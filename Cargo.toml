@@ -1,0 +1,10 @@
+[package]
+name = "knodiq_audio_shader"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "knodiq_audio_shader"
+path = "src/lib.rs"
+
+[dependencies]
