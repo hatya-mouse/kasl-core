@@ -6,6 +6,7 @@ pub enum TokenType {
     InputRange(f32, f32),
     // Types
     Float,
+    Buffer,
     // Operators
     Assign,
     Plus,

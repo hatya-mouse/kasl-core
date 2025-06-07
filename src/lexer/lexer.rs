@@ -89,6 +89,7 @@ impl Lexer {
                         "input" => tokens.push(TokenType::Input),
                         "output" => tokens.push(TokenType::Output),
                         "float" => tokens.push(TokenType::Float),
+                        "buffer" => tokens.push(TokenType::Buffer),
                         _ => tokens.push(TokenType::Identifier(identifier)),
                     }
                 }

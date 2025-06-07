@@ -1,3 +1,3 @@
 pub mod semantic_analyzer;
 
-pub use semantic_analyzer::{SemanticAnalyzer, SymbolInfo, SymbolKind};
+pub use semantic_analyzer::SemanticAnalyzer;

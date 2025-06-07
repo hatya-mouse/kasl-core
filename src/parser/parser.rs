@@ -37,6 +37,7 @@ impl Parser {
                 TokenType::Input => {
                     let data_type = match token_iter.next() {
                         Some(TokenType::Float) => Type::Float,
+                        Some(TokenType::Buffer) => Type::Buffer,
                         _ => {
                             return Err("Expected type after 'input'".into());
                         }
@@ -67,6 +68,7 @@ impl Parser {
                 TokenType::InputRange(start, end) => {
                     let data_type = match token_iter.next() {
                         Some(TokenType::Float) => Type::Float,
+                        Some(TokenType::Buffer) => Type::Buffer,
                         _ => {
                             return Err("Expected type after 'input'".into());
                         }
@@ -97,6 +99,7 @@ impl Parser {
                 TokenType::Output => {
                     let data_type = match token_iter.next() {
                         Some(TokenType::Float) => Type::Float,
+                        Some(TokenType::Buffer) => Type::Buffer,
                         _ => {
                             return Err("Expected type after 'output'".into());
                         }

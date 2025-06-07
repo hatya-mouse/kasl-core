@@ -34,7 +34,7 @@ impl Interpreter {
         self.function_table.extend(function::built_in_functions());
     }
 
-    pub fn execute(&mut self) -> Result<(), String> {
+    pub fn execute(&mut self, input_parameters: HashMap<String, SymbolInfo>) -> Result<(), String> {
         self.initialize();
 
         for statement in &self.program.statements {
@@ -58,24 +58,20 @@ impl Interpreter {
                 }
 
                 Statement::InputDeclaration(input) => {
-                    let mut initial_value = None;
-                    match &input.initial_value {
-                        Some(expr) => {
-                            initial_value = Some(self.evaluate_expression(expr)?);
-                        }
-                        None => {}
+                    if let Some(input_param) = input_parameters.get(&input.name).cloned() {
+                        let symbol = SymbolInfo {
+                            name: input.name.clone(),
+                            kind: SymbolKind::Input,
+                            data_type: input.data_type.clone(),
+                            initial_value: None,
+                            range: None,
+                            value: Some(input_param.value.unwrap_or(Value::Float(0.0))),
+                        };
+                        self.symbol_table.insert(input.name.clone(), symbol.clone());
+                        self.input_table.insert(input.name.clone(), symbol);
+                    } else {
+                        return Err(format!("Input parameter '{}' not provided", input.name));
                     }
-
-                    let symbol = SymbolInfo {
-                        name: input.name.clone(),
-                        kind: SymbolKind::Variable,
-                        data_type: input.data_type.clone(),
-                        initial_value: input.initial_value.clone(),
-                        range: input.range,
-                        value: initial_value,
-                    };
-                    self.symbol_table.insert(input.name.clone(), symbol.clone());
-                    self.var_table.insert(input.name.clone(), symbol.clone());
                 }
 
                 Statement::OutputDeclaration(output) => {
@@ -125,47 +121,65 @@ impl Interpreter {
                 .ok_or_else(|| format!("Variable '{}' has no value", name)),
 
             Expression::BinaryOp { left, op, right } => {
-                let left_value = match self.evaluate_expression(left)? {
-                    Value::Float(val) => val,
-                };
-                let right_value = match self.evaluate_expression(right)? {
-                    Value::Float(val) => val,
-                };
+                let left_value = self.evaluate_expression(left)?;
+                let right_value = self.evaluate_expression(right)?;
 
                 let evaluated_value = match op {
-                    Operator::Add => Ok(left_value + right_value),
-                    Operator::Subtract => Ok(left_value - right_value),
-                    Operator::Multiply => Ok(left_value * right_value),
+                    Operator::Add => self.apply_op(
+                        left_value,
+                        right_value,
+                        Box::new(|a, b| match (a, b) {
+                            (Value::Float(x), Value::Float(y)) => Value::Float(x + y),
+                            _ => panic!("Type mismatch in addition"),
+                        }),
+                    ),
+                    Operator::Subtract => self.apply_op(
+                        left_value,
+                        right_value,
+                        Box::new(|a, b| match (a, b) {
+                            (Value::Float(x), Value::Float(y)) => Value::Float(x - y),
+                            _ => panic!("Type mismatch in subtraction"),
+                        }),
+                    ),
+                    Operator::Multiply => self.apply_op(
+                        left_value,
+                        right_value,
+                        Box::new(|a, b| match (a, b) {
+                            (Value::Float(x), Value::Float(y)) => Value::Float(x * y),
+                            _ => panic!("Type mismatch in multiplication"),
+                        }),
+                    ),
                     Operator::Divide => {
-                        if right_value == 0.0 {
-                            Err("Division by zero".to_string())
+                        if let Value::Float(0.0) = right_value {
+                            Value::Float(0.0)
                         } else {
-                            Ok(left_value / right_value)
+                            self.apply_op(
+                                left_value,
+                                right_value,
+                                Box::new(|a, b| match (a, b) {
+                                    (Value::Float(x), Value::Float(y)) => Value::Float(x / y),
+                                    _ => panic!("Type mismatch in division"),
+                                }),
+                            )
                         }
                     }
                     Operator::Modulo => {
-                        if right_value == 0.0 {
-                            Err("Division by zero".to_string())
+                        if let Value::Float(0.0) = right_value {
+                            Value::Float(0.0)
                         } else {
-                            Ok(left_value % right_value)
+                            self.apply_op(
+                                left_value,
+                                right_value,
+                                Box::new(|a, b| match (a, b) {
+                                    (Value::Float(x), Value::Float(y)) => Value::Float(x % y),
+                                    _ => panic!("Type mismatch in modulo operation"),
+                                }),
+                            )
                         }
                     }
                 };
 
-                let expr_type = match expression
-                    .get_expression_type(&self.symbol_table, &self.function_table)
-                {
-                    Ok(data_type) => Ok(data_type),
-                    Err(e) => Err(format!("{}", e)),
-                };
-
-                match evaluated_value {
-                    Ok(val) => match expr_type {
-                        Ok(Type::Float) => Ok(Value::Float(val)),
-                        _ => Err("Type mismatch in binary operation".to_string()),
-                    },
-                    Err(e) => Err(format!("Error evaluating expression: {}", e)),
-                }
+                Ok(evaluated_value)
             }
 
             Expression::FunctionCall { name, arguments } => {
@@ -182,10 +196,41 @@ impl Interpreter {
                             .ok_or_else(|| format!("Function '{}' not found", name))?;
                         match func_info.return_type {
                             Type::Float => Ok(Value::Float(result)),
+                            Type::Buffer => Ok(Value::Buffer(vec![result])),
                         }
                     }
                     Err(e) => Err(format!("Error evaluating function '{}': {}", name, e)),
                 }
+            }
+        }
+    }
+
+    fn apply_op(&self, left: Value, right: Value, op: Box<dyn Fn(Value, Value) -> Value>) -> Value {
+        match (left, right) {
+            (Value::Float(l), Value::Float(r)) => op(Value::Float(l), Value::Float(r)),
+            (Value::Buffer(l), Value::Buffer(r)) => {
+                let result: Vec<f32> = l
+                    .iter()
+                    .zip(r.iter())
+                    .map(|(a, b)| {
+                        let v = op(Value::Float(*a), Value::Float(*b));
+                        match v {
+                            Value::Float(val) => val,
+                            _ => panic!("Operator applied to non-float values"),
+                        }
+                    })
+                    .collect();
+                Value::Buffer(result)
+            }
+            (Value::Buffer(b), Value::Float(f)) | (Value::Float(f), Value::Buffer(b)) => {
+                let result = b
+                    .iter()
+                    .map(|v| match op(Value::Float(*v), Value::Float(f)) {
+                        Value::Float(val) => val,
+                        _ => panic!("Operator applied to non-float values"),
+                    })
+                    .collect();
+                Value::Buffer(result)
             }
         }
     }
@@ -209,6 +254,12 @@ impl Interpreter {
             let value = self.evaluate_expression(&arg)?;
             match value {
                 Value::Float(val) => evaluated_args.push(val),
+                Value::Buffer(_) => {
+                    return Err(format!(
+                        "Function '{}' expects a single float argument, but got a buffer",
+                        func.name
+                    ));
+                }
             }
         }
 

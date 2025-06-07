@@ -13,6 +13,7 @@ pub enum Operator {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Type {
     Float,
+    Buffer,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -111,6 +112,8 @@ impl Expression {
     fn combine_types(&self, left_type: Type, right_type: Type) -> Result<Type, String> {
         match (left_type, right_type) {
             (Type::Float, Type::Float) => Ok(Type::Float),
+            (Type::Buffer, Type::Buffer) => Ok(Type::Buffer),
+            (Type::Float, Type::Buffer) | (Type::Buffer, Type::Float) => Ok(Type::Buffer),
         }
     }
 }

@@ -1,4 +1,8 @@
-use knodiq_audio_shader::{Interpreter, Lexer, Parser, SemanticAnalyzer};
+use std::collections::HashMap;
+
+use knodiq_audio_shader::{
+    Interpreter, Lexer, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Type, Value,
+};
 
 fn main() {
     divan::main();
@@ -7,9 +11,9 @@ fn main() {
 #[divan::bench]
 fn audio_shader_sample_processing() {
     let input = "
-    input float in_buffer = 0.1
+    input buffer in_buffer
     input float gain = 0.8
-    output float out_buffer
+    output buffer out_buffer
     out_buffer = in_buffer * gain
     ";
     let lexer = Lexer::new(input.to_string());
@@ -26,20 +30,38 @@ fn audio_shader_sample_processing() {
     let program = program.unwrap();
 
     let mut semantic_analyzer = SemanticAnalyzer::new();
-    semantic_analyzer
+    match semantic_analyzer
         .analyze(&program)
-        .map_err(|e| format!("意味解析エラーにゃ: {:?}", e));
-    let ui_params_map = semantic_analyzer.input_table;
-
-    let mut ui_parameters = Vec::new();
-    for (_, info) in ui_params_map {
-        ui_parameters.push(info.clone());
+        .map_err(|e| format!("{:?}", e))
+    {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("Semantic analysis error: {}", e);
+            return;
+        }
     }
+
+    let mut ui_parameters = HashMap::new();
+    ui_parameters.insert(
+        "in_buffer".to_string(),
+        SymbolInfo {
+            name: "in_buffer".to_string(),
+            data_type: Type::Buffer,
+            kind: SymbolKind::Input,
+            initial_value: None,
+            range: None,
+            value: Some(Value::Buffer(vec![0.15; 128])),
+        },
+    );
+    ui_parameters.insert(
+        "gain".to_string(),
+        semantic_analyzer.input_table.get("gain").cloned().unwrap(),
+    );
 
     let mut interpreter = Interpreter::new(program);
     divan::black_box_drop(
         // Profile the execution time
-        match interpreter.execute() {
+        match interpreter.execute(ui_parameters) {
             Ok(_) => {}
             Err(_) => return,
         },

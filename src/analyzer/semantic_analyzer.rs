@@ -1,24 +1,5 @@
-use crate::{Expression, FunctionInfo, Program, Statement, Type, Value};
+use crate::{FunctionInfo, Program, Statement, SymbolInfo, SymbolKind};
 use std::collections::HashMap;
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum SymbolKind {
-    Time,
-    Input,
-    Output,
-    Variable,
-    Function,
-}
-
-#[derive(Debug, Clone)]
-pub struct SymbolInfo {
-    pub name: String,
-    pub kind: SymbolKind,
-    pub data_type: Type,
-    pub initial_value: Option<Expression>,
-    pub range: Option<(f32, f32)>,
-    pub value: Option<Value>,
-}
 
 #[derive(Debug)]
 pub struct SemanticAnalyzer {
@@ -142,8 +123,8 @@ impl SemanticAnalyzer {
             self.errors
                 .push(format!("Symbol '{}' is already defined.", name));
         } else {
-            self.var_table.insert(name.clone(), info.clone());
-            self.symbol_table.insert(name, info);
+            self.symbol_table.insert(name.clone(), info.clone());
+            self.var_table.insert(name, info);
         }
     }
 
@@ -152,7 +133,7 @@ impl SemanticAnalyzer {
             self.errors
                 .push(format!("UI parameter '{}' is already defined.", name));
         } else {
-            self.var_table.insert(name.clone(), info.clone());
+            self.symbol_table.insert(name.clone(), info.clone());
             self.input_table.insert(name, info);
         }
     }
@@ -162,7 +143,7 @@ impl SemanticAnalyzer {
             self.errors
                 .push(format!("UI parameter '{}' is already defined.", name));
         } else {
-            self.var_table.insert(name.clone(), info.clone());
+            self.symbol_table.insert(name.clone(), info.clone());
             self.output_table.insert(name, info);
         }
     }
