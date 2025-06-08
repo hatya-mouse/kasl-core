@@ -25,7 +25,7 @@ impl SemanticAnalyzer {
 
     pub fn analyze(&mut self, program: &Program) -> Result<(), Vec<String>> {
         self.function_table
-            .extend(crate::function::built_in_functions());
+            .extend(crate::builtin_function::built_in_functions());
 
         for statement in &program.statements {
             match statement {
@@ -87,9 +87,11 @@ impl SemanticAnalyzer {
 
                     if let Some(info) = self.symbol_table.get(target) {
                         let target_type = info.data_type.clone();
-                        let value_type = match value
-                            .get_expression_type(&self.symbol_table, &self.function_table)
-                        {
+                        let value_type = match value.get_expression_type(
+                            &self.symbol_table,
+                            &self.function_table,
+                            Some(target_type),
+                        ) {
                             Ok(t) => t,
                             Err(e) => {
                                 self.errors

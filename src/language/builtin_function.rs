@@ -2,21 +2,30 @@ use crate::Type;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
+pub enum ArgumentTypeSpec {
+    /// Argument must be this concrete base type.
+    Concrete(Type),
+    /// Argument can be any of these base types.
+    /// The type checker will resolve it to one BaseType at the call site.
+    Polymorphic(Vec<Type>),
+}
+
+#[derive(Debug, Clone)]
 pub struct Function {
     pub name: String,
-    pub arguments: Vec<Type>,
-    pub return_type: Type,
+    pub argument_specs: Vec<ArgumentTypeSpec>,
 }
 
 pub fn built_in_functions() -> HashMap<String, Function> {
     let mut functions = HashMap::new();
 
+    let p_float_buffer = ArgumentTypeSpec::Polymorphic(vec![Type::Float, Type::Buffer]);
+
     functions.insert(
         "sin".to_string(),
         Function {
             name: "sin".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -24,8 +33,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "cos".to_string(),
         Function {
             name: "cos".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -33,8 +41,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "tan".to_string(),
         Function {
             name: "tan".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -42,8 +49,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "asin".to_string(),
         Function {
             name: "asin".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -51,8 +57,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "acos".to_string(),
         Function {
             name: "acos".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -60,8 +65,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "atan".to_string(),
         Function {
             name: "atan".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -69,8 +73,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "abs".to_string(),
         Function {
             name: "abs".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -78,8 +81,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "sgn".to_string(),
         Function {
             name: "sgn".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -87,8 +89,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "min".to_string(),
         Function {
             name: "min".to_string(),
-            arguments: vec![Type::Float, Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone(); 2],
         },
     );
 
@@ -96,8 +97,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "max".to_string(),
         Function {
             name: "max".to_string(),
-            arguments: vec![Type::Float, Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone(); 2],
         },
     );
 
@@ -105,8 +105,11 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "clamp".to_string(),
         Function {
             name: "clamp".to_string(),
-            arguments: vec![Type::Float, Type::Float, Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![
+                p_float_buffer.clone(),
+                p_float_buffer.clone(),
+                p_float_buffer.clone(),
+            ],
         },
     );
 
@@ -114,8 +117,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "pow".to_string(),
         Function {
             name: "pow".to_string(),
-            arguments: vec![Type::Float, Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone(); 2],
         },
     );
 
@@ -123,17 +125,15 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "sqrt".to_string(),
         Function {
             name: "sqrt".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
     functions.insert(
         "log".to_string(),
         Function {
-            name: "log".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            name: "log".to_string(), // Natural logarithm
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -141,8 +141,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "log2".to_string(),
         Function {
             name: "log2".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -150,8 +149,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "log10".to_string(),
         Function {
             name: "log10".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -159,8 +157,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "saw".to_string(),
         Function {
             name: "saw".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -168,8 +165,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "tri".to_string(),
         Function {
             name: "tri".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -177,8 +173,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "square".to_string(),
         Function {
             name: "square".to_string(),
-            arguments: vec![Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![p_float_buffer.clone()],
         },
     );
 
@@ -186,8 +181,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "rand".to_string(),
         Function {
             name: "rand".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
+            argument_specs: vec![],
         },
     );
 
@@ -195,8 +189,11 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "mix".to_string(),
         Function {
             name: "mix".to_string(),
-            arguments: vec![Type::Float, Type::Float, Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![
+                p_float_buffer.clone(),
+                p_float_buffer.clone(),
+                p_float_buffer.clone(),
+            ],
         },
     );
 
@@ -204,8 +201,11 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "lerp".to_string(),
         Function {
             name: "lerp".to_string(),
-            arguments: vec![Type::Float, Type::Float, Type::Float],
-            return_type: Type::Float,
+            argument_specs: vec![
+                p_float_buffer.clone(),
+                p_float_buffer.clone(),
+                p_float_buffer.clone(),
+            ],
         },
     );
 
@@ -213,8 +213,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "pi".to_string(),
         Function {
             name: "pi".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
+            argument_specs: vec![],
         },
     );
 
@@ -222,8 +221,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "time".to_string(),
         Function {
             name: "time".to_string(),
-            arguments: vec![],
-            return_type: Type::Buffer,
+            argument_specs: vec![],
         },
     );
 
@@ -231,8 +229,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "sample_rate".to_string(),
         Function {
             name: "sample_rate".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
+            argument_specs: vec![],
         },
     );
 

@@ -1,4 +1,6 @@
-use crate::{Expression, Function, Operator, Program, Statement, SymbolInfo, SymbolKind, function};
+use crate::{
+    Expression, Function, Operator, Program, Statement, SymbolInfo, SymbolKind, builtin_function,
+};
 use knodiq_engine::{Sample, Value};
 use std::collections::HashMap;
 
@@ -36,7 +38,8 @@ impl Interpreter {
         self.symbol_table.clear();
         self.function_table.clear();
 
-        self.function_table.extend(function::built_in_functions());
+        self.function_table
+            .extend(builtin_function::built_in_functions());
     }
 
     pub fn execute(
@@ -59,9 +62,11 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: target.name.clone(),
                         kind: target.kind,
-                        data_type: assignment
-                            .value
-                            .get_expression_type(&self.symbol_table, &self.function_table)?,
+                        data_type: assignment.value.get_expression_type(
+                            &self.symbol_table,
+                            &self.function_table,
+                            Some(target.data_type),
+                        )?,
                         initial_value: target.initial_value.clone(),
                         range: target.range,
                         value: Some(value.clone()),
@@ -188,15 +193,6 @@ impl Interpreter {
     }
 
     fn evaluate_function(&self, func: &Function, args: &Vec<Expression>) -> Result<Value, String> {
-        if func.arguments.len() != args.len() {
-            return Err(format!(
-                "Function '{}' expects {} arguments, but got {}",
-                func.name,
-                func.arguments.len(),
-                args.len()
-            ));
-        }
-
         let mut evaluated_args = Vec::new();
         for arg in args {
             let arg_value = self.evaluate_expression(arg)?;
