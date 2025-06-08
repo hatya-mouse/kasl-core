@@ -388,7 +388,7 @@ dependencies = [
 
 [[package]]
 name = "knodiq_audio_shader"
-version = "0.1.4-dev4"
+version = "0.1.4-dev5"
 dependencies = [
  "divan",
  "knodiq_engine",

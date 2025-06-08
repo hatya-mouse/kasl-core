@@ -1,6 +1,6 @@
 [package]
 name = "knodiq_audio_shader"
-version = "0.1.4-dev4"
+version = "0.1.4-dev5"
 edition = "2024"
 
 [lib]
