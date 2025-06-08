@@ -192,51 +192,6 @@ pub fn built_in_functions() -> HashMap<String, Function> {
     );
 
     functions.insert(
-        "sample".to_string(),
-        Function {
-            name: "sample".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
-        },
-    );
-
-    functions.insert(
-        "sample_rate".to_string(),
-        Function {
-            name: "sample_rate".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
-        },
-    );
-
-    functions.insert(
-        "bpm".to_string(),
-        Function {
-            name: "bpm".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
-        },
-    );
-
-    functions.insert(
-        "time".to_string(),
-        Function {
-            name: "time".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
-        },
-    );
-
-    functions.insert(
-        "phase".to_string(),
-        Function {
-            name: "phase".to_string(),
-            arguments: vec![],
-            return_type: Type::Float,
-        },
-    );
-
-    functions.insert(
         "mix".to_string(),
         Function {
             name: "mix".to_string(),
@@ -258,6 +213,24 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "pi".to_string(),
         Function {
             name: "pi".to_string(),
+            arguments: vec![],
+            return_type: Type::Float,
+        },
+    );
+
+    functions.insert(
+        "time".to_string(),
+        Function {
+            name: "time".to_string(),
+            arguments: vec![],
+            return_type: Type::Buffer,
+        },
+    );
+
+    functions.insert(
+        "sample_rate".to_string(),
+        Function {
+            name: "sample_rate".to_string(),
             arguments: vec![],
             return_type: Type::Float,
         },

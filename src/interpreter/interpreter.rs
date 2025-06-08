@@ -1,19 +1,34 @@
 use crate::{Expression, Function, Operator, Program, Statement, SymbolInfo, SymbolKind, function};
-use knodiq_engine::Value;
+use knodiq_engine::{Sample, Value};
 use std::collections::HashMap;
 
 pub struct Interpreter {
     pub program: Program,
     pub symbol_table: HashMap<String, SymbolInfo>,
     pub function_table: HashMap<String, Function>,
+
+    sample_rate: usize,
+    channels: usize,
+    chunk_start: usize,
+    chunk_end: usize,
 }
 
 impl Interpreter {
-    pub fn new(program: Program) -> Self {
+    pub fn new(
+        program: Program,
+        sample_rate: usize,
+        channels: usize,
+        chunk_start: usize,
+        chunk_end: usize,
+    ) -> Self {
         Interpreter {
             program,
             symbol_table: HashMap::new(),
             function_table: HashMap::new(),
+            sample_rate,
+            channels,
+            chunk_start,
+            chunk_end,
         }
     }
 
@@ -262,10 +277,38 @@ impl Interpreter {
                 })
                 .ok_or("Arguments are invalid for square.")?),
             "rand" => Ok(Value::Float(rand::random::<f32>())),
-            "sample" | "sample_rate" | "bpm" | "time" | "phase" | "mix" | "lerp" => {
-                Err(format!("Function '{}' is not implemented", func.name))
+            "mix" => {
+                if evaluated_args.len() != 3 {
+                    return Err("mix function requires exactly 3 arguments".to_string());
+                }
+                if let Value::Float(factor) = evaluated_args[2] {
+                    Ok(evaluated_args[0]
+                        .apply_op(&evaluated_args[1], |a, b| a * (1.0 - factor) + b * factor)
+                        .ok_or("Arguments are invalid for mix.")?)
+                } else {
+                    Err("Third argument for mix must be a float".to_string())
+                }
+            }
+            "lerp" => {
+                if evaluated_args.len() != 3 {
+                    return Err("lerp function requires exactly 3 arguments".to_string());
+                }
+                if let Value::Float(factor) = evaluated_args[2] {
+                    Ok(evaluated_args[0]
+                        .apply_op(&evaluated_args[1], |a, b| a * (1.0 - factor) + b * factor)
+                        .ok_or("Arguments are invalid for lerp.")?)
+                } else {
+                    Err("Third argument for lerp must be a float".to_string())
+                }
             }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
+            "time" => Ok(Value::Buffer(
+                (self.chunk_start..self.chunk_end)
+                    .map(|i| (i as Sample / self.sample_rate as Sample))
+                    .map(|t| (0..self.channels).map(|_| t).collect())
+                    .collect(),
+            )),
+            "sample_rate" => Ok(Value::Float(self.sample_rate as Sample)),
             _ => Err(format!("Unknown function '{}'", func.name)),
         }
     }

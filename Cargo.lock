@@ -398,8 +398,8 @@ dependencies = [
 
 [[package]]
 name = "knodiq_engine"
-version = "0.2.47"
-source = "git+https://github.com/hatya-mouse/knodiq_engine.git#45a1666a15b84001599ffe76cd922e63eff537a4"
+version = "0.2.49"
+source = "git+https://github.com/hatya-mouse/knodiq_engine.git#10141a8bed93ab5ab9cee2d5078c9b1d3d3829ae"
 dependencies = [
  "cpal",
  "rubato",

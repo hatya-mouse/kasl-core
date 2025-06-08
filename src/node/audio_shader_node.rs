@@ -52,9 +52,21 @@ impl AudioShaderNode {
 }
 
 impl Node for AudioShaderNode {
-    fn process(&mut self) -> Result<HashMap<String, Value>, Box<dyn Error>> {
+    fn process(
+        &mut self,
+        sample_rate: usize,
+        channels: usize,
+        chunk_start: usize,
+        chunk_end: usize,
+    ) -> Result<HashMap<String, Value>, Box<dyn Error>> {
         let program = self.program.as_ref().unwrap();
-        let mut interpreter = Interpreter::new(program.clone());
+        let mut interpreter = Interpreter::new(
+            program.clone(),
+            sample_rate,
+            channels,
+            chunk_start,
+            chunk_end,
+        );
         let output_table = interpreter.execute(self.input.clone())?;
 
         Ok(output_table
