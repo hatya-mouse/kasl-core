@@ -13,8 +13,6 @@ fn test_basic_shader_tokenize() {
     let lexer = Lexer::new(code.to_string());
     let tokens = lexer.tokenize();
 
-    println!("Tokenized: {:?}", tokens);
-
     assert!(!tokens.is_empty());
     assert_eq!(tokens[0], TokenType::Input);
     assert_eq!(tokens[2], TokenType::Identifier("in_buffer".into()));
@@ -35,8 +33,6 @@ fn test_parsing() {
 
     let parser = Parser::new(tokens);
     let program = parser.parse();
-
-    println!("Parsed program: {:?}", program);
 
     assert!(program.is_ok());
     let program = program.unwrap();

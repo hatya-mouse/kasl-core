@@ -4,10 +4,10 @@ use crate::{Interpreter, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
 use knodiq_engine::{Node, Value};
 
 pub struct AudioShaderNode {
-    input: HashMap<String, SymbolInfo>,
-    output: HashMap<String, SymbolInfo>,
-    shader: String,
-    program: Option<Program>,
+    pub input: HashMap<String, SymbolInfo>,
+    pub output: HashMap<String, SymbolInfo>,
+    pub shader: String,
+    pub program: Option<Program>,
 }
 
 impl AudioShaderNode {

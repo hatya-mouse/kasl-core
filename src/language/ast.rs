@@ -90,7 +90,7 @@ impl Expression {
             Expression::Literal(_) => Ok(Type::Float),
             Expression::Identifier(name) => symbols
                 .get(name)
-                .map_or(Ok(Type::Float), |info| Ok(info.data_type.clone())),
+                .map_or(Err(format!("Identifier '{}' not found", name)), |info| Ok(info.data_type.clone())),
             Expression::FunctionCall { name, arguments } => {
                 functions
                     .get(name)

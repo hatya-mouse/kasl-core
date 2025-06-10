@@ -302,7 +302,7 @@ impl Interpreter {
                 (0..self.channels)
                     .map(|_| {
                         (self.chunk_start..self.chunk_end)
-                            .map(|s| s as Sample / self.sample_rate as Sample)
+                            .map(|t| t as Sample / self.sample_rate as Sample)
                             .collect()
                     })
                     .collect(),

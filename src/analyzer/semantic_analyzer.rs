@@ -113,16 +113,6 @@ impl SemanticAnalyzer {
             }
         }
 
-        // Check if the AudioShader has buffer output
-        if !self
-            .output_table
-            .values()
-            .any(|info| info.kind == SymbolKind::Output && info.data_type == crate::Type::Buffer)
-        {
-            self.errors
-                .push("AudioShader must have a buffer output.".to_string());
-        }
-
         if self.errors.is_empty() {
             Ok(())
         } else {
