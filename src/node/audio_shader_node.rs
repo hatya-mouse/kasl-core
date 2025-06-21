@@ -1,9 +1,10 @@
 use std::{collections::HashMap, error::Error};
 
 use crate::{Interpreter, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
-use knodiq_engine::{Node, Value};
+use knodiq_engine::{Node, NodeId, Value};
 
 pub struct AudioShaderNode {
+    id: NodeId,
     pub input: HashMap<String, SymbolInfo>,
     pub output: HashMap<String, SymbolInfo>,
     pub shader: String,
@@ -14,6 +15,7 @@ impl AudioShaderNode {
     /// Creates a new AudioShaderNode instance.
     pub fn new() -> Self {
         AudioShaderNode {
+            id: NodeId::new_v4(),
             input: HashMap::new(),
             output: HashMap::new(),
             shader: "".to_string(),
@@ -103,6 +105,18 @@ impl Node for AudioShaderNode {
         self.output.keys().cloned().collect()
     }
 
+    fn get_type(&self) -> String {
+        "AudioShaderNode".to_string()
+    }
+
+    fn set_id(&mut self, id: NodeId) {
+        self.id = id;
+    }
+
+    fn get_id(&self) -> NodeId {
+        self.id.clone()
+    }
+
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
@@ -111,6 +125,7 @@ impl Node for AudioShaderNode {
 impl Clone for AudioShaderNode {
     fn clone(&self) -> Self {
         AudioShaderNode {
+            id: self.id.clone(),
             input: self.input.clone(),
             output: self.output.clone(),
             shader: self.shader.clone(),
