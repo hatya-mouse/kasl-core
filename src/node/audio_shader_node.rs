@@ -47,6 +47,10 @@ impl AudioShaderNode {
         }
     }
 
+    pub fn get_type(&self) -> String {
+        "AudioShaderNode".to_string()
+    }
+
     /// Gets the shader code of the node.
     pub fn get_shader(&self) -> &str {
         &self.shader
