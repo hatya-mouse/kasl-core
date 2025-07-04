@@ -14,9 +14,12 @@
 // limitations under the License.
 //
 
+use std::{iter::Peekable, slice::Iter};
+
 use crate::{
     AssignmentStatement, Expression, InputDeclarationStatement, Operator,
     OutputDeclarationStatement, Program, Statement, TokenType, Type, VariableDeclarationStatement,
+    ast::ForLoopStatement,
 };
 
 pub struct Parser {
@@ -38,158 +41,194 @@ impl Parser {
             statements: Vec::new(),
         };
 
-        for line in lines {
-            self.parse_line(line, &mut program)?;
-        }
+        program.statements = self.parse_block(0, &mut lines.iter().peekable())?;
 
         Ok(program)
     }
 
-    fn parse_line(&self, line: Vec<TokenType>, program: &mut Program) -> Result<(), String> {
-        let mut token_iter = line.iter().peekable();
+    fn parse_block(
+        &self,
+        depth: usize,
+        lines: &mut Peekable<Iter<Vec<TokenType>>>,
+    ) -> Result<Vec<Statement>, String> {
+        let mut statements = Vec::new();
+        let mut has_ended = false;
 
-        while let Some(token) = token_iter.next() {
-            match token {
-                TokenType::Input => {
-                    let data_type = self.parse_type(&mut token_iter)?;
-
-                    let name = match token_iter.next() {
-                        Some(TokenType::Identifier(name)) => name.clone(),
-                        _ => {
-                            return Err("Expected identifier after type".into());
-                        }
-                    };
-
-                    let initial_value = match token_iter.next() {
-                        Some(TokenType::Assign) => Some(self.parse_expression(&mut token_iter)?),
-                        _ => None,
-                    };
-
-                    program.statements.push(Statement::InputDeclaration(
-                        InputDeclarationStatement {
-                            name,
-                            data_type,
-                            initial_value,
-                            range: None,
-                        },
-                    ));
+        while !has_ended {
+            let line = match lines.next() {
+                Some(line) => line,
+                None => {
+                    has_ended = true;
+                    continue; // No more lines to process
                 }
+            };
+            let mut token_iter = line.iter().peekable();
 
-                TokenType::InputRange(start, end) => {
-                    let data_type = self.parse_type(&mut token_iter)?;
+            while let Some(token) = token_iter.next() {
+                match token {
+                    TokenType::Input => {
+                        let mut range: Option<(f32, f32)> = None;
 
-                    let name = match token_iter.next() {
-                        Some(TokenType::Identifier(name)) => name.clone(),
-                        _ => {
-                            return Err("Expected identifier after type".into());
-                        }
-                    };
+                        // Parse value range
+                        if let Some(TokenType::LParen) = token_iter.peek() {
+                            token_iter.next(); // consume '('
+                            let start = match token_iter.next() {
+                                Some(TokenType::FloatLiteral(value)) => value,
+                                _ => {
+                                    return Err(
+                                        "Expected float literal after '('. Range start missing."
+                                            .into(),
+                                    );
+                                }
+                            };
 
-                    let initial_value = match token_iter.next() {
-                        Some(TokenType::Assign) => Some(self.parse_expression(&mut token_iter)?),
-                        _ => None,
-                    };
+                            let end = match token_iter.next() {
+                                Some(TokenType::FloatLiteral(value)) => value,
+                                _ => {
+                                    return Err(
+                                    "Expected float literal after range start. Range end missing."
+                                        .into(),
+                                );
+                                }
+                            };
 
-                    program.statements.push(Statement::InputDeclaration(
-                        InputDeclarationStatement {
-                            name,
-                            data_type,
-                            initial_value,
-                            range: Some((*start, *end)),
-                        },
-                    ));
-                }
-
-                TokenType::Output => {
-                    let data_type = self.parse_type(&mut token_iter)?;
-
-                    let name = match token_iter.next() {
-                        Some(TokenType::Identifier(name)) => name.clone(),
-                        _ => {
-                            return Err("Expected identifier after type".into());
-                        }
-                    };
-
-                    program.statements.push(Statement::OutputDeclaration(
-                        OutputDeclarationStatement { name, data_type },
-                    ));
-                }
-
-                TokenType::Float => {
-                    let mut data_type = Type::Float;
-
-                    // Check for array brackets after float
-                    while token_iter.peek() == Some(&&TokenType::LBracket) {
-                        token_iter.next(); // consume '['
-
-                        match token_iter.next() {
-                            Some(TokenType::RBracket) => {
-                                data_type = Type::Array(Box::new(data_type));
+                            if token_iter.next() != Some(&TokenType::RParen) {
+                                return Err("Expected ')' to close range".into());
                             }
+
+                            range = Some((*start, *end));
+                        }
+
+                        let data_type = self.parse_type(&mut token_iter)?;
+
+                        let name = match token_iter.next() {
+                            Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
-                                return Err("Expected ']' after '['".into());
+                                return Err("Expected identifier after type".into());
                             }
-                        }
+                        };
+
+                        let initial_value = match token_iter.next() {
+                            Some(TokenType::Assign) => {
+                                Some(self.parse_expression(&mut token_iter)?)
+                            }
+                            _ => None,
+                        };
+
+                        statements.push(Statement::InputDeclaration(InputDeclarationStatement {
+                            name,
+                            data_type,
+                            initial_value,
+                            range,
+                        }));
                     }
 
-                    let name = match token_iter.next() {
-                        Some(TokenType::Identifier(name)) => name.clone(),
-                        _ => {
-                            return Err("Expected identifier after type name".into());
-                        }
-                    };
+                    TokenType::Output => {
+                        let data_type = self.parse_type(&mut token_iter)?;
 
-                    let initial_value = match token_iter.next() {
-                        Some(TokenType::Assign) => self.parse_expression(&mut token_iter),
-                        _ => Err("Expected '=' after identifier".into()),
-                    }?;
+                        let name = match token_iter.next() {
+                            Some(TokenType::Identifier(name)) => name.clone(),
+                            _ => {
+                                return Err("Expected identifier after type".into());
+                            }
+                        };
 
-                    program.statements.push(Statement::VariableDeclaration(
-                        VariableDeclarationStatement {
+                        statements.push(Statement::OutputDeclaration(OutputDeclarationStatement {
                             name,
                             data_type,
-                            initial_value,
-                        },
-                    ));
-                }
+                        }));
+                    }
 
-                TokenType::Identifier(name) => {
-                    let target_name = name.clone();
+                    TokenType::Var => {
+                        let name = match token_iter.next() {
+                            Some(TokenType::Identifier(name)) => name.clone(),
+                            _ => {
+                                return Err("Expected identifier after type name".into());
+                            }
+                        };
 
-                    match token_iter.next() {
-                        Some(TokenType::Assign) => {
-                            // Assignment statement
-                            let value = self.parse_expression(&mut token_iter)?;
+                        let initial_value = match token_iter.next() {
+                            Some(TokenType::Assign) => self.parse_expression(&mut token_iter),
+                            _ => Err("Expected '=' after identifier".into()),
+                        }?;
 
-                            program
-                                .statements
-                                .push(Statement::Assignment(AssignmentStatement {
+                        statements.push(Statement::VariableDeclaration(
+                            VariableDeclarationStatement {
+                                name,
+                                initial_value,
+                            },
+                        ));
+                    }
+
+                    TokenType::Identifier(name) => {
+                        let target_name = name.clone();
+
+                        match token_iter.next() {
+                            Some(TokenType::Assign) => {
+                                // Assignment statement
+                                let value = self.parse_expression(&mut token_iter)?;
+
+                                statements.push(Statement::Assignment(AssignmentStatement {
                                     target_name,
                                     value,
                                 }));
-                            continue; // Skip to the next token
+                                continue; // Skip to the next token
+                            }
+
+                            _ => return Err(format!("Expected '=' after identifier '{}'", name)),
+                        }
+                    }
+
+                    TokenType::For => {
+                        let variable_name = match token_iter.next() {
+                            Some(TokenType::Identifier(name)) => name.clone(),
+                            _ => return Err("Expected identifier after 'for'".into()),
+                        };
+
+                        if token_iter.next() != Some(&TokenType::In) {
+                            return Err("Expected 'in' after for variable".into());
                         }
 
-                        _ => return Err(format!("Expected '=' after identifier '{}'", name)),
+                        let iterable = self.parse_expression(&mut token_iter)?;
+
+                        if token_iter.next() != Some(&TokenType::LBrace) {
+                            return Err("Expected '{' after iterable in for loop".into());
+                        }
+
+                        let body = self.parse_block(depth, lines)?;
+
+                        statements.push(Statement::ForLoop(ForLoopStatement {
+                            variable_name,
+                            iterable,
+                            body,
+                        }));
                     }
-                }
 
-                TokenType::EndOfFile => {
-                    // End of file, we can stop parsing
-                    break;
-                }
+                    TokenType::RBrace => {
+                        // End of a block, we can return the current depth
+                        if depth == 0 {
+                            return Err("Unexpected '}' without matching '{'".into());
+                        }
+                        has_ended = true;
+                    }
 
-                _ => {}
+                    TokenType::EndOfFile => {
+                        // End of file, we can stop parsing
+                        has_ended = true;
+                    }
+
+                    _ => {}
+                }
             }
         }
 
-        Ok(())
+        Ok(statements)
     }
 
     /// Parses an expression recursively from the token iterator.
     fn parse_expression(
         &self,
-        token_iter: &mut std::iter::Peekable<std::slice::Iter<TokenType>>,
+        token_iter: &mut Peekable<Iter<TokenType>>,
     ) -> Result<Expression, String> {
         let mut left = match token_iter.next() {
             Some(TokenType::FloatLiteral(value)) => Expression::Literal(*value),
@@ -249,12 +288,9 @@ impl Parser {
     }
 
     /// Parses a type from the token iterator.
-    fn parse_type(
-        &self,
-        token_iter: &mut std::iter::Peekable<std::slice::Iter<TokenType>>,
-    ) -> Result<Type, String> {
+    fn parse_type(&self, token_iter: &mut Peekable<Iter<TokenType>>) -> Result<Type, String> {
         let base_type = match token_iter.next() {
-            Some(TokenType::Float) => Type::Float,
+            Some(TokenType::Number) => Type::Float,
             _ => {
                 return Err("Expected type".into());
             }

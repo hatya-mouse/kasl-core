@@ -40,14 +40,17 @@ impl SemanticAnalyzer {
     }
 
     pub fn analyze(&mut self, program: &Program) -> Result<(), Vec<String>> {
+        self.analyze_statements(&program.statements)
+    }
+
+    pub fn analyze_statements(&mut self, statements: &Vec<Statement>) -> Result<(), Vec<String>> {
         self.function_table
             .extend(crate::builtin_function::built_in_functions());
 
-        for statement in &program.statements {
+        for statement in statements {
             match statement {
                 Statement::InputDeclaration(input) => {
                     let name = input.name.clone();
-                    let data_type = input.data_type.clone();
                     let initial_value = input.initial_value.clone();
 
                     self.define_input(
@@ -55,7 +58,6 @@ impl SemanticAnalyzer {
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Input,
-                            data_type,
                             initial_value,
                             range: None,
                             value: None,
@@ -65,14 +67,12 @@ impl SemanticAnalyzer {
 
                 Statement::OutputDeclaration(output) => {
                     let name = output.name.clone();
-                    let data_type = output.data_type.clone();
 
                     self.define_output(
                         name.clone(),
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Output,
-                            data_type,
                             initial_value: None,
                             range: None,
                             value: None,
@@ -82,14 +82,12 @@ impl SemanticAnalyzer {
 
                 Statement::VariableDeclaration(var) => {
                     let name = var.name.clone();
-                    let data_type = var.data_type.clone();
 
                     self.define_symbol(
                         name.clone(),
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Variable,
-                            data_type,
                             initial_value: None,
                             range: None,
                             value: None,
@@ -99,31 +97,36 @@ impl SemanticAnalyzer {
 
                 Statement::Assignment(assignment) => {
                     let target = &assignment.target_name;
-                    let value = &assignment.value;
 
-                    if let Some(info) = self.symbol_table.get(target) {
-                        let target_type = info.data_type.clone();
-                        let value_type = match value.get_expression_type(
-                            &self.symbol_table,
-                            &self.function_table,
-                            Some(&target_type),
-                        ) {
-                            Ok(t) => t,
-                            Err(e) => {
-                                self.errors
-                                    .push(format!("Error in assignment to '{}': {}", target, e));
-                                continue;
-                            }
-                        };
-
-                        if target_type != value_type {
-                            self.errors.push(format!(
-                                "Type mismatch in assignment to '{}': expected {:?}, found {:?}.",
-                                target, target_type, value_type
-                            ));
-                        }
-                    } else {
+                    if !self.symbol_table.contains_key(target) {
                         self.errors.push(format!("Undefined symbol '{}'.", target));
+                    }
+                }
+
+                Statement::ForLoop(loop_stmt) => {
+                    let variable_name = &loop_stmt.variable_name;
+
+                    if self.symbol_table.contains_key(variable_name) {
+                        self.errors.push(format!(
+                            "Variable '{}' is already defined in the symbol table.",
+                            variable_name
+                        ));
+                    } else {
+                        self.define_symbol(
+                            variable_name.clone(),
+                            SymbolInfo {
+                                name: variable_name.clone(),
+                                kind: SymbolKind::Variable,
+                                initial_value: None,
+                                range: None,
+                                value: None,
+                            },
+                        );
+                    }
+
+                    // Check if the body is valid
+                    if let Err(e) = self.analyze_statements(&loop_stmt.body) {
+                        self.errors.extend(e);
                     }
                 }
             }

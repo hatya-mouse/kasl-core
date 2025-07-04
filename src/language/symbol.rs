@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Type};
+use crate::Expression;
 use knodiq_engine::Value;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -30,7 +30,6 @@ pub enum SymbolKind {
 pub struct SymbolInfo {
     pub name: String,
     pub kind: SymbolKind,
-    pub data_type: Type,
     pub initial_value: Option<Expression>,
     pub range: Option<(f32, f32)>,
     pub value: Option<Value>,

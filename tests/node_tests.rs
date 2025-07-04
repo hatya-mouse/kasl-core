@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{AudioShaderNode, Node, SymbolKind, Type, Value}; // Assuming Type and SymbolKind are needed
+use knodiq_audio_shader::{AudioShaderNode, Node, SymbolKind, Value}; // Assuming Type and SymbolKind are needed
 use std::collections::HashSet;
 
 #[test]
@@ -45,20 +45,14 @@ fn test_set_shader_populates_io_tables() {
 
     assert!(node.input.contains_key("input_value"));
     let input_val_info = node.input.get("input_value").unwrap();
-    assert_eq!(input_val_info.data_type, Type::Float);
     assert_eq!(input_val_info.kind, SymbolKind::Input);
 
     assert!(node.input.contains_key("input_buf"));
     let input_buf_info = node.input.get("input_buf").unwrap();
-    assert_eq!(
-        input_buf_info.data_type,
-        Type::Array(Box::new(Type::Array(Box::new(Type::Float))))
-    );
     assert_eq!(input_buf_info.kind, SymbolKind::Input);
 
     assert!(node.output.contains_key("output_value"));
     let output_val_info = node.output.get("output_value").unwrap();
-    assert_eq!(output_val_info.data_type, Type::Float);
     assert_eq!(output_val_info.kind, SymbolKind::Output);
 }
 

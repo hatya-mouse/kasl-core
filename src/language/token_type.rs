@@ -19,12 +19,17 @@ pub enum TokenType {
     // Keywords
     Input,
     Output,
-    InputRange(f32, f32),
+    Var,
+    For,
+    In,
     // Types
-    Float,
+    Number,
     // Brackets
     LBracket,
     RBracket,
+    // Braces
+    LBrace,
+    RBrace,
     // Operators
     Assign,
     Plus,

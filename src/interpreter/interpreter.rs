@@ -64,77 +64,9 @@ impl Interpreter {
     ) -> Result<HashMap<String, SymbolInfo>, String> {
         self.initialize();
 
-        for statement in &self.program.statements {
-            match &statement {
-                Statement::Assignment(assignment) => {
-                    let value = self.evaluate_expression(&assignment.value)?;
-                    let target = self
-                        .symbol_table
-                        .get(&assignment.target_name)
-                        .cloned()
-                        .ok_or_else(|| {
-                            format!("Variable '{}' not found", assignment.target_name)
-                        })?;
-                    let symbol = SymbolInfo {
-                        name: target.name.clone(),
-                        kind: target.kind,
-                        data_type: assignment.value.get_expression_type(
-                            &self.symbol_table,
-                            &self.function_table,
-                            Some(&target.data_type),
-                        )?,
-                        initial_value: target.initial_value.clone(),
-                        range: target.range,
-                        value: Some(value.clone()),
-                    };
-                    self.symbol_table
-                        .insert(assignment.target_name.clone(), symbol.clone());
-                }
+        let statements = self.program.statements.clone();
 
-                Statement::InputDeclaration(input) => {
-                    if let Some(input_param) = input_parameters.get(&input.name).cloned() {
-                        let symbol = SymbolInfo {
-                            name: input.name.clone(),
-                            kind: SymbolKind::Input,
-                            data_type: input.data_type.clone(),
-                            initial_value: None,
-                            range: None,
-                            value: Some(input_param.value.unwrap_or(Value::Float(0.0))),
-                        };
-                        self.symbol_table.insert(input.name.clone(), symbol.clone());
-                    } else {
-                        return Err(format!("Input parameter '{}' not provided", input.name));
-                    }
-                }
-
-                Statement::OutputDeclaration(output) => {
-                    let symbol = SymbolInfo {
-                        name: output.name.clone(),
-                        kind: SymbolKind::Output,
-                        data_type: output.data_type.clone(),
-                        initial_value: None,
-                        range: None,
-                        value: None,
-                    };
-                    self.symbol_table
-                        .insert(output.name.clone(), symbol.clone());
-                }
-
-                Statement::VariableDeclaration(var_decl) => {
-                    let initial_value = self.evaluate_expression(&var_decl.initial_value)?;
-                    let symbol = SymbolInfo {
-                        name: var_decl.name.clone(),
-                        kind: SymbolKind::Variable,
-                        data_type: var_decl.data_type.clone(),
-                        initial_value: None,
-                        range: None,
-                        value: Some(initial_value),
-                    };
-                    self.symbol_table
-                        .insert(var_decl.name.clone(), symbol.clone());
-                }
-            }
-        }
+        self.execute_statements(&statements, input_parameters)?;
 
         let output_table = self
             .symbol_table
@@ -148,6 +80,131 @@ impl Interpreter {
             })
             .collect::<HashMap<String, SymbolInfo>>();
         Ok(output_table)
+    }
+
+    fn execute_statements(
+        &mut self,
+        statements: &Vec<Statement>,
+        input_parameters: HashMap<String, SymbolInfo>,
+    ) -> Result<(), String> {
+        for statement in statements {
+            match &statement {
+                Statement::Assignment(assignment) => {
+                    let value = self.evaluate_expression(&assignment.value)?;
+                    let target = self
+                        .symbol_table
+                        .get(&assignment.target_name)
+                        .cloned()
+                        .ok_or_else(|| {
+                            format!("Variable '{}' not found", assignment.target_name)
+                        })?;
+                    let symbol = SymbolInfo {
+                        name: target.name.clone(),
+                        kind: target.kind,
+                        initial_value: target.initial_value.clone(),
+                        range: target.range,
+                        value: Some(value.clone()),
+                    };
+                    self.symbol_table
+                        .insert(assignment.target_name.clone(), symbol.clone());
+                }
+
+                Statement::InputDeclaration(input) => {
+                    if let Some(input_param) = input_parameters.get(&input.name).cloned() {
+                        let symbol = SymbolInfo {
+                            name: input.name.clone(),
+                            kind: SymbolKind::Input,
+                            initial_value: None,
+                            range: None,
+                            value: Some(input_param.value.unwrap_or(Value::Float(0.0))),
+                        };
+                        self.register_symbol(input.name.clone(), symbol.clone())?;
+                    } else {
+                        return Err(format!("Input parameter '{}' not provided", input.name));
+                    }
+                }
+
+                Statement::OutputDeclaration(output) => {
+                    let symbol = SymbolInfo {
+                        name: output.name.clone(),
+                        kind: SymbolKind::Output,
+                        initial_value: None,
+                        range: None,
+                        value: None,
+                    };
+                    self.register_symbol(output.name.clone(), symbol.clone())?;
+                }
+
+                Statement::VariableDeclaration(var_decl) => {
+                    let initial_value = self.evaluate_expression(&var_decl.initial_value)?;
+                    let symbol = SymbolInfo {
+                        name: var_decl.name.clone(),
+                        kind: SymbolKind::Variable,
+                        initial_value: None,
+                        range: None,
+                        value: Some(initial_value),
+                    };
+                    self.register_symbol(var_decl.name.clone(), symbol.clone())?;
+                }
+
+                Statement::ForLoop(loop_stmt) => {
+                    let symbol = SymbolInfo {
+                        name: loop_stmt.variable_name.clone(),
+                        kind: SymbolKind::Variable,
+                        initial_value: None,
+                        range: None,
+                        value: Some(Value::Float(0.0)),
+                    };
+                    self.register_symbol(loop_stmt.variable_name.clone(), symbol.clone())?;
+
+                    let iterable = self.evaluate_expression(&loop_stmt.iterable)?;
+                    match iterable {
+                        Value::Array(elements) => {
+                            for element in elements {
+                                let symbol_info = SymbolInfo {
+                                    name: loop_stmt.variable_name.clone(),
+                                    kind: SymbolKind::Variable,
+                                    initial_value: None,
+                                    range: None,
+                                    value: Some(element.clone()),
+                                };
+                                self.symbol_table
+                                    .insert(loop_stmt.variable_name.clone(), symbol_info);
+
+                                self.execute_statements(&loop_stmt.body, input_parameters.clone())?;
+                            }
+                        }
+                        Value::Float(value) => {
+                            let symbol_info = SymbolInfo {
+                                name: loop_stmt.variable_name.clone(),
+                                kind: SymbolKind::Variable,
+                                initial_value: None,
+                                range: None,
+                                value: Some(Value::Float(value)),
+                            };
+                            self.symbol_table
+                                .insert(loop_stmt.variable_name.clone(), symbol_info);
+
+                            self.execute_statements(&loop_stmt.body, input_parameters.clone())?;
+                        }
+                    }
+
+                    // Clean up the loop variable after execution
+                    self.symbol_table.remove(&loop_stmt.variable_name);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn register_symbol(&mut self, name: String, info: SymbolInfo) -> Result<(), String> {
+        if self.symbol_table.contains_key(&name) {
+            Err(format!("Symbol '{}' is already defined.", name))
+        } else {
+            self.symbol_table.insert(name.clone(), info);
+            Ok(())
+        }
     }
 
     fn evaluate_expression(&self, expression: &Expression) -> Result<Value, String> {
