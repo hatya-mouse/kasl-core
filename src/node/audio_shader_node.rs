@@ -17,7 +17,7 @@
 use std::collections::HashMap;
 
 use crate::{Interpreter, InterpreterError, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
-use knodiq_engine::{Node, NodeId, Sample, Value, error::TrackError};
+use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {
     id: NodeId,
@@ -80,6 +80,7 @@ impl Node for AudioShaderNode {
         channels: usize,
         chunk_start: usize,
         chunk_end: usize,
+        _track_id: u32,
     ) -> Result<(), Box<dyn TrackError>> {
         let program = self.program.as_ref().unwrap();
         let mut interpreter = Interpreter::new(
@@ -94,15 +95,6 @@ impl Node for AudioShaderNode {
             .map_err(|e| Box::new(InterpreterError { message: e }) as Box<dyn TrackError>)?;
         self.output = output_table;
 
-        Ok(())
-    }
-
-    fn prepare(
-        &mut self,
-        _chunk_size: Sample,
-        _sample_rate: usize,
-        _tempo: Sample,
-    ) -> Result<(), Box<dyn TrackError>> {
         Ok(())
     }
 

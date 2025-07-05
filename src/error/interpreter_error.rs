@@ -22,7 +22,11 @@ pub struct InterpreterError {
     pub message: String,
 }
 
-impl TrackError for InterpreterError {}
+impl TrackError for InterpreterError {
+    fn clone_box(&self) -> Box<dyn TrackError> {
+        Box::new(self.clone())
+    }
+}
 
 impl Error for InterpreterError {}
 

@@ -87,7 +87,7 @@ fn test_process_simple_float_shader() {
     assert!(node.set_shader(shader_code.to_string()).is_ok());
 
     node.set_input("a", Value::Float(10.0));
-    let process_result = node.process(48000, 1, 0, 1);
+    let process_result = node.process(48000, 1, 0, 1, 0);
     assert!(
         process_result.is_ok(),
         "Process failed: {:?}",
@@ -113,7 +113,7 @@ fn test_process_simple_buffer_shader() {
     );
 
     // Process 1 channel, 3 samples
-    let process_result = node.process(48000, 1, 0, 3);
+    let process_result = node.process(48000, 1, 0, 3, 0);
     assert!(
         process_result.is_ok(),
         "Process failed: {:?}",
@@ -162,7 +162,7 @@ fn test_get_output_before_and_after_process() {
     assert_eq!(node.get_output("val_out"), None); // `get_output` unwraps SymbolInfo's value
 
     node.set_input("val_in", Value::Float(5.0));
-    assert!(node.process(48000, 1, 0, 1).is_ok());
+    assert!(node.process(48000, 1, 0, 1, 0).is_ok());
 
     assert_eq!(node.get_output("val_out"), Some(Value::Float(6.0)));
     assert_eq!(node.get_output("non_existent_output"), None);
@@ -190,7 +190,7 @@ fn test_clone_node() {
     let shader_code = "input float x;\noutput float y;\ny = x + 10.0;";
     assert!(original_node.set_shader(shader_code.to_string()).is_ok());
     original_node.set_input("x", Value::Float(5.0));
-    assert!(original_node.process(48000, 1, 0, 1).is_ok());
+    assert!(original_node.process(48000, 1, 0, 1, 0).is_ok());
 
     let cloned_node = original_node.clone();
 
@@ -201,7 +201,7 @@ fn test_clone_node() {
 
     // Modify original and check if clone is independent
     original_node.set_input("x", Value::Float(20.0));
-    assert!(original_node.process(48000, 1, 0, 1).is_ok());
+    assert!(original_node.process(48000, 1, 0, 1, 0).is_ok());
     assert_eq!(original_node.get_output("y"), Some(Value::Float(30.0)));
 
     // Cloned node should remain unchanged
@@ -218,7 +218,7 @@ fn test_process_with_no_program_should_panic_or_err() {
     // Do not set shader, so program is None
 
     // We expect a panic here. To test for panics:
-    let result = std::panic::catch_unwind(move || node.process(48000, 1, 0, 1));
+    let result = std::panic::catch_unwind(move || node.process(48000, 1, 0, 1, 0));
     assert!(
         result.is_err(),
         "Process should panic if program is not set"
