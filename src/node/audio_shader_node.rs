@@ -97,6 +97,8 @@ impl Node for AudioShaderNode {
             .map_err(|e| Box::new(InterpreterError { message: e }) as Box<dyn TrackError>)?;
         self.output = output_table;
 
+        println!("Start: {:?}, End: {:?}", chunk_start, chunk_end);
+
         Ok(())
     }
 
