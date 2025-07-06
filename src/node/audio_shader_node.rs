@@ -17,7 +17,7 @@
 use std::collections::HashMap;
 
 use crate::{Interpreter, InterpreterError, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
-use knodiq_engine::{Node, NodeId, Value, error::TrackError};
+use knodiq_engine::{error::TrackError, Node, NodeId, Value};
 
 pub struct AudioShaderNode {
     id: NodeId,
