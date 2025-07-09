@@ -42,8 +42,8 @@ fn test_basic_shader_tokenize() {
 
 #[test]
 fn test_parsing() {
-    let code = "input float x = 1.0
-                    output float y
+    let code = "input number x = 1.0
+                    output number y
 
                     y = pow(x, 2)";
     let lexer = Lexer::new(code.to_string());
@@ -90,13 +90,16 @@ fn test_parsing() {
 
 #[test]
 fn test_interpreter() {
-    let code = "input buffer in_buffer
-                    input float gain = 1.0
-                    buffer result = 0.0
-                    output buffer out_buffer
+    let code = "input number in_buffer
+                    input number gain = 1.0
+                    var result = 0.0
+                    output number out_buffer
+                    output number powered
 
                     result = in_buffer * gain
-                    out_buffer = result + 1.25";
+                    out_buffer = result + 1.25
+                    
+                    powered = pow(in_buffer, 2.0)";
     let lexer = Lexer::new(code.to_string());
     let tokens = lexer.tokenize();
 
@@ -115,11 +118,12 @@ fn test_interpreter() {
 
     let output_table = interpreter.execute(input_table).unwrap();
 
-    // Expected output:
-    // result = in_buffer * gain = [[2.0 * 1.5, 3.0 * 1.5], [2.0 * 1.5, 3.0 * 1.5]] = [[3.0, 4.5], [3.0, 4.5]]
-    // out_buffer = result + 1.25 = [[3.0 + 1.25, 4.5 + 1.25], [3.0 + 1.25, 4.5 + 1.25]] = [[4.25, 5.75], [4.25, 5.75]]
     assert_eq!(
         output_table.get("out_buffer").unwrap().value,
         Some(Value::from_buffer(vec![vec![4.25, 5.75]; 2]))
+    );
+    assert_eq!(
+        output_table.get("powered").unwrap().value,
+        Some(Value::from_buffer(vec![vec![4.0, 9.0]; 2]))
     );
 }
