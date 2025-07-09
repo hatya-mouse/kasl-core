@@ -153,7 +153,7 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "log".to_string(),
         Function {
             name: "log".to_string(), // Natural logarithm
-            argument_specs: vec![p_float_array.clone()],
+            argument_specs: vec![p_float_array.clone(), p_float_array.clone()],
         },
     );
 
@@ -246,9 +246,9 @@ pub fn built_in_functions() -> HashMap<String, Function> {
     );
 
     functions.insert(
-        "sample_rate".to_string(),
+        "beats".to_string(),
         Function {
-            name: "sample_rate".to_string(),
+            name: "beats".to_string(),
             argument_specs: vec![],
         },
     );

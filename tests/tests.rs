@@ -15,8 +15,7 @@
 //
 
 use knodiq_audio_shader::{
-    AssignmentStatement, Expression, InputDeclarationStatement, Interpreter, Lexer,
-    OutputDeclarationStatement, Parser, Program, SemanticAnalyzer, Statement, TokenType, Type,
+    Expression, Interpreter, Lexer, Parser, Program, SemanticAnalyzer, Statement, TokenType, Type,
     Value,
 };
 
@@ -30,12 +29,15 @@ fn test_basic_shader_tokenize() {
     let tokens = lexer.tokenize();
 
     assert!(!tokens.is_empty());
-    assert_eq!(tokens[0], TokenType::Input);
-    assert_eq!(tokens[2], TokenType::Identifier("in_buffer".into()));
-    assert_eq!(tokens[3], TokenType::Assign);
-    assert_eq!(tokens[4], TokenType::FloatLiteral(0.0));
+    assert_eq!(tokens[0].token_type, TokenType::Input);
+    assert_eq!(
+        tokens[2].token_type,
+        TokenType::Identifier("in_buffer".into())
+    );
+    assert_eq!(tokens[3].token_type, TokenType::Assign);
+    assert_eq!(tokens[4].token_type, TokenType::FloatLiteral(0.0));
 
-    assert_eq!(tokens[10], TokenType::FloatLiteral(1.0));
+    assert_eq!(tokens[10].token_type, TokenType::FloatLiteral(1.0));
 }
 
 #[test]
@@ -54,34 +56,35 @@ fn test_parsing() {
     let program = program.unwrap();
     assert!(!program.statements.is_empty());
 
+    let input_stmt = match &program.statements[0] {
+        Statement::InputDeclaration(stmt) => stmt,
+        _ => panic!("Expected InputDeclarationStatement"),
+    };
+    assert_eq!(input_stmt.name, "x");
+    assert_eq!(input_stmt.data_type, Type::Float);
+    assert_eq!(input_stmt.initial_value, Some(Expression::Literal(1.0)));
+
+    let output_stmt = match &program.statements[1] {
+        Statement::OutputDeclaration(stmt) => stmt,
+        _ => panic!("Expected OutputDeclarationStatement"),
+    };
+    assert_eq!(output_stmt.name, "y");
+    assert_eq!(output_stmt.data_type, Type::Float);
+
+    let assignment_stmt = match &program.statements[2] {
+        Statement::Assignment(stmt) => stmt,
+        _ => panic!("Expected AssignmentStatement"),
+    };
+    assert_eq!(assignment_stmt.target_name, "y");
     assert_eq!(
-        program.statements[0],
-        Statement::InputDeclaration(InputDeclarationStatement {
-            name: "x".to_string(),
-            data_type: Type::Float,
-            initial_value: Some(Expression::Literal(1.0)),
-            range: None,
-        })
-    );
-    assert_eq!(
-        program.statements[1],
-        Statement::OutputDeclaration(OutputDeclarationStatement {
-            name: "y".to_string(),
-            data_type: Type::Float,
-        })
-    );
-    assert_eq!(
-        program.statements[2],
-        Statement::Assignment(AssignmentStatement {
-            target_name: "y".to_string(),
-            value: Expression::FunctionCall {
-                name: "pow".to_string(),
-                arguments: vec![
-                    Expression::Identifier("x".to_string()),
-                    Expression::Literal(2.0)
-                ]
-            }
-        })
+        assignment_stmt.value,
+        Expression::FunctionCall {
+            name: "pow".to_string(),
+            arguments: vec![
+                Expression::Identifier("x".to_string()),
+                Expression::Literal(2.0)
+            ]
+        }
     );
 }
 

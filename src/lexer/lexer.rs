@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::TokenType;
+use crate::{TokenType, token_type::Token};
 
 pub struct Lexer {
     input: String,
@@ -25,23 +25,30 @@ impl Lexer {
         Lexer { input }
     }
 
-    pub fn tokenize(&self) -> Vec<TokenType> {
+    pub fn tokenize(&self) -> Vec<Token> {
         let mut tokens = Vec::new();
-        for line in self.input.lines() {
-            tokens.extend(self.tokenize_line(line));
+        let lines = self.input.lines();
+        for (line_number, line) in lines.enumerate() {
+            tokens.extend(self.tokenize_line(line, line_number));
         }
-        tokens.push(TokenType::EndOfFile); // Add EOF token at the end
+        tokens.push(Token {
+            token_type: TokenType::EndOfFile,
+            line: self.input.lines().count(),
+        });
         tokens
     }
 
-    fn tokenize_line(&self, line: &str) -> Vec<TokenType> {
+    fn tokenize_line(&self, line: &str, line_number: usize) -> Vec<Token> {
         let mut tokens = Vec::new();
         let mut chars = line.chars().peekable();
 
         while let Some(char) = chars.next() {
             match char {
                 ' ' | '\t' | '\n' => continue, // Skip whitespace
-                '+' => tokens.push(TokenType::Plus),
+                '+' => tokens.push(Token {
+                    token_type: TokenType::Plus,
+                    line: self.input.lines().count(),
+                }),
                 '-' => {
                     // If the next character is a digit, it should be a negative number
                     if let Some(&next_char) = chars.peek() {
@@ -55,34 +62,79 @@ impl Lexer {
                                 }
                             }
                             if let Ok(value) = number.parse::<f32>() {
-                                tokens.push(TokenType::FloatLiteral(value));
+                                tokens.push(Token {
+                                    token_type: TokenType::FloatLiteral(value),
+                                    line: line_number,
+                                });
                             }
                         } else {
-                            tokens.push(TokenType::Minus);
+                            tokens.push(Token {
+                                token_type: TokenType::Minus,
+                                line: line_number,
+                            });
                         }
                     } else {
-                        tokens.push(TokenType::Minus);
+                        tokens.push(Token {
+                            token_type: TokenType::Minus,
+                            line: line_number,
+                        });
                     }
                 }
-                '*' => tokens.push(TokenType::Multiply),
+                '*' => tokens.push(Token {
+                    token_type: TokenType::Multiply,
+                    line: line_number,
+                }),
                 '/' => {
                     if chars.peek() == Some(&'/') {
                         // Skip comment
                         while chars.next().is_some() && chars.peek() != Some(&'\n') {}
-                        tokens.push(TokenType::Comment);
+                        tokens.push(Token {
+                            token_type: TokenType::Comment,
+                            line: line_number,
+                        });
                     } else {
-                        tokens.push(TokenType::Divide);
+                        tokens.push(Token {
+                            token_type: TokenType::Divide,
+                            line: line_number,
+                        });
                     }
                 }
-                '%' => tokens.push(TokenType::Modulo),
-                '=' => tokens.push(TokenType::Assign),
-                '(' => tokens.push(TokenType::LParen),
-                ')' => tokens.push(TokenType::RParen),
-                ',' => tokens.push(TokenType::Comma),
-                '[' => tokens.push(TokenType::LBracket),
-                ']' => tokens.push(TokenType::RBracket),
-                '{' => tokens.push(TokenType::LBrace),
-                '}' => tokens.push(TokenType::RBrace),
+                '%' => tokens.push(Token {
+                    token_type: TokenType::Modulo,
+                    line: line_number,
+                }),
+                '=' => tokens.push(Token {
+                    token_type: TokenType::Assign,
+                    line: line_number,
+                }),
+                '(' => tokens.push(Token {
+                    token_type: TokenType::LParen,
+                    line: line_number,
+                }),
+                ')' => tokens.push(Token {
+                    token_type: TokenType::RParen,
+                    line: line_number,
+                }),
+                ',' => tokens.push(Token {
+                    token_type: TokenType::Comma,
+                    line: line_number,
+                }),
+                '[' => tokens.push(Token {
+                    token_type: TokenType::LBracket,
+                    line: line_number,
+                }),
+                ']' => tokens.push(Token {
+                    token_type: TokenType::RBracket,
+                    line: line_number,
+                }),
+                '{' => tokens.push(Token {
+                    token_type: TokenType::LBrace,
+                    line: line_number,
+                }),
+                '}' => tokens.push(Token {
+                    token_type: TokenType::RBrace,
+                    line: line_number,
+                }),
                 '0'..='9' => {
                     let mut number = char.to_string();
                     while let Some(&next_char) = chars.peek() {
@@ -93,7 +145,10 @@ impl Lexer {
                         }
                     }
                     if let Ok(value) = number.parse::<f32>() {
-                        tokens.push(TokenType::FloatLiteral(value));
+                        tokens.push(Token {
+                            token_type: TokenType::FloatLiteral(value),
+                            line: line_number,
+                        });
                     }
                 }
                 _ if char.is_alphabetic() || char == '_' => {
@@ -106,20 +161,44 @@ impl Lexer {
                         }
                     }
                     match identifier.as_str() {
-                        "input" => tokens.push(TokenType::Input),
-                        "output" => tokens.push(TokenType::Output),
-                        "var" => tokens.push(TokenType::Var),
-                        "number" => tokens.push(TokenType::Number),
-                        "for" => tokens.push(TokenType::For),
-                        "in" => tokens.push(TokenType::In),
-                        _ => tokens.push(TokenType::Identifier(identifier)),
+                        "input" => tokens.push(Token {
+                            token_type: TokenType::Input,
+                            line: line_number,
+                        }),
+                        "output" => tokens.push(Token {
+                            token_type: TokenType::Output,
+                            line: line_number,
+                        }),
+                        "var" => tokens.push(Token {
+                            token_type: TokenType::Var,
+                            line: line_number,
+                        }),
+                        "number" => tokens.push(Token {
+                            token_type: TokenType::Number,
+                            line: line_number,
+                        }),
+                        "for" => tokens.push(Token {
+                            token_type: TokenType::For,
+                            line: line_number,
+                        }),
+                        "in" => tokens.push(Token {
+                            token_type: TokenType::In,
+                            line: line_number,
+                        }),
+                        _ => tokens.push(Token {
+                            token_type: TokenType::Identifier(identifier),
+                            line: line_number,
+                        }),
                     }
                 }
                 _ => {} // Ignore unrecognized characters
             }
         }
 
-        tokens.push(TokenType::EndOfLine); // End of line token
+        tokens.push(Token {
+            token_type: TokenType::EndOfLine,
+            line: line_number,
+        });
         tokens
     }
 }

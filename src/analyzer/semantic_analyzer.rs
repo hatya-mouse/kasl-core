@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Function, Program, Statement, SymbolInfo, SymbolKind};
+use crate::{Expression, Function, Program, Statement, SymbolInfo, SymbolKind};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -101,6 +101,10 @@ impl SemanticAnalyzer {
                     if !self.symbol_table.contains_key(target) {
                         self.errors.push(format!("Undefined symbol '{}'.", target));
                     }
+
+                    if let Err(e) = self.analyze_expression(&assignment.value) {
+                        self.errors.extend(e);
+                    }
                 }
 
                 Statement::ForLoop(loop_stmt) => {
@@ -136,6 +140,31 @@ impl SemanticAnalyzer {
             Ok(())
         } else {
             Err(self.errors.clone())
+        }
+    }
+
+    pub fn analyze_expression(&mut self, expr: &Expression) -> Result<(), Vec<String>> {
+        match expr {
+            Expression::Literal(_) => Ok(()),
+            Expression::Identifier(name) => {
+                if !self.symbol_table.contains_key(name) {
+                    self.errors.push(format!("Undefined symbol '{}'.", name));
+                }
+                Ok(())
+            }
+            Expression::FunctionCall { name, arguments } => {
+                if !self.function_table.contains_key(name) {
+                    self.errors.push(format!("Undefined function '{}'.", name));
+                }
+                for arg in arguments {
+                    self.analyze_expression(arg)?;
+                }
+                Ok(())
+            }
+            Expression::BinaryOp { op: _, left, right } => {
+                self.analyze_expression(left)?;
+                self.analyze_expression(right)
+            }
         }
     }
 

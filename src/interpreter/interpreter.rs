@@ -15,9 +15,10 @@
 //
 
 use crate::{
-    Expression, Function, Operator, Program, Statement, SymbolInfo, SymbolKind, builtin_function,
+    Expression, Function, Operator, Program, RuntimeError, Statement, SymbolInfo, SymbolKind,
+    builtin_function,
 };
-use knodiq_engine::{Sample, Value, audio_utils::samples_as_beats};
+use knodiq_engine::{Value, audio_utils::samples_as_beats};
 use std::collections::HashMap;
 
 pub struct Interpreter {
@@ -64,7 +65,7 @@ impl Interpreter {
     pub fn execute(
         &mut self,
         input_parameters: HashMap<String, SymbolInfo>,
-    ) -> Result<HashMap<String, SymbolInfo>, String> {
+    ) -> Result<HashMap<String, SymbolInfo>, RuntimeError> {
         self.initialize();
 
         let statements = self.program.statements.clone();
@@ -89,17 +90,18 @@ impl Interpreter {
         &mut self,
         statements: &Vec<Statement>,
         input_parameters: HashMap<String, SymbolInfo>,
-    ) -> Result<(), String> {
+    ) -> Result<(), RuntimeError> {
         for statement in statements {
             match &statement {
                 Statement::Assignment(assignment) => {
-                    let value = self.evaluate_expression(&assignment.value)?;
+                    let value = self.evaluate_expression(&assignment.value, assignment.line)?;
                     let target = self
                         .symbol_table
                         .get(&assignment.target_name)
                         .cloned()
-                        .ok_or_else(|| {
-                            format!("Variable '{}' not found", assignment.target_name)
+                        .ok_or_else(|| RuntimeError::SymbolNotFound {
+                            name: assignment.target_name.clone(),
+                            line: assignment.line,
                         })?;
                     let symbol = SymbolInfo {
                         name: target.name.clone(),
@@ -121,9 +123,12 @@ impl Interpreter {
                             range: None,
                             value: Some(input_param.value.unwrap_or(Value::Float(0.0))),
                         };
-                        self.register_symbol(input.name.clone(), symbol.clone())?;
+                        self.register_symbol(input.name.clone(), symbol.clone(), input.line)?;
                     } else {
-                        return Err(format!("Input parameter '{}' not provided", input.name));
+                        return Err(RuntimeError::InputNotProvided {
+                            name: input.name.clone(),
+                            line: input.line,
+                        });
                     }
                 }
 
@@ -135,11 +140,12 @@ impl Interpreter {
                         range: None,
                         value: None,
                     };
-                    self.register_symbol(output.name.clone(), symbol.clone())?;
+                    self.register_symbol(output.name.clone(), symbol.clone(), output.line)?;
                 }
 
                 Statement::VariableDeclaration(var_decl) => {
-                    let initial_value = self.evaluate_expression(&var_decl.initial_value)?;
+                    let initial_value =
+                        self.evaluate_expression(&var_decl.initial_value, var_decl.line)?;
                     let symbol = SymbolInfo {
                         name: var_decl.name.clone(),
                         kind: SymbolKind::Variable,
@@ -147,7 +153,7 @@ impl Interpreter {
                         range: None,
                         value: Some(initial_value),
                     };
-                    self.register_symbol(var_decl.name.clone(), symbol.clone())?;
+                    self.register_symbol(var_decl.name.clone(), symbol.clone(), var_decl.line)?;
                 }
 
                 Statement::ForLoop(loop_stmt) => {
@@ -158,9 +164,13 @@ impl Interpreter {
                         range: None,
                         value: Some(Value::Float(0.0)),
                     };
-                    self.register_symbol(loop_stmt.variable_name.clone(), symbol.clone())?;
+                    self.register_symbol(
+                        loop_stmt.variable_name.clone(),
+                        symbol.clone(),
+                        loop_stmt.line,
+                    )?;
 
-                    let iterable = self.evaluate_expression(&loop_stmt.iterable)?;
+                    let iterable = self.evaluate_expression(&loop_stmt.iterable, loop_stmt.line)?;
                     match iterable {
                         Value::Array(elements) => {
                             for element in elements {
@@ -201,16 +211,25 @@ impl Interpreter {
         Ok(())
     }
 
-    fn register_symbol(&mut self, name: String, info: SymbolInfo) -> Result<(), String> {
+    fn register_symbol(
+        &mut self,
+        name: String,
+        info: SymbolInfo,
+        line: usize,
+    ) -> Result<(), RuntimeError> {
         if self.symbol_table.contains_key(&name) {
-            Err(format!("Symbol '{}' is already defined.", name))
+            Err(RuntimeError::SymbolAlreadyDefined { name, line })
         } else {
             self.symbol_table.insert(name.clone(), info);
             Ok(())
         }
     }
 
-    fn evaluate_expression(&self, expression: &Expression) -> Result<Value, String> {
+    fn evaluate_expression(
+        &self,
+        expression: &Expression,
+        line: usize,
+    ) -> Result<Value, RuntimeError> {
         match expression {
             Expression::Literal(value) => Ok(Value::Float(*value)),
 
@@ -218,163 +237,180 @@ impl Interpreter {
                 .symbol_table
                 .get(name)
                 .cloned()
-                .ok_or_else(|| format!("Variable '{}' not found", name))?
+                .ok_or_else(|| RuntimeError::SymbolNotFound {
+                    name: name.clone(),
+                    line,
+                })?
                 .value
-                .ok_or_else(|| format!("Variable '{}' has no value", name)),
+                .ok_or_else(|| RuntimeError::Unknown { line }),
 
             Expression::BinaryOp { left, op, right } => {
-                let left_value = self.evaluate_expression(left)?;
-                let right_value = self.evaluate_expression(right)?;
+                let left_value = self.evaluate_expression(left, line)?;
+                let right_value = self.evaluate_expression(right, line)?;
 
                 let evaluated_value = match op {
-                    Operator::Add => left_value.apply_op(&right_value, Box::new(|a, b| a + b)),
-                    Operator::Subtract => left_value.apply_op(&right_value, Box::new(|a, b| a - b)),
-                    Operator::Multiply => left_value.apply_op(&right_value, Box::new(|a, b| a * b)),
-                    Operator::Divide => {
-                        if let Value::Float(0.0) = right_value {
-                            Some(Value::Float(0.0))
-                        } else {
-                            left_value.apply_op(&right_value, Box::new(|a, b| a / b))
-                        }
-                    }
-                    Operator::Modulo => {
-                        if let Value::Float(0.0) = right_value {
-                            Some(Value::Float(0.0))
-                        } else {
-                            left_value.apply_op(&right_value, Box::new(|a, b| a % b))
-                        }
-                    }
+                    Operator::Add => left_value + right_value,
+                    Operator::Subtract => left_value - right_value,
+                    Operator::Multiply => left_value * right_value,
+                    Operator::Divide => left_value / right_value,
+                    Operator::Modulo => left_value % right_value,
                 };
 
-                evaluated_value.ok_or_else(|| {
-                    format!(
-                        "Invalid operation: {:?} {:?} {:?}",
-                        left_value, op, right_value
-                    )
-                })
+                Ok(evaluated_value)
             }
 
             Expression::FunctionCall { name, arguments } => {
                 let func = match self.function_table.get(name) {
                     Some(func) => func,
-                    None => return Err(format!("Function '{}' not found", name)),
+                    None => {
+                        return Err(RuntimeError::FunctionNotFound {
+                            name: name.clone(),
+                            line,
+                        });
+                    }
                 };
 
-                match self.evaluate_function(&func, arguments) {
-                    Ok(result) => Ok(result),
-                    Err(e) => Err(format!("Error evaluating function '{}': {}", name, e)),
-                }
+                self.evaluate_function(&func, arguments, line)
             }
         }
     }
 
-    fn evaluate_function(&self, func: &Function, args: &Vec<Expression>) -> Result<Value, String> {
+    fn evaluate_function(
+        &self,
+        func: &Function,
+        args: &Vec<Expression>,
+        line: usize,
+    ) -> Result<Value, RuntimeError> {
         let mut evaluated_args = Vec::new();
         for arg in args {
-            let arg_value = self.evaluate_expression(arg)?;
+            let arg_value = self.evaluate_expression(arg, line)?;
             evaluated_args.push(arg_value);
         }
 
+        let inv_arg_err = |name: &str| RuntimeError::FunctionInvalidArgumentError {
+            name: name.to_string(),
+            line,
+        };
+
         match func.name.as_str() {
-            "sin" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.sin())
-                .ok_or("Arguments are invalid for sin.")?),
-            "cos" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.cos())
-                .ok_or("Arguments are invalid for cos.")?),
-            "tan" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.tan())
-                .ok_or("Arguments are invalid for tan.")?),
-            "asin" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.asin())
-                .ok_or("Arguments are invalid for asin.")?),
-            "acos" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.acos())
-                .ok_or("Arguments are invalid for acos.")?),
-            "atan" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.atan())
-                .ok_or("Arguments are invalid for atan.")?),
-            "abs" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.abs())
-                .ok_or("Arguments are invalid for abs.")?),
-            "sgn" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.signum())
-                .ok_or("Arguments are invalid for sgn.")?),
-            "min" => Ok(evaluated_args[0]
-                .apply_op(&evaluated_args[1], |a, b| a.min(b))
-                .ok_or("Arguments are invalid for min.")?),
-            "max" => Ok(evaluated_args[0]
-                .apply_op(&evaluated_args[1], |a, b| a.max(b))
-                .ok_or("Arguments are invalid for max.")?),
-            "clamp" => Ok(evaluated_args[0]
-                .apply_op(&evaluated_args[1], |a, min| a.max(min))
-                .ok_or("Arguments are invalid for clamp.")?
-                .apply_op(&evaluated_args[2], |a, max| a.min(max))
-                .ok_or("Arguments are invalid for clamp.")?),
-            "pow" => Ok(evaluated_args[0]
-                .apply_op(&evaluated_args[1], |a, b| a.powf(b))
-                .ok_or("Arguments are invalid for pow.")?),
-            "sqrt" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.sqrt())
-                .ok_or("Arguments are invalid for sqrt.")?),
-            "log" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.ln())
-                .ok_or("Arguments are invalid for log (ln).")?),
-            "log2" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.log2())
-                .ok_or("Arguments are invalid for log2.")?),
-            "log10" => Ok(evaluated_args[0]
-                .apply_fn(|x| x.log10())
-                .ok_or("Arguments are invalid for log10.")?),
-            "saw" => Ok(evaluated_args[0]
-                .apply_fn(|x| {
-                    let phase = x % 1.0;
-                    2.0 * (phase - 0.5)
+            "sin" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| args[0].sin())
+                .ok_or(inv_arg_err("sin"))?),
+            "cos" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| args[0].cos())
+                .ok_or(inv_arg_err("cos"))?),
+            "tan" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| args[0].tan())
+                .ok_or(inv_arg_err("tan"))?),
+            "asin" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].asin())
+                    .ok_or(inv_arg_err("asin"))?,
+            ),
+            "acos" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].acos())
+                    .ok_or(inv_arg_err("acos"))?,
+            ),
+            "atan" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].atan())
+                    .ok_or(inv_arg_err("atan"))?,
+            ),
+            "abs" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| args[0].abs())
+                .ok_or(inv_arg_err("abs"))?),
+            "sgn" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].signum())
+                    .ok_or(inv_arg_err("sgn"))?,
+            ),
+            "min" => Ok(
+                Value::apply_op(&[&evaluated_args[0], &evaluated_args[1]], |args| {
+                    args[0].min(args[1])
                 })
-                .ok_or("Arguments are invalid for saw.")?),
-            "tri" => Ok(evaluated_args[0]
-                .apply_fn(|x| {
-                    let phase = x % 1.0;
-                    if phase < 0.5 {
-                        4.0 * phase - 1.0
-                    } else {
-                        1.0 - (phase - 0.5) * 4.0
-                    }
+                .ok_or(inv_arg_err("min"))?,
+            ),
+            "max" => Ok(
+                Value::apply_op(&[&evaluated_args[0], &evaluated_args[1]], |args| {
+                    args[0].max(args[1])
                 })
-                .ok_or("Arguments are invalid for tri.")?),
-            "square" => Ok(evaluated_args[0]
-                .apply_fn(|x| {
-                    let phase = x % 1.0;
-                    if phase < 0.5 { 1.0 } else { -1.0 }
+                .ok_or(inv_arg_err("max"))?,
+            ),
+            "clamp" => Ok(Value::apply_op(
+                &[
+                    &Value::apply_op(&[&evaluated_args[0], &evaluated_args[1]], |args| {
+                        args[0].max(args[1])
+                    })
+                    .ok_or(inv_arg_err("clamp"))?,
+                    &evaluated_args[2],
+                ],
+                |args| args[0].min(args[1]),
+            )
+            .ok_or(inv_arg_err("clamp"))?),
+            "pow" => Ok(
+                Value::apply_op(&[&evaluated_args[0], &evaluated_args[1]], |args| {
+                    args[0].powf(args[1])
                 })
-                .ok_or("Arguments are invalid for square.")?),
+                .ok_or(inv_arg_err("pow"))?,
+            ),
+            "sqrt" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].sqrt())
+                    .ok_or(inv_arg_err("sqrt"))?,
+            ),
+            "log" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| args[0].ln())
+                .ok_or(inv_arg_err("log"))?),
+            "log2" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].log2())
+                    .ok_or(inv_arg_err("log2"))?,
+            ),
+            "log10" => Ok(
+                Value::apply_op(&[&evaluated_args[0]], |args| args[0].log10())
+                    .ok_or(inv_arg_err("log10"))?,
+            ),
+            "saw" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| {
+                let phase = args[0] % 1.0;
+                2.0 * (phase - 0.5)
+            })
+            .ok_or(inv_arg_err("saw"))?),
+            "tri" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| {
+                let phase = args[0] % 1.0;
+                if phase < 0.5 {
+                    4.0 * phase - 1.0
+                } else {
+                    1.0 - (phase - 0.5) * 4.0
+                }
+            })
+            .ok_or(inv_arg_err("tri"))?),
+            "square" => Ok(Value::apply_op(&[&evaluated_args[0]], |args| {
+                let phase = args[0] % 1.0;
+                if phase < 0.5 { 1.0 } else { -1.0 }
+            })
+            .ok_or(inv_arg_err("square"))?),
             "rand" => Ok(Value::Float(rand::random::<f32>())),
             "mix" => {
                 if evaluated_args.len() != 3 {
-                    return Err("mix function requires exactly 3 arguments".to_string());
+                    return Err(inv_arg_err("mix"));
                 }
-                if let Value::Float(factor) = evaluated_args[2] {
-                    Ok(evaluated_args[0]
-                        .apply_op(&evaluated_args[1], |a, b| a * (1.0 - factor) + b * factor)
-                        .ok_or("Arguments are invalid for mix.")?)
-                } else {
-                    Err("Third argument for mix must be a float".to_string())
-                }
+                Ok(Value::apply_op(
+                    &[&evaluated_args[0], &evaluated_args[1], &evaluated_args[2]],
+                    |args| args[0] * (1.0 - args[2]) + args[1] * args[2],
+                )
+                .ok_or(inv_arg_err("mix"))?)
             }
             "lerp" => {
                 if evaluated_args.len() != 3 {
-                    return Err("lerp function requires exactly 3 arguments".to_string());
+                    return Err(inv_arg_err("lerp"));
                 }
-                if let Value::Float(factor) = evaluated_args[2] {
-                    Ok(evaluated_args[0]
-                        .apply_op(&evaluated_args[1], |a, b| a * (1.0 - factor) + b * factor)
-                        .ok_or("Arguments are invalid for lerp.")?)
-                } else {
-                    Err("Third argument for lerp must be a float".to_string())
-                }
+                Ok(Value::apply_op(
+                    &[&evaluated_args[0], &evaluated_args[1], &evaluated_args[2]],
+                    |args| args[0] * (1.0 - args[2]) + args[1] * args[2],
+                )
+                .ok_or(inv_arg_err("lerp"))?)
             }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
             "time" => Ok(Value::from_buffer(
+                (0..self.channels)
+                    .map(|_| {
+                        (self.chunk_start..self.chunk_end)
+                            .map(|t| t as f32 / self.sample_rate as f32)
+                            .collect()
+                    })
+                    .collect(),
+            )),
+            "beats" => Ok(Value::from_buffer(
                 (0..self.channels)
                     .map(|_| {
                         (self.chunk_start..self.chunk_end)
@@ -383,8 +419,10 @@ impl Interpreter {
                     })
                     .collect(),
             )),
-            "sample_rate" => Ok(Value::Float(self.sample_rate as Sample)),
-            _ => Err(format!("Unknown function '{}'", func.name)),
+            _ => Err(RuntimeError::FunctionNotFound {
+                name: func.name.clone(),
+                line: line,
+            }),
         }
     }
 }

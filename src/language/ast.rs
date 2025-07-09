@@ -45,24 +45,28 @@ pub struct InputDeclarationStatement {
     pub data_type: Type,
     pub initial_value: Option<Expression>,
     pub range: Option<(f32, f32)>,
+    pub line: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct OutputDeclarationStatement {
     pub name: String,
     pub data_type: Type,
+    pub line: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableDeclarationStatement {
     pub name: String,
     pub initial_value: Expression,
+    pub line: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct AssignmentStatement {
     pub target_name: String,
     pub value: Expression,
+    pub line: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -70,6 +74,7 @@ pub struct ForLoopStatement {
     pub variable_name: String,
     pub iterable: Expression,
     pub body: Vec<Statement>,
+    pub line: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]

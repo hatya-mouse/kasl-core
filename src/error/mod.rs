@@ -14,6 +14,6 @@
 // limitations under the License.
 //
 
-pub mod interpreter_error;
+pub mod runtime_error;
 
-pub use interpreter_error::InterpreterError;
+pub use runtime_error::RuntimeError;
