@@ -144,18 +144,18 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.40"
+version = "4.5.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40b6887a1d8685cebccf115538db5c0efe625ccac9696ad45c409d96566e910f"
+checksum = "be92d32e80243a54711e5d7ce823c35c41c9d929dc4ab58e1276f625841aadf9"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.40"
+version = "4.5.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0c66c08ce9f0c698cbce5c0279d0bb6ac936d8674174fe48f736533b964f59e"
+checksum = "707eab41e9622f9139419d573eca0900137718000c517d47da73045f54331c3d"
 dependencies = [
  "anstyle",
  "clap_lex",
@@ -388,7 +388,7 @@ dependencies = [
 
 [[package]]
 name = "knodiq_audio_shader"
-version = "0.3.5"
+version = "0.3.6"
 dependencies = [
  "divan",
  "knodiq_engine",
@@ -398,8 +398,8 @@ dependencies = [
 
 [[package]]
 name = "knodiq_engine"
-version = "0.3.0"
-source = "git+https://github.com/hatya-mouse/knodiq_engine.git#424bbdbd30d48570fda704a8f9eb2f69e8c4c228"
+version = "0.3.8"
+source = "git+https://github.com/hatya-mouse/knodiq_engine.git#9fd2e28b1a90c83c71b578b9421d057de16c2d57"
 dependencies = [
  "cpal",
  "rubato",
@@ -1425,9 +1425,9 @@ checksum = "271414315aff87387382ec3d271b52d7ae78726f5d44ac98b4f4030c91880486"
 
 [[package]]
 name = "winnow"
-version = "0.7.11"
+version = "0.7.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74c7b26e3480b707944fc872477815d29a8e429d2f93a1ce000f5fa84a15cbcd"
+checksum = "f3edebf492c8125044983378ecb5766203ad3b4c2f7a922bd7dd207f6d443e95"
 dependencies = [
  "memchr",
 ]

@@ -415,8 +415,13 @@ impl Interpreter {
                 };
 
                 let time = match &evaluated_args[1] {
-                    Value::Array(v) => v,
-                    _ => return Err(inv_arg_err("load_time")),
+                    Value::Array(v) => {
+                        match v.len() {
+                            2 => v.clone(), // Use as is if two values are provided
+                            _ => return Err(inv_arg_err("load_beats")),
+                        }
+                    }
+                    _ => return Err(inv_arg_err("load_beats")),
                 };
 
                 // Convert time values to sample indices
@@ -428,7 +433,7 @@ impl Interpreter {
                     })
                     .collect::<Vec<usize>>();
 
-                Ok(get_samples_at_indices(audio, &time_sample))
+                Ok(get_samples_between(audio, &time_sample[0], &time_sample[1]))
             }
             "load_beats" => {
                 if evaluated_args.len() != 2 {
@@ -442,7 +447,12 @@ impl Interpreter {
                 };
 
                 let time = match &evaluated_args[1] {
-                    Value::Array(v) => v,
+                    Value::Array(v) => {
+                        match v.len() {
+                            2 => v.clone(), // Use as is if two values are provided
+                            _ => return Err(inv_arg_err("load_beats")),
+                        }
+                    }
                     _ => return Err(inv_arg_err("load_beats")),
                 };
 
@@ -455,19 +465,22 @@ impl Interpreter {
                     })
                     .collect::<Vec<usize>>();
 
-                Ok(get_samples_at_indices(audio, &time_sample))
+                Ok(get_samples_between(audio, &time_sample[0], &time_sample[1]))
             }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
             "time" => Ok(Value::Array(
-                (self.chunk_start..self.chunk_end)
-                    .map(|t| Value::Float(t as Sample / self.sample_rate as Sample))
-                    .collect(),
+                // (self.chunk_start..self.chunk_end)
+                //     .map(|t| Value::Float(t as Sample / self.sample_rate as Sample))
+                //     .collect(),
+                vec![
+                    Value::Float(self.chunk_start as Sample / self.sample_rate as Sample),
+                    Value::Float(self.chunk_end as Sample / self.sample_rate as Sample),
+                ],
             )),
-            "beats" => Ok(Value::Array(
-                (self.chunk_start..self.chunk_end)
-                    .map(|t| Value::Float(samples_as_beats(self.samples_per_beat, t)))
-                    .collect(),
-            )),
+            "beats" => Ok(Value::Array(vec![
+                Value::Float(samples_as_beats(self.samples_per_beat, self.chunk_start)),
+                Value::Float(samples_as_beats(self.samples_per_beat, self.chunk_end)),
+            ])),
             "sample_rate" => Ok(Value::Float(self.sample_rate as Sample)),
             "channels" => Ok(Value::Float(self.channels as Sample)),
             _ => Err(RuntimeError::FunctionNotFound {
@@ -478,25 +491,13 @@ impl Interpreter {
     }
 }
 
-fn get_samples_at_indices(audio: &Vec<Value>, indices: &Vec<usize>) -> Value {
+fn get_samples_between(audio: &Vec<Value>, start: &usize, end: &usize) -> Value {
     Value::Array(
         audio
             .iter()
-            .map(|channel| {
-                if let Value::Array(samples) = channel {
-                    let mut result = Vec::new();
-                    for &t in indices {
-                        if t < samples.len() {
-                            result.push(samples[t].clone());
-                        } else {
-                            result.push(Value::Float(0.0));
-                        }
-                    }
-                    Value::Array(result)
-                } else {
-                    Value::Float(0.0)
-                }
-            })
+            .skip(*start)
+            .take(end - start + 1)
+            .cloned()
             .collect(),
     )
 }
