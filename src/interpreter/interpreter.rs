@@ -492,5 +492,18 @@ impl Interpreter {
 }
 
 fn get_samples_between(audio: &Vec<Value>, start: &usize, end: &usize) -> Value {
-    Value::Array(audio[*start..*end].to_vec())
+    if audio.len() - 1 <= *end {
+        if *start >= audio.len() {
+            Value::Array(vec![Value::Float(0.0); *end - *start + 1])
+        } else {
+            Value::Array(audio[*start..*end].to_vec())
+        }
+    } else {
+        let shortage = *end - audio.len() + 1;
+        let end = audio.len() - shortage;
+
+        let mut result = audio[*start..end].to_vec();
+        result.resize(shortage, Value::Float(0.0));
+        Value::Array(result)
+    }
 }
