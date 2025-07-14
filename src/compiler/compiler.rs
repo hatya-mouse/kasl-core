@@ -46,7 +46,8 @@ impl Compiler {
         program: &Program,
     ) -> Result<Vec<ir::Value>, Box<dyn std::error::Error>> {
         let mut semantic_analyzer = SemanticAnalyzer::new();
-        semantic_analyzer.analyze(program)?;
+        let program = semantic_analyzer.analyze(program)?;
+
         let inputs = semantic_analyzer.get_input_table();
         let outputs = semantic_analyzer.get_output_table();
         let mut input_names = Vec::new();
