@@ -16,6 +16,8 @@
 
 use std::{iter::Peekable, slice::Iter};
 
+use knodiq_engine::Type;
+
 use crate::{
     AssignmentStatement, Expression, InputDeclarationStatement, Lexer, Operator,
     OutputDeclarationStatement, Program, Statement, TokenType, VariableDeclarationStatement,
@@ -66,6 +68,8 @@ impl Parser {
             while let Some(token) = token_iter.next() {
                 match &token.token_type {
                     TokenType::Input => {
+                        let value_type = self.parse_type(&mut token_iter)?;
+
                         let name = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
@@ -76,11 +80,14 @@ impl Parser {
                         statements.push(Statement::InputDeclaration(InputDeclarationStatement {
                             name,
                             input_attrs: Vec::new(),
+                            value_type,
                             line: token.line,
                         }));
                     }
 
                     TokenType::Output => {
+                        let value_type = self.parse_type(&mut token_iter)?;
+
                         let name = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
@@ -90,11 +97,14 @@ impl Parser {
 
                         statements.push(Statement::OutputDeclaration(OutputDeclarationStatement {
                             name,
+                            value_type,
                             line: token.line,
                         }));
                     }
 
                     TokenType::Var => {
+                        let value_type = self.parse_type(&mut token_iter)?;
+
                         let name = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
@@ -111,6 +121,7 @@ impl Parser {
                             VariableDeclarationStatement {
                                 name,
                                 initial_value,
+                                value_type,
                                 line: token.line,
                             },
                         ));
@@ -250,5 +261,25 @@ impl Parser {
         }
 
         Ok(left)
+    }
+
+    fn parse_type(&self, token_iter: &mut Peekable<Iter<Token>>) -> Result<Type, String> {
+        match token_iter.next().map(|t| &t.token_type) {
+            Some(TokenType::Identifier(name)) => match name.as_str() {
+                "float" => Ok(Type::Float),
+                "int" => Ok(Type::Int),
+                _ => Err(format!("Unknown type '{}'", name)),
+            },
+            Some(TokenType::LBrace) => {
+                let token: Vec<Token> = token_iter
+                    .take_while(|t| t.token_type != TokenType::RBrace)
+                    .cloned()
+                    .collect();
+                Ok(Type::Array(Box::new(
+                    self.parse_type(&mut token.iter().peekable())?,
+                )))
+            }
+            _ => Err("Expected type identifier".into()),
+        }
     }
 }
