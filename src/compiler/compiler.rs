@@ -16,14 +16,11 @@
 
 use std::collections::HashMap;
 
-use crate::{Program, SemanticAnalyzer, codegen::get_type, compiler::codegen::Translator};
-use cranelift_codegen::{
-    Context,
-    ir::{self, AbiParam, InstBuilder},
-};
+use crate::{Parser, Program, SemanticAnalyzer, SymbolInfo, compiler::codegen::Translator};
+use cranelift_codegen::{Context, ir::AbiParam};
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_jit::{JITBuilder, JITModule};
-use cranelift_module::Module;
+use cranelift_module::{Linkage, Module};
 
 pub struct Compiler {
     ctx: Context,
@@ -41,31 +38,68 @@ impl Compiler {
         })
     }
 
-    pub fn execute(
-        &mut self,
-        program: &Program,
-    ) -> Result<Vec<ir::Value>, Box<dyn std::error::Error>> {
+    pub fn compile(&mut self, code: &str) -> Result<*const u8, Box<dyn std::error::Error>> {
+        let mut program = Parser::new().parse(code)?;
         let mut semantic_analyzer = SemanticAnalyzer::new();
-        let program = semantic_analyzer.analyze(program)?;
+        program = semantic_analyzer.analyze(&program)?;
 
         let inputs = semantic_analyzer.get_input_table();
         let outputs = semantic_analyzer.get_output_table();
+        self.translate(&program, &inputs, &outputs)?;
+
+        let func_name = "main";
+        let id =
+            self.module
+                .declare_function(func_name, Linkage::Export, &self.ctx.func.signature)?;
+
+        self.module.define_function(id, &mut self.ctx)?;
+
+        self.module.clear_context(&mut self.ctx);
+
+        self.module.finalize_definitions()?;
+
+        let code = self.module.get_finalized_function(id);
+
+        Ok(code)
+    }
+
+    pub fn translate(
+        &mut self,
+        program: &Program,
+        inputs: &HashMap<String, SymbolInfo>,
+        outputs: &HashMap<String, SymbolInfo>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let mut input_names = Vec::new();
         let mut output_names = Vec::new();
 
+        let pointer_type = self.module.target_config().pointer_type();
+
+        self.ctx
+            .func
+            .signature
+            .params
+            .push(AbiParam::new(pointer_type)); // input_ptr
+        self.ctx
+            .func
+            .signature
+            .params
+            .push(AbiParam::new(pointer_type)); // input_count (usize)
+        self.ctx
+            .func
+            .signature
+            .params
+            .push(AbiParam::new(pointer_type)); // output_ptr
+        self.ctx
+            .func
+            .signature
+            .params
+            .push(AbiParam::new(pointer_type)); // output_count
+
         for input in inputs {
-            let var_type = get_type(input.1.value_type, &self.module);
-            self.ctx.func.signature.params.push(AbiParam::new(var_type));
             input_names.push(input.1.name.clone());
         }
 
         for output in outputs {
-            let var_type = get_type(output.1.value_type, &self.module);
-            self.ctx
-                .func
-                .signature
-                .returns
-                .push(AbiParam::new(var_type));
             output_names.push(output.1.name.clone());
         }
 
@@ -77,18 +111,23 @@ impl Compiler {
         builder.switch_to_block(entry_block);
         builder.seal_block(entry_block);
 
-        let return_block = builder.create_block();
-        builder.append_block_params_for_function_returns(return_block);
+        let mut translator = Translator::new(builder, HashMap::new(), entry_block);
 
-        let mut translator = Translator::new(builder, HashMap::new(), entry_block, return_block);
+        translator.setup_array_interface(
+            &input_names,
+            &output_names,
+            inputs,
+            outputs,
+            &self.module,
+        );
+
         for stmt in program.statements.iter() {
-            translator.codegen_stmt(&input_names, &output_names, stmt, &self.module);
+            translator.codegen_stmt(stmt, pointer_type);
         }
 
-        let return_vals = translator.get_returns();
-        translator.builder.ins().return_(&return_vals);
+        translator.finalize_array_interface(&output_names);
         translator.builder.finalize();
 
-        Ok(return_vals)
+        Ok(())
     }
 }

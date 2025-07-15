@@ -17,6 +17,8 @@
 pub mod builtin_functions;
 pub mod codegen;
 pub mod compiler;
+pub mod run;
 
 pub use codegen::Translator;
 pub use compiler::Compiler;
+pub use run::run;

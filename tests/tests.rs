@@ -15,7 +15,7 @@
 //
 
 use knodiq_audio_shader::{
-    Compiler, Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value,
+    Compiler, Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value, run,
 };
 
 #[test]
@@ -128,20 +128,13 @@ fn test_compiler() {
                     result = in_buffer * gain
                     out_buffer = result + 1.25
 
-                    powered = pow(in_buffer, 2.0)";
+                    //powered = pow(in_buffer, 2.0)
+                    powered = in_buffer * in_buffer";
 
-    let parser = Parser::new();
-    let program = parser.parse(&code).unwrap();
+    let mut inputs = Vec::new();
+    inputs.push(Value::Float(2.0));
 
-    if let Ok(mut compiler) = Compiler::new() {
-        print!(
-            "{:?}",
-            compiler
-                .execute(&program)
-                .unwrap()
-                .iter()
-                .map(|v| v.as_u32())
-                .collect::<Vec<_>>()
-        );
-    }
+    let mut compiler = Compiler::new().unwrap();
+    let result = unsafe { run(&mut compiler, &code, inputs) }.unwrap();
+    println!("Compiler run result: {:?}", result);
 }
