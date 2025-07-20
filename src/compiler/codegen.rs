@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Operator, Statement, SymbolInfo};
+use crate::{Expression, Operator, Statement, SymbolInfo, TYPE_FLOAT, TYPE_INT};
 use cranelift_codegen::{
     entity::EntityRef,
     ir::{self, Block, BlockArg, InstBuilder, types},
@@ -24,14 +24,11 @@ use cranelift_jit::JITModule;
 use cranelift_module::Module;
 use std::collections::HashMap;
 
-const TYPE_INT: ir::Type = types::I64;
-const TYPE_FLOAT: ir::Type = types::F32;
-
 pub struct Translator<'a> {
     pub builder: FunctionBuilder<'a>,
     pub variables: HashMap<String, (Variable, ir::Type)>,
     pub return_vars: Vec<String>,
-    functions: HashMap<String, ir::FuncRef>,
+    pub functions: HashMap<String, ir::FuncRef>,
     entry_block: Block,
     input_ptr: ir::Value,
     output_ptr: ir::Value,
@@ -67,10 +64,8 @@ impl<'a> Translator<'a> {
     /// Sets up the array interface for the function.
     pub fn setup_array_interface(
         &mut self,
-        input_names: &[String],
-        output_names: &[String],
-        inputs: &HashMap<String, SymbolInfo>,
-        outputs: &HashMap<String, SymbolInfo>,
+        inputs: &Vec<SymbolInfo>,
+        outputs: &Vec<SymbolInfo>,
         module: &JITModule,
     ) {
         let params = self.builder.block_params(self.entry_block);
@@ -80,48 +75,42 @@ impl<'a> Translator<'a> {
         self.output_count = params[3];
 
         let mut input_offset = 0;
-        for (_, input_name) in input_names.iter().enumerate() {
-            if let Some(input_info) = inputs.get(input_name) {
-                let var = Variable::new(self.variables.len());
-                let val_type = get_type(&input_info.value_type, module);
+        for input_info in inputs {
+            let var = Variable::new(self.variables.len());
+            let val_type = get_type(&input_info.value_type, module);
 
-                let offset = self.builder.ins().iconst(TYPE_INT, input_offset);
-                let addr = self.builder.ins().iadd(self.input_ptr, offset);
-                let val = self
-                    .builder
-                    .ins()
-                    .load(val_type, ir::MemFlags::new(), addr, 0);
+            let offset = self.builder.ins().iconst(TYPE_INT, input_offset);
+            let addr = self.builder.ins().iadd(self.input_ptr, offset);
+            let val = self
+                .builder
+                .ins()
+                .load(val_type, ir::MemFlags::new(), addr, 0);
 
-                self.variables.insert(input_name.clone(), (var, val_type));
-                self.builder.declare_var(var, val_type);
-                self.builder.def_var(var, val);
+            self.variables
+                .insert(input_info.name.clone(), (var, val_type));
+            self.builder.declare_var(var, val_type);
+            self.builder.def_var(var, val);
 
-                // Calculate the offset for the next element
-                input_offset += match val_type {
-                    TYPE_INT => 4,
-                    types::F32 => 4,
-                    _ => 8,
-                }
-            }
+            // Calculate the offset for the next element
+            input_offset += val_type.bytes() as i64;
         }
 
-        for output_name in output_names.iter() {
-            if let Some(output_info) = outputs.get(output_name) {
-                let var = Variable::new(self.variables.len());
-                let val_type = get_type(&output_info.value_type, module);
+        for output_info in outputs {
+            let var = Variable::new(self.variables.len());
+            let val_type = get_type(&output_info.value_type, module);
 
-                self.variables.insert(output_name.clone(), (var, val_type));
-                self.return_vars.push(output_name.clone());
-                self.builder.declare_var(var, val_type);
+            self.variables
+                .insert(output_info.name.clone(), (var, val_type));
+            self.return_vars.push(output_info.name.clone());
+            self.builder.declare_var(var, val_type);
 
-                let default_val = match val_type {
-                    TYPE_INT => self.builder.ins().iconst(TYPE_INT, 0),
-                    types::F32 => self.builder.ins().f32const(0.0),
-                    _ => self.builder.ins().iconst(val_type, 0),
-                };
+            let default_val = match val_type {
+                TYPE_INT => self.builder.ins().iconst(TYPE_INT, 0),
+                types::F32 => self.builder.ins().f32const(0.0),
+                _ => self.builder.ins().iconst(val_type, 0),
+            };
 
-                self.builder.def_var(var, default_val);
-            }
+            self.builder.def_var(var, default_val);
         }
     }
 
@@ -136,11 +125,7 @@ impl<'a> Translator<'a> {
                 self.builder.ins().store(ir::MemFlags::new(), val, addr, 0);
 
                 // Calculate the offset for the next element
-                output_offset += match val_type {
-                    &TYPE_INT => 4,
-                    &types::F32 => 4,
-                    _ => 8,
-                };
+                output_offset += val_type.bytes() as i64;
             }
         }
 
@@ -161,17 +146,16 @@ impl<'a> Translator<'a> {
                 self.builder.def_var(var, val);
             }
             Statement::Assignment(assignment_stmt) => {
-                let (val, val_type) = self.codegen_expr(&assignment_stmt.value, module);
-
-                let var = Variable::new(self.variables.len());
-                self.variables
-                    .insert(assignment_stmt.target_name.clone(), (var, val_type));
-
-                self.builder.declare_var(var, val_type);
+                let (val, _) = self.codegen_expr(&assignment_stmt.value, module);
+                let var = self
+                    .variables
+                    .get(&assignment_stmt.target_name)
+                    .expect("Variable not found")
+                    .0;
                 self.builder.def_var(var, val);
             }
             Statement::ForLoop(_for_loop_stmt) => {
-                todo!()
+                // self.codegen_loop(for_loop_stmt.count, for_loop_stmt.body)
             }
             _ => return,
         }
@@ -224,30 +208,16 @@ impl<'a> Translator<'a> {
                 )
             }
             Expression::FunctionCall { name, arguments } => {
-                let args = arguments
-                    .iter()
-                    .map(|arg| self.codegen_expr(arg, module))
-                    .collect::<Vec<(ir::Value, ir::Type)>>();
-                let arg_val = args.iter().map(|(val, _)| *val).collect::<Vec<ir::Value>>();
-                let mut inferred_type = types::INVALID;
-
-                for (_, val_type) in args.iter() {
-                    inferred_type = eval_type(inferred_type, *val_type);
+                let func = *self.functions.get(name).expect("Function not found");
+                let mut args = Vec::with_capacity(arguments.len());
+                for arg in arguments {
+                    args.push(self.codegen_expr(arg, module).0);
                 }
 
-                if let Some(function) = self.functions.get(name) {
-                    let inst = self.builder.ins().call(*function, &arg_val);
-                    (
-                        self.builder
-                            .inst_results(inst)
-                            .first()
-                            .unwrap_or(&ir::Value::new(0))
-                            .clone(),
-                        inferred_type,
-                    )
-                } else {
-                    (self.builder.ins().iconst(TYPE_INT, 0), TYPE_INT)
-                }
+                let call = self.builder.ins().call(func, &args);
+                let results = self.builder.inst_results(call);
+                let result_val = results[0];
+                (result_val, TYPE_FLOAT)
             }
         }
     }

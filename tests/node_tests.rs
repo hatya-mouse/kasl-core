@@ -41,16 +41,28 @@ fn test_set_shader_populates_io_tables() {
     let result = node.set_shader(shader_code.to_string());
     assert!(result.is_ok(), "Expected Ok, got {:?}", result.err());
 
-    assert!(node.input.contains_key("input_value"));
-    let input_val_info = node.input.get("input_value").unwrap();
+    assert!(node.input.iter().any(|info| info.name == "input_value"));
+    let input_val_info = node
+        .input
+        .iter()
+        .find(|info| info.name == "input_value")
+        .unwrap();
     assert_eq!(input_val_info.kind, SymbolKind::Input);
 
-    assert!(node.input.contains_key("input_buf"));
-    let input_buf_info = node.input.get("input_buf").unwrap();
+    assert!(node.input.iter().any(|info| info.name == "input_buf"));
+    let input_buf_info = node
+        .input
+        .iter()
+        .find(|info| info.name == "input_buf")
+        .unwrap();
     assert_eq!(input_buf_info.kind, SymbolKind::Input);
 
-    assert!(node.output.contains_key("output_value"));
-    let output_val_info = node.output.get("output_value").unwrap();
+    assert!(node.output.iter().any(|info| info.name == "output_value"));
+    let output_val_info = node
+        .output
+        .iter()
+        .find(|info| info.name == "output_value")
+        .unwrap();
     assert_eq!(output_val_info.kind, SymbolKind::Output);
 }
 
@@ -77,7 +89,7 @@ fn test_process_simple_float_shader() {
 #[test]
 fn test_multiple_args() {
     let mut node = AudioShaderNode::new();
-    let shader_code = "input float a\ninput float b\noutput float c\nc = max(a, b)";
+    let shader_code = "input float a\ninput float b\noutput float c\nc = pow(a, b)";
 
     let set_shader_result = node.set_shader(shader_code.to_string());
 
@@ -98,7 +110,7 @@ fn test_multiple_args() {
     );
 
     match node.get_output("c") {
-        Some(Value::Float(val)) => assert_eq!(val, 4.0),
-        other => panic!("Expected Some(Value::Float(4.0)), got {:?}", other),
+        Some(Value::Float(val)) => assert_eq!(val, 81.0),
+        other => panic!("Expected Some(Value::Float(81.0)), got {:?}", other),
     }
 }

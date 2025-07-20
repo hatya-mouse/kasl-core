@@ -43,8 +43,8 @@ impl Compiler {
         let mut semantic_analyzer = SemanticAnalyzer::new();
         program = semantic_analyzer.analyze(&program)?;
 
-        let inputs = semantic_analyzer.get_input_table();
-        let outputs = semantic_analyzer.get_output_table();
+        let inputs = semantic_analyzer.get_inputs();
+        let outputs = semantic_analyzer.get_outputs();
         self.translate(&program, &inputs, &outputs)?;
 
         let func_name = "main";
@@ -66,12 +66,9 @@ impl Compiler {
     pub fn translate(
         &mut self,
         program: &Program,
-        inputs: &HashMap<String, SymbolInfo>,
-        outputs: &HashMap<String, SymbolInfo>,
+        inputs: &Vec<SymbolInfo>,
+        outputs: &Vec<SymbolInfo>,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let mut input_names = Vec::new();
-        let mut output_names = Vec::new();
-
         let pointer_type = self.module.target_config().pointer_type();
 
         self.ctx
@@ -95,14 +92,6 @@ impl Compiler {
             .params
             .push(AbiParam::new(pointer_type)); // output_count
 
-        for input in inputs {
-            input_names.push(input.1.name.clone());
-        }
-
-        for output in outputs {
-            output_names.push(output.1.name.clone());
-        }
-
         let mut builder_ctx = FunctionBuilderContext::new();
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut builder_ctx);
 
@@ -113,19 +102,15 @@ impl Compiler {
 
         let mut translator = Translator::new(builder, HashMap::new(), entry_block);
 
-        translator.setup_array_interface(
-            &input_names,
-            &output_names,
-            inputs,
-            outputs,
-            &self.module,
-        );
+        translator.setup_array_interface(inputs, outputs, &self.module);
+        translator.define_builtin_functions(&mut self.module)?;
 
         for stmt in program.statements.iter() {
             translator.codegen_stmt(stmt, &self.module);
         }
 
-        translator.finalize_array_interface(&output_names);
+        let output_names = &outputs.iter().map(|s| s.name.clone()).collect::<Vec<_>>();
+        translator.finalize_array_interface(output_names);
         translator.builder.finalize();
 
         Ok(())

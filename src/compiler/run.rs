@@ -84,11 +84,11 @@ fn get_output_count(code: &str) -> Result<usize, Box<dyn std::error::Error>> {
     let mut analyzer = SemanticAnalyzer::new();
     analyzer.analyze(&program)?;
 
-    let outputs = analyzer.get_output_table();
+    let outputs = analyzer.get_outputs();
 
     // Count the total number of output values
     let mut total_count = 0;
-    for output_info in outputs.values() {
+    for output_info in outputs {
         total_count += match &output_info.value {
             Some(Value::Array(vec)) => vec.len(),
             _ => 1,

@@ -14,9 +14,13 @@
 // limitations under the License.
 //
 
-pub mod builtin_functions;
+use cranelift_codegen::ir::{self, types};
+pub const TYPE_INT: ir::Type = types::I64;
+pub const TYPE_FLOAT: ir::Type = types::F32;
+
 pub mod codegen;
 pub mod compiler;
+pub mod functions;
 pub mod run;
 
 pub use codegen::Translator;

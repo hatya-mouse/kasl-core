@@ -27,8 +27,8 @@ use std::collections::HashMap;
 pub struct SemanticAnalyzer {
     pub symbol_table: HashMap<String, SymbolInfo>,
     pub var_table: HashMap<String, SymbolInfo>,
-    pub input_table: HashMap<String, SymbolInfo>,
-    pub output_table: HashMap<String, SymbolInfo>,
+    pub input_table: Vec<SymbolInfo>,
+    pub output_table: Vec<SymbolInfo>,
     pub function_table: HashMap<String, Function>,
     error: SemanticError,
 }
@@ -38,8 +38,8 @@ impl SemanticAnalyzer {
         SemanticAnalyzer {
             symbol_table: HashMap::new(),
             var_table: HashMap::new(),
-            input_table: HashMap::new(),
-            output_table: HashMap::new(),
+            input_table: Vec::new(),
+            output_table: Vec::new(),
             function_table: HashMap::new(),
             error: SemanticError::new(),
         }
@@ -240,11 +240,11 @@ impl SemanticAnalyzer {
         }
     }
 
-    pub fn get_input_table(&self) -> HashMap<String, SymbolInfo> {
+    pub fn get_inputs(&self) -> Vec<SymbolInfo> {
         self.input_table.clone()
     }
 
-    pub fn get_output_table(&self) -> HashMap<String, SymbolInfo> {
+    pub fn get_outputs(&self) -> Vec<SymbolInfo> {
         self.output_table.clone()
     }
 
@@ -262,7 +262,7 @@ impl SemanticAnalyzer {
     }
 
     fn define_input(&mut self, name: String, info: SymbolInfo) {
-        if self.input_table.contains_key(&name) {
+        if self.input_table.iter().any(|sym| sym.name == name) {
             self.error
                 .errors
                 .push(semantic_error::ErrorVariant::SymbolAlreadyDefined(
@@ -270,12 +270,12 @@ impl SemanticAnalyzer {
                 ));
         } else {
             self.symbol_table.insert(name.clone(), info.clone());
-            self.input_table.insert(name, info);
+            self.input_table.push(info);
         }
     }
 
     fn define_output(&mut self, name: String, info: SymbolInfo) {
-        if self.output_table.contains_key(&name) {
+        if self.output_table.iter().any(|sym| sym.name == name) {
             self.error
                 .errors
                 .push(semantic_error::ErrorVariant::SymbolAlreadyDefined(
@@ -283,7 +283,7 @@ impl SemanticAnalyzer {
                 ));
         } else {
             self.symbol_table.insert(name.clone(), info.clone());
-            self.output_table.insert(name, info);
+            self.output_table.push(info);
         }
     }
 

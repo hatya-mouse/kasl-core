@@ -14,18 +14,19 @@
 // limitations under the License.
 //
 
-use std::{collections::HashMap, error::Error};
+use std::error::Error;
 
 use crate::{
-    Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SyntaxError, compile, run_fn,
+    Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SymbolKind, SyntaxError, compile,
+    run_fn,
 };
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {
     id: NodeId,
     name: String,
-    pub input: HashMap<String, SymbolInfo>,
-    pub output: HashMap<String, SymbolInfo>,
+    pub input: Vec<SymbolInfo>,
+    pub output: Vec<SymbolInfo>,
     pub shader: String,
     pub program: Option<Program>,
 }
@@ -36,8 +37,8 @@ impl AudioShaderNode {
         AudioShaderNode {
             id: NodeId::new_v4(),
             name: "Audio Shader Node".to_string(),
-            input: HashMap::new(),
-            output: HashMap::new(),
+            input: Vec::new(),
+            output: Vec::new(),
             shader: "".to_string(),
             program: None,
         }
@@ -59,8 +60,8 @@ impl AudioShaderNode {
         match analyzer.analyze(&program) {
             Ok(program) => {
                 self.program = Some(program);
-                self.input = analyzer.get_input_table();
-                self.output = analyzer.get_output_table();
+                self.input = analyzer.get_inputs();
+                self.output = analyzer.get_outputs();
                 return Ok(());
             }
             Err(error) => return Err(Box::new(error)),
@@ -103,7 +104,7 @@ impl Node for AudioShaderNode {
         // self.output = output_table;
 
         let mut input_vec = Vec::new();
-        for (_, symbol_info) in &self.input {
+        for symbol_info in &self.input {
             input_vec.push(match &symbol_info.value {
                 Some(v) => v.clone(),
                 None => return Ok(()),
@@ -125,48 +126,63 @@ impl Node for AudioShaderNode {
             Err(_) => return Ok(()),
         };
 
-        let output_entries: Vec<(String, SymbolInfo)> = self
-            .output
-            .iter()
-            .map(|(key, symbol_info)| (key.clone(), symbol_info.clone()))
-            .collect();
-        for (i, (key, symbol_info)) in output_entries.iter().enumerate() {
+        let output_iter = self.output.iter().enumerate();
+        let mut new_output = Vec::new();
+        for (i, symbol_info) in output_iter {
             if let Some(value) = output.get(i) {
-                self.output.insert(
-                    key.clone(),
-                    SymbolInfo {
-                        value: Some(value.clone()),
-                        ..symbol_info.clone()
-                    },
-                );
+                new_output.push(SymbolInfo {
+                    value: Some(value.clone()),
+                    ..symbol_info.clone()
+                });
             } else {
-                self.output.insert(key.clone(), symbol_info.clone());
+                new_output.push(symbol_info.clone());
             }
         }
+        self.output = new_output;
 
         Ok(())
     }
 
     fn get_input(&self, key: &str) -> Option<Value> {
-        self.input.get(key).and_then(|info| info.value.clone())
+        self.input.iter().find_map(|info| {
+            if info.name == key {
+                info.value.clone()
+            } else {
+                None
+            }
+        })
     }
 
     fn set_input(&mut self, key: &str, value: Value) {
-        if self.input.contains_key(key) {
-            self.input.get_mut(key).unwrap().value = Some(value);
+        if let Some(info) = self.input.iter_mut().find(|info| info.name == key) {
+            info.value = Some(value);
+        } else {
+            let value_type = value.get_type();
+            self.input.push(SymbolInfo {
+                name: key.to_string(),
+                value: Some(value),
+                value_type,
+                kind: SymbolKind::Input,
+            });
         }
     }
 
     fn get_input_list(&self) -> Vec<String> {
-        self.input.keys().cloned().collect()
+        self.input.iter().map(|info| info.name.clone()).collect()
     }
 
     fn get_output(&self, key: &str) -> Option<Value> {
-        self.output.get(key).and_then(|info| info.value.clone())
+        self.output.iter().find_map(|info| {
+            if info.name == key {
+                info.value.clone()
+            } else {
+                None
+            }
+        })
     }
 
     fn get_output_list(&self) -> Vec<String> {
-        self.output.keys().cloned().collect()
+        self.output.iter().map(|info| info.name.clone()).collect()
     }
 
     fn get_type(&self) -> String {
