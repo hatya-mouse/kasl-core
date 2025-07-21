@@ -593,6 +593,7 @@ dependencies = [
  "cranelift-jit",
  "cranelift-module",
  "divan",
+ "knodiq_audio_shader",
  "knodiq_engine",
  "pest",
  "rand",

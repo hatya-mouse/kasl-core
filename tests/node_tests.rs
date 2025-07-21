@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{AudioShaderNode, Node, SymbolKind, Value}; // Assuming Type and SymbolKind are needed
+use knodiq_audio_shader::{AudioShaderNode, SymbolKind};
+use knodiq_engine::{Node, Value};
 
 #[test]
 fn test_new_node() {

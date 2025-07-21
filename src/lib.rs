@@ -15,21 +15,28 @@
 //
 
 pub mod analyzer;
-pub mod compiler;
 pub mod error;
-pub mod interpreter;
 pub mod language;
 pub mod lexer;
-pub mod node;
 pub mod parser;
 
 pub use analyzer::*;
-pub use compiler::*;
 pub use error::*;
-pub use interpreter::*;
 pub use language::*;
 pub use lexer::*;
-pub use node::*;
 pub use parser::*;
 
-pub use knodiq_engine::{Node, Value};
+#[cfg(feature = "compiler")]
+pub mod compiler;
+#[cfg(feature = "compiler")]
+pub use compiler::*;
+
+#[cfg(feature = "interpreter")]
+pub mod interpreter;
+#[cfg(feature = "interpreter")]
+pub use interpreter::*;
+
+#[cfg(feature = "node")]
+pub mod node;
+#[cfg(feature = "node")]
+pub use node::*;

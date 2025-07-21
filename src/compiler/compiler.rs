@@ -15,11 +15,7 @@
 //
 
 use crate::{Parser, Program, SemanticAnalyzer, SymbolInfo, compiler::codegen::Translator};
-use cranelift_codegen::{
-    Context,
-    ir::AbiParam,
-    settings::{self, Configurable},
-};
+use cranelift_codegen::{Context, ir::AbiParam};
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
@@ -32,17 +28,13 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let builder = JITBuilder::new(cranelift_module::default_libcall_names())?;
+        let flags = [("opt_level", "speed"), ("enable_verifier", "false")];
+
+        let builder = JITBuilder::with_flags(&flags, cranelift_module::default_libcall_names())?;
         let module = JITModule::new(builder);
+        let ctx = module.make_context();
 
-        let mut flag_builder = settings::builder();
-        flag_builder.set("opt_level", "speed")?;
-        flag_builder.set("enable_verifier", "false")?;
-
-        Ok(Compiler {
-            ctx: module.make_context(),
-            module,
-        })
+        Ok(Compiler { ctx, module })
     }
 
     pub fn compile(&mut self, code: &str) -> Result<*const u8, Box<dyn std::error::Error>> {
@@ -117,7 +109,9 @@ impl Compiler {
         }
 
         let output_names = &outputs.iter().map(|s| s.name.clone()).collect::<Vec<_>>();
-        translator.finalize_array_interface(output_names);
+        translator.builder.seal_all_blocks();
+
+        translator.finalize_array_interface(output_names, &self.module);
         translator.builder.finalize();
 
         Ok(())

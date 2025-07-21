@@ -18,26 +18,22 @@ use crate::Compiler;
 use knodiq_engine::Value;
 
 pub struct Executable {
-    pub func: unsafe extern "C" fn(*const f32, usize, *mut f32, usize) -> (),
+    pub func: unsafe extern "C" fn(*const u8, usize, *mut f32, usize) -> (),
     pub outputs: Vec<f32>,
-    // プールされたバッファを追加
-    pub input_buffer: Vec<f32>,
-    pub temp_buffer: Vec<f32>,
 }
 
 impl Executable {
     pub fn run(&mut self, inputs: Vec<Value>) -> Result<Vec<Value>, Box<dyn std::error::Error>> {
-        // Convert inputs to a flat vector of f32
-        let mut input_floats = Vec::new();
+        let mut input_vals = Vec::new();
         for input in &inputs {
-            flatten_value_to_floats(input, &mut input_floats);
+            get_bytes_repr(input, &mut input_vals);
         }
 
         // Execute the function
         unsafe {
             (self.func)(
-                input_floats.as_ptr(),
-                input_floats.len(),
+                input_vals.as_ptr(),
+                input_vals.len(),
                 self.outputs.as_mut_ptr(),
                 self.outputs.len(),
             );
@@ -56,29 +52,23 @@ pub fn compile(
 ) -> Result<Executable, Box<dyn std::error::Error>> {
     let code_ptr = compiler.compile(code)?;
 
-    let func: unsafe extern "C" fn(*const f32, usize, *mut f32, usize) -> () =
+    let func: unsafe extern "C" fn(*const u8, usize, *mut f32, usize) -> () =
         unsafe { std::mem::transmute(code_ptr) };
 
     // Get the output count
     let output_count = get_output_count(code)?;
     let outputs = vec![0.0f32; output_count];
 
-    Ok(Executable {
-        func,
-        outputs,
-        input_buffer: Vec::new(),
-        temp_buffer: Vec::new(),
-    })
+    Ok(Executable { func, outputs })
 }
 
-fn flatten_value_to_floats(value: &Value, output: &mut Vec<f32>) {
+fn get_bytes_repr(value: &Value, output: &mut Vec<u8>) {
     match value {
-        Value::Int(i) => output.push(*i as f32),
-        Value::Float(f) => output.push(*f),
+        Value::Float(f) => output.extend_from_slice(&f.to_ne_bytes()),
+        Value::Int(i) => output.extend_from_slice(&i.to_ne_bytes()),
         Value::Array(arr) => {
-            for elem in arr {
-                flatten_value_to_floats(elem, output);
-            }
+            let ptr = arr.as_ptr() as usize;
+            output.extend_from_slice(&ptr.to_ne_bytes());
         }
     }
 }

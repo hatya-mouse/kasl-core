@@ -15,7 +15,7 @@
 //
 
 use crate::{TYPE_FLOAT, Translator};
-use cranelift_codegen::ir;
+use cranelift_codegen::ir::{self, InstBuilder};
 use cranelift_jit::JITModule;
 use cranelift_module::{Linkage, Module};
 
@@ -89,5 +89,12 @@ impl<'a> Translator<'a> {
         module
             .declare_function(name, Linkage::Import, &func_sig)
             .map(|func_id| module.declare_func_in_func(func_id, &mut self.builder.func))
+    }
+
+    pub fn call_function(&mut self, name: &str, args: Vec<ir::Value>) -> Vec<ir::Value> {
+        let func = *self.functions.get(name).expect("Function not found");
+        let call = self.builder.ins().call(func, &args);
+        let results = self.builder.inst_results(call);
+        results.into_iter().map(|v| v.to_owned()).collect()
     }
 }

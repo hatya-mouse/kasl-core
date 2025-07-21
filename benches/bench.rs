@@ -15,10 +15,10 @@
 //
 
 use knodiq_audio_shader::{
-    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Value, compile,
+    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, compile,
     run::Executable,
 };
-use knodiq_engine::Type;
+use knodiq_engine::{Type, Value};
 
 fn main() {
     divan::main();
@@ -125,16 +125,15 @@ fn jit_direct() {
 
     let mut exec = exec.lock().unwrap();
 
-    // 直接f32で実行（変換オーバーヘッドなし）
     unsafe {
-        (exec.func)(&2.0f32, 1, exec.outputs.as_mut_ptr(), exec.outputs.len());
+        (exec.func)(&2u8, 1, exec.outputs.as_mut_ptr(), exec.outputs.len());
     }
     divan::black_box(exec.outputs[0]);
 }
 
 #[divan::bench]
 fn jit_raw_function_call() {
-    static FUNC: std::sync::OnceLock<unsafe extern "C" fn(*const f32, usize, *mut f32, usize)> =
+    static FUNC: std::sync::OnceLock<unsafe extern "C" fn(*const u8, usize, *mut f32, usize)> =
         std::sync::OnceLock::new();
 
     let func = FUNC.get_or_init(|| {
@@ -142,7 +141,7 @@ fn jit_raw_function_call() {
         exec.func
     });
 
-    let input = 2.0f32;
+    let input = 2u8;
     let mut output = [0.0f32; 3]; // output count
 
     unsafe {

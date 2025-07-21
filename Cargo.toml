@@ -18,8 +18,14 @@ cranelift-module = "0.121.1"
 pest = "2.8.1"
 cranelift-frontend = "0.121.1"
 
+[features]
+interpreter = []
+compiler = []
+node = ["compiler"]
+
 [dev-dependencies]
 divan = "0.1.21"
+knodiq_audio_shader = { path = "./", features = ["interpreter", "node"] }
 
 [[test]]
 name = "tests"
