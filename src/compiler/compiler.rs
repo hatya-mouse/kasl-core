@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{Parser, Program, SemanticAnalyzer, SymbolInfo, compiler::codegen::Translator};
+use crate::{
+    Parser, Program, SemanticAnalyzer, SymbolInfo, codegen::get_type,
+    compiler::codegen::Translator, run::Executable,
+};
 use cranelift_codegen::{Context, ir::AbiParam};
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_jit::{JITBuilder, JITModule};
@@ -28,22 +31,55 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let flags = [("opt_level", "speed"), ("enable_verifier", "false")];
+        // let flags = [("opt_level", "speed"), ("enable_verifier", "false")];
 
-        let builder = JITBuilder::with_flags(&flags, cranelift_module::default_libcall_names())?;
+        // let builder = JITBuilder::with_flags(&flags, cranelift_module::default_libcall_names())?;
+        let builder = JITBuilder::new(cranelift_module::default_libcall_names())?;
         let module = JITModule::new(builder);
         let ctx = module.make_context();
 
         Ok(Compiler { ctx, module })
     }
 
-    pub fn compile(&mut self, code: &str) -> Result<*const u8, Box<dyn std::error::Error>> {
+    /// Compiles the given code and returns an `Executable` instance.
+    pub fn compile(&mut self, code: &str) -> Result<Executable, Box<dyn std::error::Error>> {
         let mut program = Parser::new().parse(code)?;
         let mut semantic_analyzer = SemanticAnalyzer::new();
         program = semantic_analyzer.analyze(&program)?;
 
         let inputs = semantic_analyzer.get_inputs();
         let outputs = semantic_analyzer.get_outputs();
+
+        let code_ptr = self.compile_program(&program, &inputs, &outputs)?;
+
+        let func: unsafe extern "C" fn(*const u8, *mut u8) -> () =
+            unsafe { std::mem::transmute(code_ptr) };
+
+        // Calculate the outputs
+        let output_types = outputs
+            .iter()
+            .map(|info| info.value_type.clone())
+            .collect::<Vec<_>>();
+        let output_size = output_types
+            .iter()
+            .map(|t| get_type(t, &self.module).bytes())
+            .sum::<u32>() as usize;
+        let outputs = vec![0u8; output_size];
+
+        Ok(Executable {
+            func,
+            outputs,
+            output_types,
+        })
+    }
+
+    /// Compiles the given program to machine code and returns a pointer to the compiled function.
+    pub fn compile_program(
+        &mut self,
+        program: &Program,
+        inputs: &Vec<SymbolInfo>,
+        outputs: &Vec<SymbolInfo>,
+    ) -> Result<*const u8, Box<dyn std::error::Error>> {
         self.translate(&program, &inputs, &outputs)?;
 
         let func_name = "main";

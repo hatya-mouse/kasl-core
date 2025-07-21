@@ -15,8 +15,7 @@
 //
 
 use knodiq_audio_shader::{
-    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, compile,
-    run::Executable,
+    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, run::Executable,
 };
 use knodiq_engine::{Type, Value};
 
@@ -114,7 +113,18 @@ fn jit_normal() {
 
     // Measure execution time
     let inputs = vec![Value::Float(2.0)];
-    divan::black_box_drop(exec.lock().unwrap().run(inputs).unwrap());
+    divan::black_box_drop(
+        exec.lock()
+            .unwrap()
+            .run(
+                inputs,
+                vec![
+                    Type::Array(Box::new(Type::Float)),
+                    Type::Array(Box::new(Type::Float)),
+                ],
+            )
+            .unwrap(),
+    );
 }
 
 #[divan::bench]
@@ -126,14 +136,14 @@ fn jit_direct() {
     let mut exec = exec.lock().unwrap();
 
     unsafe {
-        (exec.func)(&2u8, 1, exec.outputs.as_mut_ptr(), exec.outputs.len());
+        (exec.func)(&2u8, exec.outputs.as_mut_ptr());
     }
     divan::black_box(exec.outputs[0]);
 }
 
 #[divan::bench]
 fn jit_raw_function_call() {
-    static FUNC: std::sync::OnceLock<unsafe extern "C" fn(*const u8, usize, *mut f32, usize)> =
+    static FUNC: std::sync::OnceLock<unsafe extern "C" fn(*const u8, *mut u8)> =
         std::sync::OnceLock::new();
 
     let func = FUNC.get_or_init(|| {
@@ -142,10 +152,10 @@ fn jit_raw_function_call() {
     });
 
     let input = 2u8;
-    let mut output = [0.0f32; 3]; // output count
+    let mut output = [0u8; 3]; // output count
 
     unsafe {
-        func(&input, 1, output.as_mut_ptr(), output.len());
+        func(&input, output.as_mut_ptr());
     }
 
     divan::black_box(output[0]);
@@ -160,7 +170,17 @@ fn jit() {
     let inputs = vec![Value::Float(2.0)];
 
     let start = std::time::Instant::now();
-    let result = exec.lock().unwrap().run(inputs).unwrap();
+    let result = exec
+        .lock()
+        .unwrap()
+        .run(
+            inputs,
+            vec![
+                Type::Array(Box::new(Type::Float)),
+                Type::Array(Box::new(Type::Float)),
+            ],
+        )
+        .unwrap();
     let duration = start.elapsed();
 
     if duration.as_micros() > 100 {
@@ -184,5 +204,5 @@ fn setup_jit() -> Executable {
     ";
 
     let mut compiler = Compiler::new().unwrap();
-    compile(&mut compiler, &code).unwrap()
+    compiler.compile(&code).unwrap()
 }

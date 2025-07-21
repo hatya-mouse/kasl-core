@@ -33,8 +33,6 @@ pub struct Translator<'a> {
     entry_block: Block,
     input_ptr: ir::Value,
     output_ptr: ir::Value,
-    input_count: ir::Value,
-    output_count: ir::Value,
     var_counter: usize,
 }
 
@@ -47,8 +45,6 @@ impl<'a> Translator<'a> {
     ) -> Self {
         let input_ptr = builder.ins().iconst(TYPE_INT, 0);
         let output_ptr = builder.ins().iconst(TYPE_INT, 0);
-        let input_count = builder.ins().iconst(TYPE_INT, 0);
-        let output_count = builder.ins().iconst(TYPE_INT, 0);
 
         Translator {
             builder,
@@ -58,8 +54,6 @@ impl<'a> Translator<'a> {
             entry_block,
             input_ptr,
             output_ptr,
-            input_count,
-            output_count,
             var_counter: 0,
         }
     }
@@ -73,9 +67,7 @@ impl<'a> Translator<'a> {
     ) {
         let params = self.builder.block_params(self.entry_block);
         self.input_ptr = params[0];
-        self.input_count = params[1];
-        self.output_ptr = params[2];
-        self.output_count = params[3];
+        self.output_ptr = params[1];
 
         let mut input_offset = 0;
         for input_info in inputs {
@@ -131,6 +123,13 @@ impl<'a> Translator<'a> {
                 let addr = self.builder.ins().iadd(self.output_ptr, offset);
                 self.builder.ins().store(ir::MemFlags::new(), val, addr, 0);
 
+                println!(
+                    "Storing {} at offset {} (size: {})",
+                    output_name,
+                    output_offset,
+                    get_type(val_type, module).bytes()
+                );
+
                 // Calculate the offset for the next element
                 output_offset += get_type(val_type, module).bytes() as i64;
             }
@@ -141,7 +140,6 @@ impl<'a> Translator<'a> {
 
     /// Generates code for a statement.
     pub fn codegen_stmt(&mut self, statement: &Statement, module: &JITModule) {
-        println!("Codegen statement: {:?}", statement);
         match statement {
             Statement::VariableDeclaration(var_decl) => {
                 let var = self.new_var();

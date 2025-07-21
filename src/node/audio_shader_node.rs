@@ -16,9 +16,7 @@
 
 use std::error::Error;
 
-use crate::{
-    Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SymbolKind, SyntaxError, compile,
-};
+use crate::{Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SymbolKind, SyntaxError};
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {
@@ -115,12 +113,18 @@ impl Node for AudioShaderNode {
             Err(_) => return Ok(()),
         };
 
-        let mut exec = match compile(&mut compiler, &self.shader) {
+        let mut exec = match compiler.compile(&self.shader) {
             Ok(e) => e,
             Err(_) => return Ok(()),
         };
 
-        let output = match exec.run(input_vec) {
+        let output = match exec.run(
+            input_vec,
+            self.output
+                .iter()
+                .map(|info| info.value_type.clone())
+                .collect(),
+        ) {
             Ok(r) => r,
             Err(_) => return Ok(()),
         };

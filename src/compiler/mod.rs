@@ -25,4 +25,4 @@ pub mod run;
 
 pub use codegen::Translator;
 pub use compiler::Compiler;
-pub use run::compile;
+pub use run::Executable;
