@@ -423,10 +423,13 @@ impl<'a> Translator<'a> {
                     slf.codegen_if(
                         is_arr_enough,
                         Box::new(|slf: &mut Self| {
-                            vec![slf.load_arr_val_at(
+                            vec![(
+                                slf.load_arr_val_at(
+                                    get_type(&inside_types[arg_idx], module),
+                                    args[arg_idx],
+                                    arr_idx,
+                                ),
                                 get_type(&inside_types[arg_idx], module),
-                                args[arg_idx],
-                                arr_idx,
                             )]
                         }),
                         |slf: &mut Self| {
@@ -438,26 +441,30 @@ impl<'a> Translator<'a> {
                             slf.codegen_if(
                                 is_arr_empty,
                                 |slf: &mut Self| {
-                                    vec![
+                                    vec![(
                                         slf.builder
                                             .ins()
                                             .iconst(get_type(&inside_types[arg_idx], module), 0),
-                                    ]
+                                        get_type(&inside_types[arg_idx], module),
+                                    )]
                                 },
                                 |slf: &mut Self| {
                                     let arr_len = slf.load_arr_size(args[arg_idx]);
                                     let one = slf.builder.ins().iconst(TYPE_INT, 1);
                                     let last_idx = slf.builder.ins().isub(arr_len, one);
-                                    vec![slf.load_arr_val_at(
+                                    vec![(
+                                        slf.load_arr_val_at(
+                                            get_type(&inside_types[arg_idx], module),
+                                            args[arg_idx],
+                                            last_idx,
+                                        ),
                                         get_type(&inside_types[arg_idx], module),
-                                        args[arg_idx],
-                                        last_idx,
                                     )]
                                 },
                             );
                             let current_block = slf.builder.current_block().unwrap();
                             let return_vals = slf.builder.block_params(current_block)[0];
-                            vec![return_vals]
+                            vec![(return_vals, get_type(&inside_types[arg_idx], module))]
                         },
                     );
 
@@ -604,30 +611,29 @@ impl<'a> Translator<'a> {
     }
 
     /// Generates code for a loop that iterates `count` times, executing the body for each iteration.
-    pub fn codegen_loop<F>(&mut self, count: ir::Value, mut body: F) -> Block
+    pub fn codegen_loop<F>(&mut self, count: ir::Value, mut body: F)
     where
         F: FnMut(&mut Self, ir::Value),
     {
         let current_block = self.builder.current_block().unwrap();
 
         // Define blocks
+        let cond_block = self.builder.create_block();
         let loop_block = self.builder.create_block();
         let next_block = self.builder.create_block();
         self.builder.append_block_param(loop_block, TYPE_INT);
         self.builder.insert_block_after(loop_block, current_block);
         self.builder.insert_block_after(next_block, current_block);
 
+        // Start the loop
         let start_i = ir::Value::from_u32(0);
         self.builder
             .ins()
-            .jump(loop_block, [&BlockArg::Value(start_i)]);
-        self.builder.switch_to_block(loop_block);
-
-        // LOOP BODY
-        let i = self.builder.block_params(loop_block)[0];
-        body(self, i);
+            .jump(cond_block, [&BlockArg::Value(start_i)]);
 
         // Loop condition
+        self.builder.switch_to_block(cond_block);
+        let i = self.builder.block_params(loop_block)[0];
         let cmp = self
             .builder
             .ins()
@@ -635,23 +641,36 @@ impl<'a> Translator<'a> {
         let next_i = self.builder.ins().iadd(i, ir::Value::from_u32(1));
         self.builder
             .ins()
-            .brif(cmp, loop_block, &[BlockArg::Value(next_i)], next_block, []);
+            .brif(cmp, loop_block, &[], next_block, []);
 
-        next_block
+        // LOOP BODY
+        self.builder.switch_to_block(loop_block);
+        body(self, i);
+
+        // Jump to the next iteration
+        self.builder
+            .ins()
+            .jump(cond_block, &[BlockArg::Value(next_i)]);
+
+        self.builder.switch_to_block(next_block);
     }
 
+    /// Generates code for a if statement with a condition, a then block, and an else block.
     pub fn codegen_if<ThenFn, ElseFn>(
         &mut self,
         condition: ir::Value,
         mut then_fn: ThenFn,
         mut else_fn: ElseFn,
     ) where
-        ThenFn: FnMut(&mut Self) -> Vec<ir::Value>,
-        ElseFn: FnMut(&mut Self) -> Vec<ir::Value>,
+        ThenFn: FnMut(&mut Self) -> Vec<(ir::Value, ir::Type)>,
+        ElseFn: FnMut(&mut Self) -> Vec<(ir::Value, ir::Type)>,
     {
         let current_block = self.builder.current_block().unwrap();
         let then_block = self.builder.create_block();
         let else_block = self.builder.create_block();
+        let next_block = self.builder.create_block();
+
+        self.builder.seal_block(current_block);
 
         self.builder
             .ins()
@@ -659,27 +678,31 @@ impl<'a> Translator<'a> {
 
         self.builder.switch_to_block(then_block);
         let then_res = then_fn(self);
+        for (_, res_type) in &then_res {
+            self.builder.append_block_param(next_block, *res_type);
+        }
         self.builder.ins().jump(
-            current_block,
+            next_block,
             &then_res
                 .iter()
-                .map(|v| BlockArg::Value(*v))
+                .map(|(v, _)| BlockArg::Value(*v))
                 .collect::<Vec<_>>(),
         );
-        self.builder.seal_block(then_block);
 
         self.builder.switch_to_block(else_block);
         let else_res = else_fn(self);
+        for (_, res_type) in &else_res {
+            self.builder.append_block_param(next_block, *res_type);
+        }
         self.builder.ins().jump(
-            current_block,
+            next_block,
             &else_res
                 .iter()
-                .map(|v| BlockArg::Value(*v))
+                .map(|(v, _)| BlockArg::Value(*v))
                 .collect::<Vec<_>>(),
         );
-        self.builder.seal_block(else_block);
 
-        self.builder.switch_to_block(current_block);
+        self.builder.switch_to_block(next_block);
     }
 
     pub fn new_var(&mut self) -> Variable {
