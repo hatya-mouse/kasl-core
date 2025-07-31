@@ -18,6 +18,7 @@ use cranelift_codegen::ir::{self, types};
 pub const TYPE_INT: ir::Type = types::I32;
 pub const TYPE_FLOAT: ir::Type = types::F32;
 
+pub mod broadcasting;
 pub mod codegen;
 pub mod compiler;
 pub mod executable;

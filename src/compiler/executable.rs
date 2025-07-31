@@ -45,14 +45,15 @@ impl Executable {
         }
 
         // Convert results to Value
-        let result = output_types
-            .iter()
-            .fold(Vec::new(), |mut acc, target_type| {
-                let (remaining_bytes, value) = bytes_as_value(&self.outputs, &target_type);
-                self.outputs = remaining_bytes;
-                acc.push(value);
-                acc
-            });
+        // let result = output_types
+        //     .iter()
+        //     .fold(Vec::new(), |mut acc, target_type| {
+        //         let (remaining_bytes, value) = bytes_as_value(&self.outputs, &target_type);
+        //         self.outputs = remaining_bytes;
+        //         acc.push(value);
+        //         acc
+        //     });
+        let result = vec![];
 
         Ok(result)
     }
@@ -112,11 +113,9 @@ fn get_bytes_repr(value: &Value) -> Vec<u8> {
 }
 
 fn bytes_as_value(bytes: &Vec<u8>, target_type: &Type) -> (Vec<u8>, Value) {
+    println!("🎯 [RUNTIME] Bytes: {:?}", bytes);
     match target_type {
         Type::Array(inside_type) => {
-            println!("🎯 [RUNTIME] Reading output array");
-            println!("🎯 [RUNTIME] Input bytes: {:?}", bytes);
-
             let usize_bytes = std::mem::size_of::<usize>();
             if bytes.len() < usize_bytes {
                 panic!("Not enough bytes for array pointer");
@@ -126,10 +125,7 @@ fn bytes_as_value(bytes: &Vec<u8>, target_type: &Type) -> (Vec<u8>, Value) {
             ptr_bytes.copy_from_slice(&bytes[0..usize_bytes]);
             let ptr = usize::from_ne_bytes(ptr_bytes.try_into().unwrap()) as *const u8;
 
-            println!("🎯 [RUNTIME] Array pointer: 0x{:x}", ptr as usize);
-
             if ptr.is_null() {
-                println!("❌ [RUNTIME] NULL POINTER!");
                 return (bytes[usize_bytes..].to_vec(), Value::Array(Vec::new()));
             }
 
@@ -137,10 +133,8 @@ fn bytes_as_value(bytes: &Vec<u8>, target_type: &Type) -> (Vec<u8>, Value) {
                 let len_ptr = ptr as *const i32;
                 let len_val = *len_ptr;
 
-                // 実際のメモリ内容を読み取り
                 let raw_memory = std::slice::from_raw_parts(ptr, 16);
-                println!("🎯 [RUNTIME] Raw memory (16 bytes): {:?}", raw_memory);
-                println!("🎯 [RUNTIME] Length: {}", len_val);
+                println!("🎯 [RUNTIME] Raw memory: {:?}", raw_memory);
 
                 len_val
             } as usize;

@@ -46,7 +46,6 @@ impl Compiler {
         let mut program = Parser::new().parse(code)?;
         let mut semantic_analyzer = SemanticAnalyzer::new();
         program = semantic_analyzer.analyze(&program)?;
-
         let inputs = semantic_analyzer.get_inputs();
         let outputs = semantic_analyzer.get_outputs();
 
