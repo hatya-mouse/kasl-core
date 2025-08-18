@@ -14,29 +14,8 @@
 // limitations under the License.
 //
 
-pub mod analyzer;
-pub mod error;
-pub mod language;
-pub mod lexer;
 pub mod parser;
+pub mod tests;
 
-pub use analyzer::*;
-pub use error::*;
-pub use language::*;
-pub use lexer::*;
 pub use parser::*;
-
-#[cfg(feature = "compiler")]
-pub mod compiler;
-#[cfg(feature = "compiler")]
-pub use compiler::*;
-
-#[cfg(feature = "interpreter")]
-pub mod interpreter;
-#[cfg(feature = "interpreter")]
-pub use interpreter::*;
-
-#[cfg(feature = "node")]
-pub mod node;
-#[cfg(feature = "node")]
-pub use node::*;
+pub use tests::*;

@@ -16,7 +16,7 @@
 
 use std::error::Error;
 
-use crate::{Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SymbolKind, SyntaxError};
+use crate::{Compiler, Program, SemanticAnalyzer, SymbolInfo, SymbolKind, SyntaxError};
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {

@@ -14,6 +14,11 @@
 // limitations under the License.
 //
 
+pub mod ast;
 pub mod parser;
 
-pub use parser::Parser;
+pub use ast::{
+    ExprToken, FuncParam, InputAttribute, LiteralBind, Program, ProtocolRequirement, StateVar,
+    Statement,
+};
+pub use parser::kash;

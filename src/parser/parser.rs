@@ -1,282 +1,260 @@
-//
-// Copyright 2025 Shuntaro Kasatani
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-
-use std::{iter::Peekable, slice::Iter};
-
-use knodiq_engine::Type;
+use std::collections::HashMap;
 
 use crate::{
-    AssignmentStatement, Expression, InputDeclarationStatement, Lexer, Operator,
-    OutputDeclarationStatement, Program, Statement, TokenType, VariableDeclarationStatement,
-    ast::ForLoopStatement, token_type::Token,
+    ExprToken, FuncParam, InputAttribute, LiteralBind, ProtocolRequirement, StateVar, Statement,
 };
 
-pub struct Parser {}
+peg::parser!(pub grammar kash() for str {
+    pub rule parse() -> Vec<Statement>
+        = statements()
 
-impl Parser {
-    pub fn new() -> Self {
-        Parser {}
-    }
+    // --- STATEMENTS ---
 
-    pub fn parse(&self, program: &str) -> Result<Program, String> {
-        let tokens = Lexer::new(program.to_string()).tokenize();
+    rule statements() -> Vec<Statement>
+        = statement() ** "\n"
 
-        let lines: Vec<Vec<Token>> = tokens
-            .split(|token| token.token_type == TokenType::EndOfLine)
-            .map(|line| line.to_vec())
-            .collect();
-        let mut program = Program {
-            statements: Vec::new(),
-        };
+    rule statement() -> Statement
+        = func_decl_statement()
+        / return_statement()
+        / input_statement()
+        / output_statement()
+        / var_statement()
+        / state_statement()
+        / assign_statement()
+        / func_call_statement()
+        / if_statement()
+        / if_else_statement()
+        / struct_decl_statement()
+        / protocol_decl_statement()
+        / init_statement()
+        / infix_statement()
+        / prefix_statement()
+        / postfix_statement()
 
-        program.statements = self.parse_block(0, &mut lines.iter().peekable())?;
-
-        Ok(program)
-    }
-
-    fn parse_block(
-        &self,
-        depth: usize,
-        lines: &mut Peekable<Iter<Vec<Token>>>,
-    ) -> Result<Vec<Statement>, String> {
-        let mut statements = Vec::new();
-        let mut has_ended = false;
-
-        while !has_ended {
-            let line = match lines.next() {
-                Some(line) => line,
-                None => {
-                    has_ended = true;
-                    continue; // No more lines to process
-                }
-            };
-            let mut token_iter = line.iter().peekable();
-
-            while let Some(token) = token_iter.next() {
-                match &token.token_type {
-                    TokenType::Input => {
-                        let value_type = self.parse_type(&mut token_iter)?;
-
-                        let name = match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Identifier(name)) => name.clone(),
-                            _ => {
-                                return Err("Expected identifier after type".into());
-                            }
-                        };
-
-                        statements.push(Statement::InputDeclaration(InputDeclarationStatement {
-                            name,
-                            input_attrs: Vec::new(),
-                            value_type,
-                            line: token.line,
-                        }));
-                    }
-
-                    TokenType::Output => {
-                        let value_type = self.parse_type(&mut token_iter)?;
-
-                        let name = match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Identifier(name)) => name.clone(),
-                            _ => {
-                                return Err("Expected identifier after type".into());
-                            }
-                        };
-
-                        statements.push(Statement::OutputDeclaration(OutputDeclarationStatement {
-                            name,
-                            value_type,
-                            line: token.line,
-                        }));
-                    }
-
-                    TokenType::Var => {
-                        let name = match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Identifier(name)) => name.clone(),
-                            _ => {
-                                return Err("Expected identifier after type name".into());
-                            }
-                        };
-
-                        let initial_value = match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Assign) => self.parse_expression(&mut token_iter),
-                            _ => Err(format!("Expected '=' after identifier {}", name)),
-                        }?;
-
-                        statements.push(Statement::VariableDeclaration(
-                            VariableDeclarationStatement {
-                                name,
-                                initial_value,
-                                value_type: Type::None,
-                                line: token.line,
-                            },
-                        ));
-                    }
-
-                    TokenType::Identifier(name) => {
-                        let target_name = name.clone();
-
-                        match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Assign) => {
-                                // Assignment statement
-                                let value = self.parse_expression(&mut token_iter)?;
-
-                                statements.push(Statement::Assignment(AssignmentStatement {
-                                    target_name,
-                                    value,
-                                    line: token.line,
-                                }));
-                                continue; // Skip to the next token
-                            }
-
-                            _ => return Err(format!("Expected '=' after identifier '{}'", name)),
-                        }
-                    }
-
-                    TokenType::For => {
-                        let variable_name = match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Identifier(name)) => name.clone(),
-                            _ => return Err("Expected identifier after 'for'".into()),
-                        };
-
-                        if token_iter.next().map(|t| &t.token_type) != Some(&TokenType::In) {
-                            return Err("Expected 'in' after for variable".into());
-                        }
-
-                        let iterable = self.parse_expression(&mut token_iter)?;
-
-                        if token_iter.next().map(|t| &t.token_type) != Some(&TokenType::LBrace) {
-                            return Err("Expected '{' after iterable in for loop".into());
-                        }
-
-                        let body = self.parse_block(depth, lines)?;
-
-                        statements.push(Statement::ForLoop(ForLoopStatement {
-                            variable_name,
-                            iterable,
-                            body,
-                            line: token.line,
-                        }));
-                    }
-
-                    TokenType::RBrace => {
-                        // End of a block, we can return the current depth
-                        if depth == 0 {
-                            return Err("Unexpected '}' without matching '{'".into());
-                        }
-                        has_ended = true;
-                    }
-
-                    TokenType::EndOfFile => {
-                        // End of file, we can stop parsing
-                        has_ended = true;
-                    }
-
-                    _ => {}
-                }
-            }
+    rule func_decl_statement() -> Statement
+        = "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) ")" _? return_type:("->" _? t:identifier() { t })? __? "{"
+        __? body:statements() __?
+        "}" {
+            Statement::FuncDecl { name, params, return_type, body }
         }
 
-        Ok(statements)
-    }
-
-    /// Parses an expression recursively from the token iterator.
-    fn parse_expression(
-        &self,
-        token_iter: &mut Peekable<Iter<Token>>,
-    ) -> Result<Expression, String> {
-        let mut left = match token_iter.next().map(|t| &t.token_type) {
-            Some(TokenType::IntLiteral(value)) => Expression::IntLiteral(*value),
-            Some(TokenType::FloatLiteral(value)) => Expression::FloatLiteral(*value),
-            Some(TokenType::Identifier(name)) => match token_iter.peek().map(|t| &t.token_type) {
-                Some(TokenType::LParen) => {
-                    token_iter.next();
-                    let mut args = Vec::new();
-                    while token_iter.peek().map(|t| &t.token_type) != Some(&&TokenType::RParen) {
-                        let arg = self.parse_expression(token_iter)?;
-                        args.push(arg);
-                        if token_iter.peek().map(|t| &t.token_type) == Some(&&TokenType::Comma) {
-                            token_iter.next();
-                        } else if token_iter.peek().is_none() {
-                            return Err("Expected ')'".into());
-                        }
-                    }
-                    token_iter.next(); // consume ')'
-                    Expression::FunctionCall {
-                        name: name.clone(),
-                        arguments: args,
-                    }
-                }
-                _ => Expression::Identifier(name.clone()),
-            },
-            Some(TokenType::LParen) => {
-                let expr = self.parse_expression(token_iter)?;
-                match token_iter.next().map(|t| &t.token_type) {
-                    Some(TokenType::RParen) => expr,
-                    _ => return Err("Expected ')'".into()),
-                }
-            }
-            _ => return Err("Expected a literal, identifier, or '('".into()),
-        };
-
-        while let Some(op) = token_iter.peek().map(|t| &t.token_type) {
-            match op {
-                TokenType::Plus
-                | TokenType::Minus
-                | TokenType::Multiply
-                | TokenType::Divide
-                | TokenType::Modulo => {
-                    let operator = match op {
-                        TokenType::Plus => Operator::Add,
-                        TokenType::Minus => Operator::Subtract,
-                        TokenType::Multiply => Operator::Multiply,
-                        TokenType::Divide => Operator::Divide,
-                        TokenType::Modulo => Operator::Modulo,
-                        _ => unreachable!(),
-                    };
-                    token_iter.next(); // consume the operator
-
-                    let right = self.parse_expression(token_iter)?;
-                    left = Expression::BinaryOp {
-                        op: operator,
-                        left: Box::new(left),
-                        right: Box::new(right),
-                        left_type: Type::None,
-                        right_type: Type::None,
-                    };
-                }
-                _ => break,
-            }
+    rule return_statement() -> Statement
+        = "return" _ value:expression() {
+            Statement::Return { value }
         }
 
-        Ok(left)
-    }
-
-    fn parse_type(&self, token_iter: &mut Peekable<Iter<Token>>) -> Result<Type, String> {
-        match token_iter.next().map(|t| &t.token_type) {
-            Some(TokenType::Float) => Ok(Type::Float),
-            Some(TokenType::Int) => Ok(Type::Int),
-            Some(TokenType::LBracket) => {
-                let inner_type = self.parse_type(token_iter)?;
-
-                match token_iter.next().map(|t| &t.token_type) {
-                    Some(TokenType::RBracket) => Ok(Type::Array(Box::new(inner_type))),
-                    _ => Err("Expected ']' after array type".into()),
-                }
-            }
-            _ => Err("Expected type identifier".into()),
+    rule input_statement() -> Statement
+        = "input" _ name:identifier() value_type:(_? ":" _ t:identifier() { t })? def_val:(_ "=" _ v:expression() { v })? _ attrs:(input_attr() ** _) {
+            Statement::Input { name, value_type, def_val, attrs }
         }
-    }
-}
+
+    rule output_statement() -> Statement
+        = "output" _ name:identifier() _? ":" _ value_type:identifier() {
+            Statement::Output { name, value_type }
+        }
+
+    rule var_statement() -> Statement
+        = "var" _ name:identifier() value_type:(_? ":" _ t:identifier() { t })? _ "=" _ def_val:expression() {
+            Statement::Var { name, value_type, def_val }
+        }
+
+    rule func_call_statement() -> Statement
+        = name:id_chain() _ "(" __? args:(expression() ** comma()) ")" {
+            Statement::FuncCall { name, args }
+        }
+
+    rule state_statement() -> Statement
+        = "state" _ "{" __ vars:(state_var() ** "\n") __ "}" {
+            Statement::State { vars }
+        }
+
+    rule assign_statement() -> Statement
+        = property:id_chain() _ "=" _ value:expression() {
+            Statement::Assign { property, value }
+        }
+
+    rule if_statement() -> Statement
+        = "if" _ condition:expression() __ "{"
+        __? body:statements() __?
+        "}" {
+            Statement::If { condition, body }
+        }
+
+    rule if_else_statement() -> Statement
+        = "if" _ condition:expression() __ "{"
+        __? body:statements() __?
+        "}" __ "else" __ "{"
+        __? else_body:statements() __?
+        "}" {
+            Statement::IfElse { condition, body, else_body }
+        }
+
+    rule struct_decl_statement() -> Statement
+        = "struct" _ name:identifier() _? ":" _? inherits:(identifier() ** comma()) "{"
+        __? body:statements() __?
+        "}" {
+            Statement::StructDecl { name, inherits, body }
+        }
+
+    rule protocol_decl_statement() -> Statement
+        = "protocol" _ name:identifier() _? ":" _? inherits:(identifier() ** comma()) "{"
+        __? requires:(protocol_requirement() ** "\n") __?
+        "}" {
+            Statement::ProtocolDecl { name, inherits, requires }
+        }
+
+    rule init_statement() -> Statement
+        = literal_bind:literal_bind()? "init" _? "(" _? params:(func_param() ** comma()) ")" __? "{"
+        __? body:statements() __?
+        "}" {
+            Statement::Init { literal_bind, params, body }
+        }
+
+    rule infix_statement() -> Statement
+        = "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) ")" _? "->" _? return_type:identifier() __? "{"
+        attrs:infix_attrs()
+        "}" __? ":" __? "{"
+        __? body:statements() __?
+        "}" {
+            Statement::Infix { symbol, params, return_type, attrs, body }
+        }
+
+    rule prefix_statement() -> Statement
+        = "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) ")" _? "->" _? return_type:identifier() __? "{"
+        __? body:statements() __?
+        "}" {
+            Statement::Prefix { symbol, params, return_type, body }
+        }
+
+    rule postfix_statement() -> Statement
+        = "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) ")" _? "->" _? return_type:identifier() __? "{"
+        __? body:statements() __?
+        "}" {
+            Statement::Postfix { symbol, params, return_type, body }
+        }
+
+    // --- STATEMENT HELPERS ---
+
+    // Function Parameter
+    rule func_param() -> FuncParam
+        = label:(label:identifier() _ { label })? name:identifier() value_type:(_? ":" _ t:identifier() { t })? def_val:(_ "=" _ v:expression() { v })? {
+            FuncParam { label, name, value_type, def_val }
+        }
+
+    // Input Attribute
+    rule input_attr() -> InputAttribute
+        = "#" name:identifier() opt_args:("(" _? args:(expression() ** comma()) ")" { args })? {
+            InputAttribute { name, args: match opt_args {
+                None => vec![],
+                Some(args) => args
+            } }
+        }
+
+    // State Variable
+    rule state_var() -> StateVar
+        = name:identifier() value_type:(_? ":" _ t:identifier() { t })? _ def_val:(
+            ("=" _ v:expression() { v })
+            / expected!("Default value is required for state variables")
+        ) {
+            StateVar { name, value_type, def_val }
+        }
+
+    // --- Protocol Requirements ---
+
+    rule protocol_requirement() -> ProtocolRequirement
+        = protocol_func()
+        / protocol_infix()
+        / protocol_prefix()
+        / protocol_postfix()
+
+    rule protocol_func() -> ProtocolRequirement
+        = "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) ")" _? return_type:("->" _? t:identifier() { t })? {
+            ProtocolRequirement::Func { name, params, return_type }
+        }
+
+    rule protocol_infix() -> ProtocolRequirement
+        = "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) ")" _? "->" _? return_type:identifier() "{"
+        attrs:infix_attrs()
+        "}" {
+            ProtocolRequirement::Infix { symbol, params, return_type, attrs }
+        }
+
+    rule protocol_prefix() -> ProtocolRequirement
+        = "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) ")" _? "->" _? return_type:identifier() {
+            ProtocolRequirement::Prefix { symbol, params, return_type }
+        }
+
+    rule protocol_postfix() -> ProtocolRequirement
+        = "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) ")" _? "->" _? return_type:identifier() {
+            ProtocolRequirement::Postfix { symbol, params, return_type }
+        }
+
+    // Literal Binding
+    rule literal_bind() -> LiteralBind
+        = "intliteral" { LiteralBind::IntLiteral }
+        / "floatliteral" { LiteralBind::FloatLiteral }
+        / "boolliteral" { LiteralBind::BoolLiteral }
+
+    // Infix Attributes
+    rule infix_attrs() -> HashMap<String, String>
+        = entries:((key:identifier() _? ":" _? value:(v:identifier() / v:number() { v }) {
+            (key, value)
+        }) ** comma()) {
+            entries.into_iter().map(|(k, v)| (k, v)).collect()
+        }
+
+    // --- EXPRESSIONS ---
+
+    pub rule expression() -> Vec<ExprToken>
+        = (t:expr_token() __? { t })*
+        / "(" _ expr:expression() _ ")" { expr }
+        / expected!("expression")
+
+    rule expr_token() -> ExprToken
+        = (symbol:operator() { ExprToken::Operator(symbol) })
+        / literal()
+        / func_call()
+        / (ids:id_chain() { ExprToken::Identifier(ids) })
+
+    rule func_call() -> ExprToken
+        = name:id_chain() _ "(" __? args:(expression() ** comma()) ")" {
+            ExprToken::FuncCall { name, args }
+        }
+
+    rule literal() -> ExprToken
+        = n:number() { ExprToken::Literal(n) }
+
+    // --- TOKENS ---
+
+    rule identifier() -> String
+        = quiet!{ n:$(['a'..='z' | 'A'..='Z' | '_']['a'..='z' | 'A'..='Z' | '0'..='9' | '_']*) { n.to_owned() } }
+        / expected!("identifier")
+
+    rule id_chain() -> Vec<String>
+        = parent:identifier() children:(dot() c:id_chain() { c })? { match children {
+            Some(children) => vec![parent].into_iter().chain(children.into_iter()).collect(),
+            None => vec![parent]
+        } }
+
+    rule operator() -> String
+        = op:$(['+' | '-' | '*' | '/' | '%' | '^' | '<' | '>' | '=' | '!' | '?' | '%' | '|' | '&']) { op.to_owned() }
+
+    rule number() -> String
+        = decimal() / integer()
+
+    rule integer() -> String
+        = n:$(['0'..='9']+) { n.to_owned() }
+
+    rule decimal() -> String
+        = n:integer() "." d:$(['0'..='9']+) {
+            n + "." + d
+        }
+
+    rule comma() = __? "," __?
+
+    rule dot() = __? "." __?
+
+    rule _() =  quiet!{[' ' | '\t']*}
+
+    rule __() = quiet!{[' ' | '\t' | '\n']*}
+});

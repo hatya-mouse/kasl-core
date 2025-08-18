@@ -1,11 +1,11 @@
 [package]
-name = "knodiq_audio_shader"
+name = "kash"
 version = "0.3.9"
 edition = "2024"
 license = "Apache-2.0"
 
 [lib]
-name = "knodiq_audio_shader"
+name = "kash"
 path = "src/lib.rs"
 
 [dependencies]
@@ -18,19 +18,4 @@ cranelift-module = "0.121.1"
 pest = "2.8.1"
 cranelift-frontend = "0.121.1"
 lazy_static = "1.5.0"
-
-[features]
-interpreter = []
-compiler = []
-node = ["compiler"]
-
-[dev-dependencies]
-divan = "0.1.21"
-knodiq_audio_shader = { path = "./", features = ["interpreter", "node"] }
-
-[[test]]
-name = "tests"
-
-[[bench]]
-name = "bench"
-harness = false
+peg = "0.8.5"
