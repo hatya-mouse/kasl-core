@@ -1,0 +1,23 @@
+input stream: Stream
+input now_range: Range
+input gain = 1.5 // You can also set the default value for editor
+output chunk: Chunk
+
+// State is kept while processing. Useful for storing intermediate results or maintaining state across process loops.
+// State is only available within the top level.
+state {
+    delay_line = Stream()
+}
+
+func main() {
+    // now_chunk is not a single timestamp, but instead it itself returns a `Range` of time in seconds
+    // load function automatically loads the chunk at the given timestamp
+    // if the range is out of bounds, it will return an empty chunk
+    var current_chunk = load(stream, at: now_range)
+    var gained_chunk = apply_gain(current_chunk, gain: gain)
+    chunk = gained_chunk
+}
+
+func apply_gain(_ chunk: Chunk, gain = 1.0) -> Chunk {
+    return chunk * gain // This looks to be illegal, but chunk implements multiplication with Float so that's fine!
+}

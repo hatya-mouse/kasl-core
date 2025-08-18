@@ -1,0 +1,54 @@
+protocol Add {
+    func +(rhs: Self) -> Self
+}
+
+protocol Sub {
+    func -(rhs: Self) -> Self
+}
+
+protocol Mul {
+    func *(rhs: Self) -> Self
+}
+
+protocol Div {
+    func /(rhs: Self) -> Self
+}
+
+protocol Equality {
+    func ==(rhs: Self) -> Bool
+}
+
+struct Int: CompInt, Add, Sub, Mul, Div {
+    // Declare that integer literals can be implicitly converted to Int
+    intliteral init(_ raw: CompInt) {
+        self.raw = raw
+    }
+
+    infix +(rhs: Self) -> Self {
+        associativity: left,
+        priority: 0
+    }: {
+        return Int(compIntAdd(raw, rhs.raw))
+    }
+
+    infix -(rhs: Self) -> Self {
+        associativity: left,
+        priority: 0
+    }: {
+        return Int(compIntSub(raw, rhs.raw))
+    }
+
+    infix *(rhs: Self) -> Self {
+        associativity: left,
+        priority: 1
+    }: {
+        return Int(compIntMul(raw, rhs.raw))
+    }
+
+    infix /(rhs: Self) -> Self {
+        associativity: left,
+        priority: 1
+    }: {
+        return Int(compIntDiv(raw, rhs.raw))
+    }
+}
