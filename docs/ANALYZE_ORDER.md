@@ -1,0 +1,202 @@
+# Dependence Tree
+- Statement
+    - FuncDecl
+        - FuncParam
+            -> Defined Types
+            -> Expression
+        - Return Type
+            -> Defined Types
+        - Body
+            -> Statement
+    - Return
+        -> Expression
+    - Input
+        -> Defined Types
+        - Input Attributes
+            -> Expression
+        -> Expression
+    - Output
+        -> Defined Types
+    - Var
+        -> Defined Types
+        -> Expression
+    - State
+        - State Variables
+            -> Defined Types
+            -> Expression
+    - Assign
+        - Defined Identifiers
+        -> Expression
+    - FuncCall
+        - Defined Identifiers
+        - Function Call Arguments
+            -> Defined Types
+            -> Expression
+    - If
+        -> Expression
+        -> Statement
+    - If-else
+        -> Expression
+        -> Statement
+    - Struct
+        - Inherits
+            -> Defined Types
+        - Body
+            -> Statement
+    - Protocol
+        - Inherits
+            -> Defined Types
+        - Protocol Requirements
+            -> Defined Types
+            - FuncParam
+                -> Defined Types
+                -> Expression
+    - Init
+        - Literal Binding
+        - FuncParam
+            -> Defined Types
+            -> Expression
+        - Body
+            -> Statement
+    - Infix
+        - FuncParam
+            -> Defined Types
+            -> Expression
+        - Return Type
+            -> Defined Types
+        - Body
+            -> Statement
+    - Prefix
+        - FuncParam
+            -> Defined Types
+            -> Expression
+        - Return Type
+            -> Defined Types
+        - Body
+            -> Statement
+    - Postfix
+        - FuncParam
+            -> Defined Types
+            -> Expression
+        - Return Type
+            -> Defined Types
+        - Body
+            -> Statement
+    - Block
+        -> Statement
+
+- Expression
+    - IntLiteral
+        - Literal Initializer
+            -> Defined Inits
+    - FloatLiteral
+        - Literal Initializer
+            -> Defined Inits
+    - BoolLiteral
+        - Literal Initializer
+            -> Defined Inits
+    - Operator
+        -> Defined Operators
+        -> Defined Types
+    - Identifier
+        -> Defined Identifiers
+    - FuncCall
+        -> Defined Identifiers
+        - Function Call Arguments
+            -> Defined Types
+            -> Expression
+
+- Defined Types
+    -> Struct Names
+    -> Protocol Names
+
+- Defined Inits
+    - Struct Initializers
+        - Body
+            -> Statement
+    -> Defined Types
+
+- Defined Operators
+    -> Defined Types
+
+- Defined Identifiers (Declare)
+    -> Defined Types
+    - Defined States
+        - Value Type
+            -> Defined Types
+            -> Expression (Inference)
+    - Defined Inputs
+        - Value Type
+            -> Defined Types
+            -> Expression (Inference)
+    -> Defined Outputs
+    - Defined Variables
+        - Value Type
+            -> Defined Types
+            -> Expression (Inference)
+    - Defined Functions
+        - FuncParam
+            -> Expression (Inference)
+    - Struct Members
+        - Functions
+            - FuncParam
+                -> Expression (Inference)
+    - Protocol Requirements
+        -> Defined Types
+        - FuncParam
+            -> Defined Types
+            -> Expression (Inference)
+
+- Defined Identifiers (Body)
+    -> Defined Types
+    - Defined States
+        - Value Type
+            -> Defined Types
+        - Default Value
+            -> Expression
+    - Defined Inputs
+        - Value Type
+            -> Defined Types
+        - Default Value
+            -> Expression
+    -> Defined Outputs
+    - Defined Variables
+        - Value Type
+            -> Defined Types
+        - Default Value
+            -> Expression
+    - Defined Functions
+        - Body
+            -> Statement
+        - FuncParam
+            -> Defined Types
+            -> Expression
+    - Struct Members
+        - Variables
+            - Value Type
+                -> Defined Types
+            - Default Value
+                -> Expression
+        - Initializers
+            - FuncParam
+                -> Defined Types
+                -> Expression
+            - Body
+                -> Statement
+        - Functions
+            - FuncParam
+                -> Defined Types
+                -> Expression
+            - Body
+                -> Statement
+    - Protocol Requirements
+        -> Defined Types
+        - Variables
+            - Value Type
+                -> Defined Types
+            - Default Value
+                -> Expression
+        - Functions
+            - FuncParam
+                -> Defined Types
+                -> Expression

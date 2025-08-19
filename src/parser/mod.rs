@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-pub mod ast;
 pub mod parser;
+pub mod parser_ast;
 
-pub use ast::{
-    ExprToken, FuncCallArg, FuncParam, InfixAttrValue, InputAttribute, LiteralBind, Program,
-    ProtocolRequirement, StateVar, Statement,
-};
 pub use parser::kash_parser;
+pub use parser_ast::{
+    ExprToken, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue, ParserInputAttribute,
+    ParserLiteralBind, ParserProgram, ParserProtocolRequirement, ParserStateVar, ParserStatement,
+};

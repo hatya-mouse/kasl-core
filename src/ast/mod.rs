@@ -14,10 +14,20 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod parser;
-pub mod resolver;
+pub mod expression;
+pub mod function;
+pub mod operator;
+pub mod program;
+pub mod statement;
+pub mod symbols;
+pub mod type_def;
+pub mod variables;
 
-pub use ast::*;
-pub use parser::*;
-pub use resolver::*;
+pub use expression::Expression;
+pub use function::{FuncCallArg, FuncParam, Function};
+pub use operator::{Operator, OperatorAssociativity};
+pub use program::Program;
+pub use statement::Statement;
+pub use symbols::{SymbolPath, SymbolPathComponent};
+pub use type_def::{ProtocolType, StructType, TypeName};
+pub use variables::{InputAttribute, InputVar, OutputVar, StateVar, Variable};

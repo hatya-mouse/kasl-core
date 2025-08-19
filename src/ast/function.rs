@@ -14,10 +14,26 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod parser;
-pub mod resolver;
+use crate::{Expression, Statement, TypeName};
 
-pub use ast::*;
-pub use parser::*;
-pub use resolver::*;
+#[derive(Debug, PartialEq, Clone)]
+pub struct Function {
+    pub name: String,
+    pub params: Vec<FuncParam>,
+    pub return_type: String,
+    pub body: Vec<Statement>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct FuncParam {
+    pub label: Option<String>,
+    pub name: String,
+    pub value_type: TypeName,
+    pub def_val: Option<Box<Expression>>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FuncCallArg {
+    pub label: String,
+    pub value: Expression,
+}

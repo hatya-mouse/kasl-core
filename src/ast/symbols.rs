@@ -14,10 +14,12 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod parser;
-pub mod resolver;
+pub type SymbolPath = Vec<SymbolPathComponent>;
 
-pub use ast::*;
-pub use parser::*;
-pub use resolver::*;
+#[derive(Debug, PartialEq, Clone)]
+pub enum SymbolPathComponent {
+    Field(String),
+    Method(String),
+    Struct(String),
+    Protocol(String),
+}

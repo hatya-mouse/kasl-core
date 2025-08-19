@@ -16,7 +16,7 @@
 
 #[cfg(test)]
 mod parsing {
-    use kash::{ExprToken, FuncParam, Statement, ast::FuncCallArg, kash_parser};
+    use kash::{ExprToken, ParserFuncCallArg, ParserFuncParam, ParserStatement, kash_parser};
 
     /// Test parsing of chained expressions.
     #[test]
@@ -56,11 +56,11 @@ mod parsing {
             Ok(vec![ExprToken::FuncCall {
                 name: vec!["object".to_string(), "method".to_string()],
                 args: vec![
-                    FuncCallArg {
+                    ParserFuncCallArg {
                         label: None,
                         value: vec![ExprToken::Identifier(vec!["param1".to_string()])]
                     },
-                    FuncCallArg {
+                    ParserFuncCallArg {
                         label: None,
                         value: vec![ExprToken::Identifier(vec!["param2".to_string()])]
                     }
@@ -105,55 +105,55 @@ mod parsing {
         assert_eq!(
             parsed_program.unwrap(),
             vec![
-                Statement::Input {
+                ParserStatement::Input {
                     name: String::from("integer"),
                     value_type: Some(String::from("Int")),
                     def_val: Some(vec![ExprToken::IntLiteral(14)]),
                     attrs: vec![]
                 },
-                Statement::Input {
+                ParserStatement::Input {
                     name: String::from("fac"),
                     value_type: None,
                     def_val: Some(vec![ExprToken::IntLiteral(5)]),
                     attrs: vec![]
                 },
-                Statement::Output {
+                ParserStatement::Output {
                     name: String::from("out_value"),
                     value_type: String::from("Int")
                 },
-                Statement::StructDecl {
+                ParserStatement::StructDecl {
                     name: String::from("Multiplier"),
                     inherits: vec![],
                     body: vec![
-                        Statement::Var {
+                        ParserStatement::Var {
                             name: String::from("value"),
                             value_type: None,
                             def_val: vec![ExprToken::IntLiteral(1)]
                         },
-                        Statement::Init {
+                        ParserStatement::Init {
                             literal_bind: None,
-                            params: vec![FuncParam {
+                            params: vec![ParserFuncParam {
                                 label: Some(String::from("_")),
                                 name: String::from("value"),
                                 value_type: Some(String::from("Int")),
                                 def_val: None
                             }],
-                            body: vec![Statement::Assign {
+                            body: vec![ParserStatement::Assign {
                                 target: vec![String::from("self"), String::from("value")],
                                 value: vec![ExprToken::Identifier(vec![String::from("value")])]
                             }]
                         },
-                        Statement::FuncDecl {
+                        ParserStatement::FuncDecl {
                             required_by: None,
                             name: String::from("multiply"),
-                            params: vec![FuncParam {
+                            params: vec![ParserFuncParam {
                                 label: Some(String::from("_")),
                                 name: String::from("another"),
                                 value_type: Some(String::from("Int")),
                                 def_val: None
                             }],
                             return_type: Some(String::from("Int")),
-                            body: vec![Statement::Return {
+                            body: vec![ParserStatement::Return {
                                 value: Some(vec![
                                     ExprToken::Identifier(vec![String::from("value")]),
                                     ExprToken::Operator(String::from("*")),
@@ -163,13 +163,13 @@ mod parsing {
                         }
                     ]
                 },
-                Statement::FuncDecl {
+                ParserStatement::FuncDecl {
                     required_by: None,
                     name: String::from("main"),
                     params: vec![],
                     return_type: None,
                     body: vec![
-                        Statement::Var {
+                        ParserStatement::Var {
                             name: String::from("multiplier"),
                             value_type: None,
                             def_val: vec![ExprToken::FuncCall {
@@ -177,11 +177,11 @@ mod parsing {
                                 args: vec![]
                             }]
                         },
-                        Statement::Assign {
+                        ParserStatement::Assign {
                             target: vec![String::from("out_value")],
                             value: vec![ExprToken::FuncCall {
                                 name: vec![String::from("multiply")],
-                                args: vec![FuncCallArg {
+                                args: vec![ParserFuncCallArg {
                                     label: None,
                                     value: vec![ExprToken::Identifier(vec![String::from(
                                         "multiplier"
@@ -191,17 +191,17 @@ mod parsing {
                         }
                     ]
                 },
-                Statement::FuncDecl {
+                ParserStatement::FuncDecl {
                     required_by: None,
                     name: String::from("multiply"),
-                    params: vec![FuncParam {
+                    params: vec![ParserFuncParam {
                         label: Some(String::from("_")),
                         name: String::from("multiplier"),
                         value_type: Some(String::from("Multiplier")),
                         def_val: None
                     }],
                     return_type: Some(String::from("Int")),
-                    body: vec![Statement::Return {
+                    body: vec![ParserStatement::Return {
                         value: Some(vec![
                             ExprToken::Identifier(vec![
                                 String::from("multiplier"),

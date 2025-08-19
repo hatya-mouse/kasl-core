@@ -17,18 +17,18 @@
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Program {
-    pub statements: Vec<Statement>,
+pub struct ParserProgram {
+    pub statements: Vec<ParserStatement>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Statement {
+pub enum ParserStatement {
     FuncDecl {
         required_by: Option<String>,
         name: String,
-        params: Vec<FuncParam>,
+        params: Vec<ParserFuncParam>,
         return_type: Option<String>,
-        body: Vec<Statement>,
+        body: Vec<ParserStatement>,
     },
     Return {
         value: Option<Vec<ExprToken>>,
@@ -37,19 +37,20 @@ pub enum Statement {
         name: String,
         value_type: Option<String>,
         def_val: Option<Vec<ExprToken>>,
-        attrs: Vec<InputAttribute>,
+        attrs: Vec<ParserInputAttribute>,
     },
     Output {
         name: String,
         value_type: String,
     },
     Var {
+        required_by: Option<String>,
         name: String,
         value_type: Option<String>,
         def_val: Vec<ExprToken>,
     },
     State {
-        vars: Vec<StateVar>,
+        vars: Vec<ParserStateVar>,
     },
     Assign {
         target: Vec<String>,
@@ -57,58 +58,93 @@ pub enum Statement {
     },
     FuncCall {
         name: Vec<String>,
-        args: Vec<FuncCallArg>,
+        args: Vec<ParserFuncCallArg>,
     },
     If {
         condition: Vec<ExprToken>,
-        body: Vec<Statement>,
+        body: Vec<ParserStatement>,
     },
     IfElse {
         condition: Vec<ExprToken>,
-        body: Vec<Statement>,
-        else_body: Vec<Statement>,
+        body: Vec<ParserStatement>,
+        else_body: Vec<ParserStatement>,
     },
     StructDecl {
         name: String,
         inherits: Vec<String>,
-        body: Vec<Statement>,
+        body: Vec<ParserStatement>,
     },
     ProtocolDecl {
         name: String,
         inherits: Vec<String>,
-        requires: Vec<ProtocolRequirement>,
+        requires: Vec<ParserProtocolRequirement>,
     },
     Init {
-        literal_bind: Option<LiteralBind>,
-        params: Vec<FuncParam>,
-        body: Vec<Statement>,
+        literal_bind: Option<ParserLiteralBind>,
+        params: Vec<ParserFuncParam>,
+        body: Vec<ParserStatement>,
     },
     Infix {
         symbol: String,
-        params: Vec<FuncParam>,
+        params: Vec<ParserFuncParam>,
         return_type: String,
-        attrs: HashMap<String, InfixAttrValue>,
-        body: Vec<Statement>,
+        attrs: HashMap<String, ParserInfixAttrValue>,
+        body: Vec<ParserStatement>,
     },
     Prefix {
         symbol: String,
-        params: Vec<FuncParam>,
+        params: Vec<ParserFuncParam>,
         return_type: String,
-        body: Vec<Statement>,
+        body: Vec<ParserStatement>,
     },
     Postfix {
         symbol: String,
-        params: Vec<FuncParam>,
+        params: Vec<ParserFuncParam>,
         return_type: String,
-        body: Vec<Statement>,
+        body: Vec<ParserStatement>,
     },
     Block {
-        statements: Vec<Statement>,
+        statements: Vec<ParserStatement>,
     },
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct FuncParam {
+pub struct ParserInputAttribute {
+    pub name: String,
+    pub args: Vec<Vec<ExprToken>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserFuncCallArg {
+    pub label: Option<String>,
+    pub value: Vec<ExprToken>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ParserProtocolRequirement {
+    Func {
+        required_by: Option<String>,
+        name: String,
+        params: Vec<ParserFuncParam>,
+        return_type: Option<String>,
+    },
+    Var {
+        required_by: Option<String>,
+        name: String,
+        value_type: Option<String>,
+        def_val: Option<Vec<ExprToken>>,
+    },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserStateVar {
+    pub name: String,
+    pub value_type: Option<String>,
+    pub def_val: Vec<ExprToken>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserFuncParam {
     pub label: Option<String>,
     pub name: String,
     pub value_type: Option<String>,
@@ -116,57 +152,13 @@ pub struct FuncParam {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct InputAttribute {
-    pub name: String,
-    pub args: Vec<Vec<ExprToken>>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct FuncCallArg {
-    pub label: Option<String>,
-    pub value: Vec<ExprToken>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ProtocolRequirement {
-    Func {
-        name: String,
-        params: Vec<FuncParam>,
-        return_type: Option<String>,
-    },
-    Infix {
-        symbol: String,
-        params: Vec<FuncParam>,
-        return_type: String,
-        attrs: Option<HashMap<String, InfixAttrValue>>,
-    },
-    Prefix {
-        symbol: String,
-        params: Vec<FuncParam>,
-        return_type: String,
-    },
-    Postfix {
-        symbol: String,
-        params: Vec<FuncParam>,
-        return_type: String,
-    },
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct StateVar {
-    pub name: String,
-    pub value_type: Option<String>,
-    pub def_val: Vec<ExprToken>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum InfixAttrValue {
+pub enum ParserInfixAttrValue {
     String(String),
     Integer(u32),
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum LiteralBind {
+pub enum ParserLiteralBind {
     IntLiteral,
     FloatLiteral,
     BoolLiteral,
@@ -181,6 +173,6 @@ pub enum ExprToken {
     Identifier(Vec<String>),
     FuncCall {
         name: Vec<String>,
-        args: Vec<FuncCallArg>,
+        args: Vec<ParserFuncCallArg>,
     },
 }

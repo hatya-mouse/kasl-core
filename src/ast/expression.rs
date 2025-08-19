@@ -14,10 +14,21 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod parser;
-pub mod resolver;
+use crate::{FuncCallArg, Operator, SymbolPath};
 
-pub use ast::*;
-pub use parser::*;
-pub use resolver::*;
+#[derive(Debug, PartialEq, Clone)]
+pub enum Expression {
+    IntLiteral(u32),
+    FloatLiteral(f32),
+    BoolLiteral(bool),
+    Operator {
+        operator: Operator,
+        operand: Box<Expression>,
+        args: Vec<FuncCallArg>,
+    },
+    Identifier(SymbolPath),
+    FuncCall {
+        name: SymbolPath,
+        arguments: Vec<Expression>,
+    },
+}

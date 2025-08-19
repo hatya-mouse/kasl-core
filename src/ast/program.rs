@@ -14,10 +14,21 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod parser;
-pub mod resolver;
+use crate::{
+    Function, InputVar, OutputVar, ProtocolType, StateVar, StructType, type_def::Initializer,
+};
 
-pub use ast::*;
-pub use parser::*;
-pub use resolver::*;
+#[derive(Debug, PartialEq, Clone)]
+pub struct Program {
+    pub functions: Vec<Function>,
+    pub inputs: Vec<InputVar>,
+    pub outputs: Vec<OutputVar>,
+    pub states: Vec<StateVar>,
+
+    pub structs: Vec<StructType>,
+    pub protocols: Vec<ProtocolType>,
+
+    pub intliteral: Option<Initializer>,
+    pub floatliteral: Option<Initializer>,
+    pub boolliteral: Option<Initializer>,
+}

@@ -15,21 +15,21 @@
 //
 
 use crate::{
-    ExprToken, FuncCallArg, FuncParam, InfixAttrValue, InputAttribute, LiteralBind,
-    ProtocolRequirement, StateVar, Statement,
+    ExprToken, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue, ParserInputAttribute,
+    ParserLiteralBind, ParserProtocolRequirement, ParserStateVar, ParserStatement,
 };
 use std::collections::HashMap;
 
 peg::parser!(pub grammar kash_parser() for str {
-    pub rule parse() -> Vec<Statement>
+    pub rule parse() -> Vec<ParserStatement>
         = statements()
 
     // --- STATEMENTS ---
 
-    rule statements() -> Vec<Statement>
+    rule statements() -> Vec<ParserStatement>
         = __? statements:(statement() ** ((_? "\n" _?)+)) __? { statements }
 
-    rule statement() -> Statement
+    rule statement() -> ParserStatement
         = func_decl_statement()
         / return_statement()
         / input_statement()
@@ -49,71 +49,71 @@ peg::parser!(pub grammar kash_parser() for str {
         / block_statement()
         / expected!("statement")
 
-    rule func_decl_statement() -> Statement
+    rule func_decl_statement() -> ParserStatement
         = required_by:(r:identifier() _ { r })?
         "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
         return_type:("->" _? t:identifier() { t })? __? "{"
         __? body:statements() __?
         "}" {
-            Statement::FuncDecl { required_by, name, params, return_type, body }
+            ParserStatement::FuncDecl { required_by, name, params, return_type, body }
         }
 
-    rule return_statement() -> Statement
+    rule return_statement() -> ParserStatement
         = "return" value:(_ v:expression() { v })? {
-            Statement::Return { value }
+            ParserStatement::Return { value }
         }
 
-    rule input_statement() -> Statement
+    rule input_statement() -> ParserStatement
         = "input" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? def_val:(_? "=" _? v:expression() { v })? attrs:(_? a:input_attr() { a })* {
-            Statement::Input { name, value_type, def_val, attrs }
+            ParserStatement::Input { name, value_type, def_val, attrs }
         }
 
-    rule output_statement() -> Statement
+    rule output_statement() -> ParserStatement
         = "output" _ name:identifier() _? ":" _? value_type:identifier() {
-            Statement::Output { name, value_type }
+            ParserStatement::Output { name, value_type }
         }
 
-    rule var_statement() -> Statement
-        = "var" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? _? "=" _? def_val:expression() {
-            Statement::Var { name, value_type, def_val }
+    rule var_statement() -> ParserStatement
+        = required_by:(r:identifier() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? _? "=" _? def_val:expression() {
+            ParserStatement::Var { required_by, name, value_type, def_val }
         }
 
-    rule state_statement() -> Statement
+    rule state_statement() -> ParserStatement
         = "state" _? "{" __? vars:(state_var() ** ((_? "\n" _?)+)) __? "}" {
-            Statement::State { vars }
+            ParserStatement::State { vars }
         }
 
-    rule assign_statement() -> Statement
+    rule assign_statement() -> ParserStatement
         = target:id_chain() _ "=" _ value:expression() {
-            Statement::Assign { target, value }
+            ParserStatement::Assign { target, value }
         }
 
-    rule func_call_statement() -> Statement
+    rule func_call_statement() -> ParserStatement
         = name:id_chain() _? "(" __? args:func_call_args() ")" {
-            Statement::FuncCall { name, args }
+            ParserStatement::FuncCall { name, args }
         }
 
-    rule if_statement() -> Statement
+    rule if_statement() -> ParserStatement
         = "if" _ condition:expression() __ "{"
         __? body:statements() __?
         "}" {
-            Statement::If { condition, body }
+            ParserStatement::If { condition, body }
         }
 
-    rule if_else_statement() -> Statement
+    rule if_else_statement() -> ParserStatement
         = "if" _ condition:expression() __ "{"
         __? body:statements() __?
         "}" __ "else" __ "{"
         __? else_body:statements() __?
         "}" {
-            Statement::IfElse { condition, body, else_body }
+            ParserStatement::IfElse { condition, body, else_body }
         }
 
-    rule struct_decl_statement() -> Statement
+    rule struct_decl_statement() -> ParserStatement
         = "struct" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
         __? body:statements() __?
         "}" {
-            Statement::StructDecl {
+            ParserStatement::StructDecl {
                 name,
                 inherits: match inherits {
                     Some(inherits) => inherits,
@@ -123,125 +123,112 @@ peg::parser!(pub grammar kash_parser() for str {
             }
         }
 
-    rule protocol_decl_statement() -> Statement
+    rule protocol_decl_statement() -> ParserStatement
         = "protocol" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
         __? requires:(protocol_requirement() ** "\n") __?
         "}" {
-            Statement::ProtocolDecl { name, inherits: match inherits {
+            ParserStatement::ProtocolDecl { name, inherits: match inherits {
                 Some(inherits) => inherits,
                 None => Vec::new()
             }, requires }
         }
 
-    rule init_statement() -> Statement
+    rule init_statement() -> ParserStatement
         = literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" __? "{"
         __? body:statements() __?
         "}" {
-            Statement::Init { literal_bind, params, body }
+            ParserStatement::Init { literal_bind, params, body }
         }
 
-    rule infix_statement() -> Statement
+    rule infix_statement() -> ParserStatement
         = "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
         __? attrs:infix_attrs() __?
         "}" __? ":" __? "{"
         __? body:statements() __?
         "}" {
-            Statement::Infix { symbol, params, return_type, attrs, body }
+            ParserStatement::Infix { symbol, params, return_type, attrs, body }
         }
 
-    rule prefix_statement() -> Statement
+    rule prefix_statement() -> ParserStatement
         = "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
         __? body:statements() __?
         "}" {
-            Statement::Prefix { symbol, params, return_type, body }
+            ParserStatement::Prefix { symbol, params, return_type, body }
         }
 
-    rule postfix_statement() -> Statement
+    rule postfix_statement() -> ParserStatement
         = "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
         __? body:statements() __?
         "}" {
-            Statement::Postfix { symbol, params, return_type, body }
+            ParserStatement::Postfix { symbol, params, return_type, body }
         }
 
-    rule block_statement() -> Statement
+    rule block_statement() -> ParserStatement
         = "{" _? statements:statements() _? "}" {
-            Statement::Block { statements }
+            ParserStatement::Block { statements }
         }
 
     // --- STATEMENT HELPERS ---
 
     // Function Parameter
-    rule func_param() -> FuncParam
+    rule func_param() -> ParserFuncParam
         = label:param_label()? name:identifier() value_type:(_? ":" _? t:identifier() { t })? def_val:(_? "=" _? v:expression() { v })? {
-            FuncParam { label, name, value_type, def_val }
+            ParserFuncParam { label, name, value_type, def_val }
         }
 
     rule param_label() -> String
         = label:identifier() _ { label }
 
     // Input Attribute
-    rule input_attr() -> InputAttribute
+    rule input_attr() -> ParserInputAttribute
         = "#" name:identifier() opt_args:("(" _? args:(expression() ** comma()) comma()? ")" { args })? {
-            InputAttribute { name, args: match opt_args {
+            ParserInputAttribute { name, args: match opt_args {
                 None => vec![],
                 Some(args) => args
             } }
         }
 
     // State Variable
-    rule state_var() -> StateVar
+    rule state_var() -> ParserStateVar
         = name:identifier() value_type:(_? ":" _? t:identifier() { t })? _? "=" _? def_val:expression() {
-            StateVar { name, value_type, def_val }
+            ParserStateVar { name, value_type, def_val }
         }
 
     // Function Call Argument
-    rule func_call_args() -> Vec<FuncCallArg>
+    rule func_call_args() -> Vec<ParserFuncCallArg>
         = entries:((label:(n:identifier() _? ":" _? { n })? value:expression() {
-            FuncCallArg { label, value }
+            ParserFuncCallArg { label, value }
         }) ** comma()) comma()? {
             entries
         }
 
     // --- Protocol Requirements ---
 
-    rule protocol_requirement() -> ProtocolRequirement
+    rule protocol_requirement() -> ParserProtocolRequirement
         = protocol_func()
-        / protocol_infix()
-        / protocol_prefix()
-        / protocol_postfix()
+        / protocol_var()
 
-    rule protocol_func() -> ProtocolRequirement
-        = "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? return_type:("->" _? t:identifier() { t })? {
-            ProtocolRequirement::Func { name, params, return_type }
+    rule protocol_func() -> ParserProtocolRequirement
+        = required_by:(r:identifier() _ { r })? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? return_type:("->" _? t:identifier() { t })? {
+            ParserProtocolRequirement::Func { required_by, name, params, return_type }
         }
 
-    rule protocol_infix() -> ProtocolRequirement
-        = "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier()
-        attrs:("{" a:infix_attrs() "}" { a })? {
-            ProtocolRequirement::Infix { symbol, params, return_type, attrs }
-        }
-
-    rule protocol_prefix() -> ProtocolRequirement
-        = "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() {
-            ProtocolRequirement::Prefix { symbol, params, return_type }
-        }
-
-    rule protocol_postfix() -> ProtocolRequirement
-        = "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() {
-            ProtocolRequirement::Postfix { symbol, params, return_type }
+    rule protocol_var() -> ParserProtocolRequirement
+        = required_by:(r:identifier() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? def_val:(_? "=" _? d:expression() { d })? {
+            ParserProtocolRequirement::Var { required_by, name, value_type, def_val }
         }
 
     // Literal Binding
-    rule literal_bind() -> LiteralBind
-        = "intliteral" { LiteralBind::IntLiteral }
-        / "floatliteral" { LiteralBind::FloatLiteral }
-        / "boolliteral" { LiteralBind::BoolLiteral }
+    rule literal_bind() -> ParserLiteralBind
+        = "intliteral" { ParserLiteralBind::IntLiteral }
+        / "floatliteral" { ParserLiteralBind::FloatLiteral }
+        / "boolliteral" { ParserLiteralBind::BoolLiteral }
 
     // Infix Attributes
-    rule infix_attrs() -> HashMap<String, InfixAttrValue>
+    rule infix_attrs() -> HashMap<String, ParserInfixAttrValue>
         = entries:((key:identifier() _? ":" _? value:(
-            v:identifier() { InfixAttrValue::String(v) }
-            / v:integer() { InfixAttrValue::Integer(v)}
+            v:identifier() { ParserInfixAttrValue::String(v) }
+            / v:integer() { ParserInfixAttrValue::Integer(v)}
         ) {
             (key, value)
         }) ** comma()) comma()? {
