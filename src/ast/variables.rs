@@ -45,6 +45,7 @@ pub struct StateVar {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Variable {
+    pub required_by: Option<SymbolPath>,
     pub name: String,
     pub value_type: Option<SymbolPath>,
     pub def_val: Option<Expression>,

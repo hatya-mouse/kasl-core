@@ -15,10 +15,8 @@
 //
 
 use crate::{
-    Function, InputVar, OutputVar, ParserSymbolPathComponent, ResolverErrorType, StateVar,
-    SymbolPath,
-    resolver_error::ResolverError,
-    type_def::{SymbolPathComponent, TypeDef},
+    Function, InputVar, OutputVar, ParserSymbolPathComponent, ResolverError, ResolverErrorType,
+    StateVar, SymbolPath, SymbolPathComponent, TypeDef,
 };
 
 pub struct Program {

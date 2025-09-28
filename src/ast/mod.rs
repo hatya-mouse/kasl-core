@@ -27,5 +27,5 @@ pub use function::{FuncCallArg, FuncParam, Function};
 pub use operator::{Operator, OperatorAssociativity};
 pub use program::Program;
 pub use statement::Statement;
-pub use type_def::{SymbolPath, TypeDef};
+pub use type_def::{Initializer, LiteralBind, SymbolPath, SymbolPathComponent, TypeDef};
 pub use variables::{InputAttribute, InputVar, OutputVar, StateVar, Variable};

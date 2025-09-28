@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue,
-    ParserInputAttribute, ParserLiteralBind, ParserStateVar, ParserStatement, ParserStatementKind,
-    ParserSymbolPath, ParserSymbolPathComponent,
+    ExprToken, ExprTokenKind, LiteralBind, ParserFuncCallArg, ParserFuncParam,
+    ParserInfixAttrValue, ParserInputAttribute, ParserStateVar, ParserStatement,
+    ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent,
 };
 use std::collections::HashMap;
 
@@ -272,10 +272,10 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     // Literal Binding
-    rule literal_bind() -> ParserLiteralBind
-        = "intliteral" { ParserLiteralBind::IntLiteral }
-        / "floatliteral" { ParserLiteralBind::FloatLiteral }
-        / "boolliteral" { ParserLiteralBind::BoolLiteral }
+    rule literal_bind() -> LiteralBind
+        = "intliteral" { LiteralBind::IntLiteral }
+        / "floatliteral" { LiteralBind::FloatLiteral }
+        / "boolliteral" { LiteralBind::BoolLiteral }
 
     // Infix Attributes
     rule infix_attrs() -> HashMap<String, ParserInfixAttrValue>

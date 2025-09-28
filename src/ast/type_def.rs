@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncParam, Function, Operator, Variable};
+use crate::{FuncParam, Function, Operator, Statement, Variable};
 
 pub type SymbolPath = Vec<SymbolPathComponent>;
 
@@ -63,6 +63,15 @@ impl TypeDef {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Initializer {
+    pub literal_bind: Option<LiteralBind>,
     pub params: Vec<FuncParam>,
-    pub body: Box<Expression>,
+    pub body: Vec<Statement>,
+    pub required_by: Option<SymbolPath>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum LiteralBind {
+    IntLiteral,
+    FloatLiteral,
+    BoolLiteral,
 }

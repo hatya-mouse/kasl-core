@@ -16,6 +16,8 @@
 
 use std::collections::HashMap;
 
+use crate::type_def::LiteralBind;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
     pub statements: Vec<ParserStatement>,
@@ -88,7 +90,7 @@ pub enum ParserStatementKind {
     },
     Init {
         required_by: Option<ParserSymbolPath>,
-        literal_bind: Option<ParserLiteralBind>,
+        literal_bind: Option<LiteralBind>,
         params: Vec<ParserFuncParam>,
         body: Vec<ParserStatement>,
     },
@@ -147,13 +149,6 @@ pub struct ParserFuncParam {
 pub enum ParserInfixAttrValue {
     String(String),
     Integer(u32),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ParserLiteralBind {
-    IntLiteral,
-    FloatLiteral,
-    BoolLiteral,
 }
 
 #[derive(Debug, PartialEq, Clone)]
