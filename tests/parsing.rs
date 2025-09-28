@@ -16,10 +16,7 @@
 
 #[cfg(test)]
 mod parsing {
-    use kash::{
-        ExprToken, ParserFuncCallArg, ParserFuncParam, ParserStatement, kash_parser,
-        parser_ast::ExprTokenKind,
-    };
+    use kash::{ExprToken, ParserFuncCallArg, kash_parser, parser_ast::ExprTokenKind};
 
     /// Test parsing of chained expressions.
     #[test]

@@ -16,7 +16,7 @@
 
 use crate::{
     ExprToken, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue, ParserInputAttribute,
-    ParserLiteralBind, ParserProtocolRequirement, ParserStateVar, ParserStatement,
+    ParserLiteralBind, ParserStateVar, ParserStatement,
     parser_ast::{ExprTokenKind, ParserStatementKind},
 };
 use std::collections::HashMap;
@@ -170,7 +170,7 @@ peg::parser!(pub grammar kash_parser() for str {
 
     rule protocol_decl_statement() -> ParserStatement
         = start:position!() "protocol" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
-        __? requires:(protocol_requirement() ** "\n") __?
+        __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
                 start,
@@ -178,7 +178,7 @@ peg::parser!(pub grammar kash_parser() for str {
                 kind: ParserStatementKind::ProtocolDecl { name, inherits: match inherits {
                     Some(inherits) => inherits,
                     None => Vec::new()
-                }, requires }
+                }, body }
             }
         }
 
@@ -269,22 +269,6 @@ peg::parser!(pub grammar kash_parser() for str {
             ParserFuncCallArg { label, value }
         }) ** comma()) comma()? {
             entries
-        }
-
-    // --- Protocol Requirements ---
-
-    rule protocol_requirement() -> ParserProtocolRequirement
-        = protocol_func()
-        / protocol_var()
-
-    rule protocol_func() -> ParserProtocolRequirement
-        = required_by:(r:identifier() _ { r })? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? return_type:("->" _? t:identifier() { t })? {
-            ParserProtocolRequirement::Func { required_by, name, params, return_type }
-        }
-
-    rule protocol_var() -> ParserProtocolRequirement
-        = required_by:(r:identifier() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? def_val:(_? "=" _? d:expression() { d })? {
-            ParserProtocolRequirement::Var { required_by, name, value_type, def_val }
         }
 
     // Literal Binding

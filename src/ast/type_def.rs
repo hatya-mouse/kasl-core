@@ -44,6 +44,22 @@ pub struct StructType {
     pub vars: Vec<Variable>,
     pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
+    pub protocols: Vec<ProtocolType>,
+    pub structs: Vec<StructType>,
+}
+
+impl StructType {
+    pub fn new(name: String) -> Self {
+        StructType {
+            name,
+            inherits: Vec::new(),
+            vars: Vec::new(),
+            inits: Vec::new(),
+            funcs: Vec::new(),
+            protocols: Vec::new(),
+            structs: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -51,7 +67,24 @@ pub struct ProtocolType {
     pub name: String,
     pub inherits: Vec<TypeName>,
     pub vars: Vec<Variable>,
+    pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
+    pub protocols: Vec<ProtocolType>,
+    pub structs: Vec<StructType>,
+}
+
+impl ProtocolType {
+    pub fn new(name: String) -> Self {
+        ProtocolType {
+            name,
+            inherits: Vec::new(),
+            vars: Vec::new(),
+            inits: Vec::new(),
+            funcs: Vec::new(),
+            protocols: Vec::new(),
+            structs: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]

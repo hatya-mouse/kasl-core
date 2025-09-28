@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserStatement, ProtocolType, StructType, parser_ast::ParserStatementKind,
-    symbol_table::SymbolTable,
-};
+use crate::{ParserStatement, Program, ProtocolType, StructType, parser_ast::ParserStatementKind};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ResolverError {
@@ -26,54 +23,51 @@ pub struct ResolverError {
 }
 
 pub struct Resolver {
-    program: Vec<ParserStatement>,
-    root_symbol_table: SymbolTable,
+    statements: Vec<ParserStatement>,
 }
 
 impl Resolver {
     pub fn new() -> Self {
         Self {
-            program: Vec::new(),
-            root_symbol_table: SymbolTable::new(),
+            statements: Vec::new(),
         }
     }
 
-    pub fn resolve(&mut self, program: Vec<ParserStatement>) -> Result<(), ResolverError> {
-        self.program = program;
-        self.register_types();
+    pub fn resolve(&mut self, statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
+        let mut program = Program::new();
+        self.statements = statements;
+
+        let (structs, protocols) = self.get_types(&self.statements);
+        program.structs = structs;
+        program.protocols = protocols;
+
         Ok(())
     }
 
-    pub fn register_types(&mut self) {
-        for stmt in &self.program {
+    pub fn get_types(&self, stmts: &Vec<ParserStatement>) -> (Vec<StructType>, Vec<ProtocolType>) {
+        let mut structs = Vec::new();
+        let mut protocols = Vec::new();
+
+        for stmt in stmts {
             match &stmt.kind {
                 ParserStatementKind::StructDecl {
                     name,
                     inherits: _,
                     body: _,
                 } => {
-                    self.root_symbol_table.add_struct(StructType {
-                        name: name.clone(),
-                        inherits: Vec::new(),
-                        vars: Vec::new(),
-                        inits: Vec::new(),
-                        funcs: Vec::new(),
-                    });
+                    structs.push(StructType::new(name.clone()));
                 }
                 ParserStatementKind::ProtocolDecl {
                     name,
                     inherits: _,
-                    requires: _,
+                    body: _,
                 } => {
-                    self.root_symbol_table.add_protocol(ProtocolType {
-                        name: name.clone(),
-                        inherits: Vec::new(),
-                        vars: Vec::new(),
-                        funcs: Vec::new(),
-                    });
+                    protocols.push(ProtocolType::new(name.clone()));
                 }
                 _ => {}
             }
         }
+
+        (structs, protocols)
     }
 }

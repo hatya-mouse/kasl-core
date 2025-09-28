@@ -84,7 +84,7 @@ pub enum ParserStatementKind {
     ProtocolDecl {
         name: String,
         inherits: Vec<String>,
-        requires: Vec<ParserProtocolRequirement>,
+        body: Vec<ParserStatement>,
     },
     Init {
         literal_bind: Option<ParserLiteralBind>,
@@ -125,22 +125,6 @@ pub struct ParserInputAttribute {
 pub struct ParserFuncCallArg {
     pub label: Option<String>,
     pub value: Vec<ExprToken>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ParserProtocolRequirement {
-    Func {
-        required_by: Option<String>,
-        name: String,
-        params: Vec<ParserFuncParam>,
-        return_type: Option<String>,
-    },
-    Var {
-        required_by: Option<String>,
-        name: String,
-        value_type: Option<String>,
-        def_val: Option<Vec<ExprToken>>,
-    },
 }
 
 #[derive(Debug, PartialEq, Clone)]

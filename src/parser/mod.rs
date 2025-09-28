@@ -20,5 +20,5 @@ pub mod parser_ast;
 pub use parser::kash_parser;
 pub use parser_ast::{
     ExprToken, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue, ParserInputAttribute,
-    ParserLiteralBind, ParserProgram, ParserProtocolRequirement, ParserStateVar, ParserStatement,
+    ParserLiteralBind, ParserProgram, ParserStateVar, ParserStatement,
 };
