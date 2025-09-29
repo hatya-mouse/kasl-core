@@ -42,7 +42,7 @@ impl Program {
 
     pub fn resolve_type(
         &self,
-        type_path: &Vec<ParserSymbolPathComponent>,
+        type_path: &[ParserSymbolPathComponent],
     ) -> Result<SymbolPath, ResolverError> {
         if type_path.is_empty() {
             return Err(ResolverError {

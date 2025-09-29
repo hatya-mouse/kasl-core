@@ -16,7 +16,7 @@
 
 use crate::{ParserStatement, ParserStatementKind, TypeDef};
 
-pub fn collect_types(stmts: &Vec<ParserStatement>) -> Vec<TypeDef> {
+pub fn collect_types(stmts: &[ParserStatement]) -> Vec<TypeDef> {
     let mut types = Vec::new();
 
     for stmt in stmts {

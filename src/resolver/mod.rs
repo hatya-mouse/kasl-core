@@ -15,6 +15,7 @@
 //
 
 pub mod error;
+pub mod member_collector;
 pub mod resolver;
 pub mod symbol_collector;
 pub mod type_collector;
