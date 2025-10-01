@@ -19,44 +19,69 @@ use crate::{
     ParserStatementKind, Program, ResolverError, ResolverErrorType, TypeDef, Variable,
 };
 
+pub fn collect_all_type_members(
+    program: &mut Program,
+    stmts: &[ParserStatement],
+) -> Result<(), ResolverError> {
+    for stmt in stmts {
+        match &stmt.kind {
+            ParserStatementKind::StructDecl {
+                name,
+                inherits: _,
+                body,
+            }
+            | ParserStatementKind::ProtocolDecl {
+                name,
+                inherits: _,
+                body,
+            } => {
+                let type_def = match program.find_type_def_mut(name) {
+                    Some(ty) => ty,
+                    None => {
+                        return Err(ResolverError {
+                            error_type: ResolverErrorType::TypeNotFound(name.clone()),
+                            offset: stmt.start,
+                        });
+                    }
+                };
+                collect_members(body, type_def)?;
+            }
+
+            _ => (),
+        }
+    }
+
+    Ok(())
+}
+
 pub fn collect_members(
-    program: &Program,
     stmts: &[ParserStatement],
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    collect_member_variables(program, stmts, type_def)?;
-    collect_member_functions(program, stmts, type_def)?;
-    collect_member_nests(program, stmts, type_def)?;
-    collect_member_operators(program, stmts, type_def)?;
+    collect_member_variables(stmts, type_def)?;
+    collect_member_functions(stmts, type_def)?;
+    collect_member_nests(stmts, type_def)?;
+    collect_member_operators(stmts, type_def)?;
 
     Ok(())
 }
 
 pub fn collect_member_variables(
-    program: &Program,
     stmts: &[ParserStatement],
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
     for stmt in stmts {
         match &stmt.kind {
             ParserStatementKind::Var {
-                required_by,
+                required_by: _,
                 name,
-                value_type,
+                value_type: _,
                 def_val: _,
             } => {
-                let resolved_required_by = match required_by {
-                    Some(ty) => Some(program.resolve_type(ty)?),
-                    None => None,
-                };
-
                 type_def.vars.push(Variable {
-                    required_by: resolved_required_by,
+                    required_by: None,
                     name: name.clone(),
-                    value_type: match value_type {
-                        Some(ty) => Some(program.resolve_type(ty)?),
-                        None => None,
-                    },
+                    value_type: None,
                     def_val: None,
                 });
             }
@@ -69,38 +94,25 @@ pub fn collect_member_variables(
 }
 
 pub fn collect_member_functions(
-    program: &Program,
     stmts: &[ParserStatement],
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
     for stmt in stmts {
         match &stmt.kind {
             ParserStatementKind::FuncDecl {
-                required_by,
+                required_by: _,
                 name,
                 params,
-                return_type,
+                return_type: _,
                 body: _,
             } => {
-                let resolved_required_by = match required_by {
-                    Some(ty) => Some(program.resolve_type(ty)?),
-                    None => None,
-                };
-                let resolved_return_type = match return_type {
-                    Some(ty) => Some(program.resolve_type(ty)?),
-                    None => None,
-                };
-
                 let params_result: Result<Vec<_>, _> = params
                     .iter()
                     .map(|param| {
                         Ok(FuncParam {
                             label: param.label.clone(),
                             name: param.name.clone(),
-                            value_type: match param.value_type {
-                                Some(ref ty) => Some(program.resolve_type(ty)?),
-                                None => None,
-                            },
+                            value_type: None,
                             def_val: None,
                         })
                     })
@@ -109,33 +121,25 @@ pub fn collect_member_functions(
                 type_def.funcs.push(Function {
                     name: name.to_string(),
                     params: params_result?,
-                    return_type: resolved_return_type,
+                    return_type: None,
                     body: Vec::new(),
-                    required_by: resolved_required_by,
+                    required_by: None,
                 });
             }
 
             ParserStatementKind::Init {
-                required_by,
+                required_by: _,
                 literal_bind,
                 params,
                 body: _,
             } => {
-                let resolved_required_by = match required_by {
-                    Some(ty) => Some(program.resolve_type(ty)?),
-                    None => None,
-                };
-
                 let params_result: Result<Vec<_>, _> = params
                     .iter()
                     .map(|param| {
                         Ok(FuncParam {
                             label: param.label.clone(),
                             name: param.name.clone(),
-                            value_type: match param.value_type {
-                                Some(ref ty) => Some(program.resolve_type(ty)?),
-                                None => None,
-                            },
+                            value_type: None,
                             def_val: None,
                         })
                     })
@@ -145,7 +149,7 @@ pub fn collect_member_functions(
                     literal_bind: literal_bind.clone(),
                     params: params_result?,
                     body: Vec::new(),
-                    required_by: resolved_required_by,
+                    required_by: None,
                 });
             }
 
@@ -157,7 +161,6 @@ pub fn collect_member_functions(
 }
 
 pub fn collect_member_nests(
-    program: &Program,
     stmts: &[ParserStatement],
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
@@ -165,38 +168,18 @@ pub fn collect_member_nests(
         match &stmt.kind {
             ParserStatementKind::StructDecl {
                 name,
-                inherits,
+                inherits: _,
                 body,
-            } => {
-                let child_type_def = type_def.fine_type_def_mut(name);
-                match child_type_def {
-                    Some(child_type_def) => {
-                        let child_type_inherits: Result<Vec<_>, _> =
-                            inherits.iter().map(|ty| program.resolve_type(ty)).collect();
-                        child_type_def.inherits = child_type_inherits?;
-                        collect_members(program, body, child_type_def)?;
-                    }
-                    None => {
-                        return Err(ResolverError {
-                            error_type: ResolverErrorType::TypeNotFound(name.to_string()),
-                            offset: 0,
-                        });
-                    }
-                }
             }
-
-            ParserStatementKind::ProtocolDecl {
+            | ParserStatementKind::ProtocolDecl {
                 name,
-                inherits,
+                inherits: _,
                 body,
             } => {
                 let child_type_def = type_def.fine_type_def_mut(name);
                 match child_type_def {
                     Some(child_type_def) => {
-                        let child_type_inherits: Result<Vec<_>, _> =
-                            inherits.iter().map(|ty| program.resolve_type(ty)).collect();
-                        child_type_def.inherits = child_type_inherits?;
-                        collect_members(program, body, child_type_def)?;
+                        collect_members(body, child_type_def)?;
                     }
                     None => {
                         return Err(ResolverError {
@@ -215,7 +198,6 @@ pub fn collect_member_nests(
 }
 
 pub fn collect_member_operators(
-    program: &Program,
     stmts: &[ParserStatement],
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
@@ -224,21 +206,15 @@ pub fn collect_member_operators(
             ParserStatementKind::Infix {
                 symbol,
                 params,
-                return_type,
+                return_type: _,
                 attrs: _,
                 body: _,
             } => {
-                let resolved_return_type = program.resolve_type(return_type)?;
-
-                // TODO: params processing
                 let param = if let Some(first_param) = params.first() {
                     FuncParam {
                         label: first_param.label.clone(),
                         name: first_param.name.clone(),
-                        value_type: match &first_param.value_type {
-                            Some(ty) => Some(program.resolve_type(ty)?),
-                            None => None,
-                        },
+                        value_type: None,
                         def_val: None,
                     }
                 } else {
@@ -248,11 +224,10 @@ pub fn collect_member_operators(
                     });
                 };
 
-                // TODO: parse attrs for associativity and precedence
                 type_def.operators.push(Operator::InfixOperator {
                     symbol: symbol.clone(),
                     another: param,
-                    return_type: resolved_return_type,
+                    return_type: None,
                     associativity: OperatorAssociativity::Left,
                     precedence: 0,
                     body: Vec::new(),
@@ -262,20 +237,14 @@ pub fn collect_member_operators(
             ParserStatementKind::Prefix {
                 symbol,
                 params,
-                return_type,
+                return_type: _,
                 body: _,
             } => {
-                let resolved_return_type = program.resolve_type(return_type)?;
-
-                // TODO: params processing
                 let param = if let Some(first_param) = params.first() {
                     FuncParam {
                         label: first_param.label.clone(),
                         name: first_param.name.clone(),
-                        value_type: match &first_param.value_type {
-                            Some(ty) => Some(program.resolve_type(ty)?),
-                            None => None,
-                        },
+                        value_type: None,
                         def_val: None,
                     }
                 } else {
@@ -288,28 +257,22 @@ pub fn collect_member_operators(
                 type_def.operators.push(Operator::PrefixOperator {
                     symbol: symbol.clone(),
                     another: param,
-                    return_type: resolved_return_type,
-                    body: Vec::new(), // TODO: implement body
+                    return_type: None,
+                    body: Vec::new(),
                 });
             }
 
             ParserStatementKind::Postfix {
                 symbol,
                 params,
-                return_type,
+                return_type: _,
                 body: _,
             } => {
-                let resolved_return_type = program.resolve_type(return_type)?;
-
-                // TODO: params processing
                 let param = if let Some(first_param) = params.first() {
                     FuncParam {
                         label: first_param.label.clone(),
                         name: first_param.name.clone(),
-                        value_type: match &first_param.value_type {
-                            Some(ty) => Some(program.resolve_type(ty)?),
-                            None => None,
-                        },
+                        value_type: None,
                         def_val: None,
                     }
                 } else {
@@ -322,8 +285,8 @@ pub fn collect_member_operators(
                 type_def.operators.push(Operator::PostfixOperator {
                     symbol: symbol.clone(),
                     another: param,
-                    return_type: resolved_return_type,
-                    body: Vec::new(), // TODO: implement body
+                    return_type: None,
+                    body: Vec::new(),
                 });
             }
 

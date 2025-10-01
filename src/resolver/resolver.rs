@@ -23,7 +23,7 @@ pub fn resolve(statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
     let mut program = Program::new();
 
     program.types = collect_types(&statements);
-    collect_top_level_symbols(&mut program, &statements);
+    collect_top_level_symbols(&mut program, &statements)?;
 
     Ok(())
 }

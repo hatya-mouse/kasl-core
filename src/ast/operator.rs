@@ -21,7 +21,7 @@ pub enum Operator {
     InfixOperator {
         symbol: String,
         another: FuncParam,
-        return_type: SymbolPath,
+        return_type: Option<SymbolPath>,
         associativity: OperatorAssociativity,
         precedence: u8,
         body: Vec<Statement>,
@@ -29,13 +29,13 @@ pub enum Operator {
     PrefixOperator {
         symbol: String,
         another: FuncParam,
-        return_type: SymbolPath,
+        return_type: Option<SymbolPath>,
         body: Vec<Statement>,
     },
     PostfixOperator {
         symbol: String,
         another: FuncParam,
-        return_type: SymbolPath,
+        return_type: Option<SymbolPath>,
         body: Vec<Statement>,
     },
 }
