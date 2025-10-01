@@ -19,6 +19,7 @@ use crate::{
     ResolverError, ResolverErrorType, StateVar,
 };
 
+//
 pub fn collect_top_level_symbols(
     program: &mut Program,
     stmts: &[ParserStatement],

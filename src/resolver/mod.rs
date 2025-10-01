@@ -14,10 +14,8 @@
 // limitations under the License.
 //
 
+pub mod collection;
 pub mod error;
-pub mod member_collector;
 pub mod resolver;
-pub mod symbol_collector;
-pub mod type_collector;
 
 pub use error::{ResolverError, ResolverErrorType};
