@@ -14,27 +14,20 @@
 // limitations under the License.
 //
 
-use crate::{Expression, ParserStatementKind, Statement, SymbolPath};
+use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Function {
-    pub name: String,
-    pub params: Vec<FuncParam>,
-    pub return_type: Option<SymbolPath>,
-    pub body: Vec<Statement>,
-    pub required_by: Option<SymbolPath>,
+use crate::{ParserStatementKind, SymbolPath};
+
+pub struct SymbolTable<'a> {
+    pub symbol_def_table: HashMap<SymbolPath, &'a ParserStatementKind>,
+    pub func_def_table: HashMap<SymbolPath, &'a ParserStatementKind>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct FuncParam {
-    pub label: Option<String>,
-    pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Box<Expression>>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct FuncCallArg {
-    pub label: String,
-    pub value: Expression,
+impl<'a> SymbolTable<'a> {
+    pub fn new() -> Self {
+        Self {
+            symbol_def_table: HashMap::new(),
+            func_def_table: HashMap::new(),
+        }
+    }
 }

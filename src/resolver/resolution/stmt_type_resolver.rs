@@ -19,10 +19,44 @@ use crate::{
     resolution::infer_expr_type,
 };
 
+// Construct a resolving tree for functions and variables inside structs or protocols.
+pub fn construct_resolving_tree_struct(
+    program: &mut Program,
+    statements: &[ParserStatement],
+) -> Result<(), ResolverError> {
+    for stmt in statements {
+        match &stmt.kind {
+            ParserStatementKind::StructDecl {
+                name,
+                inherits,
+                body,
+            }
+            | ParserStatementKind::ProtocolDecl {
+                name,
+                inherits,
+                body,
+            } => {
+                // Loop through the body to resolve types.
+                for stmt in body {
+                    match &stmt.kind {
+                        ParserStatementKind::Input { name, value_type, def_val, attrs }
+
+                        _ => (),
+                    }
+                }
+            }
+
+            _ => (),
+        }
+    }
+
+    Ok(())
+}
+
 /// Resolve types.
 pub fn resolve_types(
     program: &mut Program,
-    statements: &Vec<ParserStatement>,
+    statements: &[ParserStatement],
 ) -> Result<(), ResolverError> {
     for stmt in statements {
         match &stmt.kind {
@@ -76,8 +110,7 @@ pub fn resolve_types(
                 let func = match program.find_func_mut(name) {
                     Some(func) => func,
                     None => {
-                        // Functions should've been parsed within symbol_collection
-                        // phase so panic here
+                        // Functions should've been parsed within the symbol_collection phase
                         panic!(
                             "Function {} not found in the program which should already be parsed.",
                             name
@@ -85,9 +118,46 @@ pub fn resolve_types(
                     }
                 };
 
+                // Set the resolved types.
                 func.required_by = r_required_by;
                 func.return_type = r_return_type;
                 func.params = r_params?;
+            }
+
+            ParserStatementKind::Input {
+                name,
+                value_type,
+                def_val,
+                attrs: _,
+            } => {
+                // Resolve types.
+                let r_value_type = match value_type {
+                    Some(ty) => Some(program.resolve_type(ty)?),
+                    None => match def_val {
+                        Some(expr) => Some(infer_expr_type(program, &expr)?),
+                        None => {
+                            return Err(ResolverError {
+                                error_type: ResolverErrorType::AmbiguousDeclaration(name.clone()),
+                                position: stmt.range,
+                            });
+                        }
+                    },
+                };
+
+                // Get the mutable refernce to the input.
+                let input = match program.find_input_mut(name) {
+                    Some(input) => input,
+                    None => {
+                        // Inputs should've been parsed within the symbol_collection phase
+                        panic!(
+                            "Input {} not found in the program which should already be parsed.",
+                            name
+                        );
+                    }
+                };
+
+                // Set the resolved types.
+                input.value_type = r_value_type;
             }
 
             _ => (),

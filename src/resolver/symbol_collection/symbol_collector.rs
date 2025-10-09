@@ -16,12 +16,13 @@
 
 use crate::{
     Function, InputVar, OutputVar, ParserStatement, ParserStatementKind, Program, ResolverError,
-    ResolverErrorType, StateVar,
+    ResolverErrorType, StateVar, SymbolTable,
 };
 
 //
 pub fn collect_top_level_symbols(
     program: &mut Program,
+    symbol_table: &mut SymbolTable,
     stmts: &[ParserStatement],
 ) -> Result<(), ResolverError> {
     for stmt in stmts {
@@ -39,6 +40,7 @@ pub fn collect_top_level_symbols(
                     attrs: Vec::new(),
                 });
             }
+
             ParserStatementKind::Output {
                 name,
                 value_type: _,
@@ -55,6 +57,7 @@ pub fn collect_top_level_symbols(
                     });
                 }
             }
+
             ParserStatementKind::FuncDecl {
                 required_by,
                 name,

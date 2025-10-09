@@ -14,14 +14,10 @@
 // limitations under the License.
 //
 
-pub mod dependency_analysis;
-pub mod error;
-pub mod member_collection;
-pub mod resolution;
-pub mod resolver;
-pub mod symbol_collection;
-pub mod symbol_table;
-pub mod type_collection;
+pub mod graph_builder;
+pub mod graph_def;
+pub mod sorter;
 
-pub use error::{ResolverError, ResolverErrorType};
-pub use symbol_table::SymbolTable;
+pub use graph_builder::build_graph;
+pub use graph_def::{DependencyGraphEdge, DependencyGraphNode};
+pub use sorter::sort_graph;

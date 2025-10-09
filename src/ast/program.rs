@@ -102,4 +102,34 @@ impl Program {
     pub fn find_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
         self.types.iter_mut().find(|s| s.name == name)
     }
+
+    // # State
+
+    pub fn find_state_var(&self, name: &str) -> Option<&StateVar> {
+        self.states.iter().find(|s| s.name == name)
+    }
+
+    pub fn find_state_var_mut(&mut self, name: &str) -> Option<&mut StateVar> {
+        self.states.iter_mut().find(|s| s.name == name)
+    }
+
+    // # Input
+
+    pub fn find_input(&self, name: &str) -> Option<&InputVar> {
+        self.inputs.iter().find(|i| i.name == name)
+    }
+
+    pub fn find_input_mut(&mut self, name: &str) -> Option<&mut InputVar> {
+        self.inputs.iter_mut().find(|i| i.name == name)
+    }
+
+    // # Output
+
+    pub fn find_output(&self, name: &str) -> Option<&OutputVar> {
+        self.outputs.iter().find(|o| o.name == name)
+    }
+
+    pub fn find_output_mut(&mut self, name: &str) -> Option<&mut OutputVar> {
+        self.outputs.iter_mut().find(|o| o.name == name)
+    }
 }

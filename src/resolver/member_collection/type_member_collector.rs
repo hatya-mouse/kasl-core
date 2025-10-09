@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatement, ParserStatementKind, Program, ResolverError, TypeDef,
+    ParserStatement, ParserStatementKind, Program, ResolverError, SymbolTable, TypeDef,
     member_collection::{
         collect_member_functions, collect_member_nests, collect_member_operators,
         collect_member_variables,
@@ -25,6 +25,7 @@ use crate::{
 /// Loop through the top level and collect type members.
 pub fn collect_all_type_members(
     program: &mut Program,
+    symbol_table: &mut SymbolTable,
     stmts: &[ParserStatement],
 ) -> Result<(), ResolverError> {
     for stmt in stmts {
@@ -40,7 +41,7 @@ pub fn collect_all_type_members(
                 body,
             } => match program.find_type_def_mut(name) {
                 Some(parent_type_def) => {
-                    collect_type_members(body, parent_type_def)?;
+                    collect_type_members(body, symbol_table, parent_type_def)?;
                 }
                 None => {
                     panic!("TypeDef {} not found while it's defined", name);
@@ -57,11 +58,12 @@ pub fn collect_all_type_members(
 // Collects members in a given struct or protocol.
 pub fn collect_type_members(
     stmts: &[ParserStatement],
+    symbol_table: &mut SymbolTable,
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    collect_member_variables(stmts, type_def)?;
-    collect_member_functions(stmts, type_def)?;
-    collect_member_operators(stmts, type_def)?;
+    collect_member_variables(stmts, symbol_table, type_def)?;
+    collect_member_functions(stmts, symbol_table, type_def)?;
+    collect_member_operators(stmts, symbol_table, type_def)?;
     collect_member_nests(stmts, type_def)?;
 
     Ok(())

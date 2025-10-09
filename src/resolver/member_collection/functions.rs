@@ -15,11 +15,13 @@
 //
 
 use crate::{
-    FuncParam, Function, Initializer, ParserStatement, ParserStatementKind, ResolverError, TypeDef,
+    FuncParam, Function, Initializer, ParserStatement, ParserStatementKind, ResolverError,
+    SymbolTable, TypeDef,
 };
 
 pub fn collect_member_functions(
     stmts: &[ParserStatement],
+    symbol_table: &mut SymbolTable,
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
     for stmt in stmts {

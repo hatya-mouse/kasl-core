@@ -14,27 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{Expression, ParserStatementKind, Statement, SymbolPath};
+use crate::SymbolPath;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Function {
-    pub name: String,
-    pub params: Vec<FuncParam>,
-    pub return_type: Option<SymbolPath>,
-    pub body: Vec<Statement>,
-    pub required_by: Option<SymbolPath>,
+pub struct DependencyGraphNode {
+    name: SymbolPath,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct FuncParam {
-    pub label: Option<String>,
-    pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Box<Expression>>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct FuncCallArg {
-    pub label: String,
-    pub value: Expression,
+pub struct DependencyGraphEdge {
+    from: DependencyGraphNode,
+    to: DependencyGraphNode,
 }
