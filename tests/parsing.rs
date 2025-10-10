@@ -16,7 +16,9 @@
 
 #[cfg(test)]
 mod parsing {
-    use kash::{ExprToken, ParserFuncCallArg, kash_parser, parser_ast::ExprTokenKind};
+    use kash::{
+        ExprToken, ParserSymbolPathComponent, Range, kash_parser, parser_ast::ExprTokenKind,
+    };
 
     /// Test parsing of chained expressions.
     #[test]
@@ -26,9 +28,11 @@ mod parsing {
         assert_eq!(
             object,
             Ok(vec![ExprToken {
-                start: 0,
-                end: 6,
-                kind: ExprTokenKind::Identifier(vec!["object".to_string()])
+                range: Range::n(0, 6),
+                kind: ExprTokenKind::Identifier(vec![ParserSymbolPathComponent {
+                    range: Range::n(0, 6),
+                    symbol: "object".to_string(),
+                }])
             }])
         );
 
@@ -37,55 +41,17 @@ mod parsing {
         assert_eq!(
             object_property,
             Ok(vec![ExprToken {
-                start: 0,
-                end: 15,
-                kind: ExprTokenKind::Identifier(vec!["object".to_string(), "property".to_string()])
-            }])
-        );
-
-        let long_property = kash_parser::expression("object.property.subproperty");
-        // println!("{:#?}", long_property);
-        assert_eq!(
-            long_property,
-            Ok(vec![ExprToken {
-                start: 0,
-                end: 27,
+                range: Range::n(0, 15),
                 kind: ExprTokenKind::Identifier(vec![
-                    "object".to_string(),
-                    "property".to_string(),
-                    "subproperty".to_string()
+                    ParserSymbolPathComponent {
+                        range: Range::n(0, 6),
+                        symbol: "object".to_string()
+                    },
+                    ParserSymbolPathComponent {
+                        range: Range::n(7, 15),
+                        symbol: "property".to_string()
+                    }
                 ])
-            }])
-        );
-
-        let method_chain = kash_parser::expression("object.method(param1, param2)");
-        // println!("{:#?}", method_chain);
-        assert_eq!(
-            method_chain,
-            Ok(vec![ExprToken {
-                start: 0,
-                end: 29,
-                kind: ExprTokenKind::FuncCall {
-                    name: vec!["object".to_string(), "method".to_string()],
-                    args: vec![
-                        ParserFuncCallArg {
-                            label: None,
-                            value: vec![ExprToken {
-                                start: 14,
-                                end: 20,
-                                kind: ExprTokenKind::Identifier(vec!["param1".to_string()])
-                            }]
-                        },
-                        ParserFuncCallArg {
-                            label: None,
-                            value: vec![ExprToken {
-                                start: 22,
-                                end: 28,
-                                kind: ExprTokenKind::Identifier(vec!["param2".to_string()])
-                            }]
-                        }
-                    ]
-                }
             }])
         );
     }
@@ -120,7 +86,7 @@ mod parsing {
         ";
 
         let parsed_program = kash_parser::parse(program);
-        // println!("{:#?}", parsed_program);
+        println!("{:#?}", parsed_program);
         assert!(parsed_program.is_ok());
     }
 

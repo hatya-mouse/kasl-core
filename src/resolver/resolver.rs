@@ -14,19 +14,18 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserStatement, Program, ResolverError, SymbolTable,
-    member_collection::collect_all_type_members, symbol_collection::collect_top_level_symbols,
-    type_collection::collect_types,
-};
+use crate::{ParserStatement, ResolverError, SymbolTable, symbol_table::build_symbol_table};
 
 pub fn resolve(statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
-    let mut program = Program::new();
+    // let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
 
-    program.types = collect_types(&statements);
-    collect_top_level_symbols(&mut program, &mut symbol_table, &statements)?;
-    collect_all_type_members(&mut program, &mut symbol_table, &statements)?;
+    build_symbol_table(&mut symbol_table, &statements);
+    println!("{:#?}", &symbol_table);
+
+    // program.types = collect_types(&statements);
+    // collect_top_level_symbols(&mut program, &mut symbol_table, &statements)?;
+    // collect_all_type_members(&mut program, &mut symbol_table, &statements)?;
 
     Ok(())
 }

@@ -15,3 +15,4 @@
 //
 
 pub mod parsing;
+pub mod symbol_table;

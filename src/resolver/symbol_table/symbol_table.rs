@@ -18,6 +18,7 @@ use std::collections::HashMap;
 
 use crate::ParserStatement;
 
+#[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
     pub vars: HashMap<String, &'a ParserStatement>,
     pub funcs: HashMap<String, &'a ParserStatement>,

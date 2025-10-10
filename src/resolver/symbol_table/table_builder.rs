@@ -21,6 +21,8 @@ pub fn build_symbol_table<'a>(
     statements: &'a [ParserStatement],
 ) {
     for stmt in statements {
+        println!("Parsing {:#?}", &stmt.kind);
+
         match &stmt.kind {
             ParserStatementKind::FuncDecl {
                 required_by: _,
@@ -78,6 +80,7 @@ pub fn build_nest_symbol_table<'a>(
     statements: &'a [ParserStatement],
 ) {
     for stmt in statements {
+        println!("Parsing {:#?} inside {}", &stmt.kind, &path);
         match &stmt.kind {
             ParserStatementKind::Var {
                 required_by: _,
