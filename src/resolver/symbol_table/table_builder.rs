@@ -64,7 +64,9 @@ pub fn build_symbol_table<'a>(
                 inherits: _,
                 body,
             } => {
-                build_nest_symbol_table(name.clone(), symbol_table, body);
+                let mut nested_table = SymbolTable::new();
+                build_nest_symbol_table(&mut nested_table, body);
+                symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
             }
 
             _ => {}
@@ -73,7 +75,6 @@ pub fn build_symbol_table<'a>(
 }
 
 pub fn build_nest_symbol_table<'a>(
-    path: String,
     symbol_table: &mut SymbolTable<'a>,
     statements: &'a [ParserStatement],
 ) {
@@ -85,8 +86,7 @@ pub fn build_nest_symbol_table<'a>(
                 value_type: _,
                 def_val: _,
             } => {
-                let full_path = format!("{}.{}", &path, name);
-                symbol_table.insert_var(full_path, &stmt);
+                symbol_table.insert_var(name.clone(), &stmt);
             }
 
             ParserStatementKind::FuncDecl {
@@ -96,8 +96,7 @@ pub fn build_nest_symbol_table<'a>(
                 return_type: _,
                 body: _,
             } => {
-                let full_path = format!("{}.{}", &path, name);
-                symbol_table.insert_func(full_path, &stmt);
+                symbol_table.insert_func(name.clone(), &stmt);
             }
 
             ParserStatementKind::Init {
@@ -106,7 +105,7 @@ pub fn build_nest_symbol_table<'a>(
                 params: _,
                 body: _,
             } => {
-                symbol_table.insert_init(path.clone(), &stmt);
+                symbol_table.insert_init(&stmt);
             }
 
             ParserStatementKind::Infix {
@@ -128,22 +127,22 @@ pub fn build_nest_symbol_table<'a>(
                 return_type: _,
                 body: _,
             } => {
-                let full_path = format!("{}.{}", &path, symbol);
-                symbol_table.insert_operator(full_path, &stmt);
+                symbol_table.insert_operator(symbol.clone(), &stmt);
             }
 
             ParserStatementKind::StructDecl {
                 name,
                 inherits: _,
-                body: _,
+                body,
             }
             | ParserStatementKind::ProtocolDecl {
                 name,
                 inherits: _,
-                body: _,
+                body,
             } => {
-                let full_path = format!("{}.{}", &path, name);
-                build_nest_symbol_table(full_path, symbol_table, statements);
+                let mut nested_table = SymbolTable::new();
+                build_nest_symbol_table(&mut nested_table, body);
+                symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
             }
 
             _ => (),

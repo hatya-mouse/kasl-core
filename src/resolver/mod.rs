@@ -21,7 +21,7 @@ pub mod error;
 pub mod resolver;
 // pub mod symbol_collection;
 pub mod symbol_table;
-// pub mod type_collection;
+pub mod type_collection;
 
 pub use error::{ResolverError, ResolverErrorType};
 pub use symbol_table::SymbolTable;

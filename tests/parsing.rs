@@ -86,7 +86,7 @@ mod parsing {
         ";
 
         let parsed_program = kash_parser::parse(program);
-        println!("{:#?}", parsed_program);
+        // println!("{:#?}", parsed_program);
         assert!(parsed_program.is_ok());
     }
 

@@ -14,29 +14,40 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatement, ParserStatementKind, TypeDef};
+use crate::{ParserStatementKind, SymbolTable, TypeDef};
 
-pub fn collect_types(stmts: &[ParserStatement]) -> Vec<TypeDef> {
+pub fn collect_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
     let mut types = Vec::new();
 
-    for stmt in stmts {
-        match &stmt.kind {
+    for (_, stmt) in &symbol_table.type_defs {
+        match &stmt.0.kind {
             ParserStatementKind::StructDecl {
                 name,
                 inherits: _,
-                body,
+                body: _,
             }
             | ParserStatementKind::ProtocolDecl {
                 name,
                 inherits: _,
-                body,
+                body: _,
             } => {
-                let mut type_def = TypeDef::new(name.clone());
-                let child_types = collect_types(&body);
-                type_def.types = child_types;
-                types.push(type_def);
+                let nested_types = collect_types(&stmt.1);
+                types.push(TypeDef {
+                    name: name.clone(),
+                    inherits: Vec::new(),
+                    vars: Vec::new(),
+                    inits: Vec::new(),
+                    funcs: Vec::new(),
+                    types: nested_types,
+                    operators: Vec::new(),
+                })
             }
-            _ => (),
+
+            _ => {
+                panic!(
+                    "SymbolTable::type_defs must only include StructDecl(s) and ProtocolDecl(s)",
+                );
+            }
         }
     }
 
