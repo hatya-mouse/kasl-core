@@ -39,8 +39,8 @@ impl Clone for DependencyGraphNode {
 /// # Example
 /// Edge `A -> B` means that "A depends on B", therefore B must be resolved before A.
 pub struct DependencyGraphEdge {
-    from: DependencyGraphNode,
-    to: DependencyGraphNode,
+    pub from: DependencyGraphNode,
+    pub to: DependencyGraphNode,
 }
 
 impl DependencyGraphEdge {

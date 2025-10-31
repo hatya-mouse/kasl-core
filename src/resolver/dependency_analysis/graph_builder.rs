@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
+    ParserStatementKind, Program, SymbolPathComponent, SymbolTable,
     dependency_analysis::{build_func_graph, build_struct_and_protocol_graph, build_var_graph},
 };
 
@@ -86,7 +86,7 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
             } => {
                 if let Some(decl_stmt) = symbol_table.get_type_def(&name) {
                     let child_symbol_table = &decl_stmt.1;
-                    let mut child_type_path = vec![SymbolPathComponent::TypeDef(name.to_string())];
+                    let child_type_path = vec![SymbolPathComponent::TypeDef(name.to_string())];
 
                     build_struct_and_protocol_graph(
                         &mut graph,

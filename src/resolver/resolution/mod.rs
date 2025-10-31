@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-pub mod expr_inference;
-pub mod stmt_type_resolver;
+// pub mod expr_inference;
 
-pub use expr_inference::infer_expr_type;
-pub use stmt_type_resolver::resolve_types;
+// pub use expr_inference::infer_expr_type;
