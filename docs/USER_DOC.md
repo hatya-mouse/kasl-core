@@ -185,7 +185,7 @@ struct Point {
         self.y = y
     }
 
-    func distance(&self, other: &Point) -> Float {
+    func distance(other: Point) -> Float {
         return ((self.x - other.x).powf(2.0) + (self.y - other.y).powf(2.0)).sqrt()
     }
 }
@@ -193,7 +193,7 @@ struct Point {
 func main() {
     var point1 = Point(x: 1.0, y: 2.0)
     var point2 = Point(x: 3.0, y: 4.0)
-    var distance = point1.distance(&point2) // Calculate the distance between point1 and point2
+    var distance = point1.distance(point2) // Calculate the distance between point1 and point2
 }
 ```
 
