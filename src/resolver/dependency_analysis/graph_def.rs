@@ -34,21 +34,27 @@ impl DependencyGraph {
         self.nodes.insert(node.name.clone(), node);
     }
 
-    pub fn add_edge(&mut self, from: &SymbolPath, to: &SymbolPath) {
-        self.edges.push(DependencyGraphEdge {
-            from: from.clone(),
-            to: to.clone(),
-        });
+    pub fn add_edge(&mut self, from: &SymbolPath, target: &SymbolPath) {
+        self.edges
+            .push(DependencyGraphEdge::new(from.clone(), target.clone()));
+    }
+
+    pub fn node_paths(&self) -> Vec<&SymbolPath> {
+        self.nodes.keys().collect()
+    }
+
+    pub fn edges(&self) -> Vec<&DependencyGraphEdge> {
+        self.edges.iter().collect()
     }
 
     pub fn node(&self, name: &SymbolPath) -> Option<&DependencyGraphNode> {
         self.nodes.get(name)
     }
 
-    pub fn edge(&self, from: &SymbolPath, to: &SymbolPath) -> Option<&DependencyGraphEdge> {
+    pub fn edge(&self, from: &SymbolPath, target: &SymbolPath) -> Option<&DependencyGraphEdge> {
         self.edges
             .iter()
-            .find(|edge| edge.from == *from && edge.to == *to)
+            .find(|edge| edge.from == *from && edge.target == *target)
     }
 
     pub fn get_edge_nodes(
@@ -56,10 +62,18 @@ impl DependencyGraph {
         edge: &DependencyGraphEdge,
     ) -> Option<(&DependencyGraphNode, &DependencyGraphNode)> {
         self.node(&edge.from)
-            .and_then(|from| self.node(&edge.to).map(|to| (from, to)))
+            .and_then(|from| self.node(&edge.target).map(|target| (from, target)))
+    }
+
+    pub fn get_edges_from_node(&self, path: &SymbolPath) -> Vec<&DependencyGraphEdge> {
+        self.edges
+            .iter()
+            .filter(|edge| edge.from == *path)
+            .collect()
     }
 }
 
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct DependencyGraphNode {
     name: SymbolPath,
 }
@@ -82,13 +96,14 @@ impl Clone for DependencyGraphNode {
 ///
 /// # Example
 /// Edge `A -> B` means that "A depends on B", therefore B must be resolved before A.
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct DependencyGraphEdge {
     pub from: SymbolPath,
-    pub to: SymbolPath,
+    pub target: SymbolPath,
 }
 
 impl DependencyGraphEdge {
-    pub fn new(from: SymbolPath, to: SymbolPath) -> Self {
-        DependencyGraphEdge { from, to }
+    pub fn new(from: SymbolPath, target: SymbolPath) -> Self {
+        DependencyGraphEdge { from, target }
     }
 }

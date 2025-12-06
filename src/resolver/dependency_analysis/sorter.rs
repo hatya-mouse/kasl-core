@@ -14,4 +14,48 @@
 // limitations under the License.
 //
 
-pub fn sort_graph() {}
+use std::collections::{HashMap, VecDeque};
+
+use crate::{DependencyGraph, SymbolPath};
+
+pub fn sort_graph(graph: &DependencyGraph) -> Result<(), Vec<SymbolPath>> {
+    // Calculate the in degree of each node
+    let mut in_degrees = HashMap::new();
+
+    for node in graph.node_paths() {
+        in_degrees.insert(node, 0);
+    }
+
+    for edge in graph.edges() {
+        *in_degrees.get_mut(&edge.target).unwrap() += 1;
+    }
+
+    // Initialize the queue with nodes that have no incoming edges
+    let mut queue = VecDeque::new();
+    for node in graph.node_paths() {
+        if in_degrees[node] == 0 {
+            queue.push_back(node);
+        }
+    }
+
+    // Perform topological sorting
+    let mut sorted_nodes = Vec::new();
+    while let Some(node) = queue.pop_front() {
+        sorted_nodes.push(node);
+        for edge in graph.get_edges_from_node(&node) {
+            *in_degrees.get_mut(&edge.target).unwrap() -= 1;
+            if in_degrees[&edge.target] == 0 {
+                in_degrees.remove(&edge.target);
+                queue.push_back(&edge.target);
+            }
+        }
+    }
+
+    // Check if the graph is acyclic
+    if sorted_nodes.len() != graph.node_paths().len() {
+        let cyclic_nodes = in_degrees.keys().map(|&node| node.clone()).collect();
+        Err(cyclic_nodes)
+    } else {
+        Ok(())
+    }
+}

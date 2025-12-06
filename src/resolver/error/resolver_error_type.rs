@@ -27,6 +27,7 @@ pub enum ResolverErrorType {
     InvalidRequiredBy,
     AmbiguousDeclaration(String),
     NotEnoughParamForOp(OperatorKind),
+    CycleDetected,
 
     Placeholder,
 }
@@ -71,6 +72,7 @@ impl ResolverErrorType {
                     op_type.to_string()
                 )
             }
+            ResolverErrorType::CycleDetected => "Cycle detected in dependency graph".to_string(),
 
             ResolverErrorType::Placeholder => "PLACEHOLDER ERROR".to_string(),
         }
