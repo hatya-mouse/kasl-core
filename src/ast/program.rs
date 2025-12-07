@@ -16,16 +16,16 @@
 
 use crate::{Function, InputVar, OutputVar, StateVar, TypeDef};
 
-pub struct Program {
-    pub main_func: Option<Function>,
-    pub funcs: Vec<Function>,
-    pub types: Vec<TypeDef>,
-    pub states: Vec<StateVar>,
-    pub inputs: Vec<InputVar>,
-    pub outputs: Vec<OutputVar>,
+pub struct Program<'a> {
+    pub main_func: Option<Function<'a>>,
+    pub funcs: Vec<Function<'a>>,
+    pub types: Vec<TypeDef<'a>>,
+    pub states: Vec<StateVar<'a>>,
+    pub inputs: Vec<InputVar<'a>>,
+    pub outputs: Vec<OutputVar<'a>>,
 }
 
-impl Program {
+impl<'a> Program<'a> {
     pub fn new() -> Self {
         Self {
             main_func: None,
@@ -37,55 +37,8 @@ impl Program {
         }
     }
 
-    // -- Getter Functions --
-
-    // # Function
-
-    pub fn find_func(&self, name: &str) -> Option<&Function> {
-        self.funcs.iter().find(|f| f.name == name)
-    }
-
-    pub fn find_func_mut(&mut self, name: &str) -> Option<&mut Function> {
-        self.funcs.iter_mut().find(|f| f.name == name)
-    }
-
-    // # Type
-
-    pub fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
-        self.types.iter().find(|s| s.name == name)
-    }
-
-    pub fn find_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
+    // Get a mutable reference to a TypeDef by name
+    pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>> {
         self.types.iter_mut().find(|s| s.name == name)
-    }
-
-    // # State
-
-    pub fn find_state_var(&self, name: &str) -> Option<&StateVar> {
-        self.states.iter().find(|s| s.name == name)
-    }
-
-    pub fn find_state_var_mut(&mut self, name: &str) -> Option<&mut StateVar> {
-        self.states.iter_mut().find(|s| s.name == name)
-    }
-
-    // # Input
-
-    pub fn find_input(&self, name: &str) -> Option<&InputVar> {
-        self.inputs.iter().find(|i| i.name == name)
-    }
-
-    pub fn find_input_mut(&mut self, name: &str) -> Option<&mut InputVar> {
-        self.inputs.iter_mut().find(|i| i.name == name)
-    }
-
-    // # Output
-
-    pub fn find_output(&self, name: &str) -> Option<&OutputVar> {
-        self.outputs.iter().find(|o| o.name == name)
-    }
-
-    pub fn find_output_mut(&mut self, name: &str) -> Option<&mut OutputVar> {
-        self.outputs.iter_mut().find(|o| o.name == name)
     }
 }

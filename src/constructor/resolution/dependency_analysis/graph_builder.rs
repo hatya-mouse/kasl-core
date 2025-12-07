@@ -15,12 +15,14 @@
 //
 
 use crate::{
-    DependencyGraph, ParserStatementKind, Program, SymbolPathComponent, SymbolTable,
-    dependency_analysis::{build_func_graph, build_struct_and_protocol_graph, build_var_graph},
+    ParserStatementKind, SymbolPathComponent, SymbolTable,
+    resolution::dependency_analysis::{
+        DependencyGraph, build_func_graph, build_struct_and_protocol_graph, build_var_graph,
+    },
     symbol_path,
 };
 
-pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
+pub fn build_graph(symbol_table: &SymbolTable) -> DependencyGraph {
     let mut graph = DependencyGraph::new();
 
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
@@ -35,7 +37,8 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 if value_type.is_none() {
                     if let Some(def_val) = def_val {
                         // Combine variable name to create a new path for the child type
-                        let var_path = symbol_path![SymbolPathComponent::Var(name.to_string())];
+                        let var_path =
+                            symbol_path![SymbolPathComponent::InputVar(name.to_string())];
                         build_var_graph(&mut graph, symbol_table, var_path, def_val);
                     }
                 }
@@ -45,7 +48,8 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 for var in vars {
                     if var.value_type.is_none() {
                         // Combine variable name to create a new path for the child type
-                        let var_path = symbol_path![SymbolPathComponent::Var(var.name.to_string())];
+                        let var_path =
+                            symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
                         build_var_graph(&mut graph, symbol_table, var_path, &var.def_val);
                     }
                 }
@@ -92,7 +96,6 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
 
                     build_struct_and_protocol_graph(
                         &mut graph,
-                        program,
                         &child_type_path,
                         symbol_table,
                         child_symbol_table,
@@ -103,4 +106,6 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
             _ => (),
         }
     }
+
+    graph
 }

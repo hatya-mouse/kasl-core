@@ -17,6 +17,7 @@
 use crate::{ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent};
 use std::collections::HashMap;
 
+/// SymbolTable stores a reference to the declaration statement of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
     pub vars: HashMap<String, &'a ParserStatement>,
@@ -108,5 +109,35 @@ impl<'a> SymbolTable<'a> {
 
     pub fn get_inits(&self) -> &Vec<&ParserStatement> {
         &self.inits
+    }
+
+    /// Gets the statement by SymbolPath.
+    /// Componenets except the last one must be a Type statement.
+    pub fn get_statement_by_path(&self, symbol_path: &SymbolPath) -> Option<&&ParserStatement> {
+        let mut current_scope = self;
+        let components = &symbol_path.components;
+        let last_index = components.len().checked_sub(1)?;
+
+        for i in 0..last_index {
+            match &components[i] {
+                SymbolPathComponent::TypeDef(type_name) => {
+                    if let Some(type_def_entry) = current_scope.type_defs.get(type_name) {
+                        current_scope = &type_def_entry.1;
+                    } else {
+                        return None;
+                    }
+                }
+                _ => return None,
+            }
+        }
+
+        match &components[last_index] {
+            SymbolPathComponent::Var(name) => current_scope.get_var(name),
+            SymbolPathComponent::Func(name) => current_scope.get_func(name),
+            SymbolPathComponent::TypeDef(name) => {
+                current_scope.get_type_def(name).map(|entry| &entry.0)
+            }
+            _ => None,
+        }
     }
 }

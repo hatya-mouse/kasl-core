@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatementKind, ResolverError, SymbolTable, TypeDef,
+    ConstructorError, ParserStatementKind, SymbolTable, TypeDef,
     member_collection::collect_type_members,
 };
 
@@ -23,7 +23,7 @@ use crate::{
 pub fn collect_member_nests(
     symbol_table: &SymbolTable,
     type_def: &mut TypeDef,
-) -> Result<(), ResolverError> {
+) -> Result<(), ConstructorError> {
     for stmt in &symbol_table.type_defs {
         match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
@@ -35,7 +35,7 @@ pub fn collect_member_nests(
                 name,
                 inherits: _,
                 body: _,
-            } => match type_def.find_type_def_mut(&name) {
+            } => match type_def.get_type_def_mut(&name) {
                 Some(parent_type_def) => {
                     collect_type_members(&stmt.1.1, parent_type_def)?;
                 }

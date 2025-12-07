@@ -15,14 +15,14 @@
 //
 
 use crate::{
-    FuncParam, Operator, OperatorAssociativity, ParserStatementKind, ResolverError,
-    ResolverErrorType, SymbolTable, TypeDef, error::resolver_error_type::OperatorKind,
+    ConstructorError, ConstructorErrorType, FuncParam, Operator, OperatorAssociativity,
+    ParserStatementKind, SymbolTable, TypeDef, error::constructor_error_type::OperatorKind,
 };
 
 pub fn collect_member_operators(
     symbol_table: &SymbolTable,
     type_def: &mut TypeDef,
-) -> Result<(), ResolverError> {
+) -> Result<(), ConstructorError> {
     for stmt in &symbol_table.operators {
         match &stmt.1.kind {
             ParserStatementKind::Infix {
@@ -40,8 +40,8 @@ pub fn collect_member_operators(
                         def_val: None,
                     }
                 } else {
-                    return Err(ResolverError {
-                        error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Infix),
+                    return Err(ConstructorError {
+                        error_type: ConstructorErrorType::NotEnoughParamForOp(OperatorKind::Infix),
                         position: stmt.1.range,
                     });
                 };
@@ -70,8 +70,8 @@ pub fn collect_member_operators(
                         def_val: None,
                     }
                 } else {
-                    return Err(ResolverError {
-                        error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Prefix),
+                    return Err(ConstructorError {
+                        error_type: ConstructorErrorType::NotEnoughParamForOp(OperatorKind::Prefix),
                         position: stmt.1.range,
                     });
                 };
@@ -98,8 +98,10 @@ pub fn collect_member_operators(
                         def_val: None,
                     }
                 } else {
-                    return Err(ResolverError {
-                        error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Postfix),
+                    return Err(ConstructorError {
+                        error_type: ConstructorErrorType::NotEnoughParamForOp(
+                            OperatorKind::Postfix,
+                        ),
                         position: stmt.1.range,
                     });
                 };

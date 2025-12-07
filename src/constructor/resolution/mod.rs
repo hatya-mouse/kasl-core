@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-pub mod resolver_error;
-pub mod resolver_error_type;
+pub mod dependency_analysis;
+pub mod expr_inference;
+pub mod resolver;
 
-pub use resolver_error::ResolverError;
-pub use resolver_error_type::ResolverErrorType;
+pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};

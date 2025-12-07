@@ -16,9 +16,9 @@
 
 use std::collections::{HashMap, VecDeque};
 
-use crate::{DependencyGraph, SymbolPath};
+use crate::{SymbolPath, resolution::dependency_analysis::DependencyGraph};
 
-pub fn sort_graph(graph: &DependencyGraph) -> Result<(), Vec<SymbolPath>> {
+pub fn sort_graph(graph: &DependencyGraph) -> Result<Vec<&SymbolPath>, Vec<SymbolPath>> {
     // Calculate the in degree of each node
     let mut in_degrees = HashMap::new();
 
@@ -56,6 +56,6 @@ pub fn sort_graph(graph: &DependencyGraph) -> Result<(), Vec<SymbolPath>> {
         let cyclic_nodes = in_degrees.keys().map(|&node| node.clone()).collect();
         Err(cyclic_nodes)
     } else {
-        Ok(())
+        Ok(sorted_nodes)
     }
 }

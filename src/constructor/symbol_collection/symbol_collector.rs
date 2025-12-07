@@ -15,15 +15,15 @@
 //
 
 use crate::{
-    Function, InputVar, OutputVar, ParserStatementKind, Program, ResolverError, ResolverErrorType,
-    StateVar, SymbolTable,
+    ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserStatementKind,
+    Program, StateVar, SymbolTable,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
 pub fn collect_top_level_symbols(
     program: &mut Program,
-    symbol_table: &mut SymbolTable,
-) -> Result<(), ResolverError> {
+    symbol_table: &SymbolTable,
+) -> Result<(), ConstructorError> {
     for stmt in &symbol_table.vars {
         match &stmt.1.kind {
             ParserStatementKind::Input {
@@ -72,9 +72,9 @@ pub fn collect_top_level_symbols(
                 body: _,
             } => {
                 if required_by.is_some() {
-                    return Err(ResolverError {
+                    return Err(ConstructorError {
                         position: stmt.1.range,
-                        error_type: ResolverErrorType::InvalidRequiredBy,
+                        error_type: ConstructorErrorType::InvalidRequiredBy,
                     });
                 }
 

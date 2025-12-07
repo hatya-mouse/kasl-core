@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatementKind, Program, ResolverError, SymbolTable, TypeDef,
+    ConstructorError, ParserStatementKind, Program, SymbolTable, TypeDef,
     member_collection::{
         collect_member_functions, collect_member_nests, collect_member_operators,
         collect_member_variables,
@@ -26,7 +26,7 @@ use crate::{
 pub fn collect_all_type_members(
     program: &mut Program,
     symbol_table: &SymbolTable,
-) -> Result<(), ResolverError> {
+) -> Result<(), ConstructorError> {
     for stmt in &symbol_table.type_defs {
         match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
@@ -38,7 +38,7 @@ pub fn collect_all_type_members(
                 name,
                 inherits: _,
                 body: _,
-            } => match program.find_type_def_mut(name) {
+            } => match program.get_type_def_mut(name) {
                 Some(parent_type_def) => {
                     collect_type_members(&stmt.1.1, parent_type_def)?;
                 }
@@ -58,7 +58,7 @@ pub fn collect_all_type_members(
 pub fn collect_type_members(
     child_symbol_table: &SymbolTable,
     parent_type_def: &mut TypeDef,
-) -> Result<(), ResolverError> {
+) -> Result<(), ConstructorError> {
     collect_member_variables(child_symbol_table, parent_type_def)?;
     collect_member_functions(child_symbol_table, parent_type_def)?;
     collect_member_operators(child_symbol_table, parent_type_def)?;

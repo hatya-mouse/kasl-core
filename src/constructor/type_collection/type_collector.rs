@@ -14,9 +14,14 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatementKind, SymbolTable, TypeDef};
+use crate::{ParserStatementKind, Program, SymbolTable, TypeDef};
 
-pub fn collect_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
+pub fn collect_all_types(program: &mut Program, symbol_table: &SymbolTable) {
+    let types = collect_nested_types(symbol_table);
+    program.types.extend(types);
+}
+
+fn collect_nested_types<'a>(symbol_table: &SymbolTable) -> Vec<TypeDef<'a>> {
     let mut types = Vec::new();
 
     for (_, stmt) in &symbol_table.type_defs {
@@ -31,7 +36,7 @@ pub fn collect_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
                 inherits: _,
                 body: _,
             } => {
-                let nested_types = collect_types(&stmt.1);
+                let nested_types = collect_nested_types(&stmt.1);
                 types.push(TypeDef {
                     name: name.clone(),
                     inherits: Vec::new(),

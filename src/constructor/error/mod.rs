@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
-pub mod type_collector;
+pub mod constructor_error;
+pub mod constructor_error_type;
 
-pub use type_collector::collect_types;
+pub use constructor_error::ConstructorError;
+pub use constructor_error_type::ConstructorErrorType;

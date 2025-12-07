@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-use std::ops::Index;
+use std::{fmt::Display, ops::Index};
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct SymbolPath {
-    components: Vec<SymbolPathComponent>,
+    pub components: Vec<SymbolPathComponent>,
 }
 
 impl SymbolPath {
@@ -41,15 +41,49 @@ impl Index<usize> for SymbolPath {
     }
 }
 
+impl Display for SymbolPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.components
+                .iter()
+                .map(|c| c.to_string())
+                .collect::<Vec<String>>()
+                .join(".")
+        )
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum SymbolPathComponent {
     CompInt,
     CompFloat,
     CompBool,
     Var(String),
+    StateVar(String),
+    InputVar(String),
+    OutputVar(String),
     Func(String),
     TypeDef(String),
     FuncParam(String),
+}
+
+impl Display for SymbolPathComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SymbolPathComponent::CompInt => write!(f, "CompInt"),
+            SymbolPathComponent::CompFloat => write!(f, "CompFloat"),
+            SymbolPathComponent::CompBool => write!(f, "CompBool"),
+            SymbolPathComponent::Var(name)
+            | SymbolPathComponent::StateVar(name)
+            | SymbolPathComponent::InputVar(name)
+            | SymbolPathComponent::OutputVar(name)
+            | SymbolPathComponent::Func(name)
+            | SymbolPathComponent::TypeDef(name)
+            | SymbolPathComponent::FuncParam(name) => write!(f, "{}", name),
+        }
+    }
 }
 
 // Use this macro to create a SymbolPath from a simple list of components

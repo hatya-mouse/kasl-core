@@ -14,6 +14,23 @@
 // limitations under the License.
 //
 
-// pub mod expr_inference;
+use crate::{ConstructorErrorType, Range};
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+};
 
-// pub use expr_inference::infer_expr_type;
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct ConstructorError {
+    pub error_type: ConstructorErrorType,
+    pub position: Range,
+}
+
+impl Display for ConstructorError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let message = self.error_type.format();
+        write!(f, "{}", message)
+    }
+}
+
+impl Error for ConstructorError {}

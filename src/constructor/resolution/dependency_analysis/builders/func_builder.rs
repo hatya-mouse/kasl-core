@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    DependencyGraph, ExprTokenKind, ParserFuncParam, SymbolPath, SymbolPathComponent, SymbolTable,
+    ExprTokenKind, ParserFuncParam, SymbolPath, SymbolPathComponent, SymbolTable,
+    resolution::dependency_analysis::DependencyGraph,
 };
 
 pub fn build_func_graph(

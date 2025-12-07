@@ -14,20 +14,20 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Function, Operator, Statement, SymbolPath, Variable};
+use crate::{FuncParam, Function, Operator, Statement, Variable};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct TypeDef {
+pub struct TypeDef<'a> {
     pub name: String,
-    pub inherits: Vec<SymbolPath>,
-    pub vars: Vec<Variable>,
-    pub inits: Vec<Initializer>,
-    pub funcs: Vec<Function>,
-    pub types: Vec<TypeDef>,
-    pub operators: Vec<Operator>,
+    pub inherits: Vec<&'a TypeDef<'a>>,
+    pub vars: Vec<Variable<'a>>,
+    pub inits: Vec<Initializer<'a>>,
+    pub funcs: Vec<Function<'a>>,
+    pub types: Vec<TypeDef<'a>>,
+    pub operators: Vec<Operator<'a>>,
 }
 
-impl TypeDef {
+impl<'a> TypeDef<'a> {
     pub fn new(name: String) -> Self {
         TypeDef {
             name,
@@ -40,21 +40,17 @@ impl TypeDef {
         }
     }
 
-    pub fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
-        self.types.iter().find(|s| s.name == name)
-    }
-
-    pub fn find_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
+    pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>> {
         self.types.iter_mut().find(|s| s.name == name)
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Initializer {
+pub struct Initializer<'a> {
     pub literal_bind: Option<LiteralBind>,
-    pub params: Vec<FuncParam>,
-    pub body: Vec<Statement>,
-    pub required_by: Option<SymbolPath>,
+    pub params: Vec<FuncParam<'a>>,
+    pub body: Vec<Statement<'a>>,
+    pub required_by: Option<&'a TypeDef<'a>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

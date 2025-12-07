@@ -14,12 +14,15 @@
 // limitations under the License.
 //
 
-use crate::{ExprToken, Program, Range, ResolverError, ResolverErrorType, SymbolPath};
+use crate::{ConstructorError, ConstructorErrorType, ExprToken, Program, Range, SymbolPath};
 
-pub fn infer_expr_type(program: &Program, expr: &[ExprToken]) -> Result<SymbolPath, ResolverError> {
-    todo!("Implement Expression Type Inference");
-    Err(ResolverError {
-        error_type: ResolverErrorType::Placeholder,
+pub fn infer_expr_type(
+    program: &Program,
+    expr: &[ExprToken],
+) -> Result<SymbolPath, ConstructorError> {
+    // todo!("Implement Expression Type Inference");
+    Err(ConstructorError {
+        error_type: ConstructorErrorType::Placeholder,
         position: Range::zero(),
     })
 }

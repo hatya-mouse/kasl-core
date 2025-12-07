@@ -14,8 +14,10 @@
 // limitations under the License.
 //
 
+use crate::SymbolPath;
+
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum ResolverErrorType {
+pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
     TypeNotFound(String),
@@ -27,23 +29,23 @@ pub enum ResolverErrorType {
     InvalidRequiredBy,
     AmbiguousDeclaration(String),
     NotEnoughParamForOp(OperatorKind),
-    CycleDetected,
+    DependencyCycle(SymbolPath),
 
     Placeholder,
 }
 
-impl ResolverErrorType {
+impl ConstructorErrorType {
     pub fn format(&self) -> String {
         match self {
-            ResolverErrorType::ConsecutiveDots => {
+            ConstructorErrorType::ConsecutiveDots => {
                 "Consecutive dots are not allowed here.".to_string()
             }
-            ResolverErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
-            ResolverErrorType::TypeNotFound(type_name) => {
+            ConstructorErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
+            ConstructorErrorType::TypeNotFound(type_name) => {
                 format!("Type '{}' not found here.", type_name)
             }
-            ResolverErrorType::ExpectType => "Type name is expected.".to_string(),
-            ResolverErrorType::Invalid { scope, cause } => {
+            ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
+            ConstructorErrorType::Invalid { scope, cause } => {
                 let cause_str = cause.to_string();
                 let capitalized_cause = format!(
                     "{}{}",
@@ -56,25 +58,29 @@ impl ResolverErrorType {
                     scope.to_string()
                 )
             }
-            ResolverErrorType::InvalidRequiredBy => {
+            ConstructorErrorType::InvalidRequiredBy => {
                 "Required type name can only be used within structs and protocols with inherits"
                     .to_string()
             }
-            ResolverErrorType::AmbiguousDeclaration(type_name) => {
+            ConstructorErrorType::AmbiguousDeclaration(type_name) => {
                 format!(
                     "The type of '{}' is unclear. Please add a type annotation (e.g. '{}: Int') or provide a default value (e.g. '{} = 0') so the compiler can know its type.",
                     type_name, type_name, type_name
                 )
             }
-            ResolverErrorType::NotEnoughParamForOp(op_type) => {
+            ConstructorErrorType::NotEnoughParamForOp(op_type) => {
                 format!(
                     "Not enough number of parameters for {} operator.",
                     op_type.to_string()
                 )
             }
-            ResolverErrorType::CycleDetected => "Cycle detected in dependency graph".to_string(),
-
-            ResolverErrorType::Placeholder => "PLACEHOLDER ERROR".to_string(),
+            ConstructorErrorType::DependencyCycle(symbol_path) => {
+                format!(
+                    "Cannot infer the type of '{}' due to a dependency cycle.",
+                    symbol_path
+                )
+            }
+            ConstructorErrorType::Placeholder => "PLACEHOLDER ERROR".to_string(),
         }
     }
 }
