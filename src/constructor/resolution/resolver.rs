@@ -187,6 +187,48 @@ pub fn resolve_types(
                 }
             }
 
+            ParserStatementKind::FuncDecl {
+                required_by: _,
+                name: _,
+                params,
+                return_type: _,
+                body: _,
+            } => {
+                for param in params {
+                    if let Some(type_parser_path) = &param.value_type {
+                        let type_symbol_path =
+                            program.resolve_type_def_parser_path(&type_parser_path);
+                        if let Some(variable) = program.get_inferable_var_mut(&symbol_path) {
+                            variable.value_type = type_symbol_path;
+                        } else {
+                            errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::CannotInferType(
+                                    symbol_path.clone(),
+                                ),
+                                position: symbol_decl_statement.range,
+                            });
+                        }
+                    } else if let Some(def_val) = &param.def_val {
+                        match program.infer_expr_type(def_val) {
+                            Ok(type_symbol_path) => {
+                                if let Some(variable) = program.get_inferable_var_mut(&symbol_path)
+                                {
+                                    variable.value_type = Some(type_symbol_path);
+                                } else {
+                                    errors.push(ConstructorError {
+                                        error_type: ConstructorErrorType::CannotInferType(
+                                            symbol_path.clone(),
+                                        ),
+                                        position: symbol_decl_statement.range,
+                                    });
+                                }
+                            }
+                            Err(err) => errors.push(err),
+                        }
+                    }
+                }
+            }
+
             _ => (),
         }
     }
