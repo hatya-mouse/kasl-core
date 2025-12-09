@@ -100,7 +100,7 @@ pub fn collect_member_functions(
                     }
                 }
 
-                type_def.inits.push(initializer);
+                program.register_init_by_path(initializer, &scope_path);
             }
 
             _ => (),

@@ -59,16 +59,16 @@ impl Scope for TypeDef {
         self.funcs.iter_mut().find(|f| f.name == name)
     }
 
-    fn register_initializer(&mut self, initializer: Initializer) -> Result<(), ConstructorError> {
+    fn register_init(&mut self, initializer: Initializer) -> Result<(), ConstructorError> {
         self.inits.push(initializer);
         Ok(())
     }
 
-    fn get_initializer(&self, param_types: &[SymbolPath]) -> Option<&Initializer> {
+    fn get_init(&self, param_types: &[SymbolPath]) -> Option<&Initializer> {
         self.inits.iter().find(|i| i.does_params_match(param_types))
     }
 
-    fn get_initializer_mut(&mut self, param_types: &[SymbolPath]) -> Option<&mut Initializer> {
+    fn get_init_mut(&mut self, param_types: &[SymbolPath]) -> Option<&mut Initializer> {
         self.inits
             .iter_mut()
             .find(|i| i.does_params_match(param_types))

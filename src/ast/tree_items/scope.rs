@@ -36,17 +36,17 @@ pub trait Scope {
     }
 
     /// Register the given Initializer to the scope.
-    fn register_initializer(&mut self, _initializer: Initializer) -> Result<(), ConstructorError> {
-        panic!("register_initializer not implemented on the Scope")
+    fn register_init(&mut self, _initializer: Initializer) -> Result<(), ConstructorError> {
+        panic!("register_init not implemented on the Scope")
     }
 
     /// Get an immutable reference to an Initializer by its type of parameters. Returns None if the Initializer is not found.
-    fn get_initializer(&self, _param_types: &[SymbolPath]) -> Option<&Initializer> {
+    fn get_init(&self, _param_types: &[SymbolPath]) -> Option<&Initializer> {
         None
     }
 
     /// Get a mutable reference to an Initializer by its name. Returns None if the Initializer is not found.
-    fn get_initializer_mut(&mut self, _param_types: &[SymbolPath]) -> Option<&mut Initializer> {
+    fn get_init_mut(&mut self, _param_types: &[SymbolPath]) -> Option<&mut Initializer> {
         None
     }
 
