@@ -21,11 +21,6 @@ pub fn collect_member_variables(
     symbol_table: &SymbolTable,
     scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
-    let type_def = match program.get_type_def_by_path_mut(scope_path) {
-        Some(type_def) => type_def,
-        None => panic!("TypeDef {} not found while it's defined", scope_path),
-    };
-
     for stmt in &symbol_table.vars {
         match &stmt.1.kind {
             ParserStatementKind::Var {
@@ -34,12 +29,13 @@ pub fn collect_member_variables(
                 value_type: _,
                 def_val: _,
             } => {
-                type_def.vars.push(ScopeVar {
+                let var = ScopeVar {
                     required_by: None,
                     name: name.clone(),
                     value_type: None,
                     def_val: None,
-                });
+                };
+                program.register_var_by_path(var, scope_path)?;
             }
 
             _ => (),

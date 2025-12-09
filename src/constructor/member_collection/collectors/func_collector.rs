@@ -24,11 +24,6 @@ pub fn collect_member_functions(
     symbol_table: &SymbolTable,
     scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
-    let type_def = match program.get_type_def_by_path_mut(scope_path) {
-        Some(type_def) => type_def,
-        None => panic!("TypeDef {} not found while it's defined", scope_path),
-    };
-
     for stmt in &symbol_table.funcs {
         match &stmt.1.kind {
             ParserStatementKind::FuncDecl {
@@ -50,13 +45,14 @@ pub fn collect_member_functions(
                     })
                     .collect();
 
-                type_def.funcs.push(Function {
+                let function = Function {
                     name: name.to_string(),
                     params: params_result?,
                     return_type: None,
                     body: Vec::new(),
                     required_by: None,
-                });
+                };
+                program.register_func_by_path(function, scope_path)?;
             }
 
             _ => (),
@@ -100,7 +96,7 @@ pub fn collect_member_functions(
                     }
                 }
 
-                program.register_init_by_path(initializer, &scope_path);
+                program.register_init_by_path(initializer, scope_path)?;
             }
 
             _ => (),

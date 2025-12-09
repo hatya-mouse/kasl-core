@@ -24,11 +24,6 @@ pub fn collect_member_operators(
     symbol_table: &SymbolTable,
     scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
-    let type_def = match program.get_type_def_by_path_mut(scope_path) {
-        Some(type_def) => type_def,
-        None => panic!("TypeDef {} not found while it's defined", scope_path),
-    };
-
     for stmt in &symbol_table.operators {
         match &stmt.1.kind {
             ParserStatementKind::Infix {
@@ -52,7 +47,7 @@ pub fn collect_member_operators(
                     });
                 };
 
-                type_def.operators.push(Operator {
+                let operator = Operator {
                     symbol: symbol.clone(),
                     return_type: None,
                     body: Vec::new(),
@@ -61,7 +56,8 @@ pub fn collect_member_operators(
                         associativity: OperatorAssociativity::Left,
                         precedence: 0,
                     },
-                });
+                };
+                program.register_operator_by_path(operator, scope_path)?;
             }
 
             ParserStatementKind::Prefix {
@@ -77,12 +73,13 @@ pub fn collect_member_operators(
                     });
                 }
 
-                type_def.operators.push(Operator {
+                let operator = Operator {
                     symbol: symbol.clone(),
                     return_type: None,
                     body: Vec::new(),
                     kind: OperatorKind::PrefixOperator,
-                });
+                };
+                program.register_operator_by_path(operator, scope_path)?;
             }
 
             ParserStatementKind::Postfix {
@@ -98,12 +95,13 @@ pub fn collect_member_operators(
                     });
                 }
 
-                type_def.operators.push(Operator {
+                let operator = Operator {
                     symbol: symbol.clone(),
                     return_type: None,
                     body: Vec::new(),
                     kind: OperatorKind::PostfixOperator,
-                });
+                };
+                program.register_operator_by_path(operator, scope_path)?;
             }
 
             _ => (),

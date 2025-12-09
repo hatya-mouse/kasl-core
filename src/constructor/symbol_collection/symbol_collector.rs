@@ -16,7 +16,7 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserStatementKind,
-    Program, StateVar, SymbolTable,
+    Program, StateVar, SymbolPath, SymbolTable,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -32,29 +32,34 @@ pub fn collect_top_level_symbols(
                 def_val: _,
                 attrs: _,
             } => {
-                program.inputs.push(InputVar {
+                let input = InputVar {
                     name: name.to_string(),
                     value_type: None,
                     def_val: None,
                     attrs: Vec::new(),
-                });
+                };
+                program.register_input_by_path(input, &SymbolPath::root())?;
             }
 
             ParserStatementKind::Output {
                 name,
                 value_type: _,
-            } => program.outputs.push(OutputVar {
-                name: name.to_string(),
-                value_type: None,
-            }),
+            } => {
+                let output = OutputVar {
+                    name: name.to_string(),
+                    value_type: None,
+                };
+                program.register_output_by_path(output, &SymbolPath::root())?;
+            }
 
             ParserStatementKind::State { vars } => {
                 for var in vars {
-                    program.states.push(StateVar {
+                    let state = StateVar {
                         name: var.name.to_string(),
                         value_type: None,
                         def_val: None,
-                    });
+                    };
+                    program.register_state_by_path(state, &SymbolPath::root())?;
                 }
             }
 
@@ -78,13 +83,14 @@ pub fn collect_top_level_symbols(
                     });
                 }
 
-                program.funcs.push(Function {
+                let function = Function {
                     name: name.to_string(),
                     params: Vec::new(),
                     return_type: None,
                     body: Vec::new(),
                     required_by: None,
-                })
+                };
+                program.register_func_by_path(function, &SymbolPath::root())?;
             }
 
             _ => (),
