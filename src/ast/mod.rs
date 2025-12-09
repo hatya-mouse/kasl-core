@@ -14,24 +14,12 @@
 // limitations under the License.
 //
 
-pub mod expression;
-pub mod function;
-pub mod operator;
-pub mod program;
-pub mod range;
-pub mod scope;
-pub mod statement;
-pub mod symbol_path;
-pub mod type_def;
-pub mod variables;
+pub mod data;
+pub mod tree_items;
 
-pub use expression::Expression;
-pub use function::{FuncCallArg, Function};
-pub use operator::{Operator, OperatorAssociativity, OperatorKind};
-pub use program::Program;
-pub use range::Range;
-pub use scope::Scope;
-pub use statement::Statement;
-pub use symbol_path::{SymbolPath, SymbolPathComponent};
-pub use type_def::{Initializer, LiteralBind, TypeDef};
-pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};
+pub use data::{Range, SymbolPath, SymbolPathComponent};
+pub use tree_items::{
+    Expression, FuncCallArg, FuncParam, Function, Initializer, InputAttribute, InputVar,
+    LiteralBind, Operator, OperatorAssociativity, OperatorKind, OutputVar, Program, Scope,
+    ScopeVar, StateVar, Statement, TypeDef,
+};

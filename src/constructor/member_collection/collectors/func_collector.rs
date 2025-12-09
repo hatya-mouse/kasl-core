@@ -15,13 +15,20 @@
 //
 
 use crate::{
-    ConstructorError, FuncParam, Function, Initializer, ParserStatementKind, SymbolTable, TypeDef,
+    ConstructorError, FuncParam, Function, Initializer, LiteralBind, ParserStatementKind, Program,
+    SymbolPath, SymbolTable,
 };
 
 pub fn collect_member_functions(
+    program: &mut Program,
     symbol_table: &SymbolTable,
-    type_def: &mut TypeDef,
+    scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
+    let type_def = match program.get_type_def_by_path_mut(scope_path) {
+        Some(type_def) => type_def,
+        None => panic!("TypeDef {} not found while it's defined", scope_path),
+    };
+
     for stmt in &symbol_table.funcs {
         match &stmt.1.kind {
             ParserStatementKind::FuncDecl {
@@ -76,12 +83,24 @@ pub fn collect_member_functions(
                     })
                     .collect();
 
-                type_def.inits.push(Initializer {
+                let initializer = Initializer {
                     literal_bind: literal_bind.clone(),
                     params: params_result?,
                     body: Vec::new(),
                     required_by: None,
-                });
+                };
+
+                if let Some(literal_bind) = literal_bind {
+                    match literal_bind {
+                        LiteralBind::IntLiteral => program.set_int_literal(scope_path.clone())?,
+                        LiteralBind::FloatLiteral => {
+                            program.set_float_literal(scope_path.clone())?
+                        }
+                        LiteralBind::BoolLiteral => program.set_bool_literal(scope_path.clone())?,
+                    }
+                }
+
+                type_def.inits.push(initializer);
             }
 
             _ => (),

@@ -15,11 +15,12 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatementKind, Program, Scope, SymbolTable, TypeDef,
+    ConstructorError, ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
     member_collection::{
         collect_member_functions, collect_member_nests, collect_member_operators,
         collect_member_variables,
     },
+    symbol_path,
 };
 
 /// Loop through the top level and collect type members.
@@ -38,14 +39,10 @@ pub fn collect_all_type_members(
                 name,
                 inherits: _,
                 body: _,
-            } => match program.get_type_def_mut(name) {
-                Some(parent_type_def) => {
-                    collect_type_members(&stmt.1.1, parent_type_def)?;
-                }
-                None => {
-                    panic!("TypeDef {} not found while it's defined", name);
-                }
-            },
+            } => {
+                let scope_path = symbol_path![SymbolPathComponent::TypeDef(name.clone())];
+                collect_type_members(program, &stmt.1.1, scope_path)?;
+            }
 
             _ => (),
         }
@@ -56,13 +53,14 @@ pub fn collect_all_type_members(
 
 // Collects members in a given struct or protocol.
 pub fn collect_type_members(
+    program: &mut Program,
     child_symbol_table: &SymbolTable,
-    parent_type_def: &mut TypeDef,
+    scope_path: SymbolPath,
 ) -> Result<(), ConstructorError> {
-    collect_member_variables(child_symbol_table, parent_type_def)?;
-    collect_member_functions(child_symbol_table, parent_type_def)?;
-    collect_member_operators(child_symbol_table, parent_type_def)?;
-    collect_member_nests(child_symbol_table, parent_type_def)?;
+    collect_member_variables(program, child_symbol_table, &scope_path)?;
+    collect_member_functions(program, child_symbol_table, &scope_path)?;
+    collect_member_operators(program, child_symbol_table, &scope_path)?;
+    collect_member_nests(program, child_symbol_table, &scope_path)?;
 
     Ok(())
 }

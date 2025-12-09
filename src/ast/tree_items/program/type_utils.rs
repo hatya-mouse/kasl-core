@@ -14,32 +14,9 @@
 // limitations under the License.
 //
 
-use crate::{
-    Function, InputVar, OutputVar, ParserSymbolPath, Scope, StateVar, SymbolPath,
-    SymbolPathComponent, TypeDef,
-};
-
-pub struct Program {
-    pub main_func: Option<Function>,
-    pub funcs: Vec<Function>,
-    pub types: Vec<TypeDef>,
-    pub states: Vec<StateVar>,
-    pub inputs: Vec<InputVar>,
-    pub outputs: Vec<OutputVar>,
-}
+use crate::{ParserSymbolPath, Program, Scope, SymbolPath, SymbolPathComponent, TypeDef};
 
 impl Program {
-    pub fn new() -> Self {
-        Self {
-            main_func: None,
-            funcs: Vec::new(),
-            types: Vec::new(),
-            states: Vec::new(),
-            inputs: Vec::new(),
-            outputs: Vec::new(),
-        }
-    }
-
     /// Resolve ParserSymbolPath to obtain a SymbolPath to the TypeDef.
     pub fn resolve_type_def_parser_path(
         &self,
@@ -73,6 +50,17 @@ impl Program {
 
         match last {
             SymbolPathComponent::TypeDef(name) => parent_scope.get_type_def(name),
+            _ => None,
+        }
+    }
+
+    /// Get a mutable reference to the TypeDef by its path.
+    pub fn get_type_def_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut TypeDef> {
+        let (last, parent) = symbol_path.components.split_last()?;
+        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
+
+        match last {
+            SymbolPathComponent::TypeDef(name) => parent_scope.get_type_def_mut(name),
             _ => None,
         }
     }
@@ -113,47 +101,5 @@ impl Program {
         }
 
         Some(current_scope)
-    }
-}
-
-impl Scope for Program {
-    fn get_func(&self, name: &str) -> Option<&Function> {
-        self.funcs.iter().find(|f| f.name == name)
-    }
-
-    fn get_func_mut(&mut self, name: &str) -> Option<&mut Function> {
-        self.funcs.iter_mut().find(|f| f.name == name)
-    }
-
-    fn get_type_def(&self, name: &str) -> Option<&TypeDef> {
-        self.types.iter().find(|t| t.name == name)
-    }
-
-    fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
-        self.types.iter_mut().find(|t| t.name == name)
-    }
-
-    fn get_state(&self, name: &str) -> Option<&StateVar> {
-        self.states.iter().find(|s| s.name == name)
-    }
-
-    fn get_state_mut(&mut self, name: &str) -> Option<&mut StateVar> {
-        self.states.iter_mut().find(|s| s.name == name)
-    }
-
-    fn get_input(&self, name: &str) -> Option<&InputVar> {
-        self.inputs.iter().find(|i| i.name == name)
-    }
-
-    fn get_input_mut(&mut self, name: &str) -> Option<&mut InputVar> {
-        self.inputs.iter_mut().find(|i| i.name == name)
-    }
-
-    fn get_output(&self, name: &str) -> Option<&OutputVar> {
-        self.outputs.iter().find(|o| o.name == name)
-    }
-
-    fn get_output_mut(&mut self, name: &str) -> Option<&mut OutputVar> {
-        self.outputs.iter_mut().find(|o| o.name == name)
     }
 }

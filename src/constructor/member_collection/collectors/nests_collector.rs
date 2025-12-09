@@ -15,14 +15,15 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatementKind, SymbolTable, TypeDef,
+    ConstructorError, ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
     member_collection::collect_type_members,
 };
 
 /// Loop through the scope and collect type members.
 pub fn collect_member_nests(
+    program: &mut Program,
     symbol_table: &SymbolTable,
-    type_def: &mut TypeDef,
+    scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
     for stmt in &symbol_table.type_defs {
         match &stmt.1.0.kind {
@@ -35,14 +36,11 @@ pub fn collect_member_nests(
                 name,
                 inherits: _,
                 body: _,
-            } => match type_def.get_type_def_mut(&name) {
-                Some(parent_type_def) => {
-                    collect_type_members(&stmt.1.1, parent_type_def)?;
-                }
-                None => {
-                    panic!("TypeDef {} not found while it's defined", name);
-                }
-            },
+            } => {
+                let mut child_scope_path = scope_path.clone();
+                child_scope_path.push(SymbolPathComponent::TypeDef(name.clone()));
+                collect_type_members(program, &stmt.1.1, child_scope_path)?;
+            }
 
             _ => (),
         }

@@ -16,7 +16,7 @@
 
 use std::collections::HashMap;
 
-use crate::{Range, type_def::LiteralBind};
+use crate::{LiteralBind, Range};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {

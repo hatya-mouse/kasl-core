@@ -92,7 +92,10 @@ impl ProgramLocator for Program {
         }
     }
 
-    fn get_inferable_func_param_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut FuncParam> {
+    fn get_inferable_func_param_mut<'a>(
+        &'a mut self,
+        symbol_path: &SymbolPath,
+    ) -> Option<&'a mut FuncParam> {
         if symbol_path.components.is_empty() {
             return None;
         }

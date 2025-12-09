@@ -40,3 +40,30 @@ pub struct FuncCallArg {
     pub label: String,
     pub value: Expression,
 }
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Initializer {
+    pub literal_bind: Option<LiteralBind>,
+    pub params: Vec<FuncParam>,
+    pub body: Vec<Statement>,
+    pub required_by: Option<SymbolPath>,
+}
+
+impl Initializer {
+    pub fn does_params_match(&self, param_types: &[SymbolPath]) -> bool {
+        self.params.iter().zip(param_types).all(|(param, ty)| {
+            param
+                .value_type
+                .as_ref()
+                .map(|param_ty| param_ty == ty)
+                .unwrap_or(false)
+        })
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum LiteralBind {
+    IntLiteral,
+    FloatLiteral,
+    BoolLiteral,
+}

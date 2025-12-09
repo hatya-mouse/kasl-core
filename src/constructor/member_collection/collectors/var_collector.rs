@@ -14,12 +14,18 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ParserStatementKind, ScopeVar, SymbolTable, TypeDef};
+use crate::{ConstructorError, ParserStatementKind, Program, ScopeVar, SymbolPath, SymbolTable};
 
 pub fn collect_member_variables(
+    program: &mut Program,
     symbol_table: &SymbolTable,
-    type_def: &mut TypeDef,
+    scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
+    let type_def = match program.get_type_def_by_path_mut(scope_path) {
+        Some(type_def) => type_def,
+        None => panic!("TypeDef {} not found while it's defined", scope_path),
+    };
+
     for stmt in &symbol_table.vars {
         match &stmt.1.kind {
             ParserStatementKind::Var {

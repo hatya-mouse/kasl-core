@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
-pub mod dependency_analysis;
-pub mod expr_inference;
-pub mod program_locator;
-pub mod type_resolver;
+pub mod range;
+pub mod symbol_path;
 
-pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
+pub use range::Range;
+pub use symbol_path::{SymbolPath, SymbolPathComponent};

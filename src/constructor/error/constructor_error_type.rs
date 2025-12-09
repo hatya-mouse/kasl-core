@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-use crate::SymbolPath;
+use crate::{LiteralBind, SymbolPath};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
-    TypeNotFound(String),
+    TypeNotFound(SymbolPath),
     ExpectType,
     Invalid {
         scope: ScopeType,
@@ -31,6 +31,8 @@ pub enum ConstructorErrorType {
     InvalidParamForOp,
     DependencyCycle(SymbolPath),
     CannotInferType(SymbolPath),
+    DuplicateLiteralBind(LiteralBind),
+    MissingLiteralBind(LiteralBind),
     CompilerBug(String),
 
     Placeholder,
@@ -81,6 +83,26 @@ impl ConstructorErrorType {
             }
             ConstructorErrorType::CannotInferType(symbol_path) => {
                 format!("Cannot infer the type of '{}'.", symbol_path)
+            }
+            ConstructorErrorType::DuplicateLiteralBind(type_bind) => {
+                format!(
+                    "Duplicate {} initializer.",
+                    match type_bind {
+                        LiteralBind::BoolLiteral => "bool_literal",
+                        LiteralBind::IntLiteral => "int_literal",
+                        LiteralBind::FloatLiteral => "float_literal",
+                    }
+                )
+            }
+            ConstructorErrorType::MissingLiteralBind(type_bind) => {
+                format!(
+                    "{} initializer is not declared in the scope despite the literal is used.",
+                    match type_bind {
+                        LiteralBind::BoolLiteral => "bool_literal",
+                        LiteralBind::IntLiteral => "int_literal",
+                        LiteralBind::FloatLiteral => "float_literal",
+                    }
+                )
             }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(

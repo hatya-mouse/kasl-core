@@ -17,12 +17,12 @@
 use crate::{
     ConstructorError, ConstructorErrorType, ParserStatementKind, Program, Range, SymbolPath,
     SymbolTable,
+    ast::tree_items::variables::VariableTrait,
     resolution::{
         dependency_analysis::{build_graph, sort_graph},
         expr_inference::ExprTypeInference,
         program_locator::ProgramLocator,
     },
-    variables::VariableTrait,
 };
 
 pub fn resolve_types(

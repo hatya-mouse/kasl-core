@@ -28,6 +28,12 @@ impl SymbolPath {
         }
     }
 
+    pub fn root() -> Self {
+        SymbolPath {
+            components: Vec::new(),
+        }
+    }
+
     pub fn from(path: &[SymbolPathComponent]) -> Self {
         SymbolPath {
             components: path.to_vec(),
@@ -99,13 +105,13 @@ impl Display for SymbolPathComponent {
 // ```
 #[macro_export]
 macro_rules! symbol_path {
-    ( $( $x:expr ),* $(,)? ) => {
+    ($($x:expr),* $(,)?) => {
         {
-            let mut temp_path = $crate::ast::SymbolPath::new();
+            let mut temp_path = $crate::ast::data::SymbolPath::new();
             $(
                 let temp_val = $x;
                 // Type check to ensure it's SymbolPathComponent
-                let _: &$crate::ast::SymbolPathComponent = &temp_val;
+                let _: &$crate::ast::data::SymbolPathComponent = &temp_val;
                 // Push the component to the vector
                 temp_path.push(temp_val);
             )*

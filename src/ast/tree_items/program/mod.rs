@@ -14,9 +14,10 @@
 // limitations under the License.
 //
 
-pub mod dependency_analysis;
-pub mod expr_inference;
-pub mod program_locator;
-pub mod type_resolver;
+pub mod literal_bind;
+pub mod member_registration;
+pub mod program;
+pub mod scope_support;
+pub mod type_utils;
 
-pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
+pub use program::Program;

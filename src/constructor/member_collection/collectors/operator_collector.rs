@@ -16,13 +16,19 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, FuncParam, Operator, OperatorAssociativity,
-    OperatorKind, ParserStatementKind, SymbolTable, TypeDef,
+    OperatorKind, ParserStatementKind, Program, SymbolPath, SymbolTable,
 };
 
 pub fn collect_member_operators(
+    program: &mut Program,
     symbol_table: &SymbolTable,
-    type_def: &mut TypeDef,
+    scope_path: &SymbolPath,
 ) -> Result<(), ConstructorError> {
+    let type_def = match program.get_type_def_by_path_mut(scope_path) {
+        Some(type_def) => type_def,
+        None => panic!("TypeDef {} not found while it's defined", scope_path),
+    };
+
     for stmt in &symbol_table.operators {
         match &stmt.1.kind {
             ParserStatementKind::Infix {
