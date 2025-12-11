@@ -176,7 +176,7 @@ pub enum ExprTokenKind {
     Operator(String),
     Identifier(ParserSymbolPath),
     FuncCall {
-        name: ParserSymbolPath,
+        path: ParserSymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
 }

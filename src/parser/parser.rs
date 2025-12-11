@@ -312,8 +312,8 @@ peg::parser!(pub grammar kash_parser() for str {
 
 
     rule func_call() -> ExprTokenKind
-        = name:id_chain() _? "(" __? args:func_call_args() ")" {
-            ExprTokenKind::FuncCall { name, args }
+        = path:id_chain() _? "(" __? args:func_call_args() ")" {
+            ExprTokenKind::FuncCall { path, args }
         }
 
     rule literal() -> ExprTokenKind

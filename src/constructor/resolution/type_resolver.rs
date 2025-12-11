@@ -21,7 +21,6 @@ use crate::{
     resolution::{
         dependency_analysis::{build_graph, sort_graph},
         expr_inference::ExprTypeInference,
-        program_locator::ProgramLocator,
     },
 };
 
@@ -81,18 +80,18 @@ pub fn resolve_types(
                         &mut errors,
                         symbol_path,
                         symbol_decl_statement.range,
-                        Program::get_inferable_input_mut,
+                        Program::get_input_by_path_mut,
                         type_symbol_path,
                     );
                 } else if let Some(def_val) = def_val {
-                    match program.infer_expr_type(def_val) {
+                    match program.infer_expr_type(def_val, symbol_table) {
                         Ok(type_symbol_path) => {
                             process_inference_write(
                                 program,
                                 &mut errors,
                                 symbol_path,
                                 symbol_decl_statement.range,
-                                Program::get_inferable_input_mut,
+                                Program::get_input_by_path_mut,
                                 Some(type_symbol_path),
                             );
                         }
@@ -111,7 +110,7 @@ pub fn resolve_types(
                     &mut errors,
                     symbol_path,
                     symbol_decl_statement.range,
-                    Program::get_inferable_output_mut,
+                    Program::get_output_by_path_mut,
                     type_symbol_path,
                 );
             }
@@ -126,18 +125,18 @@ pub fn resolve_types(
                             &mut errors,
                             symbol_path,
                             symbol_decl_statement.range,
-                            Program::get_inferable_state_mut,
+                            Program::get_state_by_path_mut,
                             type_symbol_path,
                         );
                     } else {
-                        match program.infer_expr_type(&var.def_val) {
+                        match program.infer_expr_type(&var.def_val, symbol_table) {
                             Ok(type_symbol_path) => {
                                 process_inference_write(
                                     program,
                                     &mut errors,
                                     symbol_path,
                                     symbol_decl_statement.range,
-                                    Program::get_inferable_state_mut,
+                                    Program::get_state_by_path_mut,
                                     Some(type_symbol_path),
                                 );
                             }
@@ -160,18 +159,18 @@ pub fn resolve_types(
                         &mut errors,
                         symbol_path,
                         symbol_decl_statement.range,
-                        Program::get_inferable_var_mut,
+                        Program::get_var_by_path_mut,
                         type_symbol_path,
                     );
                 } else if let Some(def_val) = def_val {
-                    match program.infer_expr_type(def_val) {
+                    match program.infer_expr_type(def_val, symbol_table) {
                         Ok(type_symbol_path) => {
                             process_inference_write(
                                 program,
                                 &mut errors,
                                 symbol_path,
                                 symbol_decl_statement.range,
-                                Program::get_inferable_var_mut,
+                                Program::get_var_by_path_mut,
                                 Some(type_symbol_path),
                             );
                         }
@@ -196,18 +195,18 @@ pub fn resolve_types(
                             &mut errors,
                             symbol_path,
                             symbol_decl_statement.range,
-                            Program::get_inferable_func_param_mut,
+                            Program::get_func_param_by_path_mut,
                             type_symbol_path,
                         );
                     } else if let Some(def_val) = &param.def_val {
-                        match program.infer_expr_type(def_val) {
+                        match program.infer_expr_type(def_val, symbol_table) {
                             Ok(type_symbol_path) => {
                                 process_inference_write(
                                     program,
                                     &mut errors,
                                     symbol_path,
                                     symbol_decl_statement.range,
-                                    Program::get_inferable_var_mut,
+                                    Program::get_var_by_path_mut,
                                     Some(type_symbol_path),
                                 );
                             }

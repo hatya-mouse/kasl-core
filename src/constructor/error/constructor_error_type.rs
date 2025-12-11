@@ -21,6 +21,7 @@ pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
     TypeNotFound(SymbolPath),
+    FuncNotFound(SymbolPath),
     ExpectType,
     Invalid {
         scope: ScopeType,
@@ -33,8 +34,9 @@ pub enum ConstructorErrorType {
     CannotInferType(SymbolPath),
     DuplicateLiteralBind(LiteralBind),
     MissingLiteralBind(LiteralBind),
-    CompilerBug(String),
+    NoReturnFunctionInExpr(SymbolPath),
 
+    CompilerBug(String),
     Placeholder,
 }
 
@@ -45,8 +47,11 @@ impl ConstructorErrorType {
                 "Consecutive dots are not allowed here.".to_string()
             }
             ConstructorErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
-            ConstructorErrorType::TypeNotFound(type_name) => {
-                format!("Type '{}' not found here.", type_name)
+            ConstructorErrorType::TypeNotFound(type_path) => {
+                format!("Type '{}' not found here.", type_path)
+            }
+            ConstructorErrorType::FuncNotFound(func_path) => {
+                format!("Function '{}' not found here.", func_path)
             }
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {
@@ -102,6 +107,12 @@ impl ConstructorErrorType {
                         LiteralBind::IntLiteral => "int_literal",
                         LiteralBind::FloatLiteral => "float_literal",
                     }
+                )
+            }
+            ConstructorErrorType::NoReturnFunctionInExpr(symbol_path) => {
+                format!(
+                    "This function '{}' does not have a return type despite being used in an expression.",
+                    symbol_path
                 )
             }
             ConstructorErrorType::CompilerBug(message) => {

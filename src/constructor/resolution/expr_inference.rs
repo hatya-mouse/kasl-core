@@ -16,15 +16,23 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
-    SymbolPath, symbol_path,
+    SymbolPath, SymbolTable, symbol_path,
 };
 
 pub trait ExprTypeInference {
-    fn infer_expr_type(&self, expr: &[ExprToken]) -> Result<SymbolPath, ConstructorError>;
+    fn infer_expr_type(
+        &self,
+        expr: &[ExprToken],
+        symbol_table: &SymbolTable,
+    ) -> Result<SymbolPath, ConstructorError>;
 }
 
 impl ExprTypeInference for Program {
-    fn infer_expr_type(&self, expr: &[ExprToken]) -> Result<SymbolPath, ConstructorError> {
+    fn infer_expr_type(
+        &self,
+        expr: &[ExprToken],
+        symbol_table: &SymbolTable,
+    ) -> Result<SymbolPath, ConstructorError> {
         let mut expr_iter = expr.iter().peekable();
         let mut last_type: Option<SymbolPath> = None;
 
@@ -65,6 +73,34 @@ impl ExprTypeInference for Program {
                         });
                     }
                 },
+
+                ExprTokenKind::FuncCall {
+                    path: ref func_parser_path,
+                    args: _,
+                } => {
+                    let func_symbol_path = symbol_table.resolve_path(func_parser_path);
+                    let func = self.get_func_by_path(&func_symbol_path);
+
+                    match func {
+                        Some(func) => match &func.return_type {
+                            Some(return_type) => last_type = Some(return_type.clone()),
+                            None => {
+                                return Err(ConstructorError {
+                                    error_type: ConstructorErrorType::NoReturnFunctionInExpr(
+                                        func_symbol_path,
+                                    ),
+                                    position: token.range,
+                                });
+                            }
+                        },
+                        None => {
+                            return Err(ConstructorError {
+                                error_type: ConstructorErrorType::FuncNotFound(func_symbol_path),
+                                position: token.range,
+                            });
+                        }
+                    }
+                }
 
                 _ => (),
             }

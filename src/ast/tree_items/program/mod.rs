@@ -14,10 +14,11 @@
 // limitations under the License.
 //
 
+pub mod item_getter;
 pub mod literal_bind;
 pub mod member_registration;
 pub mod program;
-pub mod scope_support;
+pub mod scope_impl;
 pub mod type_utils;
 
 pub use program::Program;

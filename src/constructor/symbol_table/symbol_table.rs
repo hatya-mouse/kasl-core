@@ -17,7 +17,7 @@
 use crate::{ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent};
 use std::collections::HashMap;
 
-/// SymbolTable stores a reference to the declaration statement of variables, functions, operators, type definitions, and initializers.
+/// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
     pub vars: HashMap<String, &'a ParserStatement>,

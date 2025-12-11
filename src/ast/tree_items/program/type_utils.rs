@@ -43,28 +43,6 @@ impl Program {
         Some(complete_path)
     }
 
-    /// Get a immutable reference to the TypeDef by its path.
-    pub fn get_type_def_by_path(&self, symbol_path: &SymbolPath) -> Option<&TypeDef> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::TypeDef(name) => parent_scope.get_type_def(name),
-            _ => None,
-        }
-    }
-
-    /// Get a mutable reference to the TypeDef by its path.
-    pub fn get_type_def_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut TypeDef> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
-
-        match last {
-            SymbolPathComponent::TypeDef(name) => parent_scope.get_type_def_mut(name),
-            _ => None,
-        }
-    }
-
     /// Get an **immutable** reference to the scope which belongs to the last component of the given vector of the symbol path component.
     pub fn get_to_deepest_scope(
         &self,
