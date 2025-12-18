@@ -81,6 +81,8 @@ pub fn collect_token_type(
             ExprTokenKind::Operator(_) => {
                 token_type.push(None);
             }
+
+            _ => (),
         }
     }
 
