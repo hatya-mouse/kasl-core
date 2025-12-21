@@ -40,6 +40,24 @@ impl SymbolPath {
         }
     }
 
+    pub fn comp_int() -> Self {
+        SymbolPath {
+            components: vec![SymbolPathComponent::CompInt],
+        }
+    }
+
+    pub fn comp_float() -> Self {
+        SymbolPath {
+            components: vec![SymbolPathComponent::CompFloat],
+        }
+    }
+
+    pub fn comp_bool() -> Self {
+        SymbolPath {
+            components: vec![SymbolPathComponent::CompBool],
+        }
+    }
+
     pub fn push(&mut self, component: SymbolPathComponent) {
         self.components.push(component);
     }

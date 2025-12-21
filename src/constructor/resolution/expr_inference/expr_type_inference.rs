@@ -14,12 +14,16 @@
 // limitations under the License.
 //
 
-use crate::{
-    ConstructorError, ExprToken, Program, SymbolPath, SymbolTable,
-    resolution::expr_inference::token_type_collector::collect_token_type, symbol_path,
-};
+use crate::{ConstructorError, ExprToken, Operator, Program, SymbolPath, SymbolTable, symbol_path};
 
-pub trait ExprTypeInference {
+pub enum ResolvedToken<'a> {
+    Value(SymbolPath), // The type of the value
+    Operator(&'a Operator),
+    LParen,
+    RParen,
+}
+
+pub trait ExprTypeInference<'a> {
     fn infer_expr_type(
         &self,
         expr: &[ExprToken],
@@ -27,14 +31,13 @@ pub trait ExprTypeInference {
     ) -> Result<SymbolPath, ConstructorError>;
 }
 
-impl ExprTypeInference for Program {
+impl<'a> ExprTypeInference<'a> for Program {
     fn infer_expr_type(
         &self,
         expr: &[ExprToken],
         symbol_table: &SymbolTable,
     ) -> Result<SymbolPath, ConstructorError> {
         let mut expr_iter = expr.iter().peekable();
-        let token_types = collect_token_type(self, expr, symbol_table)?;
 
         Ok(symbol_path![])
     }

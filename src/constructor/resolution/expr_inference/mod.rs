@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+pub mod expr_token_resolver;
 pub mod expr_type_inference;
 pub mod token_type_collector;
 pub mod type_getter;
+
+pub use expr_type_inference::{ExprTypeInference, ResolvedToken};
