@@ -48,6 +48,7 @@ impl<'a> Program {
                     ExprTokenKind::BoolLiteral(_) => {
                         result.push(ResolvedToken::Value(SymbolPath::comp_bool()));
                     }
+                    // TODO
                     _ => (),
                 }
             } else {
