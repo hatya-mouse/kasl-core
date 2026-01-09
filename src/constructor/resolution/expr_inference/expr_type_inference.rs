@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ExprToken, Program, SymbolPath, SymbolTable, symbol_path};
+use crate::{
+    ConstructorError, ExprToken, Program, SymbolPath, SymbolTable,
+    resolution::expr_inference::{
+        shunting_yard::shunting_yard, typed_token_getter::get_typed_tokens,
+    },
+    symbol_path,
+};
 
 pub enum TypedToken {
     Value(SymbolPath), // The type of the value
@@ -37,10 +43,10 @@ impl<'a> ExprTypeInference<'a> for Program {
         expr: &[ExprToken],
         symbol_table: &SymbolTable,
     ) -> Result<SymbolPath, ConstructorError> {
-        let mut expr_iter = expr.iter().peekable();
-
         // 1. Convert tokens to TypedToken so we can easily look up their types
+        let mut typed_tokens = get_typed_tokens(self, expr, symbol_table)?;
         // 2. Rearrange tokens to get reverse polish notation
+        shunting_yard(&mut typed_tokens);
         // 3. Evaluate the reverse polish notation to get the type of the expression
 
         Ok(symbol_path![])

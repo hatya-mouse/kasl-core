@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ pub mod literal_bind;
 pub mod member_registration;
 pub mod program;
 pub mod scope_impl;
+pub mod type_getter;
 pub mod type_utils;
 
 pub use program::Program;

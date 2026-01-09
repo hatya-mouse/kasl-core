@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
 // limitations under the License.
 //
 
-pub mod expr_token_resolver;
 pub mod expr_type_inference;
-pub mod type_getter;
+pub mod shunting_yard;
+pub mod typed_token_getter;
 
 pub use expr_type_inference::{ExprTypeInference, TypedToken};
+pub use typed_token_getter::get_typed_tokens;

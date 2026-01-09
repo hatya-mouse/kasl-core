@@ -14,20 +14,6 @@
 // limitations under the License.
 //
 
-pub mod expression;
-pub mod function;
-pub mod operator;
-pub mod program;
-pub mod scope;
-pub mod statement;
-pub mod type_def;
-pub mod variables;
+use crate::resolution::expr_inference::TypedToken;
 
-pub use expression::Expression;
-pub use function::{FuncCallArg, Function, Initializer, LiteralBind};
-pub use operator::{Operator, OperatorAssociativity, OperatorKind};
-pub use program::Program;
-pub use scope::Scope;
-pub use statement::Statement;
-pub use type_def::TypeDef;
-pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};
+pub fn shunting_yard(tokens: &mut [TypedToken]) {}
