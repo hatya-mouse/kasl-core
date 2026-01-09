@@ -15,13 +15,9 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program, Range, SymbolTable, resolution::expr_inference::expr_type_inference::TypedToken
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
+    SymbolTable, resolution::expr_inference::expr_type_inference::TypedToken,
 };
-
-enum ExpectedTokenKind {
-    ValueOrPrefix,
-    InfixOrPostfix,
-}
 
 /// Infer the type of each token in the expression and convert them to TypedTokens.
 pub fn get_typed_tokens<'a>(
@@ -33,7 +29,7 @@ pub fn get_typed_tokens<'a>(
     let mut result: Vec<TypedToken> = Vec::new();
 
     while let Some(token) = expr_iter.next() {
-        match token.kind {
+        match &token.kind {
             ExprTokenKind::IntLiteral(_) => match &program.int_literal_type {
                 Some(int_literal_type) => result.push(TypedToken::Value(int_literal_type.clone())),
                 None => {
@@ -74,13 +70,13 @@ pub fn get_typed_tokens<'a>(
                 }
             },
 
-            ExprTokenKind::Identifier(ref parser_path) => {
+            ExprTokenKind::Identifier(parser_path) => {
                 let symbol_type = program.get_symbol_type(&parser_path, symbol_table, token)?;
                 result.push(TypedToken::Value(symbol_type));
             }
 
             ExprTokenKind::FuncCall {
-                path: ref func_parser_path,
+                path: func_parser_path,
                 args: _,
             } => {
                 let func_type = program.get_func_type(func_parser_path, symbol_table, token)?;
@@ -88,12 +84,7 @@ pub fn get_typed_tokens<'a>(
             }
 
             ExprTokenKind::Operator(operator_symbol) => {
-                if let Some(last_token) = result.last() {
-                    let next_token = expr_iter.peek();
-                    let typed_operator_token =
-                        handle_operator_token(program, &operator_symbol, &token.range, last_token, next_token)?;
-                    result.push(typed_operator_token);
-                }
+                result.push(TypedToken::Operator(operator_symbol.to_string()))
             }
 
             ExprTokenKind::LParen => result.push(TypedToken::LParen),
@@ -104,71 +95,3 @@ pub fn get_typed_tokens<'a>(
 
     Ok(result)
 }
-
-fn handle_operator_token(
-    program: &Program,
-    operator_symbol: &str,
-    token_range: &Range,
-    last_token: &TypedToken,
-    next_token: Option<&&ExprToken>,
-) -> Result<TypedToken, ConstructorError> {
-    match last_token {
-        TypedToken::Value(_) | TypedToken::RParen => match next_token {
-            Some(token) => match token.kind {
-                ExprTokenKind::Operator(_) => {
-                    return Ok(TypedToken::PostfixOperator(operator_symbol.to_string()));
-                }
-                ExprTokenKind::RParen => {
-                    return Ok(TypedToken::PostfixOperator(operator_symbol.to_string()));
-                }
-                _ => {
-                    return Ok(TypedToken::InfixOperator(operator_symbol.to_string()));
-                }
-            },
-            None => return Ok(TypedToken::PostfixOperator(operator_symbol.to_string())),
-        },
-        TypedToken::LParen => match next_token {
-            Some(token) => match token.kind {
-                ExprTokenKind::Operator(_) => {}
-            },
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::UnmatchedParentheses,
-                    position: ,
-                });
-            }
-        },
-        _ => (),
-    }
-}
-
-// fn get_typed_tokens<'a>(
-//     program: &Program,
-//     expr: &[ExprToken],
-//     symbol_table: &SymbolTable,
-// ) -> Result<Vec<TypedToken<'a>>, ConstructorError> {
-//     let token_types = collect_token_type(program, expr, symbol_table)?;
-//     let next_expected = ExpectedTokenKind::ValueOrPrefix;
-//     let mut result = Vec::new();
-
-//     for (expr, token_type) in expr.iter().zip(token_types.iter()) {
-//         if matches!(next_expected, ExpectedTokenKind::ValueOrPrefix) {
-//             match expr.kind {
-//                 ExprTokenKind::IntLiteral(_) => {
-//                     result.push(TypedToken::Value(SymbolPath::comp_int()));
-//                 }
-//                 ExprTokenKind::FloatLiteral(_) => {
-//                     result.push(TypedToken::Value(SymbolPath::comp_float()));
-//                 }
-//                 ExprTokenKind::BoolLiteral(_) => {
-//                     result.push(TypedToken::Value(SymbolPath::comp_bool()));
-//                 }
-//                 // TODO
-//                 _ => (),
-//             }
-//         } else {
-//         }
-//     }
-
-//     Ok(vec![])
-// }

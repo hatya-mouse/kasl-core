@@ -18,9 +18,7 @@ use crate::{ConstructorError, ExprToken, Program, SymbolPath, SymbolTable, symbo
 
 pub enum TypedToken {
     Value(SymbolPath), // The type of the value
-    InfixOperator(String),
-    PrefixOperator(String),
-    PostfixOperator(String),
+    Operator(String),
     LParen,
     RParen,
 }
