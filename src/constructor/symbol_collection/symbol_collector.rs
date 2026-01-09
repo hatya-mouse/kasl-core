@@ -16,7 +16,7 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserStatementKind,
-    Program, StateVar, SymbolPath, SymbolTable,
+    Program, StateVar, SymbolTable,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -97,19 +97,19 @@ pub fn collect_top_level_symbols(
         }
     }
 
-    for stmt in &symbol_table.operator_defines {
-        match &stmt.1.kind {
-            ParserStatementKind::OperatorDefine {
-                required_by,
-                name,
-                params: _,
-                return_type: _,
-                body: _,
-            } => {}
+    // for stmt in &symbol_table.operator_defines {
+    //     match &stmt.1.kind {
+    //         ParserStatementKind::OperatorDefine {
+    //             required_by,
+    //             name,
+    //             params: _,
+    //             return_type: _,
+    //             body: _,
+    //         } => {}
 
-            _ => (),
-        }
-    }
+    //         _ => (),
+    //     }
+    // }
 
     Ok(())
 }

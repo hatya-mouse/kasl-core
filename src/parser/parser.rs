@@ -45,6 +45,7 @@ peg::parser!(pub grammar kash_parser() for str {
         / protocol_decl_statement()
         / init_statement()
         / operator_impl_statement()
+        / operator_define_statement()
         / block_statement()
         / expected!("statement")
 
@@ -200,6 +201,7 @@ peg::parser!(pub grammar kash_parser() for str {
             }
         }
 
+    // Operator Implementation
     rule operator_impl_statement() -> ParserStatement
         = start:position!() "impl" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:statements() __?
