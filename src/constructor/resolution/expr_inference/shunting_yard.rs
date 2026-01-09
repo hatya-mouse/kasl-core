@@ -14,6 +14,11 @@
 // limitations under the License.
 //
 
-use crate::resolution::expr_inference::TypedToken;
+use crate::{ConstructorError, resolution::expr_inference::TypedToken};
 
-pub fn shunting_yard(tokens: &mut [TypedToken]) {}
+pub fn shunting_yard(tokens: &mut [TypedToken]) -> Result<Vec<TypedToken>, ConstructorError> {
+    let mut output_queue: Vec<TypedToken> = Vec::new();
+    let mut operator_stack: Vec<TypedToken> = Vec::new();
+
+    Ok(output_queue)
+}

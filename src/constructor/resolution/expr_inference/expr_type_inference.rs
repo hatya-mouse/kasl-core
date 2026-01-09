@@ -16,10 +16,7 @@
 
 use crate::{
     ConstructorError, ExprToken, Program, SymbolPath, SymbolTable,
-    resolution::expr_inference::{
-        shunting_yard::shunting_yard, typed_token_getter::get_typed_tokens,
-    },
-    symbol_path,
+    resolution::expr_inference::typed_token_getter::get_typed_tokens, symbol_path,
 };
 
 pub trait ExprTypeInference<'a> {
@@ -40,7 +37,7 @@ impl<'a> ExprTypeInference<'a> for Program {
         let mut typed_tokens = get_typed_tokens(self, expr, symbol_table)?;
         // 2. Determine the type of each operator
         // 3. Rearrange tokens to get reverse polish notation
-        shunting_yard(&mut typed_tokens);
+        // shunting_yard(&mut typed_tokens);
         // 4. Evaluate the reverse polish notation to get the type of the expression
 
         Ok(symbol_path![])
