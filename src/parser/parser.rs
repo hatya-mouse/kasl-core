@@ -16,8 +16,8 @@
 
 use crate::{
     ExprToken, ExprTokenKind, LiteralBind, ParserFuncCallArg, ParserFuncParam,
-    ParserInfixAttrValue, ParserInputAttribute, ParserStateVar, ParserStatement,
-    ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent, Range,
+    ParserInputAttribute, ParserOperatorAttrValue, ParserOperatorType, ParserStateVar,
+    ParserStatement, ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent, Range,
 };
 use std::collections::HashMap;
 
@@ -44,8 +44,7 @@ peg::parser!(pub grammar kash_parser() for str {
         / struct_decl_statement()
         / protocol_decl_statement()
         / init_statement()
-        / infix_statement()
-        / prefix_statement()
+        / operator_impl_statement()
         / block_statement()
         / expected!("statement")
 
@@ -179,25 +178,35 @@ peg::parser!(pub grammar kash_parser() for str {
             }
         }
 
-    rule infix_statement() -> ParserStatement
-        = start:position!() "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? "{"
-        __? attrs:infix_attrs() __?
-        "}" __? body:("{"
-        __? body:statements() __?
-        "}" { body })? end:position!() {
+    // Operator Attributes
+    rule operator_attrs() -> HashMap<String, ParserOperatorAttrValue>
+        = entries:((key:identifier() _? ":" _? value:(
+            v:identifier() { ParserOperatorAttrValue::String(v) }
+            / v:integer() { ParserOperatorAttrValue::Integer(v) }
+        ) {
+            (key, value)
+        }) ** comma()) comma()? {
+            HashMap::from_iter(entries)
+        }
+
+    // Operator Definition
+    rule operator_define_statement() -> ParserStatement
+        = start:position!() "define" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() __? attrs:("{"
+        __? attrs:operator_attrs() __?
+        "}" { attrs }) end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::Infix { symbol, params, return_type, attrs, body }
+                kind: ParserStatementKind::OperatorDefine { op_type, symbol, attrs },
             }
         }
 
-    rule prefix_statement() -> ParserStatement
-        = start:position!() "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
+    rule operator_impl_statement() -> ParserStatement
+        = start:position!() "impl" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:statements() __?
-        "}" { body })? end:position!() {
+        "}" { body }) end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::Prefix { symbol, params, return_type, body }
+                kind: ParserStatementKind::OperatorImpl { op_type, symbol, params, return_type, body },
             }
         }
 
@@ -248,17 +257,6 @@ peg::parser!(pub grammar kash_parser() for str {
         = "intliteral" { LiteralBind::IntLiteral }
         / "floatliteral" { LiteralBind::FloatLiteral }
         / "boolliteral" { LiteralBind::BoolLiteral }
-
-    // Infix Attributes
-    rule infix_attrs() -> HashMap<String, ParserInfixAttrValue>
-        = entries:((key:identifier() _? ":" _? value:(
-            v:identifier() { ParserInfixAttrValue::String(v) }
-            / v:integer() { ParserInfixAttrValue::Integer(v)}
-        ) {
-            (key, value)
-        }) ** comma()) comma()? {
-            HashMap::from_iter(entries)
-        }
 
     // --- EXPRESSIONS ---
 
@@ -365,7 +363,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule reserved()
         = ("input" / "output" / "var" / "state" / "func" / "return"
         / "if" / "else" / "struct" / "init" / "protocol" / "intliteral"
-        / "floatliteral" / "boolliteral" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
+        / "floatliteral" / "boolliteral" / "define" / "impl" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']
 

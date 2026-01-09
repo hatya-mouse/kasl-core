@@ -35,8 +35,6 @@ impl PartialEq for ParserStatement {
     }
 }
 
-impl Eq for ParserStatement {}
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserStatementKind {
     FuncDecl {
@@ -101,22 +99,27 @@ pub enum ParserStatementKind {
         params: Vec<ParserFuncParam>,
         body: Option<Vec<ParserStatement>>,
     },
-    Infix {
+    OperatorDefine {
+        op_type: ParserOperatorType,
         symbol: String,
-        params: Vec<ParserFuncParam>,
-        return_type: ParserSymbolPath,
-        attrs: HashMap<String, ParserInfixAttrValue>,
-        body: Option<Vec<ParserStatement>>,
+        attrs: HashMap<String, ParserOperatorAttrValue>,
     },
-    Prefix {
+    OperatorImpl {
+        op_type: ParserOperatorType,
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: ParserSymbolPath,
-        body: Option<Vec<ParserStatement>>,
+        body: Vec<ParserStatement>,
     },
     Block {
         statements: Vec<ParserStatement>,
     },
+}
+
+#[derive(Debug, PartialEq, Clone, Eq)]
+pub enum ParserOperatorType {
+    Infix,
+    Prefix,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -151,7 +154,7 @@ pub struct ParserFuncParam {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ParserInfixAttrValue {
+pub enum ParserOperatorAttrValue {
     String(String),
     Integer(u32),
 }
