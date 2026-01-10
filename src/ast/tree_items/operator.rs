@@ -40,6 +40,11 @@ pub struct InfixOperatorProperties {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct PrefixOperatorProperties {
+    pub precedence: u8,
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum OperatorAssociativity {
     Left,
     Right,

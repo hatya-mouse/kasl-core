@@ -18,7 +18,7 @@ use std::collections::HashMap;
 
 use crate::{
     Function, InfixOperator, InfixOperatorProperties, InputVar, OutputVar, PrefixOperator,
-    StateVar, SymbolPath, TypeDef,
+    StateVar, SymbolPath, TypeDef, tree_items::operator::PrefixOperatorProperties,
 };
 
 pub struct Program {
@@ -31,7 +31,7 @@ pub struct Program {
 
     pub infix_operator_properties: HashMap<String, InfixOperatorProperties>,
     pub infix_operators: Vec<InfixOperator>,
-    pub prefix_operator_properties: HashMap<String, u8>,
+    pub prefix_operator_properties: HashMap<String, PrefixOperatorProperties>,
     pub prefix_operators: Vec<PrefixOperator>,
 
     pub bool_literal_type: Option<SymbolPath>,
@@ -124,6 +124,20 @@ impl Program {
     }
 
     // -- InfixOperator --
+    /// Register a new infix operator properties.
+    pub fn register_infix_properties(
+        &mut self,
+        symbol: String,
+        properties: InfixOperatorProperties,
+    ) {
+        self.infix_operator_properties.insert(symbol, properties);
+    }
+
+    /// Get an immutable reference to the InfixOperator properties by its symbol.
+    pub fn get_infix_properties(&self, symbol: &str) -> Option<&InfixOperatorProperties> {
+        self.infix_operator_properties.get(symbol)
+    }
+
     /// Get an immutable reference to the InfixOperator by its path.
     pub fn get_infix_func(
         &self,
@@ -161,6 +175,20 @@ impl Program {
     }
 
     // -- PrefixOperator --
+    /// Register a new prefix operator properties.
+    pub fn register_prefix_properties(
+        &mut self,
+        symbol: String,
+        properties: PrefixOperatorProperties,
+    ) {
+        self.prefix_operator_properties.insert(symbol, properties);
+    }
+
+    /// Get an immutable reference to the PrefixOperator properties by its symbol.
+    pub fn get_prefix_properties(&self, symbol: &str) -> Option<&PrefixOperatorProperties> {
+        self.prefix_operator_properties.get(symbol)
+    }
+
     /// Get an immutable reference to the PrefixOperator by its path.
     pub fn get_prefix_func(
         &self,
