@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatement, ParserStatementKind, SymbolTable};
+use crate::{ParserOperatorType, ParserStatement, ParserStatementKind, SymbolTable};
 
 pub fn build_symbol_table<'a>(
     symbol_table: &mut SymbolTable<'a>,
@@ -123,23 +123,27 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
             }
 
-            ParserStatementKind::OperatorDefine {
-                op_type: _,
+            ParserStatementKind::InfixDefine {
                 symbol,
-                attrs: _,
+                infix_properties: _,
             } => {
-                symbol_table.insert_operator_define(symbol.clone(), stmt);
+                symbol_table.insert_infix_define(symbol.clone(), stmt);
+            }
+
+            ParserStatementKind::PrefixDefine { symbol } => {
+                symbol_table.insert_prefix_define(symbol.clone(), stmt);
             }
 
             ParserStatementKind::OperatorFunc {
-                op_type: _,
+                op_type,
                 symbol,
                 params: _,
                 return_type: _,
                 body: _,
-            } => {
-                symbol_table.insert_operator_func(symbol.clone(), stmt);
-            }
+            } => match op_type {
+                ParserOperatorType::Infix => symbol_table.insert_infix_func(symbol.clone(), stmt),
+                ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
+            },
 
             _ => (),
         }

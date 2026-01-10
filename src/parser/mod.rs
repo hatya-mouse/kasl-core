@@ -20,6 +20,6 @@ pub mod parser_ast;
 pub use parser::kasl_parser;
 pub use parser_ast::{
     ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
-    ParserOperatorAttrValue, ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement,
-    ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent,
+    ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement, ParserStatementKind,
+    ParserSymbolPath, ParserSymbolPathComponent,
 };

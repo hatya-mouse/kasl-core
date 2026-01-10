@@ -15,11 +15,10 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, LiteralBind, ParserFuncCallArg, ParserFuncParam,
-    ParserInputAttribute, ParserOperatorAttrValue, ParserOperatorType, ParserStateVar,
+    ExprToken, ExprTokenKind, InfixOperatorProperties, LiteralBind, OperatorAssociativity,
+    ParserFuncCallArg, ParserFuncParam, ParserInputAttribute, ParserOperatorType, ParserStateVar,
     ParserStatement, ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent, Range,
 };
-use std::collections::HashMap;
 
 peg::parser!(pub grammar kasl_parser() for str {
     pub rule parse() -> Vec<ParserStatement>
@@ -179,25 +178,38 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    // Operator Attributes
-    rule operator_attrs() -> HashMap<String, ParserOperatorAttrValue>
-        = entries:((key:identifier() _? ":" _? value:(
-            v:identifier() { ParserOperatorAttrValue::String(v) }
-            / v:integer() { ParserOperatorAttrValue::Integer(v) }
-        ) {
-            (key, value)
-        }) ** comma()) comma()? {
-            HashMap::from_iter(entries)
+        // Infix Operator Properties
+        rule infix_properties() -> InfixOperatorProperties
+        = precedence:precedence_prop() __? comma() __? associativity:associativity_prop() {
+            InfixOperatorProperties { precedence, associativity }
         }
+        / associativity:associativity_prop() __? comma() __? precedence:precedence_prop() {
+            InfixOperatorProperties { precedence, associativity }
+        }
+
+        rule precedence_prop() -> u32
+            = "precedence" _? ":" _? value:integer() { value }
+
+            rule associativity_prop() -> OperatorAssociativity
+            = "associativity" _? ":" _? value:(
+                "left" { OperatorAssociativity::Left }
+                / "right" { OperatorAssociativity::Right }
+                / "none" { OperatorAssociativity::None }
+            ) { value }
 
     // Operator Definition
     rule operator_definition_statement() -> ParserStatement
-        = start:position!() "operator" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() __? attrs:("{"
-        __? attrs:operator_attrs() __?
-        "}" { attrs }) end:position!() {
+        = start:position!() "operator" _ kind:(
+            "infix" _ symbol:operator() __? "{" __? props:infix_properties() __? "}" {
+                ParserStatementKind::InfixDefine { symbol, infix_properties: props }
+            }
+            / "prefix" _ symbol:operator() {
+                ParserStatementKind::PrefixDefine { symbol }
+            }
+        ) end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::OperatorDefine { op_type, symbol, attrs },
+                kind,
             }
         }
 

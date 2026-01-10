@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserStatementKind,
-    Program, StateVar, SymbolTable,
+    ConstructorError, ConstructorErrorType, Function, InfixOperator, InputVar, OutputVar,
+    ParserOperatorType, ParserStatementKind, PrefixOperator, Program, StateVar, SymbolTable,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -97,19 +97,92 @@ pub fn collect_top_level_symbols(
         }
     }
 
-    // for stmt in &symbol_table.operator_defines {
-    //     match &stmt.1.kind {
-    //         ParserStatementKind::OperatorDefine {
-    //             required_by,
-    //             name,
-    //             params: _,
-    //             return_type: _,
-    //             body: _,
-    //         } => {}
+    for stmt in &symbol_table.infix_defines {
+        match &stmt.1.kind {
+            ParserStatementKind::InfixDefine {
+                symbol,
+                infix_properties,
+            } => program.register_infix_properties(symbol.to_string(), infix_properties.clone()),
+            _ => (),
+        }
+    }
 
-    //         _ => (),
-    //     }
-    // }
+    for stmt in &symbol_table.prefix_defines {
+        match &stmt.1.kind {
+            ParserStatementKind::PrefixDefine { symbol } => {
+                program.register_prefix_operator(symbol.to_string())
+            }
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.infix_defines {
+        match &stmt.1.kind {
+            ParserStatementKind::InfixDefine {
+                symbol,
+                infix_properties,
+            } => program.register_infix_properties(symbol.to_string(), infix_properties.clone()),
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.prefix_defines {
+        match &stmt.1.kind {
+            ParserStatementKind::PrefixDefine { symbol } => {
+                program.register_prefix_operator(symbol.to_string())
+            }
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.infix_funcs {
+        match &stmt.1.kind {
+            ParserStatementKind::OperatorFunc {
+                op_type,
+                symbol,
+                params: _,
+                return_type: _,
+                body: _,
+            } => match op_type {
+                ParserOperatorType::Infix => {
+                    let infix = InfixOperator {
+                        symbol: symbol.to_string(),
+                        lhs: None,
+                        rhs: None,
+                        return_type: None,
+                        body: Vec::new(),
+                    };
+                    program.register_infix_func(infix);
+                }
+                _ => (),
+            },
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.prefix_funcs {
+        match &stmt.1.kind {
+            ParserStatementKind::OperatorFunc {
+                op_type,
+                symbol,
+                params: _,
+                return_type: _,
+                body: _,
+            } => match op_type {
+                ParserOperatorType::Prefix => {
+                    let prefix = PrefixOperator {
+                        symbol: symbol.to_string(),
+                        operand: None,
+                        return_type: None,
+                        body: Vec::new(),
+                    };
+                    program.register_prefix_func(prefix);
+                }
+                _ => (),
+            },
+            _ => (),
+        }
+    }
 
     Ok(())
 }

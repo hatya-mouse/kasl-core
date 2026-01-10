@@ -14,11 +14,23 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, resolution::expr_inference::TypedToken};
+use crate::{ConstructorError, Program, resolution::expr_inference::TypedToken};
 
-pub fn shunting_yard(tokens: &mut [TypedToken]) -> Result<Vec<TypedToken>, ConstructorError> {
+pub fn shunting_yard(
+    program: &mut Program,
+    tokens: Vec<TypedToken>,
+) -> Result<Vec<TypedToken>, ConstructorError> {
     let mut output_queue: Vec<TypedToken> = Vec::new();
     let mut operator_stack: Vec<TypedToken> = Vec::new();
+
+    for token in tokens {
+        match token {
+            TypedToken::Value(_) => output_queue.push(token),
+            TypedToken::PrefixOperator(_) | TypedToken::InfixOperator(_) => {
+                while let Some(top) = operator_stack.last() {}
+            }
+        }
+    }
 
     Ok(output_queue)
 }

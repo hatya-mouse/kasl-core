@@ -36,6 +36,7 @@ pub enum ConstructorErrorType {
     MissingLiteralBind(LiteralBind),
     NoReturnFunctionInExpr(SymbolPath),
     UnmatchedParentheses,
+    InvalidInfixProperty(String),
 
     CompilerBug(String),
     Placeholder,
@@ -119,6 +120,9 @@ impl ConstructorErrorType {
             }
             ConstructorErrorType::UnmatchedParentheses => {
                 format!("Unmatched parentheses.")
+            }
+            ConstructorErrorType::InvalidInfixProperty(attribute) => {
+                format!("Infix property '{}' doesn't exist", attribute)
             }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(

@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-
-use crate::{LiteralBind, Range};
+use crate::{InfixOperatorProperties, LiteralBind, Range};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
@@ -99,10 +97,12 @@ pub enum ParserStatementKind {
         params: Vec<ParserFuncParam>,
         body: Option<Vec<ParserStatement>>,
     },
-    OperatorDefine {
-        op_type: ParserOperatorType,
+    InfixDefine {
         symbol: String,
-        attrs: HashMap<String, ParserOperatorAttrValue>,
+        infix_properties: InfixOperatorProperties,
+    },
+    PrefixDefine {
+        symbol: String,
     },
     OperatorFunc {
         op_type: ParserOperatorType,
@@ -151,12 +151,6 @@ pub struct ParserFuncParam {
     pub value_type: Option<ParserSymbolPath>,
     pub def_val: Option<Vec<ExprToken>>,
     pub range: Range,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ParserOperatorAttrValue {
-    String(String),
-    Integer(u32),
 }
 
 #[derive(Debug, PartialEq, Clone)]

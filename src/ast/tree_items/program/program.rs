@@ -18,7 +18,7 @@ use std::collections::HashMap;
 
 use crate::{
     Function, InfixOperator, InfixOperatorProperties, InputVar, OutputVar, PrefixOperator,
-    StateVar, SymbolPath, TypeDef, tree_items::operator::PrefixOperatorProperties,
+    StateVar, SymbolPath, TypeDef,
 };
 
 pub struct Program {
@@ -31,7 +31,7 @@ pub struct Program {
 
     pub infix_operator_properties: HashMap<String, InfixOperatorProperties>,
     pub infix_operators: Vec<InfixOperator>,
-    pub prefix_operator_properties: HashMap<String, PrefixOperatorProperties>,
+    pub prefix_operator_symbols: Vec<String>,
     pub prefix_operators: Vec<PrefixOperator>,
 
     pub bool_literal_type: Option<SymbolPath>,
@@ -51,7 +51,7 @@ impl Program {
 
             infix_operator_properties: HashMap::new(),
             infix_operators: Vec::new(),
-            prefix_operator_properties: HashMap::new(),
+            prefix_operator_symbols: Vec::new(),
             prefix_operators: Vec::new(),
 
             bool_literal_type: None,
@@ -138,6 +138,11 @@ impl Program {
         self.infix_operator_properties.get(symbol)
     }
 
+    /// Register an InfixOperator to the program
+    pub fn register_infix_func(&mut self, operator: InfixOperator) {
+        self.infix_operators.push(operator);
+    }
+
     /// Get an immutable reference to the InfixOperator by its path.
     pub fn get_infix_func(
         &self,
@@ -148,11 +153,15 @@ impl Program {
         self.infix_operators
             .iter()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| match (&op.lhs.value_type, &op.rhs.value_type) {
-                (Some(lhs_value_type), Some(rhs_value_type)) => {
-                    lhs_value_type == lhs_type && rhs_value_type == rhs_type
+            .find(|op| {
+                if let (Some(lhs), Some(rhs)) = (&op.lhs, &op.rhs) {
+                    if let (Some(lhs_value_type), Some(rhs_value_type)) =
+                        (&lhs.value_type, &rhs.value_type)
+                    {
+                        return lhs_value_type == lhs_type && rhs_value_type == rhs_type;
+                    }
                 }
-                _ => false,
+                false
             })
     }
 
@@ -166,27 +175,32 @@ impl Program {
         self.infix_operators
             .iter_mut()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| match (&op.lhs.value_type, &op.rhs.value_type) {
-                (Some(lhs_value_type), Some(rhs_value_type)) => {
-                    lhs_value_type == lhs_type && rhs_value_type == rhs_type
+            .find(|op| {
+                if let (Some(lhs), Some(rhs)) = (&op.lhs, &op.rhs) {
+                    if let (Some(lhs_value_type), Some(rhs_value_type)) =
+                        (&lhs.value_type, &rhs.value_type)
+                    {
+                        return lhs_value_type == lhs_type && rhs_value_type == rhs_type;
+                    }
                 }
-                _ => false,
+                false
             })
     }
 
     // -- PrefixOperator --
-    /// Register a new prefix operator properties.
-    pub fn register_prefix_properties(
-        &mut self,
-        symbol: String,
-        properties: PrefixOperatorProperties,
-    ) {
-        self.prefix_operator_properties.insert(symbol, properties);
+    /// Register a new prefix operator.
+    pub fn register_prefix_operator(&mut self, symbol: String) {
+        self.prefix_operator_symbols.push(symbol);
     }
 
-    /// Get an immutable reference to the PrefixOperator properties by its symbol.
-    pub fn get_prefix_properties(&self, symbol: &str) -> Option<&PrefixOperatorProperties> {
-        self.prefix_operator_properties.get(symbol)
+    /// Check if a prefix operator is registered.
+    pub fn has_prefix_operator(&self, symbol: &String) -> bool {
+        self.prefix_operator_symbols.contains(symbol)
+    }
+
+    /// Register a PrefixOperator to the program
+    pub fn register_prefix_func(&mut self, operator: PrefixOperator) {
+        self.prefix_operators.push(operator);
     }
 
     /// Get an immutable reference to the PrefixOperator by its path.
@@ -198,9 +212,13 @@ impl Program {
         self.prefix_operators
             .iter()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| match &op.operand.value_type {
-                Some(value_type) => value_type == operand_type,
-                None => false,
+            .find(|op| {
+                if let Some(operand) = &op.operand {
+                    if let Some(value_type) = &operand.value_type {
+                        return value_type == operand_type;
+                    }
+                }
+                false
             })
     }
 
@@ -213,9 +231,13 @@ impl Program {
         self.prefix_operators
             .iter_mut()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| match &op.operand.value_type {
-                Some(value_type) => value_type == operand_type,
-                None => false,
+            .find(|op| {
+                if let Some(operand) = &op.operand {
+                    if let Some(value_type) = &operand.value_type {
+                        return value_type == operand_type;
+                    }
+                }
+                false
             })
     }
 }
