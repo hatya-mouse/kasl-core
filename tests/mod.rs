@@ -14,5 +14,7 @@
 // limitations under the License.
 //
 
+pub mod complex_program;
+pub mod expression;
 pub mod parsing;
 pub mod symbol_table;
