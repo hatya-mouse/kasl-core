@@ -19,3 +19,4 @@ pub mod expr_inference;
 pub mod type_resolver;
 
 pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
+pub use expr_inference::{TypedToken, TypedTokenKind, get_typed_tokens};

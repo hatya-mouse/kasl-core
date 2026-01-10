@@ -24,3 +24,4 @@ pub mod type_collection;
 
 pub use error::{ConstructorError, ConstructorErrorType};
 pub use symbol_table::SymbolTable;
+pub use resolution::{TypedToken, TypedTokenKind, get_typed_tokens};

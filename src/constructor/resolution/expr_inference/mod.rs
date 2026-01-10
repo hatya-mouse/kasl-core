@@ -19,4 +19,4 @@ pub mod shunting_yard;
 pub mod typed_token_getter;
 
 pub use expr_type_inference::ExprTypeInference;
-pub use typed_token_getter::{TypedToken, get_typed_tokens};
+pub use typed_token_getter::{TypedToken, TypedTokenKind, get_typed_tokens};

@@ -64,9 +64,7 @@ mod complex_program {
             }
 
             // Define a prefix operator (unary minus)
-            operator prefix - {
-                precedence: 4
-            }
+            operator prefix -
 
             func prefix -(operand: Float) -> Float {
                 return operand * -1.0

@@ -15,11 +15,24 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program, Range,
     SymbolPath, SymbolTable,
 };
 
-pub enum TypedToken {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TypedToken {
+    pub kind: TypedTokenKind,
+    pub range: Range,
+}
+
+impl TypedToken {
+    pub fn new(kind: TypedTokenKind, range: Range) -> Self {
+        TypedToken { kind, range }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TypedTokenKind {
     Value(SymbolPath), // The type of the value
     PrefixOperator(String),
     InfixOperator(String),
@@ -39,7 +52,10 @@ pub fn get_typed_tokens(
     while let Some(token) = expr_iter.next() {
         match &token.kind {
             ExprTokenKind::IntLiteral(_) => match &program.int_literal_type {
-                Some(int_literal_type) => result.push(TypedToken::Value(int_literal_type.clone())),
+                Some(int_literal_type) => result.push(TypedToken::new(
+                    TypedTokenKind::Value(int_literal_type.clone()),
+                    token.range.clone(),
+                )),
                 None => {
                     return Err(ConstructorError {
                         error_type: ConstructorErrorType::MissingLiteralBind(
@@ -51,9 +67,10 @@ pub fn get_typed_tokens(
             },
 
             ExprTokenKind::FloatLiteral(_) => match &program.float_literal_type {
-                Some(float_literal_type) => {
-                    result.push(TypedToken::Value(float_literal_type.clone()))
-                }
+                Some(float_literal_type) => result.push(TypedToken::new(
+                    TypedTokenKind::Value(float_literal_type.clone()),
+                    token.range.clone(),
+                )),
                 None => {
                     return Err(ConstructorError {
                         error_type: ConstructorErrorType::MissingLiteralBind(
@@ -65,9 +82,10 @@ pub fn get_typed_tokens(
             },
 
             ExprTokenKind::BoolLiteral(_) => match &program.bool_literal_type {
-                Some(bool_literal_type) => {
-                    result.push(TypedToken::Value(bool_literal_type.clone()))
-                }
+                Some(bool_literal_type) => result.push(TypedToken::new(
+                    TypedTokenKind::Value(bool_literal_type.clone()),
+                    token.range.clone(),
+                )),
                 None => {
                     return Err(ConstructorError {
                         error_type: ConstructorErrorType::MissingLiteralBind(
@@ -80,7 +98,10 @@ pub fn get_typed_tokens(
 
             ExprTokenKind::Identifier(parser_path) => {
                 let symbol_type = program.get_symbol_type(&parser_path, symbol_table, token)?;
-                result.push(TypedToken::Value(symbol_type));
+                result.push(TypedToken::new(
+                    TypedTokenKind::Value(symbol_type),
+                    token.range.clone(),
+                ));
             }
 
             ExprTokenKind::FuncCall {
@@ -88,18 +109,26 @@ pub fn get_typed_tokens(
                 args: _,
             } => {
                 let func_type = program.get_func_type(func_parser_path, symbol_table, token)?;
-                result.push(TypedToken::Value(func_type));
+                result.push(TypedToken::new(
+                    TypedTokenKind::Value(func_type),
+                    token.range.clone(),
+                ));
             }
 
             ExprTokenKind::Operator(operator_symbol) => {
                 let last_token = result.last();
-                let operator_token = handle_operator_resolution(operator_symbol, last_token);
+                let operator_token =
+                    handle_operator_resolution(operator_symbol, token.range.clone(), last_token);
                 result.push(operator_token);
             }
 
-            ExprTokenKind::LParen => result.push(TypedToken::LParen),
+            ExprTokenKind::LParen => {
+                result.push(TypedToken::new(TypedTokenKind::LParen, token.range.clone()))
+            }
 
-            ExprTokenKind::RParen => result.push(TypedToken::RParen),
+            ExprTokenKind::RParen => {
+                result.push(TypedToken::new(TypedTokenKind::RParen, token.range.clone()))
+            }
         }
     }
 
@@ -108,20 +137,27 @@ pub fn get_typed_tokens(
 
 fn handle_operator_resolution(
     operator_symbol: &String,
+    operator_range: Range,
     last_token: Option<&TypedToken>,
 ) -> TypedToken {
     // Whether the operator is infix or prefix can be determined by the last token
     let is_infix = match last_token {
-        Some(TypedToken::Value(_)) | Some(TypedToken::RParen) => true,
-        None
-        | Some(TypedToken::LParen)
-        | Some(TypedToken::InfixOperator(_))
-        | Some(TypedToken::PrefixOperator(_)) => false,
+        Some(unwrapped_token) => match unwrapped_token.kind {
+            TypedTokenKind::LParen | TypedTokenKind::RParen => false,
+            _ => true,
+        },
+        None => false,
     };
 
     if is_infix {
-        return TypedToken::InfixOperator(operator_symbol.clone());
+        return TypedToken::new(
+            TypedTokenKind::InfixOperator(operator_symbol.clone()),
+            operator_range,
+        );
     } else {
-        return TypedToken::PrefixOperator(operator_symbol.clone());
+        return TypedToken::new(
+            TypedTokenKind::PrefixOperator(operator_symbol.clone()),
+            operator_range,
+        );
     }
 }

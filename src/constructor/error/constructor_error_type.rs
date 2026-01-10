@@ -22,6 +22,7 @@ pub enum ConstructorErrorType {
     TrailingDot,
     SymbolNotFound(Option<SymbolPath>),
     OperatorNotFound(String),
+    OperatorCannotBeChained(String),
     ExpectType,
     Invalid {
         scope: ScopeType,
@@ -55,6 +56,9 @@ impl ConstructorErrorType {
             },
             ConstructorErrorType::OperatorNotFound(operator_symbol) => {
                 format!("Operator '{}' not found here.", operator_symbol)
+            }
+            ConstructorErrorType::OperatorCannotBeChained(operator_symbol) => {
+                format!("Infix operator '{}' cannot be chained.", operator_symbol)
             }
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {
