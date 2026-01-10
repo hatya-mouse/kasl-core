@@ -247,7 +247,7 @@ mod expression {
     }
 
     #[test]
-    fn missing_infix_properties_is_compiler_bug() {
+    fn operator_not_found_error() {
         // Using an infix operator with no registered properties should return CompilerBug
         let program = Program::new();
         let tokens = vec![v(), inf("$unknown$"), v()];
@@ -256,8 +256,8 @@ mod expression {
 
         let err = res.err().unwrap();
         match err.error_type {
-            kasl::ConstructorErrorType::CompilerBug(_) => {}
-            other => panic!("expected CompilerBug, got {:?}", other),
+            kasl::ConstructorErrorType::OperatorNotFound(_) => {}
+            other => panic!("expected OperatorNotFound, got {:?}", other),
         }
     }
 }
