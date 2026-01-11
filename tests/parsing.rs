@@ -23,7 +23,7 @@ mod parsing {
     /// Test parsing of chained expressions.
     #[test]
     fn chaining() {
-        let object = kasl_parser::expression("object");
+        let object = kasl_parser::oneline_expression("object");
         // println!("{:#?}", object);
         assert_eq!(
             object,
@@ -36,7 +36,7 @@ mod parsing {
             }])
         );
 
-        let object_property = kasl_parser::expression("object.property");
+        let object_property = kasl_parser::oneline_expression("object.property");
         // println!("{:#?}", object_property);
         assert_eq!(
             object_property,

@@ -23,7 +23,7 @@ use crate::{
 pub fn build_func_param_graph(
     graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
-    func_path: SymbolPath,
+    func_path: &SymbolPath,
     params: &[ParserFuncParam],
 ) -> Result<(), ConstructorError> {
     for param in params {

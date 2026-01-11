@@ -108,8 +108,8 @@ pub fn resolve_types(
             ParserStatementKind::Output { name, value_type } => {
                 // Output variable must have a type annotation
                 if let Some(type_symbol_path) = program.resolve_type_def_parser_path(&value_type) {
-                    match program.get_input_mut(name) {
-                        Some(input) => input.value_type = Some(type_symbol_path),
+                    match program.get_output_mut(name) {
+                        Some(output) => output.value_type = Some(type_symbol_path),
                         None => errors.push(ConstructorError {
                             error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
                             position: symbol_decl_statement.range,
@@ -196,11 +196,33 @@ pub fn resolve_types(
 
             ParserStatementKind::FuncDecl {
                 required_by: _,
-                name: _,
+                name,
                 params,
-                return_type: _,
+                return_type,
                 body: _,
             } => {
+                // If the function has a return type, resolve it
+                if let Some(return_type) = return_type {
+                    if let Some(return_type_path) =
+                        program.resolve_type_def_parser_path(&return_type)
+                    {
+                        match program.get_func_mut(name) {
+                            Some(func) => func.return_type = Some(return_type_path),
+                            None => errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::CannotInferType(
+                                    symbol_path.clone(),
+                                ),
+                                position: symbol_decl_statement.range,
+                            }),
+                        }
+                    } else {
+                        errors.push(ConstructorError {
+                            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                            position: symbol_decl_statement.range,
+                        });
+                    }
+                }
+
                 for param in params {
                     if let Some(type_symbol_path) = resolve_type_or_push_error(
                         program,

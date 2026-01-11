@@ -30,7 +30,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
     let mut graph = DependencyGraph::new();
 
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
-    for stmt in &symbol_table.vars {
+    for stmt in &symbol_table.inputs {
         match &stmt.1.kind {
             ParserStatementKind::Input {
                 name,
@@ -38,23 +38,35 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
                 def_val,
                 attrs: _,
             } => {
+                // Combine variable name to create a new path for the child type
+                let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
                 if let Some(def_val) = def_val {
-                    // Combine variable name to create a new path for the child type
-                    let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
                     build_var_graph(&mut graph, symbol_table, &var_path, def_val)?;
-                    graph.add_node(DependencyGraphNode::new(var_path));
                 }
+                graph.add_node(DependencyGraphNode::new(var_path));
             }
 
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.outputs {
+        match &stmt.1.kind {
             ParserStatementKind::Output {
                 name,
                 value_type: _,
             } => {
                 // Combine variable name to create a new path for the child type
-                let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
+                let var_path = symbol_path![SymbolPathComponent::OutputVar(name.to_string())];
                 graph.add_node(DependencyGraphNode::new(var_path));
             }
 
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.states {
+        match &stmt.1.kind {
             ParserStatementKind::State { vars } => {
                 for var in vars {
                     // Combine variable name to create a new path for the child type
@@ -80,7 +92,8 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             } => {
                 // Combine variable name to create a new path for the function
                 let func_path = symbol_path![SymbolPathComponent::Func(name.to_string())];
-                build_func_param_graph(&mut graph, symbol_table, func_path, params)?;
+                build_func_param_graph(&mut graph, symbol_table, &func_path, params)?;
+                graph.add_node(DependencyGraphNode::new(func_path));
             }
 
             _ => (),

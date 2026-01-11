@@ -18,8 +18,15 @@
 mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
-        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind, get_typed_tokens,
-        resolution::expr_inference::rearrange_tokens_to_rpn, symbol_path,
+        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
+        constructor::constructor::construct_program,
+        get_typed_tokens,
+        member_collection::collect_type_members,
+        resolution::{expr_inference::rearrange_tokens_to_rpn, type_resolver::resolve_types},
+        symbol_collection::collect_top_level_symbols,
+        symbol_path,
+        symbol_table::build_symbol_table,
+        type_collection::collect_all_types,
     };
 
     fn v() -> TypedToken {
@@ -262,9 +269,9 @@ mod expression {
     }
 
     #[test]
-    fn heavy_duty_expression_test() {
-        // Expression: `(foo.bar(a + 2) * -b) - (c ^ (d + e))`
-        // Expected RPN: `foo.bar(a 2 +) b pre- * c d e + ^ -` (as a string representation)
+    fn complex_expression_test() {
+        // Expression: `(foo_bar(a + 2) * -b) - (c ^ (d + e))`
+        // Expected RPN: `foo_bar b pre- * c d e + ^ -` (as a string representation)
         //
         // This test stress-tests the integration of the parser, get_typed_tokens,
         // and rearrange_tokens_to_rpn.
@@ -312,6 +319,8 @@ mod expression {
         // Build a symbol table by parsing a small program that declares the needed symbols.
         // Use top-level inputs and a valid function name (no dot in identifier).
         let program_src = r#"
+struct Int {}
+struct Float {}
 func foo_bar(x: Int) -> Float { }
 input a: Int = 0
 input b: Int = 0
@@ -319,14 +328,18 @@ input c: Int = 0
 input d: Int = 0
 input e: Int = 0
 "#;
+
         let parsed_program = kasl::kasl_parser::parse(program_src)
             .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
-        kasl::symbol_table::build_symbol_table(&mut symbol_table, &parsed_program);
+        build_symbol_table(&mut symbol_table, &parsed_program);
+        collect_all_types(&mut program, &symbol_table);
+        collect_top_level_symbols(&mut program, &symbol_table).unwrap();
+        resolve_types(&mut program, &symbol_table).unwrap();
 
         // 2. --- Parsing ---
         // Parse the string directly using the `kasl_parser::expression` rule
         let expr_str = "(foo_bar(a + 2) * -b) - (c ^ (d + e))";
-        let expr_tokens = kasl::kasl_parser::expression(expr_str)
+        let expr_tokens = kasl::kasl_parser::oneline_expression(expr_str)
             .unwrap_or_else(|e| panic!("Parser failed: {}", e));
 
         // 3. --- Typing & RPN Conversion ---
@@ -351,10 +364,6 @@ input e: Int = 0
             "-",        // - (infix)
         ];
 
-        // `get_typed_tokens` does not yet resolve the contents of function arguments,
-        // so `foo.bar(a + 2)` is treated as a single `V<Float>` token (the return type of foo.bar).
-        // This test ensures that, given this premise, the structure of the main
-        // expression is correctly converted to RPN.
         assert_eq!(got, want, "The RPN sequence did not match the expectation.");
     }
 }

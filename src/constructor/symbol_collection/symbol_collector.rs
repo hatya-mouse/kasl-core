@@ -24,7 +24,7 @@ pub fn collect_top_level_symbols(
     program: &mut Program,
     symbol_table: &SymbolTable,
 ) -> Result<(), ConstructorError> {
-    for stmt in &symbol_table.vars {
+    for stmt in &symbol_table.inputs {
         match &stmt.1.kind {
             ParserStatementKind::Input {
                 name,
@@ -41,6 +41,12 @@ pub fn collect_top_level_symbols(
                 program.register_input(input);
             }
 
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.outputs {
+        match &stmt.1.kind {
             ParserStatementKind::Output {
                 name,
                 value_type: _,
@@ -52,6 +58,12 @@ pub fn collect_top_level_symbols(
                 program.register_output(output);
             }
 
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.states {
+        match &stmt.1.kind {
             ParserStatementKind::State { vars } => {
                 for var in vars {
                     let state = StateVar {
@@ -93,25 +105,6 @@ pub fn collect_top_level_symbols(
                 program.register_func(function);
             }
 
-            _ => (),
-        }
-    }
-
-    for stmt in &symbol_table.infix_defines {
-        match &stmt.1.kind {
-            ParserStatementKind::InfixDefine {
-                symbol,
-                infix_properties,
-            } => program.register_infix_properties(symbol.to_string(), infix_properties.clone()),
-            _ => (),
-        }
-    }
-
-    for stmt in &symbol_table.prefix_defines {
-        match &stmt.1.kind {
-            ParserStatementKind::PrefixDefine { symbol } => {
-                program.register_prefix_operator(symbol.to_string())
-            }
             _ => (),
         }
     }

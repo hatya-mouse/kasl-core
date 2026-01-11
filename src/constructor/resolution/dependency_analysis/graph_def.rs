@@ -17,6 +17,7 @@
 use crate::SymbolPath;
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct DependencyGraph {
     pub nodes: HashMap<SymbolPath, DependencyGraphNode>,
     pub edges: Vec<DependencyGraphEdge>,

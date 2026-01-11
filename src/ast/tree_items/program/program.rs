@@ -21,6 +21,7 @@ use crate::{
     StateVar, SymbolPath, TypeDef,
 };
 
+#[derive(Debug)]
 pub struct Program {
     pub main_func: Option<Function>,
     pub funcs: Vec<Function>,

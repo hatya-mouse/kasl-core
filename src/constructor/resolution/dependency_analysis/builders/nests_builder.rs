@@ -57,7 +57,7 @@ pub fn build_struct_and_protocol_graph(
                 // Combine function name to create a new path for the function
                 let mut func_path = type_path.clone();
                 func_path.push(SymbolPathComponent::Func(name.to_string()));
-                build_func_param_graph(graph, root_symbol_table, func_path, params)?;
+                build_func_param_graph(graph, root_symbol_table, &func_path, params)?;
             }
 
             _ => (),

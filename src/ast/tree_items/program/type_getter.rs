@@ -39,6 +39,7 @@ impl Program {
         match symbol_path.components.last() {
             Some(last_component) => match last_component {
                 SymbolPathComponent::InputVar(name) => {
+                    // The path has been resolved so we can safely unwrap the input variable
                     let input_var = self.get_input(name).unwrap();
                     input_var.value_type.clone().ok_or(ConstructorError {
                         error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),

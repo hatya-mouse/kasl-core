@@ -159,6 +159,22 @@ pub struct ExprToken {
     pub kind: ExprTokenKind,
 }
 
+impl ExprToken {
+    pub fn lparen(range: Range) -> Self {
+        Self {
+            range,
+            kind: ExprTokenKind::LParen,
+        }
+    }
+
+    pub fn rparen(range: Range) -> Self {
+        Self {
+            range,
+            kind: ExprTokenKind::RParen,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum ExprTokenKind {
     IntLiteral(u32),

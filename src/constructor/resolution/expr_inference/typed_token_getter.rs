@@ -143,8 +143,8 @@ fn handle_operator_resolution(
     // Whether the operator is infix or prefix can be determined by the last token
     let is_infix = match last_token {
         Some(unwrapped_token) => match unwrapped_token.kind {
-            TypedTokenKind::LParen | TypedTokenKind::RParen => false,
-            _ => true,
+            TypedTokenKind::Value(_) | TypedTokenKind::RParen => true,
+            _ => false,
         },
         None => false,
     };
