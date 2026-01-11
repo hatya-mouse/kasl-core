@@ -178,8 +178,8 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-        // Infix Operator Properties
-        rule infix_properties() -> InfixOperatorProperties
+    // Infix Operator Properties
+    rule infix_properties() -> InfixOperatorProperties
         = precedence:precedence_prop() __? comma() __? associativity:associativity_prop() {
             InfixOperatorProperties { precedence, associativity }
         }
@@ -187,15 +187,15 @@ peg::parser!(pub grammar kasl_parser() for str {
             InfixOperatorProperties { precedence, associativity }
         }
 
-        rule precedence_prop() -> u32
-            = "precedence" _? ":" _? value:integer() { value }
+    rule precedence_prop() -> u32
+        = "precedence" _? ":" _? value:integer() { value }
 
-            rule associativity_prop() -> OperatorAssociativity
-            = "associativity" _? ":" _? value:(
-                "left" { OperatorAssociativity::Left }
-                / "right" { OperatorAssociativity::Right }
-                / "none" { OperatorAssociativity::None }
-            ) { value }
+    rule associativity_prop() -> OperatorAssociativity
+        = "associativity" _? ":" _? value:(
+            "left" { OperatorAssociativity::Left }
+            / "right" { OperatorAssociativity::Right }
+            / "none" { OperatorAssociativity::None }
+        ) { value }
 
     // Operator Definition
     rule operator_definition_statement() -> ParserStatement
@@ -274,50 +274,67 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // --- EXPRESSIONS ---
 
-    pub rule expression() -> Vec<ExprToken>
-        = (
-            !(__? "\n" / __? ")" / __? "}")
-            first:expr_token()?
-            rest:(
-                ops:(__? op:operator_token() { op })+
-                __? token:expr_token() {
-                    (ops, token)
-                }
-            )*
-            last:operator_token()? {
-                let mut tokens = match first {
-                    Some(first) => vec![first],
-                    None => vec![],
-                };
-                for (ops, token) in rest {
-                    tokens.extend(ops);
-                    tokens.push(token);
-                }
-                if let Some(op) = last { tokens.push(op); }
+    // pub rule expression() -> Vec<ExprToken>
+    //     = (
+    //         !(__? "\n" / __? ")" / __? "}")
+    //         first:expr_token()?
+    //         rest:(
+    //             ops:(__? op:operator_token() { op })+
+    //             __? token:expr_token() {
+    //                 (ops, token)
+    //             }
+    //         )*
+    //         last:operator_token()? {
+    //             let mut tokens = match first {
+    //                 Some(first) => vec![first],
+    //                 None => vec![],
+    //             };
+    //             for (ops, token) in rest {
+    //                 tokens.extend(ops);
+    //                 tokens.push(token);
+    //             }
+    //             if let Some(op) = last { tokens.push(op); }
 
-                tokens
-            }
-        )
-        / l_paren_start:position!() "(" l_paren_end:position!() _ expr:expression() _ r_paren_start:position!() ")" r_paren_end:position!() {
-            let mut tokens = vec![
-                ExprToken { kind: ExprTokenKind::LParen, range: Range::n(l_paren_start, l_paren_end) },
-                ExprToken { kind: ExprTokenKind::RParen, range: Range::n(r_paren_start, r_paren_end) }
-            ];
-            tokens.splice(1..1, expr);
+    //             tokens
+    //         }
+    //     )
+    //     / l_paren_start:position!() "(" l_paren_end:position!() _ expr:expression() _ r_paren_start:position!() ")" r_paren_end:position!() {
+    //         let mut tokens = vec![
+    //             ExprToken { kind: ExprTokenKind::LParen, range: Range::n(l_paren_start, l_paren_end) },
+    //             ExprToken { kind: ExprTokenKind::RParen, range: Range::n(r_paren_start, r_paren_end) }
+    //         ];
+    //         tokens.splice(1..1, expr);
+    //         tokens
+    //     }
+    //     / expected!("expression")
+
+    pub rule expression() -> Vec<ExprToken>
+        = tokens:( expr_token() ** (__?) ) {
             tokens
         }
         / expected!("expression")
 
-    rule operator_token() -> ExprToken
-        = start:position!() op:operator() end:position!() { ExprToken { range: Range::n(start, end), kind: ExprTokenKind::Operator(op) } }
+    rule operator_token() -> ExprTokenKind
+        = op:operator() { ExprTokenKind::Operator(op) }
+
+    // rule expr_token() -> ExprToken
+    //     = start:position!() kind:(
+    //         literal()
+    //         / func_call()
+    //         / id_chain_token()
+    //     ) end:position!() { ExprToken { range: Range::n(start, end), kind } }
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
-            literal()
+            "(" { ExprTokenKind::LParen }
+            / ")" { ExprTokenKind::RParen }
+            / literal()
             / func_call()
             / id_chain_token()
-        ) end:position!() { ExprToken { range: Range::n(start, end), kind } }
-
+            / operator_token()
+        ) end:position!() {
+            ExprToken { range: Range::n(start, end), kind }
+        }
 
     rule func_call() -> ExprTokenKind
         = path:id_chain() _? "(" __? args:func_call_args() ")" {

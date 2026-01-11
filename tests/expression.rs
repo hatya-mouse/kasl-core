@@ -260,4 +260,101 @@ mod expression {
             other => panic!("expected OperatorNotFound, got {:?}", other),
         }
     }
+
+    #[test]
+    fn heavy_duty_expression_test() {
+        // Expression: `(foo.bar(a + 2) * -b) - (c ^ (d + e))`
+        // Expected RPN: `foo.bar(a 2 +) b pre- * c d e + ^ -` (as a string representation)
+        //
+        // This test stress-tests the integration of the parser, get_typed_tokens,
+        // and rearrange_tokens_to_rpn.
+
+        // 1. --- Setup ---
+        let mut program = Program::new();
+        let mut symbol_table = SymbolTable::new();
+
+        // Register operator properties
+        program.register_infix_properties(
+            "+".to_string(),
+            InfixOperatorProperties {
+                precedence: 10,
+                associativity: OperatorAssociativity::Left,
+            },
+        );
+        program.register_infix_properties(
+            "-".to_string(),
+            InfixOperatorProperties {
+                precedence: 10,
+                associativity: OperatorAssociativity::Left,
+            },
+        );
+        program.register_infix_properties(
+            "*".to_string(),
+            InfixOperatorProperties {
+                precedence: 20,
+                associativity: OperatorAssociativity::Left,
+            },
+        );
+        program.register_infix_properties(
+            "^".to_string(),
+            InfixOperatorProperties {
+                precedence: 30,
+                associativity: OperatorAssociativity::Right,
+            },
+        );
+        program.register_prefix_operator("-".to_string());
+
+        // Set types for literals and variables
+        let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
+        // let float_type = symbol_path![SymbolPathComponent::TypeDef("Float".to_string())];
+        program.set_int_literal(int_type.clone()).unwrap();
+
+        // Build a symbol table by parsing a small program that declares the needed symbols.
+        // Use top-level inputs and a valid function name (no dot in identifier).
+        let program_src = r#"
+func foo_bar(x: Int) -> Float { }
+input a: Int = 0
+input b: Int = 0
+input c: Int = 0
+input d: Int = 0
+input e: Int = 0
+"#;
+        let parsed_program = kasl::kasl_parser::parse(program_src)
+            .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
+        kasl::symbol_table::build_symbol_table(&mut symbol_table, &parsed_program);
+
+        // 2. --- Parsing ---
+        // Parse the string directly using the `kasl_parser::expression` rule
+        let expr_str = "(foo_bar(a + 2) * -b) - (c ^ (d + e))";
+        let expr_tokens = kasl::kasl_parser::expression(expr_str)
+            .unwrap_or_else(|e| panic!("Parser failed: {}", e));
+
+        // 3. --- Typing & RPN Conversion ---
+        let typed_tokens = get_typed_tokens(&program, &expr_tokens, &symbol_table)
+            .unwrap_or_else(|e| panic!("get_typed_tokens failed: {}", e));
+
+        let rpn_tokens = rearrange_tokens_to_rpn(&program, typed_tokens)
+            .unwrap_or_else(|e| panic!("rearrange_tokens_to_rpn failed: {}", e));
+
+        // 4. --- Validation ---
+        let got = short_repr(&rpn_tokens);
+        let want = vec![
+            "V<Float>", // Result of foo.bar(a + 2)
+            "V<Int>",   // b
+            "pre-",     // - (prefix)
+            "*",        // *
+            "V<Int>",   // c
+            "V<Int>",   // d
+            "V<Int>",   // e
+            "+",        // +
+            "^",        // ^
+            "-",        // - (infix)
+        ];
+
+        // `get_typed_tokens` does not yet resolve the contents of function arguments,
+        // so `foo.bar(a + 2)` is treated as a single `V<Float>` token (the return type of foo.bar).
+        // This test ensures that, given this premise, the structure of the main
+        // expression is correctly converted to RPN.
+        assert_eq!(got, want, "The RPN sequence did not match the expectation.");
+    }
 }
