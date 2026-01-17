@@ -16,7 +16,8 @@
 
 use crate::{
     ConstructorError, ExprToken, Program, SymbolPath, SymbolTable, get_typed_tokens,
-    resolution::expr_inference::rearrange_tokens_to_rpn, symbol_path,
+    resolution::expr_inference::{build_expr_tree, rearrange_tokens_to_rpn},
+    symbol_path,
 };
 
 pub trait ExprTypeInference<'a> {
@@ -38,6 +39,7 @@ impl<'a> ExprTypeInference<'a> for Program {
         // 2. Rearrange tokens to get reverse polish notation
         let rpn_tokens = rearrange_tokens_to_rpn(self, typed_tokens);
         // 3. Evaluate the reverse polish notation to get the type of the expression
+        let expr_tree = build_expr_tree(self, rpn_tokens);
 
         Ok(symbol_path![])
     }

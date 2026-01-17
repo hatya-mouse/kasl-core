@@ -18,10 +18,7 @@
 mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
-        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
-        constructor::constructor::construct_program,
-        get_typed_tokens,
-        member_collection::collect_type_members,
+        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind, get_typed_tokens,
         resolution::{expr_inference::rearrange_tokens_to_rpn, type_resolver::resolve_types},
         symbol_collection::collect_top_level_symbols,
         symbol_path,

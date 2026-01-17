@@ -14,10 +14,12 @@
 // limitations under the License.
 //
 
+pub mod expr_tree_builder;
 pub mod expr_type_inference;
 pub mod rpn_rearrange;
 pub mod typed_token_getter;
 
+pub use expr_tree_builder::build_expr_tree;
 pub use expr_type_inference::ExprTypeInference;
 pub use rpn_rearrange::rearrange_tokens_to_rpn;
 pub use typed_token_getter::{TypedToken, TypedTokenKind, get_typed_tokens};
