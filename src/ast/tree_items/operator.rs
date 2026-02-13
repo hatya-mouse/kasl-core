@@ -21,8 +21,8 @@ use crate::{FuncParam, Statement, SymbolPath};
 #[derive(Debug, PartialEq, Clone)]
 pub struct InfixOperator {
     pub symbol: String,
-    pub lhs: Option<FuncParam>,
-    pub rhs: Option<FuncParam>,
+    pub lhs: FuncParam,
+    pub rhs: FuncParam,
     pub return_type: Option<SymbolPath>,
     pub body: Vec<Statement>,
 }
@@ -30,7 +30,7 @@ pub struct InfixOperator {
 #[derive(Debug, PartialEq, Clone)]
 pub struct PrefixOperator {
     pub symbol: String,
-    pub operand: Option<FuncParam>,
+    pub operand: FuncParam,
     pub return_type: Option<SymbolPath>,
     pub body: Vec<Statement>,
 }

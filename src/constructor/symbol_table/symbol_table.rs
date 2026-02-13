@@ -26,10 +26,10 @@ pub struct SymbolTable<'a> {
     pub vars: HashMap<String, &'a ParserStatement>,
     pub funcs: HashMap<String, &'a ParserStatement>,
     pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
-    pub infix_defines: HashMap<String, &'a ParserStatement>,
-    pub prefix_defines: HashMap<String, &'a ParserStatement>,
-    pub infix_funcs: HashMap<String, &'a ParserStatement>,
-    pub prefix_funcs: HashMap<String, &'a ParserStatement>,
+    // pub infix_defines: HashMap<String, &'a ParserStatement>,
+    // pub prefix_defines: HashMap<String, &'a ParserStatement>,
+    // pub infix_funcs: HashMap<String, &'a ParserStatement>,
+    // pub prefix_funcs: HashMap<String, &'a ParserStatement>,
     pub inits: Vec<&'a ParserStatement>,
 }
 

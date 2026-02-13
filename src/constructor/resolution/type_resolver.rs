@@ -15,12 +15,16 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ParserStatementKind,
+    ConstructorError, ConstructorErrorType, ExprToken, ParserOperatorType, ParserStatementKind,
     ParserSymbolPathComponent, Program, Range, SymbolPath, SymbolTable,
     ast::tree_items::variables::VariableTrait,
     resolution::{
         dependency_analysis::{build_graph, sort_graph},
         expr_inference::ExprTreeBuilder,
+        resolvers::{
+            infix_operator_resolver::resolve_infix_func,
+            prefix_operator_resolver::resolve_prefix_operator,
+        },
     },
 };
 
@@ -183,6 +187,40 @@ pub fn resolve_types(
                 }
             }
 
+            ParserStatementKind::OperatorFunc {
+                op_type,
+                symbol,
+                params,
+                return_type,
+                body: _,
+            } => {
+                println!("Resolving operator function: {}", symbol);
+                match op_type {
+                    ParserOperatorType::Infix => match resolve_infix_func(
+                        program,
+                        symbol,
+                        symbol_path,
+                        params,
+                        return_type,
+                        symbol_decl_statement.range,
+                    ) {
+                        Ok(_) => (),
+                        Err(err) => errors.push(err),
+                    },
+                    ParserOperatorType::Prefix => match resolve_prefix_operator(
+                        program,
+                        symbol,
+                        symbol_path,
+                        params,
+                        return_type,
+                        symbol_decl_statement.range,
+                    ) {
+                        Ok(_) => (),
+                        Err(err) => errors.push(err),
+                    },
+                }
+            }
+
             _ => (),
         }
     }
@@ -212,7 +250,7 @@ fn infer_type_and_write<T, F>(
 ) -> Result<(), Vec<ConstructorError>>
 where
     F: for<'a> Fn(&'a mut Program) -> Option<&'a mut T>,
-    T: VariableTrait + Sized,
+    T: VariableTrait + Sized + std::fmt::Debug,
 {
     if let Some(default_value) = default_value {
         let parsed_expr = program.build_expr_tree_from_raw_tokens(default_value, symbol_table)?;

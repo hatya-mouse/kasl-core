@@ -24,7 +24,7 @@ mod complex_program {
             // Inputs / Outputs
             input sr: Int = 44100
             input gain = 0.8
-            output out_signal: Float
+            output out_signal: Float = 0.0
 
             // State
             state {
@@ -52,7 +52,7 @@ mod complex_program {
 
             // Wrapper types with literal bindings
             struct Int {
-                var raw: CompInt
+                var raw: CompInt = CompInt()
 
                 // Bind integer literal to this type
                 intliteral init(_ value: CompInt) {
@@ -61,7 +61,7 @@ mod complex_program {
             }
 
             struct Float {
-                var raw: CompFloat
+                var raw: CompFloat = 0.0
 
                 floatliteral init(_ value: CompFloat) {
                     self.raw = value

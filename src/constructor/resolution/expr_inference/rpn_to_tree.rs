@@ -142,6 +142,7 @@ pub fn build_expr_tree_from_rpn(
                             position: current_token.range,
                         }]
                     })?;
+
                 let operator_return_type = operator.return_type.as_ref().ok_or_else(|| {
                     vec![ConstructorError {
                         error_type: ConstructorErrorType::CompilerBug(

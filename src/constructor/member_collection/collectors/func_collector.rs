@@ -16,7 +16,7 @@
 
 use crate::{
     ConstructorError, FuncParam, Function, Initializer, LiteralBind, ParserStatementKind, Program,
-    SymbolPath, SymbolTable,
+    SymbolPath, SymbolTable, member_collection::collectors::construct_func_params,
 };
 
 pub fn collect_member_functions(
@@ -33,21 +33,10 @@ pub fn collect_member_functions(
                 return_type: _,
                 body: _,
             } => {
-                let params_result: Result<Vec<_>, _> = params
-                    .iter()
-                    .map(|param| {
-                        Ok(FuncParam {
-                            label: param.label.clone(),
-                            name: param.name.clone(),
-                            value_type: None,
-                            def_val: None,
-                        })
-                    })
-                    .collect();
-
+                let func_params = construct_func_params(params);
                 let function = Function {
                     name: name.to_string(),
-                    params: params_result?,
+                    params: func_params,
                     return_type: None,
                     body: Vec::new(),
                     required_by: None,

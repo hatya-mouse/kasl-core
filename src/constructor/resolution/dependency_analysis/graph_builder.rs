@@ -129,5 +129,43 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
         }
     }
 
+    for stmt in &symbol_table.prefix_funcs {
+        match &stmt.1.kind {
+            ParserStatementKind::OperatorFunc {
+                op_type: _,
+                symbol,
+                params,
+                return_type: _,
+                body: _,
+            } => {
+                // Combine variable name to create a new path for the function
+                let func_path = symbol_path![SymbolPathComponent::InfixFunc(symbol.to_string())];
+                build_func_param_graph(&mut graph, symbol_table, &func_path, params)?;
+                graph.add_node(DependencyGraphNode::new(func_path));
+            }
+
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.prefix_funcs {
+        match &stmt.1.kind {
+            ParserStatementKind::OperatorFunc {
+                op_type: _,
+                symbol,
+                params,
+                return_type: _,
+                body: _,
+            } => {
+                // Combine variable name to create a new path for the function
+                let func_path = symbol_path![SymbolPathComponent::PrefixFunc(symbol.to_string())];
+                build_func_param_graph(&mut graph, symbol_table, &func_path, params)?;
+                graph.add_node(DependencyGraphNode::new(func_path));
+            }
+
+            _ => (),
+        }
+    }
+
     Ok(graph)
 }

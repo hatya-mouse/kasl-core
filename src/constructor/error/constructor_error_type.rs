@@ -20,6 +20,7 @@ use crate::{LiteralBind, SymbolPath};
 pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
+    InvalidOperatorParams(String),
     SymbolNotFound(Option<SymbolPath>),
     OperatorNotFound(String),
     OperatorCannotBeChained(String),
@@ -54,6 +55,12 @@ impl ConstructorErrorType {
                 "Consecutive dots are not allowed here.".to_string()
             }
             ConstructorErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
+            ConstructorErrorType::InvalidOperatorParams(operator_symbol) => {
+                format!(
+                    "Operator '{}' has wrong number of parameters.",
+                    operator_symbol,
+                )
+            }
             ConstructorErrorType::SymbolNotFound(symbol_path) => match symbol_path {
                 Some(path) => format!("Symbol '{}' not found here.", path),
                 None => "Symbol not found here.".to_string(),

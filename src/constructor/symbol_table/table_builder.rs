@@ -70,6 +70,23 @@ pub fn build_symbol_table<'a>(
                 symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
             }
 
+            ParserStatementKind::InfixDefine { symbol, .. } => {
+                symbol_table.insert_infix_define(symbol.clone(), &stmt);
+            }
+
+            ParserStatementKind::PrefixDefine { symbol } => {
+                symbol_table.insert_prefix_define(symbol.clone(), &stmt);
+            }
+
+            ParserStatementKind::OperatorFunc {
+                op_type, symbol, ..
+            } => match op_type {
+                ParserOperatorType::Infix => symbol_table.insert_infix_func(symbol.clone(), &stmt),
+                ParserOperatorType::Prefix => {
+                    symbol_table.insert_prefix_func(symbol.clone(), &stmt)
+                }
+            },
+
             _ => {}
         }
     }

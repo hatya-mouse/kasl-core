@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, InfixOperator, InputVar, OutputVar,
-    ParserOperatorType, ParserStatementKind, PrefixOperator, Program, StateVar, SymbolTable,
+    ConstructorError, ConstructorErrorType, FuncParam, Function, InfixOperator, InputVar,
+    OutputVar, ParserOperatorType, ParserStatementKind, PrefixOperator, Program, StateVar,
+    SymbolTable, member_collection::collectors::construct_func_params,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -86,7 +87,7 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::FuncDecl {
                 required_by,
                 name,
-                params: _,
+                params,
                 return_type: _,
                 body: _,
             } => {
@@ -97,9 +98,10 @@ pub fn collect_top_level_symbols(
                     });
                 }
 
+                let func_params = construct_func_params(params);
                 let function = Function {
                     name: name.to_string(),
-                    params: Vec::new(),
+                    params: func_params,
                     return_type: None,
                     body: Vec::new(),
                     required_by: None,
@@ -116,7 +118,7 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::InfixDefine {
                 symbol,
                 infix_properties,
-            } => program.register_infix_properties(symbol.to_string(), infix_properties.clone()),
+            } => program.register_infix_operator(symbol.to_string(), infix_properties.clone()),
             _ => (),
         }
     }
@@ -135,15 +137,32 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
-                params: _,
+                params,
                 return_type: _,
                 body: _,
             } => match op_type {
                 ParserOperatorType::Infix => {
+                    if params.len() != 2 {
+                        return Err(ConstructorError {
+                            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
+                            position: stmt.1.range,
+                        });
+                    }
+
                     let infix = InfixOperator {
                         symbol: symbol.to_string(),
-                        lhs: None,
-                        rhs: None,
+                        lhs: FuncParam {
+                            label: params[0].label.clone(),
+                            name: params[0].name.clone(),
+                            value_type: None,
+                            def_val: None,
+                        },
+                        rhs: FuncParam {
+                            label: params[1].label.clone(),
+                            name: params[1].name.clone(),
+                            value_type: None,
+                            def_val: None,
+                        },
                         return_type: None,
                         body: Vec::new(),
                     };
@@ -160,14 +179,26 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
-                params: _,
+                params,
                 return_type: _,
                 body: _,
             } => match op_type {
                 ParserOperatorType::Prefix => {
+                    if params.len() != 1 {
+                        return Err(ConstructorError {
+                            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
+                            position: stmt.1.range,
+                        });
+                    }
+
                     let prefix = PrefixOperator {
                         symbol: symbol.to_string(),
-                        operand: None,
+                        operand: FuncParam {
+                            label: params[0].label.clone(),
+                            name: params[0].name.clone(),
+                            value_type: None,
+                            def_val: None,
+                        },
                         return_type: None,
                         body: Vec::new(),
                     };

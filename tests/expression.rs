@@ -19,7 +19,11 @@ mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
         SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind, get_typed_tokens,
-        resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
+        member_collection::collect_all_type_members,
+        resolution::{
+            expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
+            type_resolver::resolve_types,
+        },
         symbol_collection::collect_top_level_symbols,
         symbol_path,
         symbol_table::build_symbol_table,
@@ -109,7 +113,7 @@ mod expression {
         // => (a - b) - c
         // => RPN: a b - c -
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "-".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -133,14 +137,14 @@ mod expression {
         // => RPN: a b c * -
         let mut program = Program::new();
 
-        program.register_infix_properties(
+        program.register_infix_operator(
             "-".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
                 associativity: OperatorAssociativity::Left,
             },
         );
-        program.register_infix_properties(
+        program.register_infix_operator(
             "*".to_string(),
             InfixOperatorProperties {
                 precedence: 20,
@@ -165,14 +169,14 @@ mod expression {
         let mut program = Program::new();
 
         program.register_prefix_operator("-".to_string());
-        program.register_infix_properties(
+        program.register_infix_operator(
             "*".to_string(),
             InfixOperatorProperties {
                 precedence: 20,
                 associativity: OperatorAssociativity::Left,
             },
         );
-        program.register_infix_properties(
+        program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -195,7 +199,7 @@ mod expression {
     fn non_associative_chain_error() {
         // a < b < c where '<' is non-associative should error OperatorCannotBeChained
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "<".to_string(),
             InfixOperatorProperties {
                 precedence: 5,
@@ -219,7 +223,7 @@ mod expression {
     fn unmatched_parentheses_detected_on_drain() {
         // (a + b  -- missing closing paren -> should error UnmatchedParentheses on final drain
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -243,7 +247,7 @@ mod expression {
     fn unmatched_parentheses_right_paren_error() {
         // a + b )  -- extra right paren should be detected when encountering RParen
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -289,37 +293,6 @@ mod expression {
         let mut program = Program::new();
         let mut symbol_table = SymbolTable::new();
 
-        // Register operator properties
-        program.register_infix_properties(
-            "+".to_string(),
-            InfixOperatorProperties {
-                precedence: 10,
-                associativity: OperatorAssociativity::Left,
-            },
-        );
-        program.register_infix_properties(
-            "-".to_string(),
-            InfixOperatorProperties {
-                precedence: 10,
-                associativity: OperatorAssociativity::Left,
-            },
-        );
-        program.register_infix_properties(
-            "*".to_string(),
-            InfixOperatorProperties {
-                precedence: 20,
-                associativity: OperatorAssociativity::Left,
-            },
-        );
-        program.register_infix_properties(
-            "^".to_string(),
-            InfixOperatorProperties {
-                precedence: 30,
-                associativity: OperatorAssociativity::Right,
-            },
-        );
-        program.register_prefix_operator("-".to_string());
-
         // Set types for literals and variables
         let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
         // let float_type = symbol_path![SymbolPathComponent::TypeDef("Float".to_string())];
@@ -328,6 +301,33 @@ mod expression {
         // Build a symbol table by parsing a small program that declares the needed symbols.
         // Use top-level inputs and a valid function name (no dot in identifier).
         let program_src = r#"
+operator infix + {
+    precedence: 10,
+    associativity: left
+}
+func infix + (lhs: Int, rhs: Int) -> Int {}
+
+operator infix - {
+    precedence: 10,
+    associativity: left
+}
+func infix - (lhs: Int, rhs: Int) -> Int {}
+
+operator infix * {
+    precedence: 20,
+    associativity: left
+}
+func infix * (lhs: Int, rhs: Int) -> Int {}
+
+operator infix ^ {
+    precedence: 30,
+    associativity: right
+}
+func infix ^ (lhs: Int, rhs: Int) -> Int {}
+
+operator prefix -
+func prefix - (value: Int) -> Int {}
+
 struct Int {}
 struct Float {}
 func foo_bar(x: Int) -> Float { }
@@ -343,6 +343,11 @@ input e: Int = 0
         build_symbol_table(&mut symbol_table, &parsed_program);
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut program, &symbol_table).unwrap();
+        collect_all_type_members(&mut program, &symbol_table).unwrap();
+        resolve_types(&mut program, &symbol_table).unwrap();
+
+        // println!("Parsed Program: {:#?}", parsed_program);
+        // println!("Program: {:#?}", program);
 
         // 2. --- Parsing ---
         // Parse the string directly using the `kasl_parser::expression` rule
