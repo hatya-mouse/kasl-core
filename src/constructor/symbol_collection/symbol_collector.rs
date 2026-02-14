@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, FuncParam, Function, InfixOperator, InputVar,
-    OutputVar, ParserOperatorType, ParserStatement, ParserStatementKind, PrefixOperator, Program,
-    StateVar, SymbolTable, member_collection::collectors::construct_func_params,
+    ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserOperatorType,
+    ParserStatement, ParserStatementKind, Program, StateVar, SymbolTable,
+    member_collection::collectors::construct_func_params,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -154,25 +154,6 @@ pub fn collect_top_level_symbols(
                             position: stmt.range,
                         });
                     }
-
-                    let infix = InfixOperator {
-                        symbol: symbol.to_string(),
-                        lhs: FuncParam {
-                            label: params[0].label.clone(),
-                            name: params[0].name.clone(),
-                            value_type: None,
-                            def_val: None,
-                        },
-                        rhs: FuncParam {
-                            label: params[1].label.clone(),
-                            name: params[1].name.clone(),
-                            value_type: None,
-                            def_val: None,
-                        },
-                        return_type: None,
-                        body: Vec::new(),
-                    };
-                    program.register_infix_func(infix);
                 }
                 _ => (),
             },
@@ -202,19 +183,6 @@ pub fn collect_top_level_symbols(
                             position: stmt.range,
                         });
                     }
-
-                    let prefix = PrefixOperator {
-                        symbol: symbol.to_string(),
-                        operand: FuncParam {
-                            label: params[0].label.clone(),
-                            name: params[0].name.clone(),
-                            value_type: None,
-                            def_val: None,
-                        },
-                        return_type: None,
-                        body: Vec::new(),
-                    };
-                    program.register_prefix_func(prefix);
                 }
                 _ => (),
             },

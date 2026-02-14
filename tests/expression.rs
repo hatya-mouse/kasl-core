@@ -311,13 +311,13 @@ operator infix - {
     precedence: 10,
     associativity: left
 }
-func infix - (lhs: Int, rhs: Int) -> Int {}
+func infix - (lhs: Float, rhs: Int) -> Float {}
 
 operator infix * {
     precedence: 20,
     associativity: left
 }
-func infix * (lhs: Int, rhs: Int) -> Int {}
+func infix * (lhs: Float, rhs: Int) -> Float {}
 
 operator infix ^ {
     precedence: 30,
@@ -345,9 +345,6 @@ input e: Int = 0
         collect_top_level_symbols(&mut program, &symbol_table).unwrap();
         collect_all_type_members(&mut program, &symbol_table).unwrap();
         resolve_types(&mut program, &symbol_table).unwrap();
-
-        // println!("Parsed Program: {:#?}", parsed_program);
-        // println!("Program: {:#?}", program);
 
         // 2. --- Parsing ---
         // Parse the string directly using the `kasl_parser::expression` rule

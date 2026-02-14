@@ -36,6 +36,11 @@ pub struct SymbolTable<'a> {
     pub inits: Vec<&'a ParserStatement>,
 }
 
+pub enum StatementLookup<'a> {
+    Single(&'a ParserStatement),
+    Multiple(&'a [&'a ParserStatement]),
+}
+
 impl<'a> SymbolTable<'a> {
     pub fn new() -> Self {
         Self {
@@ -214,7 +219,7 @@ impl<'a> SymbolTable<'a> {
     pub fn get_statement_by_path(
         &'a self,
         symbol_path: &SymbolPath,
-    ) -> Option<&'a ParserStatement> {
+    ) -> Option<StatementLookup<'a>> {
         let mut current_scope = self;
         let last_index = symbol_path.components.len().checked_sub(1)?;
 
@@ -232,14 +237,31 @@ impl<'a> SymbolTable<'a> {
         }
 
         match &symbol_path.components[last_index] {
-            SymbolPathComponent::InputVar(name) => current_scope.get_input(name),
-            SymbolPathComponent::OutputVar(name) => current_scope.get_output(name),
-            SymbolPathComponent::StateVar(name) => current_scope.get_state(name),
-            SymbolPathComponent::Var(name) => current_scope.get_var(name),
-            SymbolPathComponent::Func(name) => current_scope.get_func(name),
-            SymbolPathComponent::TypeDef(name) => {
-                current_scope.get_type_def(name).map(|entry| entry.0)
+            SymbolPathComponent::InputVar(name) => {
+                current_scope.get_input(name).map(StatementLookup::Single)
             }
+            SymbolPathComponent::OutputVar(name) => {
+                current_scope.get_output(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::StateVar(name) => {
+                current_scope.get_state(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::Var(name) => {
+                current_scope.get_var(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::Func(name) => {
+                current_scope.get_func(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::InfixFunc(symbol) => current_scope
+                .get_infix_funcs(symbol)
+                .map(|stmts| StatementLookup::Multiple(stmts)),
+            SymbolPathComponent::PrefixFunc(symbol) => current_scope
+                .get_prefix_funcs(symbol)
+                .map(|stmts| StatementLookup::Multiple(stmts)),
+            SymbolPathComponent::TypeDef(name) => current_scope
+                .get_type_def(name)
+                .map(|entry| entry.0)
+                .map(StatementLookup::Single),
             _ => None,
         }
     }

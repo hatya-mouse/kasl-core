@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ParserFuncParam, ParserSymbolPath, Program, Range,
-    SymbolPath,
+    ConstructorError, ConstructorErrorType, FuncParam, ParserFuncParam, ParserSymbolPath,
+    PrefixOperator, Program, Range, SymbolPath,
 };
 
 pub fn resolve_prefix_operator(
@@ -27,8 +27,6 @@ pub fn resolve_prefix_operator(
     return_type: &ParserSymbolPath,
     decl_range: Range,
 ) -> Result<(), ConstructorError> {
-    println!("Resolving prefix operator: {}", symbol);
-
     if params.len() != 1 {
         return Err(ConstructorError {
             error_type: ConstructorErrorType::InvalidOperatorParams(symbol.to_string()),
@@ -37,59 +35,35 @@ pub fn resolve_prefix_operator(
     }
 
     if let Some(value_type) = &params[0].value_type {
-        if let Some(operand_type) = program.resolve_type_def_parser_path(&value_type) {
-            // If the symbol has a type annotation, use it
-            // Get the operator by the retrieved type and the symbokl path
-            let operator = match program.get_prefix_func_mut(&operand_type, symbol) {
-                Some(func) => func,
-                None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::OperatorNotFound(symbol.to_string()),
-                        position: decl_range,
-                    });
-                }
-            };
+        // Get the operand type path
+        let operand_type = program
+            .resolve_type_def_parser_path(&value_type)
+            .ok_or_else(|| ConstructorError {
+                error_type: ConstructorErrorType::SymbolNotFound(None),
+                position: decl_range,
+            })?;
 
-            operator.operand.value_type = Some(operand_type.clone());
+        // Get the return type path
+        let return_type_path = program
+            .resolve_type_def_parser_path(return_type)
+            .ok_or_else(|| ConstructorError {
+                error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                position: decl_range,
+            })?;
 
-            resolve_prefix_return_type(
-                program,
-                symbol,
-                symbol_path,
-                &operand_type,
-                return_type,
-                decl_range,
-            )?;
-        }
-    }
-
-    Ok(())
-}
-
-fn resolve_prefix_return_type(
-    program: &mut Program,
-    symbol: &str,
-    symbol_path: &SymbolPath,
-    operand_type: &SymbolPath,
-    return_type: &ParserSymbolPath,
-    decl_range: Range,
-) -> Result<(), ConstructorError> {
-    // If the function has a return type, resolve it
-    if let Some(return_type_path) = program.resolve_type_def_parser_path(return_type) {
-        match program.get_prefix_func_mut(operand_type, symbol) {
-            Some(func) => func.return_type = Some(return_type_path),
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
-                    position: decl_range,
-                });
-            }
-        }
-    } else {
-        return Err(ConstructorError {
-            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
-            position: decl_range,
-        });
+        // If the symbol has a type annotation, use it
+        let prefix = PrefixOperator {
+            symbol: symbol.to_string(),
+            operand: FuncParam {
+                label: params[0].label.clone(),
+                name: params[0].name.clone(),
+                value_type: Some(operand_type),
+                def_val: None,
+            },
+            return_type: Some(return_type_path),
+            body: Vec::new(),
+        };
+        program.register_prefix_func(prefix);
     }
 
     Ok(())

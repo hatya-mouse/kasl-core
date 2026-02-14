@@ -26,6 +26,7 @@ use crate::{
             prefix_operator_resolver::resolve_prefix_operator,
         },
     },
+    symbol_table::symbol_table::StatementLookup,
 };
 
 /// Infer the types of symbols (input, output, state, var, and function parameters) in the program.
@@ -40,35 +41,68 @@ pub fn resolve_types(
     let sorted_list = match sort_graph(&graph) {
         Ok(sorted_list) => sorted_list,
         Err(causative_symbols) => {
-            let errors = causative_symbols
-                .into_iter()
-                .map(|symbol| {
-                    // Get the symbol declaration statement
-                    let symbol_decl_statement = symbol_table.get_statement_by_path(&symbol);
-                    // And get the range in which the statement is declared
-                    let symbol_decl_position = symbol_decl_statement.map(|stmt| stmt.range);
-                    ConstructorError {
-                        error_type: ConstructorErrorType::DependencyCycle(symbol),
-                        position: symbol_decl_position.unwrap_or(Range::zero()),
+            let mut errors = Vec::new();
+            for symbol_path in causative_symbols {
+                if let Some(symbol_decl_statement) =
+                    symbol_table.get_statement_by_path(&symbol_path)
+                {
+                    match symbol_decl_statement {
+                        StatementLookup::Single(stmt) => {
+                            // And get the range in which the statement is declared
+                            errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::DependencyCycle(symbol_path),
+                                position: stmt.range,
+                            });
+                        }
+                        StatementLookup::Multiple(stmts) => {
+                            // Iterate over each statement and push an error for each one
+                            for stmt in stmts {
+                                errors.push(ConstructorError {
+                                    error_type: ConstructorErrorType::DependencyCycle(
+                                        symbol_path.clone(),
+                                    ),
+                                    position: stmt.range,
+                                });
+                            }
+                        }
                     }
-                })
-                .collect();
+                } else {
+                    errors.push(ConstructorError {
+                        error_type: ConstructorErrorType::DependencyCycle(symbol_path),
+                        position: Range::zero(),
+                    });
+                }
+            }
             return Err(errors);
         }
     };
 
     let mut errors = Vec::new();
 
-    // Infer the type of each symbol in the sorted order
+    let mut statements = Vec::new();
     for symbol_path in sorted_list {
         // Get the symbol declaration statement
-        let symbol_decl_statement = match symbol_table.get_statement_by_path(&symbol_path) {
-            Some(stmt) => stmt,
-            None => {
-                continue;
+        if let Some(symbol_decl_statement) = symbol_table.get_statement_by_path(&symbol_path) {
+            match symbol_decl_statement {
+                StatementLookup::Single(stmt) => {
+                    statements.push((symbol_path, stmt));
+                }
+                StatementLookup::Multiple(stmts) => {
+                    for stmt in stmts {
+                        statements.push((symbol_path, stmt));
+                    }
+                }
             }
-        };
+        } else {
+            errors.push(ConstructorError {
+                error_type: ConstructorErrorType::SymbolNotFound(None),
+                position: Range::zero(),
+            });
+        }
+    }
 
+    // Infer the type of each symbol in the sorted order
+    for (symbol_path, symbol_decl_statement) in statements {
         // Check if the symbol has already got a type annotation
         // If not, infer the type
         match &symbol_decl_statement.kind {
@@ -193,33 +227,30 @@ pub fn resolve_types(
                 params,
                 return_type,
                 body: _,
-            } => {
-                println!("Resolving operator function: {}", symbol);
-                match op_type {
-                    ParserOperatorType::Infix => match resolve_infix_func(
-                        program,
-                        symbol,
-                        symbol_path,
-                        params,
-                        return_type,
-                        symbol_decl_statement.range,
-                    ) {
-                        Ok(_) => (),
-                        Err(err) => errors.push(err),
-                    },
-                    ParserOperatorType::Prefix => match resolve_prefix_operator(
-                        program,
-                        symbol,
-                        symbol_path,
-                        params,
-                        return_type,
-                        symbol_decl_statement.range,
-                    ) {
-                        Ok(_) => (),
-                        Err(err) => errors.push(err),
-                    },
-                }
-            }
+            } => match op_type {
+                ParserOperatorType::Infix => match resolve_infix_func(
+                    program,
+                    symbol,
+                    symbol_path,
+                    params,
+                    return_type,
+                    symbol_decl_statement.range,
+                ) {
+                    Ok(_) => (),
+                    Err(err) => errors.push(err),
+                },
+                ParserOperatorType::Prefix => match resolve_prefix_operator(
+                    program,
+                    symbol,
+                    symbol_path,
+                    params,
+                    return_type,
+                    symbol_decl_statement.range,
+                ) {
+                    Ok(_) => (),
+                    Err(err) => errors.push(err),
+                },
+            },
 
             _ => (),
         }

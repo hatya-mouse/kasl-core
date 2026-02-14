@@ -16,7 +16,7 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, ExprTokenKind, ParserFuncParam, SymbolPath,
-    SymbolPathComponent, SymbolTable,
+    SymbolTable,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
@@ -34,8 +34,7 @@ pub fn build_func_param_graph(
                     // If the default value has an identifier in it,
                     // the parameter depends on the identifier
                     ExprTokenKind::Identifier(path) => {
-                        let mut from_path = func_path.clone();
-                        from_path.push(SymbolPathComponent::FuncParam(param.name.clone()));
+                        let from_path = func_path.clone();
 
                         let to_path = match root_symbol_table.resolve_path(path) {
                             Some(path) => path,

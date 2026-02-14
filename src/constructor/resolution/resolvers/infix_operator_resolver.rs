@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ParserFuncParam, ParserSymbolPath, Program, Range,
-    SymbolPath,
+    ConstructorError, ConstructorErrorType, FuncParam, InfixOperator, ParserFuncParam,
+    ParserSymbolPath, Program, Range, SymbolPath,
 };
 
 pub fn resolve_infix_func(
@@ -53,59 +53,33 @@ pub fn resolve_infix_func(
     let lhs_type = types[0].clone();
     let rhs_type = types[1].clone();
 
-    // Once we've got the types, we can get the exact operator
-    let operator = match program.get_infix_func_mut(&lhs_type, &rhs_type, symbol) {
-        Some(func) => func,
-        None => {
-            return Err(ConstructorError {
-                error_type: ConstructorErrorType::OperatorNotFound(symbol.to_string()),
-                position: decl_range,
-            });
-        }
-    };
-
-    operator.lhs.value_type = Some(lhs_type.clone());
-    operator.rhs.value_type = Some(rhs_type.clone());
-
-    resolve_infix_return_type(
-        program,
-        symbol,
-        symbol_path,
-        &lhs_type,
-        &rhs_type,
-        return_type,
-        decl_range,
-    )?;
-
-    Ok(())
-}
-
-fn resolve_infix_return_type(
-    program: &mut Program,
-    symbol: &str,
-    symbol_path: &SymbolPath,
-    lhs_type: &SymbolPath,
-    rhs_type: &SymbolPath,
-    return_type: &ParserSymbolPath,
-    decl_range: Range,
-) -> Result<(), ConstructorError> {
-    // If the function has a return type, resolve it
-    if let Some(return_type_path) = program.resolve_type_def_parser_path(return_type) {
-        match program.get_infix_func_mut(lhs_type, rhs_type, symbol) {
-            Some(func) => func.return_type = Some(return_type_path),
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
-                    position: decl_range,
-                });
-            }
-        }
-    } else {
-        return Err(ConstructorError {
+    // Get the return type
+    let return_type_path = program
+        .resolve_type_def_parser_path(return_type)
+        .ok_or_else(|| ConstructorError {
             error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
             position: decl_range,
-        });
-    }
+        })?;
+
+    // Once we've got the types, we can get the exact operator
+    let infix = InfixOperator {
+        symbol: symbol.to_string(),
+        lhs: FuncParam {
+            label: params[0].label.clone(),
+            name: params[0].name.clone(),
+            value_type: Some(lhs_type),
+            def_val: None,
+        },
+        rhs: FuncParam {
+            label: params[1].label.clone(),
+            name: params[1].name.clone(),
+            value_type: Some(rhs_type),
+            def_val: None,
+        },
+        return_type: Some(return_type_path),
+        body: Vec::new(),
+    };
+    program.register_infix_func(infix);
 
     Ok(())
 }
