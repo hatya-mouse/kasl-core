@@ -15,16 +15,18 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
+    ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
+    error::ErrorCollector,
     member_collection::{collect_member_functions, collect_member_nests, collect_member_variables},
     symbol_path,
 };
 
 /// Loop through the top level and collect type members.
 pub fn collect_all_type_members(
+    ec: &mut ErrorCollector,
     program: &mut Program,
     symbol_table: &SymbolTable,
-) -> Result<(), ConstructorError> {
+) {
     for stmt in &symbol_table.type_defs {
         match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
@@ -38,25 +40,22 @@ pub fn collect_all_type_members(
                 body: _,
             } => {
                 let scope_path = symbol_path![SymbolPathComponent::TypeDef(name.clone())];
-                collect_type_members(program, &stmt.1.1, scope_path)?;
+                collect_type_members(ec, program, &stmt.1.1, scope_path);
             }
 
             _ => (),
         }
     }
-
-    Ok(())
 }
 
 // Collects members in a given struct or protocol.
 pub fn collect_type_members(
+    ec: &mut ErrorCollector,
     program: &mut Program,
     child_symbol_table: &SymbolTable,
     scope_path: SymbolPath,
-) -> Result<(), ConstructorError> {
-    collect_member_variables(program, child_symbol_table, &scope_path)?;
-    collect_member_functions(program, child_symbol_table, &scope_path)?;
-    collect_member_nests(program, child_symbol_table, &scope_path)?;
-
-    Ok(())
+) {
+    collect_member_variables(ec, program, child_symbol_table, &scope_path);
+    collect_member_functions(ec, program, child_symbol_table, &scope_path);
+    collect_member_nests(ec, program, child_symbol_table, &scope_path);
 }

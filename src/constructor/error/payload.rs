@@ -14,15 +14,8 @@
 // limitations under the License.
 //
 
-#[derive(Clone, Debug)]
-pub enum Payload<'a> {
-    None,
-    Sym(&'a str),
-    Num(usize),
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum CanonicalMeta {
+pub enum Payload {
     None,
     Str(String),
     Num(usize),

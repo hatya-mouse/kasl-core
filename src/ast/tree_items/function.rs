@@ -63,3 +63,13 @@ pub enum LiteralBind {
     FloatLiteral,
     BoolLiteral,
 }
+
+impl LiteralBind {
+    pub fn to_string(&self) -> String {
+        match self {
+            LiteralBind::IntLiteral => "intliteral".to_string(),
+            LiteralBind::FloatLiteral => "floatliteral".to_string(),
+            LiteralBind::BoolLiteral => "boolliteral".to_string(),
+        }
+    }
+}

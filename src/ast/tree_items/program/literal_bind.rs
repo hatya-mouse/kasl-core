@@ -14,45 +14,59 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ConstructorErrorType, LiteralBind, Program, Range, SymbolPath};
+use crate::{
+    LiteralBind, Program, Range, SymbolPath,
+    error::{ErrorCollector, Phase},
+};
 
 impl Program {
     /// Set a int literal type. If it already exists, this will return a ConstructorError.
-    pub fn set_int_literal(&mut self, literal_type: SymbolPath) -> Result<(), ConstructorError> {
+    pub fn set_int_literal(
+        &mut self,
+        ec: &mut ErrorCollector,
+        literal_type: SymbolPath,
+        func_range: Range,
+    ) {
         if self.int_literal_type.is_some() {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateLiteralBind(LiteralBind::IntLiteral),
-                position: Range::zero(),
-            })
+            ec.dup_literal_bind(func_range, Phase::MemberCollection, LiteralBind::IntLiteral);
         } else {
             self.int_literal_type = Some(literal_type);
-            Ok(())
         }
     }
 
     /// Set a int literal initializer. If it already exists, this will return a ConstructorError.
-    pub fn set_float_literal(&mut self, literal_type: SymbolPath) -> Result<(), ConstructorError> {
-        if self.float_literal_type.is_some() {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateLiteralBind(LiteralBind::FloatLiteral),
-                position: Range::zero(),
-            })
+    pub fn set_float_literal(
+        &mut self,
+        ec: &mut ErrorCollector,
+        literal_type: SymbolPath,
+        func_range: Range,
+    ) {
+        if self.int_literal_type.is_some() {
+            ec.dup_literal_bind(
+                func_range,
+                Phase::MemberCollection,
+                LiteralBind::FloatLiteral,
+            );
         } else {
             self.float_literal_type = Some(literal_type);
-            Ok(())
         }
     }
 
     /// Set a int literal initializer. If it already exists, this will return a ConstructorError.
-    pub fn set_bool_literal(&mut self, literal_type: SymbolPath) -> Result<(), ConstructorError> {
-        if self.bool_literal_type.is_some() {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateLiteralBind(LiteralBind::BoolLiteral),
-                position: Range::zero(),
-            })
+    pub fn set_bool_literal(
+        &mut self,
+        ec: &mut ErrorCollector,
+        literal_type: SymbolPath,
+        func_range: Range,
+    ) {
+        if self.int_literal_type.is_some() {
+            ec.dup_literal_bind(
+                func_range,
+                Phase::MemberCollection,
+                LiteralBind::BoolLiteral,
+            );
         } else {
             self.bool_literal_type = Some(literal_type);
-            Ok(())
         }
     }
 }

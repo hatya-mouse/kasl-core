@@ -46,7 +46,7 @@ pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<Con
     collect_top_level_symbols(&mut error_collector, &mut program, &symbol_table);
 
     // 5. Collect all type members
-    collect_all_type_members(&mut program, &symbol_table).map_err(|err| vec![err])?;
+    collect_all_type_members(&mut error_collector, &mut program, &symbol_table);
 
     // 6. Infer the types of symbols
     resolve_types(&mut program, &symbol_table)?;

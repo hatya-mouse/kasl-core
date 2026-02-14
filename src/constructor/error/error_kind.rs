@@ -35,4 +35,13 @@ pub enum ErrorKind {
     /// Phase: TopLevelCollection
     /// Payload: None
     InvalidParamNumbersForPrefix,
+
+    /// Title: DuplicateLiteralBind
+    /// Phase: MemberCollection
+    /// Payload: Type of the duplicate literal bind
+    DuplicateLiteralBind,
+
+    /// Title: CompilerBug
+    /// Payload: Error message
+    CompilerBug,
 }

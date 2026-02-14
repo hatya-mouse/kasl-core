@@ -15,15 +15,16 @@
 //
 
 use crate::{
-    ConstructorError, FuncParam, Function, Initializer, LiteralBind, ParserStatementKind, Program,
-    SymbolPath, SymbolTable, member_collection::collectors::construct_func_params,
+    FuncParam, Function, Initializer, LiteralBind, ParserStatementKind, Program, SymbolPath,
+    SymbolTable, error::ErrorCollector, member_collection::collectors::construct_func_params,
 };
 
 pub fn collect_member_functions(
+    ec: &mut ErrorCollector,
     program: &mut Program,
     symbol_table: &SymbolTable,
     scope_path: &SymbolPath,
-) -> Result<(), ConstructorError> {
+) {
     for stmt in &symbol_table.funcs {
         match &stmt.1.kind {
             ParserStatementKind::FuncDecl {
@@ -41,7 +42,7 @@ pub fn collect_member_functions(
                     body: Vec::new(),
                     required_by: None,
                 };
-                program.register_func_by_path(function, scope_path)?;
+                program.register_func_by_path(ec, function, scope_path, stmt.1.range);
             }
 
             _ => (),
@@ -56,41 +57,41 @@ pub fn collect_member_functions(
                 params,
                 body: _,
             } => {
-                let params_result: Result<Vec<_>, _> = params
+                let params_result = params
                     .iter()
-                    .map(|param| {
-                        Ok(FuncParam {
-                            label: param.label.clone(),
-                            name: param.name.clone(),
-                            value_type: None,
-                            def_val: None,
-                        })
+                    .map(|param| FuncParam {
+                        label: param.label.clone(),
+                        name: param.name.clone(),
+                        value_type: None,
+                        def_val: None,
                     })
                     .collect();
 
                 let initializer = Initializer {
                     literal_bind: literal_bind.clone(),
-                    params: params_result?,
+                    params: params_result,
                     body: Vec::new(),
                     required_by: None,
                 };
 
                 if let Some(literal_bind) = literal_bind {
                     match literal_bind {
-                        LiteralBind::IntLiteral => program.set_int_literal(scope_path.clone())?,
-                        LiteralBind::FloatLiteral => {
-                            program.set_float_literal(scope_path.clone())?
+                        LiteralBind::IntLiteral => {
+                            program.set_int_literal(ec, scope_path.clone(), stmt.range)
                         }
-                        LiteralBind::BoolLiteral => program.set_bool_literal(scope_path.clone())?,
+                        LiteralBind::FloatLiteral => {
+                            program.set_float_literal(ec, scope_path.clone(), stmt.range)
+                        }
+                        LiteralBind::BoolLiteral => {
+                            program.set_bool_literal(ec, scope_path.clone(), stmt.range)
+                        }
                     }
                 }
 
-                program.register_init_by_path(initializer, scope_path)?;
+                program.register_init_by_path(ec, initializer, scope_path, stmt.range);
             }
 
             _ => (),
         }
     }
-
-    Ok(())
 }

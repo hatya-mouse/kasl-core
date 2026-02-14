@@ -20,16 +20,16 @@ pub mod constructor_error_type;
 pub mod error_collector;
 pub mod error_kind;
 pub mod error_record;
-pub mod metadata;
+pub mod payload;
 
 pub use constructor_error::ConstructorError;
 pub use constructor_error_type::ConstructorErrorType;
 pub use error_collector::ErrorCollector;
 pub use error_kind::ErrorKind;
 pub use error_record::{ErrorKey, ErrorRecord, Phase, Severity};
-pub use metadata::{CanonicalMeta, Payload};
+pub use payload::Payload;
 
 pub type EK = crate::error::ErrorKind;
 pub type Ph = crate::error::Phase;
 pub type Sv = crate::error::Severity;
-pub type Pl<'a> = crate::error::Payload<'a>;
+pub type Pl = crate::error::Payload;

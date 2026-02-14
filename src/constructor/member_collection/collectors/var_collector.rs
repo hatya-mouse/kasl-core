@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ParserStatementKind, Program, ScopeVar, SymbolPath, SymbolTable};
+use crate::{
+    ParserStatementKind, Program, ScopeVar, SymbolPath, SymbolTable, error::ErrorCollector,
+};
 
 pub fn collect_member_variables(
+    ec: &mut ErrorCollector,
     program: &mut Program,
     symbol_table: &SymbolTable,
     scope_path: &SymbolPath,
-) -> Result<(), ConstructorError> {
+) {
     for stmt in &symbol_table.vars {
         match &stmt.1.kind {
             ParserStatementKind::Var {
@@ -35,12 +38,10 @@ pub fn collect_member_variables(
                     value_type: None,
                     def_val: None,
                 };
-                program.register_var_by_path(var, scope_path)?;
+                program.register_var_by_path(ec, var, scope_path, stmt.1.range);
             }
 
             _ => (),
         }
     }
-
-    Ok(())
 }

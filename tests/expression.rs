@@ -346,7 +346,7 @@ input e: Int = 0
         build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut ec, &mut program, &symbol_table);
-        collect_all_type_members(&mut program, &symbol_table).unwrap();
+        collect_all_type_members(&mut ec, &mut program, &symbol_table);
         resolve_types(&mut program, &symbol_table).unwrap();
 
         // 2. --- Parsing ---

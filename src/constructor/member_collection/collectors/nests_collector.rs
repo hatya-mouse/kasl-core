@@ -15,16 +15,17 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
-    member_collection::collect_type_members,
+    ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
+    error::ErrorCollector, member_collection::collect_type_members,
 };
 
 /// Loop through the scope and collect type members.
 pub fn collect_member_nests(
+    ec: &mut ErrorCollector,
     program: &mut Program,
     symbol_table: &SymbolTable,
     scope_path: &SymbolPath,
-) -> Result<(), ConstructorError> {
+) {
     for stmt in &symbol_table.type_defs {
         match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
@@ -39,12 +40,10 @@ pub fn collect_member_nests(
             } => {
                 let mut child_scope_path = scope_path.clone();
                 child_scope_path.push(SymbolPathComponent::TypeDef(name.clone()));
-                collect_type_members(program, &stmt.1.1, child_scope_path)?;
+                collect_type_members(ec, program, &stmt.1.1, child_scope_path);
             }
 
             _ => (),
         }
     }
-
-    Ok(())
 }

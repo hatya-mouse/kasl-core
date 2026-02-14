@@ -18,7 +18,7 @@ use std::collections::HashMap;
 
 use crate::{
     Range,
-    error::{CanonicalMeta, ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity},
+    error::{ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity},
 };
 
 pub struct ErrorCollector {
@@ -40,13 +40,10 @@ impl ErrorCollector {
         severity: Severity,
         payload: Payload,
     ) {
-        // 1. Convert payload to canonical meta
-        let meta = self.canonicalize(&payload);
+        // 1. Generate a key
+        let key = ErrorKey::new(kind, payload);
 
-        // 2. Generate a key
-        let key = ErrorKey::new(kind, meta);
-
-        // 3. Register / Update the error record
+        // 2. Register / Update the error record
         if let Some(record) = self.records.get_mut(&key) {
             // Prefer the record from the earlier phase
             if phase < record.earliest_phase {
@@ -56,14 +53,6 @@ impl ErrorCollector {
         } else {
             let new_record = ErrorRecord::new(key.clone(), range, phase, severity);
             self.records.insert(key, new_record);
-        }
-    }
-
-    pub fn canonicalize(&self, payload: &Payload) -> CanonicalMeta {
-        match payload {
-            Payload::None => CanonicalMeta::None,
-            Payload::Sym(str) => CanonicalMeta::Str(str.to_string()),
-            Payload::Num(num) => CanonicalMeta::Num(*num),
         }
     }
 }

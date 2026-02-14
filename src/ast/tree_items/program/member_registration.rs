@@ -15,24 +15,28 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, Initializer, Program, Range, ScopeItemMut,
-    ScopeVar, SymbolPath,
+    Function, Initializer, Program, Range, ScopeItemMut, ScopeVar, SymbolPath,
+    error::{ErrorCollector, Phase},
 };
 
 impl Program {
     /// Register a Function to the program **by its path**.
     pub fn register_func_by_path(
         &mut self,
+        ec: &mut ErrorCollector,
         func: Function,
         to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
+        decl_range: Range,
+    ) {
         let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
             Some(scope) => scope,
             None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
-                    position: Range::zero(),
-                });
+                ec.comp_bug(
+                    decl_range,
+                    Phase::MemberCollection,
+                    &format!("Could not reach the deepest scope for path {:?}", to_path),
+                );
+                return;
             }
         };
 
@@ -40,89 +44,85 @@ impl Program {
             ScopeItemMut::Program(prog) => prog.register_func(func),
             ScopeItemMut::TypeDef(td) => td.register_func(func),
             other => {
-                return Err(unexpected_scope_error(
-                    "register_func_by_path",
-                    to_path,
-                    &format!("{:?}", other),
-                ));
+                ec.comp_bug(
+                    decl_range,
+                    Phase::MemberCollection,
+                    &format!(
+                        "Expected TypeDef or Program scope for path {:?}, found {:?}",
+                        to_path, other
+                    ),
+                );
             }
         }
-
-        Ok(())
     }
 
     /// Register a Initializer to the program **by its path**.
     pub fn register_init_by_path(
         &mut self,
+        ec: &mut ErrorCollector,
         init: Initializer,
         to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
+        decl_range: Range,
+    ) {
         let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
             Some(scope) => scope,
             None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
-                    position: Range::zero(),
-                });
+                ec.comp_bug(
+                    decl_range,
+                    Phase::MemberCollection,
+                    &format!("Could not reach the deepest scope for path {:?}", to_path),
+                );
+                return;
             }
         };
 
         match target_scope {
             ScopeItemMut::TypeDef(td) => td.register_init(init),
             other => {
-                return Err(unexpected_scope_error(
-                    "register_init_by_path",
-                    to_path,
-                    &format!("{:?}", other),
-                ));
+                ec.comp_bug(
+                    decl_range,
+                    Phase::MemberCollection,
+                    &format!(
+                        "Expected TypeDef scope for path {:?}, found {:?}",
+                        to_path, other
+                    ),
+                );
             }
         }
-
-        Ok(())
     }
 
     /// Register a ScopeVar to the program **by its path**.
     pub fn register_var_by_path(
         &mut self,
+        ec: &mut ErrorCollector,
         var: ScopeVar,
         to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
+        decl_range: Range,
+    ) {
         let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
             Some(scope) => scope,
             None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
-                    position: Range::zero(),
-                });
+                ec.comp_bug(
+                    decl_range,
+                    Phase::MemberCollection,
+                    &format!("Could not reach the deepest scope for path {:?}", to_path),
+                );
+                return;
             }
         };
 
         match target_scope {
             ScopeItemMut::TypeDef(td) => td.register_var(var),
             other => {
-                return Err(unexpected_scope_error(
-                    "register_var_by_path",
-                    to_path,
-                    &format!("{:?}", other),
-                ));
+                ec.comp_bug(
+                    decl_range,
+                    Phase::MemberCollection,
+                    &format!(
+                        "Expected TypeDef scope for path {:?}, found {:?}",
+                        to_path, other
+                    ),
+                );
             }
         }
-
-        Ok(())
-    }
-}
-
-fn unexpected_scope_error(func: &str, path: &SymbolPath, found: &str) -> ConstructorError {
-    debug_assert!(
-        false,
-        "{} reached unexpected scope variant: {} for path {}",
-        func, found, path
-    );
-    ConstructorError {
-        error_type: ConstructorErrorType::CompilerBug(format!(
-            "{}: unexpected scope '{}' for path '{}'",
-            func, found, path
-        )),
-        position: Range::zero(),
     }
 }

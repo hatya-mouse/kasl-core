@@ -16,7 +16,7 @@
 
 use crate::{
     Range,
-    error::{CanonicalMeta, ErrorKind},
+    error::{ErrorKind, Payload},
 };
 use std::collections::HashSet;
 
@@ -48,12 +48,12 @@ impl ErrorRecord {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ErrorKey {
     pub kind: ErrorKind,
-    pub meta: CanonicalMeta,
+    pub payload: Payload,
 }
 
 impl ErrorKey {
-    pub fn new(kind: ErrorKind, meta: CanonicalMeta) -> Self {
-        ErrorKey { kind, meta }
+    pub fn new(kind: ErrorKind, payload: Payload) -> Self {
+        ErrorKey { kind, payload }
     }
 }
 
@@ -71,6 +71,7 @@ pub enum Phase {
 
 #[derive(Clone, Debug)]
 pub enum Severity {
+    CompilerBug,
     Error,
     Warning,
     Info,
