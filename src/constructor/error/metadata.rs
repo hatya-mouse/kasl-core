@@ -14,21 +14,12 @@
 // limitations under the License.
 //
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
-pub struct Range {
-    pub start: usize,
-    pub end: usize,
+#[derive(Clone, Debug)]
+pub enum Payload {
+    None,
 }
 
-impl Range {
-    pub fn n(start: usize, end: usize) -> Self {
-        Range {
-            start: start,
-            end: end,
-        }
-    }
-
-    pub fn zero() -> Self {
-        Range { start: 0, end: 0 }
-    }
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub enum CanonicalMeta {
+    None,
 }

@@ -16,6 +16,12 @@
 
 pub mod constructor_error;
 pub mod constructor_error_type;
+pub mod error_collector;
+pub mod error_record;
+pub mod metadata;
 
 pub use constructor_error::ConstructorError;
 pub use constructor_error_type::ConstructorErrorType;
+pub use error_collector::ErrorCollector;
+pub use error_record::{ErrorKey, ErrorKind, ErrorRecord, Phase, Severity};
+pub use metadata::{CanonicalMeta, Payload};
