@@ -32,7 +32,7 @@ pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<Con
     let mut symbol_table = SymbolTable::new();
 
     // 1. Build symbol table
-    build_symbol_table(&mut symbol_table, &statements);
+    build_symbol_table(&mut symbol_table, &statements).map_err(|err| vec![err])?;
 
     // 2. Collect types
     collect_all_types(&mut program, &symbol_table);

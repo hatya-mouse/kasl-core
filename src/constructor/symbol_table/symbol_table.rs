@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent};
+use crate::{
+    ConstructorError, ConstructorErrorType, ParserStatement, ParserSymbolPath, SymbolPath,
+    SymbolPathComponent,
+};
 use std::collections::HashMap;
 
 /// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
@@ -114,12 +117,36 @@ impl<'a> SymbolTable<'a> {
         self.type_defs.insert(name, (stmt, sub_table));
     }
 
-    pub fn insert_infix_define(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.infix_defines.insert(symbol, stmt);
+    pub fn insert_infix_define(
+        &mut self,
+        symbol: String,
+        stmt: &'a ParserStatement,
+    ) -> Result<(), ConstructorError> {
+        if self.infix_defines.contains_key(&symbol) {
+            Err(ConstructorError {
+                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
+                position: stmt.range,
+            })
+        } else {
+            self.infix_defines.insert(symbol, stmt);
+            Ok(())
+        }
     }
 
-    pub fn insert_prefix_define(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.prefix_defines.insert(symbol, stmt);
+    pub fn insert_prefix_define(
+        &mut self,
+        symbol: String,
+        stmt: &'a ParserStatement,
+    ) -> Result<(), ConstructorError> {
+        if self.prefix_defines.contains_key(&symbol) {
+            Err(ConstructorError {
+                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
+                position: stmt.range,
+            })
+        } else {
+            self.prefix_defines.insert(symbol, stmt);
+            Ok(())
+        }
     }
 
     pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {

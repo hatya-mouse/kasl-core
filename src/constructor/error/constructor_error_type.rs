@@ -22,6 +22,7 @@ pub enum ConstructorErrorType {
     TrailingDot,
     InvalidOperatorParams(String),
     SymbolNotFound(Option<SymbolPath>),
+    DuplicateSymbol(String),
     OperatorNotFound(String),
     OperatorCannotBeChained(String),
     ExpectType,
@@ -70,6 +71,9 @@ impl ConstructorErrorType {
             }
             ConstructorErrorType::OperatorCannotBeChained(operator_symbol) => {
                 format!("Infix operator '{}' cannot be chained.", operator_symbol)
+            }
+            ConstructorErrorType::DuplicateSymbol(symbol) => {
+                format!("Symbol '{}' is already defined.", symbol)
             }
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {

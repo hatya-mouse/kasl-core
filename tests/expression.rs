@@ -340,7 +340,7 @@ input e: Int = 0
 
         let parsed_program = kasl::kasl_parser::parse(program_src)
             .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
-        build_symbol_table(&mut symbol_table, &parsed_program);
+        build_symbol_table(&mut symbol_table, &parsed_program).unwrap();
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut program, &symbol_table).unwrap();
         collect_all_type_members(&mut program, &symbol_table).unwrap();

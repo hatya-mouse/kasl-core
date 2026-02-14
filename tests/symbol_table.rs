@@ -48,7 +48,7 @@ mod symbol_table {
         let parsed_program = kasl_parser::parse(program).unwrap();
 
         let mut symbol_table = SymbolTable::new();
-        build_symbol_table(&mut symbol_table, &parsed_program);
+        build_symbol_table(&mut symbol_table, &parsed_program).unwrap();
 
         symbol_table.get_func("main");
 
