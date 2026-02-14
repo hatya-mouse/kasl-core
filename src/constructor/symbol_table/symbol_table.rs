@@ -26,10 +26,10 @@ pub struct SymbolTable<'a> {
     pub vars: HashMap<String, &'a ParserStatement>,
     pub funcs: HashMap<String, &'a ParserStatement>,
     pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
-    // pub infix_defines: HashMap<String, &'a ParserStatement>,
-    // pub prefix_defines: HashMap<String, &'a ParserStatement>,
-    // pub infix_funcs: HashMap<String, &'a ParserStatement>,
-    // pub prefix_funcs: HashMap<String, &'a ParserStatement>,
+    pub infix_defines: HashMap<String, &'a ParserStatement>,
+    pub infix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
+    pub prefix_defines: HashMap<String, &'a ParserStatement>,
+    pub prefix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub inits: Vec<&'a ParserStatement>,
 }
 
@@ -123,11 +123,13 @@ impl<'a> SymbolTable<'a> {
     }
 
     pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.infix_funcs.insert(symbol, stmt);
+        let target_vec = self.infix_funcs.entry(symbol).or_insert_with(Vec::new);
+        target_vec.push(stmt);
     }
 
     pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.prefix_funcs.insert(symbol, stmt);
+        let target_vec = self.prefix_funcs.entry(symbol).or_insert_with(Vec::new);
+        target_vec.push(stmt);
     }
 
     pub fn insert_init(&mut self, stmt: &'a ParserStatement) {
@@ -168,11 +170,11 @@ impl<'a> SymbolTable<'a> {
         self.prefix_defines.get(symbol)
     }
 
-    pub fn get_infix_func(&self, symbol: &str) -> Option<&&ParserStatement> {
+    pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&ParserStatement>> {
         self.infix_funcs.get(symbol)
     }
 
-    pub fn get_prefix_func(&self, symbol: &str) -> Option<&&ParserStatement> {
+    pub fn get_prefix_funcs(&self, symbol: &str) -> Option<&Vec<&ParserStatement>> {
         self.prefix_funcs.get(symbol)
     }
 

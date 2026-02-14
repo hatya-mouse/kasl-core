@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatementKind, SymbolPathComponent, SymbolTable,
+    ConstructorError, ParserStatement, ParserStatementKind, SymbolPathComponent, SymbolTable,
     resolution::{
         DependencyGraphNode,
         dependency_analysis::{
@@ -129,8 +129,14 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
         }
     }
 
-    for stmt in &symbol_table.prefix_funcs {
-        match &stmt.1.kind {
+    let infix_funcs = &symbol_table
+        .infix_funcs
+        .values()
+        .flatten()
+        .collect::<Vec<&&ParserStatement>>();
+
+    for stmt in infix_funcs {
+        match &stmt.kind {
             ParserStatementKind::OperatorFunc {
                 op_type: _,
                 symbol,
@@ -148,8 +154,14 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
         }
     }
 
-    for stmt in &symbol_table.prefix_funcs {
-        match &stmt.1.kind {
+    let prefix_funcs = &symbol_table
+        .prefix_funcs
+        .values()
+        .flatten()
+        .collect::<Vec<&&ParserStatement>>();
+
+    for stmt in prefix_funcs {
+        match &stmt.kind {
             ParserStatementKind::OperatorFunc {
                 op_type: _,
                 symbol,

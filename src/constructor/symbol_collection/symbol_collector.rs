@@ -16,8 +16,8 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, FuncParam, Function, InfixOperator, InputVar,
-    OutputVar, ParserOperatorType, ParserStatementKind, PrefixOperator, Program, StateVar,
-    SymbolTable, member_collection::collectors::construct_func_params,
+    OutputVar, ParserOperatorType, ParserStatement, ParserStatementKind, PrefixOperator, Program,
+    StateVar, SymbolTable, member_collection::collectors::construct_func_params,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -132,8 +132,14 @@ pub fn collect_top_level_symbols(
         }
     }
 
-    for stmt in &symbol_table.infix_funcs {
-        match &stmt.1.kind {
+    let infix_funcs = &symbol_table
+        .infix_funcs
+        .values()
+        .flatten()
+        .collect::<Vec<&&ParserStatement>>();
+
+    for stmt in infix_funcs {
+        match &stmt.kind {
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
@@ -145,7 +151,7 @@ pub fn collect_top_level_symbols(
                     if params.len() != 2 {
                         return Err(ConstructorError {
                             error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
-                            position: stmt.1.range,
+                            position: stmt.range,
                         });
                     }
 
@@ -174,8 +180,14 @@ pub fn collect_top_level_symbols(
         }
     }
 
-    for stmt in &symbol_table.prefix_funcs {
-        match &stmt.1.kind {
+    let prefix_funcs = &symbol_table
+        .prefix_funcs
+        .values()
+        .flatten()
+        .collect::<Vec<&&ParserStatement>>();
+
+    for stmt in prefix_funcs {
+        match &stmt.kind {
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
@@ -187,7 +199,7 @@ pub fn collect_top_level_symbols(
                     if params.len() != 1 {
                         return Err(ConstructorError {
                             error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
-                            position: stmt.1.range,
+                            position: stmt.range,
                         });
                     }
 
