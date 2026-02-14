@@ -15,8 +15,7 @@
 //
 
 use crate::{
-    ConstructorError, ParserOperatorType, ParserStatement, ParserStatementKind, SymbolTable,
-    error::ErrorCollector,
+    ParserOperatorType, ParserStatement, ParserStatementKind, SymbolTable, error::ErrorCollector,
 };
 
 pub fn build_symbol_table<'a>(
