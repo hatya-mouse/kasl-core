@@ -23,6 +23,5 @@ pub mod symbol_table;
 pub mod type_collection;
 pub mod validation;
 
-pub use error::{ConstructorError, ConstructorErrorType};
 pub use resolution::{TypedToken, TypedTokenKind, get_typed_tokens};
 pub use symbol_table::SymbolTable;

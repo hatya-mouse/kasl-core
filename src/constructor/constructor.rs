@@ -15,10 +15,14 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatement, Program, SymbolTable, error::ErrorCollector,
-    member_collection::collect_all_type_members, resolution::type_resolver::resolve_types,
-    symbol_collection::collect_top_level_symbols, symbol_table::build_symbol_table,
-    type_collection::collect_all_types, validation::validator::validate,
+    ParserStatement, Program, SymbolTable,
+    error::{ErrorCollector, ErrorRecord},
+    member_collection::collect_all_type_members,
+    resolution::type_resolver::resolve_types,
+    symbol_collection::collect_top_level_symbols,
+    symbol_table::build_symbol_table,
+    type_collection::collect_all_types,
+    validation::validator::validate,
 };
 
 /// Process order:
@@ -28,7 +32,7 @@ use crate::{
 /// 4. `symbol_collection`: Collect top-level symbols
 /// 5. `member_collection`: Collect all type members
 /// 6. `type_resolution`: Resolve types
-pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ConstructorError>> {
+pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ErrorRecord>> {
     let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
     let mut error_collector = ErrorCollector::new();
@@ -51,5 +55,5 @@ pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<Con
     // 6. Infer the types of symbols
     resolve_types(&mut error_collector, &mut program, &symbol_table);
 
-    Ok(())
+    error_collector.as_result()
 }

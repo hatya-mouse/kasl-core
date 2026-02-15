@@ -57,6 +57,14 @@ impl ErrorCollector {
         }
     }
 
+    pub fn as_result(&self) -> Result<(), Vec<ErrorRecord>> {
+        if self.has_error() {
+            Err(self.records.values().cloned().collect())
+        } else {
+            Ok(())
+        }
+    }
+
     pub fn has_error(&self) -> bool {
         !self.records.is_empty()
     }
