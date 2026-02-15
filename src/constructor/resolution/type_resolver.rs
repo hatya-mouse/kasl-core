@@ -101,49 +101,37 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 value_type,
                 def_val,
                 attrs: _,
-            } => ctx.resolve_variable(
-                symbol_path,
-                current_stmt.range,
-                |program| program.get_input_mut(name),
-                Some(def_val),
-                value_type.as_ref(),
-            ),
+            } => ctx.resolve_input(name, value_type.as_ref(), def_val, current_stmt.range),
 
             ParserStatementKind::Output {
                 name,
                 value_type,
                 def_val,
-            } => ctx.resolve_variable(
-                symbol_path,
-                current_stmt.range,
-                |program| program.get_output_mut(name),
-                Some(def_val),
-                value_type.as_ref(),
-            ),
+            } => ctx.resolve_output(name, value_type.as_ref(), def_val, current_stmt.range),
 
             ParserStatementKind::State { vars } => {
                 for var in vars {
-                    ctx.resolve_variable(
-                        symbol_path,
-                        current_stmt.range,
-                        |program| program.get_state_mut(&var.name),
-                        Some(&var.def_val),
+                    ctx.resolve_state(
+                        &var.name,
                         var.value_type.as_ref(),
+                        &var.def_val,
+                        current_stmt.range,
                     );
                 }
             }
 
             ParserStatementKind::Var {
-                required_by: _,
-                name: _,
+                required_by,
+                name,
                 value_type,
                 def_val,
-            } => ctx.resolve_variable(
+            } => ctx.resolve_var(
+                name,
                 symbol_path,
-                current_stmt.range,
-                |program| program.get_var_by_path_mut(symbol_path),
-                Some(def_val),
+                required_by.as_ref(),
                 value_type.as_ref(),
+                def_val,
+                current_stmt.range,
             ),
 
             ParserStatementKind::FuncDecl {
@@ -175,6 +163,13 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                     ctx.resolve_prefix_operator(symbol, params, return_type, current_stmt.range)
                 }
             },
+
+            ParserStatementKind::InfixDefine {
+                symbol,
+                infix_properties,
+            } => ctx.register_infix_define(symbol, infix_properties.clone()),
+
+            ParserStatementKind::PrefixDefine { symbol } => ctx.register_prefix_define(symbol),
 
             _ => (),
         }

@@ -52,4 +52,8 @@ impl<'a> TypeResolveCtx<'a> {
         };
         self.program.register_prefix_func(prefix);
     }
+
+    pub fn register_prefix_define(&mut self, symbol: &str) {
+        self.program.register_prefix_operator(symbol.to_string());
+    }
 }

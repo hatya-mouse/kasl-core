@@ -179,14 +179,25 @@ impl ErrorCollector {
         self.emit(EK::InvalidExprSyntax, range, phase, Sv::Error, Pl::None);
     }
 
-    /// Wrapper function for MissingTypeAnnotation error.
-    pub fn missing_type_annotation(&mut self, range: Range, phase: Phase, symbol: &str) {
+    /// Wrapper function for MissingDefaultValue error.
+    pub fn missing_def_val(&mut self, range: Range, phase: Phase, path: &str) {
         self.emit(
-            EK::MissingTypeAnnotation,
+            EK::MissingDefaultValue,
             range,
             phase,
             Sv::Error,
-            Pl::Str(symbol.to_string()),
+            Pl::Str(path.to_string()),
+        );
+    }
+
+    /// Wrapper function for ParamWithoutType error.
+    pub fn param_without_type(&mut self, range: Range, phase: Phase, path: &str) {
+        self.emit(
+            EK::ParamWithoutType,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(path.to_string()),
         );
     }
 

@@ -18,7 +18,7 @@ use crate::{
     ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent,
     error::{ErrorCollector, Ph},
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map::Entry};
 
 /// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
@@ -186,10 +186,13 @@ impl<'a> SymbolTable<'a> {
         symbol: String,
         stmt: &'a ParserStatement,
     ) {
-        if self.infix_defines.contains_key(&symbol) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &symbol);
-        } else {
-            self.infix_defines.insert(symbol, stmt);
+        match self.infix_defines.entry(symbol) {
+            Entry::Vacant(vacant) => {
+                vacant.insert(stmt);
+            }
+            Entry::Occupied(occupied) => {
+                ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, occupied.key())
+            }
         }
     }
 
@@ -199,10 +202,13 @@ impl<'a> SymbolTable<'a> {
         symbol: String,
         stmt: &'a ParserStatement,
     ) {
-        if self.prefix_defines.contains_key(&symbol) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &symbol);
-        } else {
-            self.prefix_defines.insert(symbol, stmt);
+        match self.prefix_defines.entry(symbol) {
+            Entry::Vacant(vacant) => {
+                vacant.insert(stmt);
+            }
+            Entry::Occupied(occupied) => {
+                ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, occupied.key())
+            }
         }
     }
 

@@ -28,19 +28,20 @@ impl Program {
             Some(last_component) => match last_component {
                 SymbolPathComponent::InputVar(name) => {
                     // The path has been resolved so we can safely unwrap the input variable
-                    self.get_input(name).unwrap().value_type.clone()
+                    Some(self.get_input(name).unwrap().value_type.clone())
                 }
                 SymbolPathComponent::OutputVar(name) => {
-                    self.get_output(name).unwrap().value_type.clone()
+                    Some(self.get_output(name).unwrap().value_type.clone())
                 }
                 SymbolPathComponent::StateVar(name) => {
-                    self.get_state(name).unwrap().value_type.clone()
+                    Some(self.get_state(name).unwrap().value_type.clone())
                 }
-                SymbolPathComponent::Var(_) => self
-                    .get_var_by_path(&symbol_path)
-                    .unwrap()
-                    .value_type
-                    .clone(),
+                SymbolPathComponent::Var(_) => Some(
+                    self.get_var_by_path(&symbol_path)
+                        .unwrap()
+                        .value_type
+                        .clone(),
+                ),
                 _ => None,
             },
             None => None,

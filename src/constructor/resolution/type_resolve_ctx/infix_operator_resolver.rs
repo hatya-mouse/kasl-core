@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    InfixOperator, ParserFuncParam, ParserSymbolPath, Range, error::Phase,
+    InfixOperator, InfixOperatorProperties, ParserFuncParam, ParserSymbolPath, Range, error::Phase,
     resolution::TypeResolveCtx,
 };
 
@@ -55,5 +55,10 @@ impl<'a> TypeResolveCtx<'a> {
             body: Vec::new(),
         };
         self.program.register_infix_func(infix);
+    }
+
+    pub fn register_infix_define(&mut self, symbol: &str, properties: InfixOperatorProperties) {
+        self.program
+            .register_infix_operator(symbol.to_string(), properties);
     }
 }

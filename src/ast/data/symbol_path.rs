@@ -101,7 +101,9 @@ pub enum SymbolPathComponent {
     InputVar(String),
     OutputVar(String),
     Func(String),
+    InfixDef(String),
     InfixFunc(String),
+    PrefixDef(String),
     PrefixFunc(String),
     TypeDef(String),
 }
@@ -117,7 +119,9 @@ impl Display for SymbolPathComponent {
             | SymbolPathComponent::InputVar(name)
             | SymbolPathComponent::OutputVar(name)
             | SymbolPathComponent::Func(name)
+            | SymbolPathComponent::InfixDef(name)
             | SymbolPathComponent::InfixFunc(name)
+            | SymbolPathComponent::PrefixDef(name)
             | SymbolPathComponent::PrefixFunc(name)
             | SymbolPathComponent::TypeDef(name) => write!(f, "{}", name),
         }

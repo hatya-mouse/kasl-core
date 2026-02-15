@@ -39,7 +39,7 @@ impl<'a> TypeResolveCtx<'a> {
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
-                value_type: Some(resolved_type),
+                value_type: resolved_type,
                 def_val: None,
             })
         } else if let Some(def_val) = &param.def_val {
@@ -49,19 +49,19 @@ impl<'a> TypeResolveCtx<'a> {
                 def_val,
                 self.symbol_table,
             )?;
-            let value_type = expr.get_type(self.ec, self.program, param.range)?;
+            let resolved_type = expr.get_type(self.ec, self.program, param.range)?;
 
             // Construct the parameter
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
-                value_type: Some(value_type),
-                def_val: Some(Box::new(expr)),
+                value_type: resolved_type,
+                def_val: Some(expr),
             })
         } else {
             // If the parameter does not have a type annotation or default value, throw an error
             self.ec
-                .missing_type_annotation(param.range, Phase::TypeResolution, &param.name);
+                .param_without_type(param.range, Phase::TypeResolution, &param.name);
             None
         }
     }

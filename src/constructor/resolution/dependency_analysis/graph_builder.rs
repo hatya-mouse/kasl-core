@@ -33,11 +33,12 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
     for stmt in &symbol_table.inputs {
         if let ParserStatementKind::Input {
-                name,
-                value_type: _,
-                def_val,
-                attrs: _,
-            } = &stmt.1.kind {
+            name,
+            value_type: _,
+            def_val,
+            attrs: _,
+        } = &stmt.1.kind
+        {
             // Combine variable name to create a new path for the child type
             let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
             build_var_graph(ec, &mut graph, symbol_table, &var_path, def_val);
@@ -47,10 +48,11 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     for stmt in &symbol_table.outputs {
         if let ParserStatementKind::Output {
-                name,
-                value_type: _,
-                def_val: _,
-            } = &stmt.1.kind {
+            name,
+            value_type: _,
+            def_val: _,
+        } = &stmt.1.kind
+        {
             // Combine variable name to create a new path for the child type
             let var_path = symbol_path![SymbolPathComponent::OutputVar(name.to_string())];
             graph.add_node(DependencyGraphNode::new(var_path));
@@ -61,8 +63,7 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
         if let ParserStatementKind::State { vars } = &stmt.1.kind {
             for var in vars {
                 // Combine variable name to create a new path for the child type
-                let var_path =
-                    symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
+                let var_path = symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
                 build_var_graph(ec, &mut graph, symbol_table, &var_path, &var.def_val);
                 graph.add_node(DependencyGraphNode::new(var_path));
             }
@@ -71,12 +72,13 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     for stmt in &symbol_table.funcs {
         if let ParserStatementKind::FuncDecl {
-                required_by: _,
-                name,
-                params,
-                return_type: _,
-                body: _,
-            } = &stmt.1.kind {
+            required_by: _,
+            name,
+            params,
+            return_type: _,
+            body: _,
+        } = &stmt.1.kind
+        {
             // Combine variable name to create a new path for the function
             let func_path = symbol_path![SymbolPathComponent::Func(name.to_string())];
             build_func_param_graph(ec, &mut graph, symbol_table, &func_path, params);
@@ -123,12 +125,13 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     for stmt in infix_funcs {
         if let ParserStatementKind::OperatorFunc {
-                op_type: _,
-                symbol,
-                params,
-                return_type: _,
-                body: _,
-            } = &stmt.kind {
+            op_type: _,
+            symbol,
+            params,
+            return_type: _,
+            body: _,
+        } = &stmt.kind
+        {
             // Combine variable name to create a new path for the function
             let func_path = symbol_path![SymbolPathComponent::InfixFunc(symbol.to_string())];
             build_func_param_graph(ec, &mut graph, symbol_table, &func_path, params);
@@ -144,16 +147,31 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     for stmt in prefix_funcs {
         if let ParserStatementKind::OperatorFunc {
-                op_type: _,
-                symbol,
-                params,
-                return_type: _,
-                body: _,
-            } = &stmt.kind {
+            op_type: _,
+            symbol,
+            params,
+            return_type: _,
+            body: _,
+        } = &stmt.kind
+        {
             // Combine variable name to create a new path for the function
             let func_path = symbol_path![SymbolPathComponent::PrefixFunc(symbol.to_string())];
             build_func_param_graph(ec, &mut graph, symbol_table, &func_path, params);
             graph.add_node(DependencyGraphNode::new(func_path));
+        }
+    }
+
+    for stmt in &symbol_table.infix_defines {
+        if let ParserStatementKind::InfixDefine { symbol, .. } = &stmt.1.kind {
+            let def_path = symbol_path![SymbolPathComponent::InfixDef(symbol.to_string())];
+            graph.add_node(DependencyGraphNode::new(def_path));
+        }
+    }
+
+    for stmt in &symbol_table.prefix_defines {
+        if let ParserStatementKind::PrefixDefine { symbol } = &stmt.1.kind {
+            let def_path = symbol_path![SymbolPathComponent::PrefixDef(symbol.to_string())];
+            graph.add_node(DependencyGraphNode::new(def_path));
         }
     }
 

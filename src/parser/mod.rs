@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-pub mod parser;
+pub mod grammar;
 pub mod parser_ast;
 
-pub use parser::kasl_parser;
+pub use grammar::kasl_parser;
 pub use parser_ast::{
     ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
     ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement, ParserStatementKind,

@@ -16,28 +16,12 @@
 
 use crate::{Expression, SymbolPath};
 
-/// Trait for all type of variables.
-pub trait VariableTrait {
-    fn set_value_type(&mut self, type_path: Option<SymbolPath>);
-    fn set_default_value(&mut self, default_value: Option<Expression>);
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputVar {
     pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Expression>,
+    pub value_type: SymbolPath,
+    pub def_val: Expression,
     pub attrs: Vec<InputAttribute>,
-}
-
-impl VariableTrait for InputVar {
-    fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
-        self.value_type = type_path;
-    }
-
-    fn set_default_value(&mut self, default_value: Option<Expression>) {
-        self.def_val = default_value;
-    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -49,69 +33,29 @@ pub struct InputAttribute {
 #[derive(Debug, PartialEq, Clone)]
 pub struct OutputVar {
     pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Expression>,
-}
-
-impl VariableTrait for OutputVar {
-    fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
-        self.value_type = type_path;
-    }
-
-    fn set_default_value(&mut self, default_value: Option<Expression>) {
-        self.def_val = default_value;
-    }
+    pub value_type: SymbolPath,
+    pub def_val: Expression,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct StateVar {
     pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Expression>,
-}
-
-impl VariableTrait for StateVar {
-    fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
-        self.value_type = type_path;
-    }
-
-    fn set_default_value(&mut self, default_value: Option<Expression>) {
-        self.def_val = default_value;
-    }
+    pub value_type: SymbolPath,
+    pub def_val: Expression,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ScopeVar {
     pub required_by: Option<SymbolPath>,
     pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Expression>,
-}
-
-impl VariableTrait for ScopeVar {
-    fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
-        self.value_type = type_path;
-    }
-
-    fn set_default_value(&mut self, default_value: Option<Expression>) {
-        self.def_val = default_value;
-    }
+    pub value_type: SymbolPath,
+    pub def_val: Expression,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Box<Expression>>,
-}
-
-impl VariableTrait for FuncParam {
-    fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
-        self.value_type = type_path;
-    }
-
-    fn set_default_value(&mut self, default_value: Option<Expression>) {
-        self.def_val = default_value.map(Box::new);
-    }
+    pub value_type: SymbolPath,
+    pub def_val: Option<Expression>,
 }

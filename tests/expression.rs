@@ -19,12 +19,10 @@ use kasl::{
     SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
     error::{EK, ErrorCollector, Pl},
     get_typed_tokens,
-    member_collection::collect_all_type_members,
     resolution::{
         expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
         type_resolver::resolve_types,
     },
-    symbol_collection::collect_top_level_symbols,
     symbol_path,
     table_construction::build_symbol_table,
     type_collection::collect_all_types,
@@ -351,8 +349,6 @@ input e: Int = 0
         .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
     build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
     collect_all_types(&mut program, &symbol_table);
-    collect_top_level_symbols(&mut ec, &mut program, &symbol_table);
-    collect_all_type_members(&mut ec, &mut program, &symbol_table);
     resolve_types(&mut ec, &mut program, &symbol_table);
 
     // 2. --- Parsing ---
@@ -390,8 +386,8 @@ input e: Int = 0
     assert_eq!(got, want, "The RPN sequence did not match the expectation.");
 
     let expr_result = build_expr_tree_from_rpn(&mut ec, &program, &symbol_table, rpn_tokens);
-    expr_result.expect(&format!(
-        "Couldn't build expression tree from the tokens:\n{:#?}",
-        ec
-    ));
+    match expr_result {
+        Some(_) => (),
+        None => panic!("Couldn't build expression tree from the tokens:\n{:#?}", ec),
+    }
 }

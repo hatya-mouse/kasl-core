@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+use std::fmt::Display;
+
 use crate::{Expression, FuncParam, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -47,13 +49,10 @@ pub struct Initializer {
 
 impl Initializer {
     pub fn does_params_match(&self, param_types: &[SymbolPath]) -> bool {
-        self.params.iter().zip(param_types).all(|(param, ty)| {
-            param
-                .value_type
-                .as_ref()
-                .map(|param_ty| param_ty == ty)
-                .unwrap_or(false)
-        })
+        self.params
+            .iter()
+            .zip(param_types)
+            .all(|(param, ty)| &param.value_type == ty)
     }
 }
 
@@ -64,12 +63,12 @@ pub enum LiteralBind {
     BoolLiteral,
 }
 
-impl LiteralBind {
-    pub fn to_string(&self) -> String {
+impl Display for LiteralBind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LiteralBind::IntLiteral => "intliteral".to_string(),
-            LiteralBind::FloatLiteral => "floatliteral".to_string(),
-            LiteralBind::BoolLiteral => "boolliteral".to_string(),
+            LiteralBind::IntLiteral => write!(f, "intliteral"),
+            LiteralBind::FloatLiteral => write!(f, "floatliteral"),
+            LiteralBind::BoolLiteral => write!(f, "boolliteral"),
         }
     }
 }

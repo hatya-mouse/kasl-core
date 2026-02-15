@@ -18,6 +18,7 @@ pub mod expression;
 pub mod function;
 pub mod operator;
 pub mod program;
+pub mod program_funcs;
 pub mod scope_item;
 pub mod statement;
 pub mod type_def;

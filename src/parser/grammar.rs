@@ -146,10 +146,7 @@ peg::parser!(pub grammar kasl_parser() for str {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::StructDecl {
                     name,
-                    inherits: match inherits {
-                        Some(inherits) => inherits,
-                        None => Vec::new()
-                    },
+                    inherits: inherits.unwrap_or_default(),
                     body
                 }
             }
@@ -161,10 +158,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         "}" end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::ProtocolDecl { name, inherits: match inherits {
-                    Some(inherits) => inherits,
-                    None => Vec::new()
-                }, body }
+                kind: ParserStatementKind::ProtocolDecl { name, inherits: inherits.unwrap_or_default(), body }
             }
         }
 
@@ -246,10 +240,7 @@ peg::parser!(pub grammar kasl_parser() for str {
     // Input Attribute
     rule input_attr() -> ParserInputAttribute
         = start:position!() "#" name:identifier() opt_args:("(" _? args:(multiline_expression() ** comma()) comma()? ")" { args })? end:position!() {
-            ParserInputAttribute { name, args: match opt_args {
-                None => vec![],
-                Some(args) => args
-            }, range: Range::n(start, end) }
+            ParserInputAttribute { name, args: opt_args.unwrap_or_default(), range: Range::n(start, end) }
         }
 
     // State ScopeVar

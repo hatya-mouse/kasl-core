@@ -156,14 +156,7 @@ impl Program {
         self.infix_operators
             .iter()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| {
-                if let (Some(lhs_value_type), Some(rhs_value_type)) =
-                    (&op.lhs.value_type, &op.rhs.value_type)
-                {
-                    return lhs_value_type == lhs_type && rhs_value_type == rhs_type;
-                }
-                false
-            })
+            .find(|op| &op.lhs.value_type == lhs_type && &op.rhs.value_type == rhs_type)
     }
 
     /// Get a mutable reference to the InfixOperator by the types of its operands.
@@ -176,14 +169,7 @@ impl Program {
         self.infix_operators
             .iter_mut()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| {
-                if let (Some(lhs_value_type), Some(rhs_value_type)) =
-                    (&op.lhs.value_type, &op.rhs.value_type)
-                {
-                    return lhs_value_type == lhs_type && rhs_value_type == rhs_type;
-                }
-                false
-            })
+            .find(|op| &op.lhs.value_type == lhs_type && &op.rhs.value_type == rhs_type)
     }
 
     // -- PrefixOperator --
@@ -206,12 +192,7 @@ impl Program {
         self.prefix_operators
             .iter()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| {
-                if let Some(value_type) = &op.operand.value_type {
-                    return value_type == operand_type;
-                }
-                false
-            })
+            .find(|op| &op.operand.value_type == operand_type)
     }
 
     /// Get a mutable reference to the PrefixOperator by the type of its operand.
@@ -223,11 +204,6 @@ impl Program {
         self.prefix_operators
             .iter_mut()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| {
-                if let Some(value_type) = &op.operand.value_type {
-                    return value_type == operand_type;
-                }
-                false
-            })
+            .find(|op| &op.operand.value_type == operand_type)
     }
 }

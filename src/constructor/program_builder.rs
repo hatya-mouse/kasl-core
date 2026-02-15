@@ -17,9 +17,7 @@
 use crate::{
     ParserStatement, Program, SymbolTable,
     error::{ErrorCollector, ErrorRecord},
-    member_collection::collect_all_type_members,
     resolution::type_resolver::resolve_types,
-    symbol_collection::collect_top_level_symbols,
     table_construction::build_symbol_table,
     type_collection::collect_all_types,
     validation::validator::validate,
@@ -29,9 +27,7 @@ use crate::{
 /// 1. `symbol_table`: Build symbol table
 /// 2. `type_collection`: Collect types
 /// 3. `validation`: Validate program
-/// 4. `symbol_collection`: Collect top-level symbols
-/// 5. `member_collection`: Collect all type members
-/// 6. `type_resolution`: Resolve types
+/// 6. `resolve_types`: Resolve types and construct the AST
 pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ErrorRecord>> {
     let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
@@ -46,13 +42,7 @@ pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<Err
     // 3. Validate program
     validate(&mut error_collector, &symbol_table);
 
-    // 4. Collect top-level symbols
-    collect_top_level_symbols(&mut error_collector, &mut program, &symbol_table);
-
-    // 5. Collect all type members
-    collect_all_type_members(&mut error_collector, &mut program, &symbol_table);
-
-    // 6. Infer the types of symbols
+    // 4. Infer the types of symbols
     resolve_types(&mut error_collector, &mut program, &symbol_table);
 
     error_collector.as_result()

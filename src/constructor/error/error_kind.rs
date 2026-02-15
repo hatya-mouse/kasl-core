@@ -92,10 +92,15 @@ pub enum ErrorKind {
     /// Payload: None
     InvalidExprSyntax,
 
-    /// Title: MissingTypeAnnotation
+    /// Title: MissingDefaultValue
     /// Phase: TypeResolution
-    /// Payload: Name of the symbol which doesn't have a type annotation
-    MissingTypeAnnotation,
+    /// Payload: Path to the symbol which doesn't have a default value
+    MissingDefaultValue,
+
+    /// Title: ParamWithoutType
+    /// Phase: TypeResolution
+    /// Payload: Name of the parameter which doesn't have a type annotation
+    ParamWithoutType,
 
     /// Title: OperatorHasDefaultValue
     /// Phase: TypeResolution

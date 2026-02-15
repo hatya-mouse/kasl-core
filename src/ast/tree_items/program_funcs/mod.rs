@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-pub mod collectors;
-pub mod type_member_collector;
-
-pub use collectors::{collect_member_functions, collect_member_nests, collect_member_variables};
-pub use type_member_collector::{collect_all_type_members, collect_type_members};
+pub mod item_getter;
+pub mod literal_bind;
+pub mod member_registration;
+pub mod type_getter;
+pub mod type_utils;
