@@ -68,4 +68,10 @@ impl ErrorCollector {
     pub fn has_error(&self) -> bool {
         !self.records.is_empty()
     }
+
+    pub fn has_error_kind(&self, kind: ErrorKind, payload: Payload) -> bool {
+        self.records
+            .keys()
+            .any(|key| key.kind == kind && key.payload == payload)
+    }
 }

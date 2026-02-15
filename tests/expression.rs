@@ -235,13 +235,7 @@ mod expression {
         let tokens = vec![v(), inf("<"), v(), inf("<"), v()];
         rearrange_tokens_to_rpn(&mut ec, &program, tokens);
         assert!(ec.has_error());
-
-        ec.records
-            .get(&ErrorKey::new(
-                EK::OpCannotBeChained,
-                Pl::Str("<".to_string()),
-            ))
-            .unwrap();
+        assert!(ec.has_error_kind(EK::OpCannotBeChained, Pl::Str("<".to_string())));
     }
 
     #[test]
@@ -262,10 +256,7 @@ mod expression {
         let tokens = vec![lpar(), v(), inf("+"), v()];
         rearrange_tokens_to_rpn(&mut ec, &program, tokens);
         assert!(ec.has_error());
-
-        ec.records
-            .get(&ErrorKey::new(EK::UnmatchedParentheses, Pl::None))
-            .unwrap();
+        assert!(ec.has_error_kind(EK::UnmatchedParentheses, Pl::None));
     }
 
     #[test]
@@ -285,10 +276,7 @@ mod expression {
         let tokens = vec![v(), inf("+"), v(), rpar()];
         rearrange_tokens_to_rpn(&mut ec, &program, tokens);
         assert!(ec.has_error());
-
-        ec.records
-            .get(&ErrorKey::new(EK::UnmatchedParentheses, Pl::None))
-            .unwrap();
+        assert!(ec.has_error_kind(EK::UnmatchedParentheses, Pl::None));
     }
 
     #[test]
@@ -300,13 +288,7 @@ mod expression {
         let tokens = vec![v(), inf("$unknown$"), v()];
         rearrange_tokens_to_rpn(&mut ec, &program, tokens);
         assert!(ec.has_error());
-
-        ec.records
-            .get(&ErrorKey::new(
-                EK::OperatorNotFound,
-                Pl::Str("$unknown$".to_string()),
-            ))
-            .unwrap();
+        assert!(ec.has_error_kind(EK::OperatorNotFound, Pl::Str("$unknown$".to_string())));
     }
 
     #[test]
