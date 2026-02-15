@@ -39,18 +39,12 @@ impl ExprTreeBuilder for Program {
         symbol_table: &SymbolTable,
     ) -> Option<Expression> {
         // 1. Convert tokens to TypedToken so we can easily look up their types
-        let typed_tokens = match get_typed_tokens(ec, self, symbol_table, expr) {
-            Some(tokens) => tokens,
-            None => return None,
-        };
+        let typed_tokens = get_typed_tokens(ec, self, symbol_table, expr)?;
         // 2. Rearrange tokens to get reverse polish notation
-        let rpn_tokens = match rearrange_tokens_to_rpn(ec, self, typed_tokens) {
-            Some(tokens) => tokens,
-            None => return None,
-        };
+        let rpn_tokens = rearrange_tokens_to_rpn(ec, self, typed_tokens)?;
         // 3. Evaluate the reverse polish notation to get the type of the expression
-        let expr_tree = build_expr_tree_from_rpn(ec, self, symbol_table, rpn_tokens);
+        
 
-        expr_tree
+        build_expr_tree_from_rpn(ec, self, symbol_table, rpn_tokens)
     }
 }

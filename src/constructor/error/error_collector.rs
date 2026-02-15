@@ -26,6 +26,12 @@ pub struct ErrorCollector {
     pub records: HashMap<ErrorKey, ErrorRecord>,
 }
 
+impl Default for ErrorCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ErrorCollector {
     pub fn new() -> Self {
         ErrorCollector {

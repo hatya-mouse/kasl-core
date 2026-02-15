@@ -14,13 +14,11 @@
 // limitations under the License.
 //
 
-#[cfg(test)]
-mod complex_program {
-    use kasl::kasl_parser;
+use kasl::kasl_parser;
 
-    #[test]
-    fn complex_program_parses() {
-        let program = r#"
+#[test]
+fn complex_program_parses() {
+    let program = r#"
             // Inputs / Outputs
             input sr: Int = 44100
             input gain = 0.8
@@ -135,7 +133,6 @@ mod complex_program {
             }
         "#;
 
-        let parsed = kasl_parser::parse(program);
-        assert!(parsed.is_ok(), "parser failed: {:?}", parsed.err());
-    }
+    let parsed = kasl_parser::parse(program);
+    assert!(parsed.is_ok(), "parser failed: {:?}", parsed.err());
 }

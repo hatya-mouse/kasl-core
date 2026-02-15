@@ -50,10 +50,10 @@ pub fn get_typed_tokens(
     symbol_table: &SymbolTable,
     expr: &[ExprToken],
 ) -> Option<Vec<TypedToken>> {
-    let mut expr_iter = expr.iter().peekable();
+    let expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
 
-    while let Some(token) = expr_iter.next() {
+    for token in expr_iter {
         match &token.kind {
             ExprTokenKind::IntLiteral(_) => match &program.int_literal_type {
                 Some(int_literal_type) => result.push(TypedToken::new(
@@ -61,7 +61,7 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: int_literal_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 )),
                 None => {
                     ec.no_literal_bind(token.range, Phase::TypeResolution, LiteralBind::IntLiteral);
@@ -75,7 +75,7 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: float_literal_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 )),
                 None => {
                     ec.no_literal_bind(
@@ -93,7 +93,7 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: bool_literal_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 )),
                 None => {
                     ec.no_literal_bind(
@@ -106,7 +106,7 @@ pub fn get_typed_tokens(
             },
 
             ExprTokenKind::Identifier(parser_path) => {
-                let var_type = match program.get_var_type(&parser_path, symbol_table) {
+                let var_type = match program.get_var_type(parser_path, symbol_table) {
                     Some(var_type) => var_type,
                     None => {
                         ec.var_not_found(
@@ -122,7 +122,7 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: var_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 ));
             }
 
@@ -146,23 +146,23 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: func_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 ));
             }
 
             ExprTokenKind::Operator(operator_symbol) => {
                 let last_token = result.last();
                 let operator_token =
-                    handle_operator_resolution(operator_symbol, token.range.clone(), last_token);
+                    handle_operator_resolution(operator_symbol, token.range, last_token);
                 result.push(operator_token);
             }
 
             ExprTokenKind::LParen => {
-                result.push(TypedToken::new(TypedTokenKind::LParen, token.range.clone()))
+                result.push(TypedToken::new(TypedTokenKind::LParen, token.range))
             }
 
             ExprTokenKind::RParen => {
-                result.push(TypedToken::new(TypedTokenKind::RParen, token.range.clone()))
+                result.push(TypedToken::new(TypedTokenKind::RParen, token.range))
             }
         }
     }
@@ -171,32 +171,31 @@ pub fn get_typed_tokens(
 }
 
 fn handle_operator_resolution(
-    operator_symbol: &String,
+    operator_symbol: &str,
     operator_range: Range,
     last_token: Option<&TypedToken>,
 ) -> TypedToken {
     // Whether the operator is infix or prefix can be determined by the last token
     let is_infix = match last_token {
-        Some(unwrapped_token) => match unwrapped_token.kind {
+        Some(unwrapped_token) => matches!(
+            unwrapped_token.kind,
             TypedTokenKind::Value {
                 expr_token: _,
                 value_type: _,
-            }
-            | TypedTokenKind::RParen => true,
-            _ => false,
-        },
+            } | TypedTokenKind::RParen
+        ),
         None => false,
     };
 
     if is_infix {
-        return TypedToken::new(
-            TypedTokenKind::InfixOperator(operator_symbol.clone()),
+        TypedToken::new(
+            TypedTokenKind::InfixOperator(operator_symbol.to_string()),
             operator_range,
-        );
+        )
     } else {
-        return TypedToken::new(
-            TypedTokenKind::PrefixOperator(operator_symbol.clone()),
+        TypedToken::new(
+            TypedTokenKind::PrefixOperator(operator_symbol.to_string()),
             operator_range,
-        );
+        )
     }
 }

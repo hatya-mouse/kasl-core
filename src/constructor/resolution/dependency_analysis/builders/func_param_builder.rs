@@ -47,7 +47,7 @@ pub fn build_func_param_graph(
                             }
                         };
 
-                        graph.add_edge(&func_path, &to_path);
+                        graph.add_edge(func_path, &to_path);
                         graph.add_node(DependencyGraphNode::new(func_path.clone()));
                         graph.add_node(DependencyGraphNode::new(to_path));
                     }
@@ -65,7 +65,7 @@ pub fn build_func_param_graph(
                             }
                         };
 
-                        graph.add_edge(&func_path, &to_path);
+                        graph.add_edge(func_path, &to_path);
                         graph.add_node(DependencyGraphNode::new(func_path.clone()));
                         graph.add_node(DependencyGraphNode::new(to_path));
                     }

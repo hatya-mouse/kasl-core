@@ -20,7 +20,7 @@ use crate::{
     member_collection::collect_all_type_members,
     resolution::type_resolver::resolve_types,
     symbol_collection::collect_top_level_symbols,
-    symbol_table::build_symbol_table,
+    table_construction::build_symbol_table,
     type_collection::collect_all_types,
     validation::validator::validate,
 };

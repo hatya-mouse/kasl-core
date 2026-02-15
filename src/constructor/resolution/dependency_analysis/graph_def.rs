@@ -23,6 +23,12 @@ pub struct DependencyGraph {
     pub edges: Vec<DependencyGraphEdge>,
 }
 
+impl Default for DependencyGraph {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DependencyGraph {
     pub fn new() -> Self {
         DependencyGraph {

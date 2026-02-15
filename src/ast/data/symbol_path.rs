@@ -21,6 +21,12 @@ pub struct SymbolPath {
     pub components: Vec<SymbolPathComponent>,
 }
 
+impl Default for SymbolPath {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SymbolPath {
     pub fn new() -> Self {
         SymbolPath {

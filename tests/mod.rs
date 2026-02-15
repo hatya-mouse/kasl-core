@@ -14,7 +14,11 @@
 // limitations under the License.
 //
 
+#[cfg(test)]
 pub mod complex_program;
+#[cfg(test)]
 pub mod expression;
+#[cfg(test)]
 pub mod parsing;
+#[cfg(test)]
 pub mod symbol_table;

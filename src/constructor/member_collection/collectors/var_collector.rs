@@ -25,23 +25,19 @@ pub fn collect_member_variables(
     scope_path: &SymbolPath,
 ) {
     for stmt in &symbol_table.vars {
-        match &stmt.1.kind {
-            ParserStatementKind::Var {
+        if let ParserStatementKind::Var {
                 required_by: _,
                 name,
                 value_type: _,
                 def_val: _,
-            } => {
-                let var = ScopeVar {
-                    required_by: None,
-                    name: name.clone(),
-                    value_type: None,
-                    def_val: None,
-                };
-                program.register_var_by_path(ec, var, scope_path, stmt.1.range);
-            }
-
-            _ => (),
+            } = &stmt.1.kind {
+            let var = ScopeVar {
+                required_by: None,
+                name: name.clone(),
+                value_type: None,
+                def_val: None,
+            };
+            program.register_var_by_path(ec, var, scope_path, stmt.1.range);
         }
     }
 }

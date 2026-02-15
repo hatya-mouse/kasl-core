@@ -28,39 +28,31 @@ pub fn build_struct_and_protocol_graph(
     child_symbol_table: &SymbolTable,
 ) {
     for stmt in &child_symbol_table.vars {
-        match &stmt.1.kind {
-            ParserStatementKind::Var {
+        if let ParserStatementKind::Var {
                 required_by: _,
                 name,
                 value_type: _,
                 def_val,
-            } => {
-                // Combine variable name to create a new path for the child type
-                let mut var_path = type_path.clone();
-                var_path.push(SymbolPathComponent::Var(name.to_string()));
-                build_var_graph(ec, graph, root_symbol_table, &var_path, def_val);
-            }
-
-            _ => (),
+            } = &stmt.1.kind {
+            // Combine variable name to create a new path for the child type
+            let mut var_path = type_path.clone();
+            var_path.push(SymbolPathComponent::Var(name.to_string()));
+            build_var_graph(ec, graph, root_symbol_table, &var_path, def_val);
         }
     }
 
     for stmt in &child_symbol_table.funcs {
-        match &stmt.1.kind {
-            ParserStatementKind::FuncDecl {
+        if let ParserStatementKind::FuncDecl {
                 required_by: _,
                 name,
                 params,
                 return_type: _,
                 body: _,
-            } => {
-                // Combine function name to create a new path for the function
-                let mut func_path = type_path.clone();
-                func_path.push(SymbolPathComponent::Func(name.to_string()));
-                build_func_param_graph(ec, graph, root_symbol_table, &func_path, params);
-            }
-
-            _ => (),
+            } = &stmt.1.kind {
+            // Combine function name to create a new path for the function
+            let mut func_path = type_path.clone();
+            func_path.push(SymbolPathComponent::Func(name.to_string()));
+            build_func_param_graph(ec, graph, root_symbol_table, &func_path, params);
         }
     }
 
@@ -76,7 +68,7 @@ pub fn build_struct_and_protocol_graph(
                 inherits: _,
                 body: _,
             } => {
-                if let Some(decl_expr) = child_symbol_table.get_type_def(&name) {
+                if let Some(decl_expr) = child_symbol_table.get_type_def(name) {
                     let child_symbol_table = &decl_expr.1;
 
                     // Combine the child type name to create a new type path for the child type

@@ -90,9 +90,7 @@ pub fn build_expr_tree_from_rpn(
 
                     // Build expression tree for arguments
                     let mut parsed_arguments = Vec::new();
-                    for i in 0..args.len() {
-                        let arg = &args[i];
-
+                    for (i, arg) in args.iter().enumerate() {
                         // Check if the function has enough number of arguments
                         if i < function.params.len() {
                             // Build expression tree for an argument
@@ -152,25 +150,13 @@ pub fn build_expr_tree_from_rpn(
                     }
                 };
 
-                let operator_return_type = match operator.return_type.as_ref() {
-                    Some(return_type) => return_type.clone(),
-                    None => {
-                        ec.comp_bug(
-                            current_token.range,
-                            Phase::TypeResolution,
-                            "Operator return type should have been resolved at this point.",
-                        );
-                        return None;
-                    }
-                };
-
                 let operator_expr = Expression::PrefixOperator {
                     operand: Box::new(operand),
                     operand_type,
-                    return_type: operator_return_type.clone(),
+                    return_type: operator.return_type.clone(),
                 };
 
-                stack.push((operator_expr, operator_return_type.clone()));
+                stack.push((operator_expr, operator.return_type.clone()));
             }
             TypedTokenKind::InfixOperator(ref symbol) => {
                 let (rhs, rhs_type) = match stack.pop() {
@@ -196,27 +182,16 @@ pub fn build_expr_tree_from_rpn(
                         return None;
                     }
                 };
-                let operator_return_type = match operator.return_type.as_ref() {
-                    Some(return_type) => return_type.clone(),
-                    None => {
-                        ec.comp_bug(
-                            current_token.range,
-                            Phase::TypeResolution,
-                            "Operator return type should have been resolved at this point.",
-                        );
-                        return None;
-                    }
-                };
 
                 let operator_expr = Expression::InfixOperator {
                     lhs: Box::new(lhs),
                     lhs_type,
                     rhs: Box::new(rhs),
                     rhs_type,
-                    return_type: operator_return_type.clone(),
+                    return_type: operator.return_type.clone(),
                 };
 
-                stack.push((operator_expr, operator_return_type.clone()));
+                stack.push((operator_expr, operator.return_type.clone()));
             }
             _ => {
                 ec.comp_bug(

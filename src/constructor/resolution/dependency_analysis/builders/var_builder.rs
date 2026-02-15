@@ -54,7 +54,7 @@ pub fn build_var_graph(
                 }
 
                 if !to_path.components.is_empty() {
-                    graph.add_edge(&var_path, &to_path);
+                    graph.add_edge(var_path, &to_path);
                     graph.add_node(DependencyGraphNode::new(to_path));
                 }
             }
@@ -68,7 +68,7 @@ pub fn build_var_graph(
                     }
                 };
 
-                graph.add_edge(&var_path, &to_path);
+                graph.add_edge(var_path, &to_path);
                 graph.add_node(DependencyGraphNode::new(var_path.clone()));
                 graph.add_node(DependencyGraphNode::new(to_path));
             }

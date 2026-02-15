@@ -14,6 +14,30 @@
 // limitations under the License.
 //
 
+pub mod func_resolver;
 pub mod infix_operator_resolver;
 pub mod param_resolver;
 pub mod prefix_operator_resolver;
+pub mod var_resolver;
+
+use crate::{Program, SymbolTable, error::ErrorCollector};
+
+pub struct TypeResolveCtx<'a> {
+    pub ec: &'a mut ErrorCollector,
+    pub program: &'a mut Program,
+    pub symbol_table: &'a SymbolTable<'a>,
+}
+
+impl<'a> TypeResolveCtx<'a> {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        program: &'a mut Program,
+        symbol_table: &'a SymbolTable<'a>,
+    ) -> Self {
+        TypeResolveCtx {
+            ec,
+            program,
+            symbol_table,
+        }
+    }
+}

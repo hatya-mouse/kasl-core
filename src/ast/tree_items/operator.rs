@@ -23,7 +23,7 @@ pub struct InfixOperator {
     pub symbol: String,
     pub lhs: FuncParam,
     pub rhs: FuncParam,
-    pub return_type: Option<SymbolPath>,
+    pub return_type: SymbolPath,
     pub body: Vec<Statement>,
 }
 
@@ -31,7 +31,7 @@ pub struct InfixOperator {
 pub struct PrefixOperator {
     pub symbol: String,
     pub operand: FuncParam,
-    pub return_type: Option<SymbolPath>,
+    pub return_type: SymbolPath,
     pub body: Vec<Statement>,
 }
 

@@ -81,9 +81,9 @@ pub fn rearrange_tokens_to_rpn(
                     }
                 }
 
-                if current_props.associativity == OperatorAssociativity::None {
-                    if let Some(top_token) = operator_stack.last() {
-                        if let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind {
+                if current_props.associativity == OperatorAssociativity::None
+                    && let Some(top_token) = operator_stack.last()
+                        && let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind {
                             // Get the precedence and associativity of the operator from the stack
                             let top_props = match program.get_infix_operator(top_op_symbol) {
                                 Some(props) => props,
@@ -108,8 +108,6 @@ pub fn rearrange_tokens_to_rpn(
                                 return None;
                             }
                         }
-                    }
-                }
 
                 operator_stack.push(current_token);
             }

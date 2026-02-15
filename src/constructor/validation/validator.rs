@@ -28,27 +28,20 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
         .collect::<Vec<&&ParserStatement>>();
 
     for stmt in infix_funcs {
-        match &stmt.kind {
-            ParserStatementKind::OperatorFunc {
+        if let ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol: _,
                 params,
                 return_type: _,
                 body: _,
-            } => match op_type {
-                ParserOperatorType::Infix => {
-                    if params.len() != 2 {
-                        ec.invalid_param_numbers_for_infix(
-                            stmt.range,
-                            Ph::TopLevelCollection,
-                            params.len(),
-                        );
-                    }
-                }
-                _ => (),
-            },
-            _ => (),
-        }
+            } = &stmt.kind { if op_type == &ParserOperatorType::Infix
+        && params.len() != 2 {
+            ec.invalid_param_numbers_for_infix(
+                stmt.range,
+                Ph::TopLevelCollection,
+                params.len(),
+            );
+        } }
     }
 
     let prefix_funcs = &symbol_table
@@ -58,26 +51,19 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
         .collect::<Vec<&&ParserStatement>>();
 
     for stmt in prefix_funcs {
-        match &stmt.kind {
-            ParserStatementKind::OperatorFunc {
+        if let ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol: _,
                 params,
                 return_type: _,
                 body: _,
-            } => match op_type {
-                ParserOperatorType::Prefix => {
-                    if params.len() != 1 {
-                        ec.invalid_param_numbers_for_prefix(
-                            stmt.range,
-                            Ph::TopLevelCollection,
-                            params.len(),
-                        );
-                    }
-                }
-                _ => (),
-            },
-            _ => (),
-        }
+            } = &stmt.kind { if op_type == &ParserOperatorType::Prefix
+        && params.len() != 1 {
+            ec.invalid_param_numbers_for_prefix(
+                stmt.range,
+                Ph::TopLevelCollection,
+                params.len(),
+            );
+        } }
     }
 }

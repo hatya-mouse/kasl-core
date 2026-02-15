@@ -43,6 +43,12 @@ pub enum StatementLookup<'a> {
     Multiple(&'a [&'a ParserStatement]),
 }
 
+impl<'a> Default for SymbolTable<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> SymbolTable<'a> {
     pub fn new() -> Self {
         Self {
@@ -72,15 +78,15 @@ impl<'a> SymbolTable<'a> {
                 result_path.push(SymbolPathComponent::CompFloat);
             } else if &component.symbol == "CompBool" {
                 result_path.push(SymbolPathComponent::CompBool);
-            } else if let Some(_) = current_scope.get_input(&component.symbol) {
+            } else if current_scope.get_input(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::InputVar(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_output(&component.symbol) {
+            } else if current_scope.get_output(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::OutputVar(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_state(&component.symbol) {
+            } else if current_scope.get_state(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::StateVar(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_var(&component.symbol) {
+            } else if current_scope.get_var(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::Var(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_func(&component.symbol) {
+            } else if current_scope.get_func(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::Func(component.symbol.clone()));
             } else if let Some(type_def) = current_scope.get_type_def(&component.symbol) {
                 result_path.push(SymbolPathComponent::TypeDef(component.symbol.clone()));
@@ -201,12 +207,12 @@ impl<'a> SymbolTable<'a> {
     }
 
     pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        let target_vec = self.infix_funcs.entry(symbol).or_insert_with(Vec::new);
+        let target_vec = self.infix_funcs.entry(symbol).or_default();
         target_vec.push(stmt);
     }
 
     pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        let target_vec = self.prefix_funcs.entry(symbol).or_insert_with(Vec::new);
+        let target_vec = self.prefix_funcs.entry(symbol).or_default();
         target_vec.push(stmt);
     }
 
@@ -217,23 +223,23 @@ impl<'a> SymbolTable<'a> {
     // Getter functions
 
     pub fn get_input(&self, name: &str) -> Option<&ParserStatement> {
-        self.inputs.get(name).map(|x| *x)
+        self.inputs.get(name).copied()
     }
 
     pub fn get_output(&self, name: &str) -> Option<&ParserStatement> {
-        self.outputs.get(name).map(|x| *x)
+        self.outputs.get(name).copied()
     }
 
     pub fn get_state(&self, name: &str) -> Option<&ParserStatement> {
-        self.states.get(name).map(|x| *x)
+        self.states.get(name).copied()
     }
 
     pub fn get_var(&self, name: &str) -> Option<&ParserStatement> {
-        self.vars.get(name).map(|x| *x)
+        self.vars.get(name).copied()
     }
 
     pub fn get_func(&self, name: &str) -> Option<&ParserStatement> {
-        self.funcs.get(name).map(|x| *x)
+        self.funcs.get(name).copied()
     }
 
     pub fn get_type_def(&self, name: &str) -> Option<&(&ParserStatement, SymbolTable<'a>)> {
@@ -241,11 +247,11 @@ impl<'a> SymbolTable<'a> {
     }
 
     pub fn get_infix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
-        self.infix_defines.get(symbol).map(|x| *x)
+        self.infix_defines.get(symbol).copied()
     }
 
     pub fn get_prefix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
-        self.prefix_defines.get(symbol).map(|x| *x)
+        self.prefix_defines.get(symbol).copied()
     }
 
     pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserStatement>> {

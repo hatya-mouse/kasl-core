@@ -22,10 +22,7 @@ impl Program {
         parser_path: &ParserSymbolPath,
         symbol_table: &SymbolTable,
     ) -> Option<SymbolPath> {
-        let symbol_path = match symbol_table.resolve_path(parser_path) {
-            Some(path) => path,
-            None => return None,
-        };
+        let symbol_path = symbol_table.resolve_path(parser_path)?;
 
         match symbol_path.components.last() {
             Some(last_component) => match last_component {

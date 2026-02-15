@@ -14,55 +14,53 @@
 // limitations under the License.
 //
 
-#[cfg(test)]
-mod parsing {
-    use kasl::{
-        ExprToken, ParserSymbolPath, ParserSymbolPathComponent, Range, kasl_parser,
-        parser_ast::ExprTokenKind,
-    };
+use kasl::{
+    ExprToken, ParserSymbolPath, ParserSymbolPathComponent, Range, kasl_parser,
+    parser_ast::ExprTokenKind,
+};
 
-    /// Test parsing of chained expressions.
-    #[test]
-    fn chaining() {
-        let object = kasl_parser::oneline_expression("object");
-        // println!("{:#?}", object);
-        assert_eq!(
-            object,
-            Ok(vec![ExprToken {
-                range: Range::n(0, 6),
-                kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
-                    ParserSymbolPathComponent {
-                        range: Range::n(0, 6),
-                        symbol: "object".to_string(),
-                    }
-                ]))
-            }])
-        );
+/// Test parsing of chained expressions.
+#[test]
+fn chaining() {
+    let object = kasl_parser::oneline_expression("object");
+    // println!("{:#?}", object);
+    assert_eq!(
+        object,
+        Ok(vec![ExprToken {
+            range: Range::n(0, 6),
+            kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
+                ParserSymbolPathComponent {
+                    range: Range::n(0, 6),
+                    symbol: "object".to_string(),
+                }
+            ]))
+        }])
+    );
 
-        let object_property = kasl_parser::oneline_expression("object.property");
-        // println!("{:#?}", object_property);
-        assert_eq!(
-            object_property,
-            Ok(vec![ExprToken {
-                range: Range::n(0, 15),
-                kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
-                    ParserSymbolPathComponent {
-                        range: Range::n(0, 6),
-                        symbol: "object".to_string()
-                    },
-                    ParserSymbolPathComponent {
-                        range: Range::n(6, 15),
-                        symbol: "property".to_string()
-                    }
-                ]))
-            }])
-        );
-    }
+    let object_property = kasl_parser::oneline_expression("object.property");
+    // println!("{:#?}", object_property);
+    assert_eq!(
+        object_property,
+        Ok(vec![ExprToken {
+            range: Range::n(0, 15),
+            kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
+                ParserSymbolPathComponent {
+                    range: Range::n(0, 6),
+                    symbol: "object".to_string()
+                },
+                ParserSymbolPathComponent {
+                    range: Range::n(6, 15),
+                    symbol: "property".to_string()
+                }
+            ]))
+        }])
+    );
+}
 
-    /// Test parsing of simple statements.
-    #[test]
-    fn easy_program() {
-        let program = "input integer: Int = 14
+/// Test parsing of simple statements.
+#[test]
+fn easy_program() {
+    let program = "input integer: Int = 14
             input fac = 5 #range(0, 100)
             output out_value: Int = 0
 
@@ -88,8 +86,7 @@ mod parsing {
             }
         ";
 
-        let parsed_program = kasl_parser::parse(program);
-        // println!("{:#?}", parsed_program);
-        assert!(parsed_program.is_ok());
-    }
+    let parsed_program = kasl_parser::parse(program);
+    // println!("{:#?}", parsed_program);
+    assert!(parsed_program.is_ok());
 }

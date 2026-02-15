@@ -19,9 +19,9 @@ pub mod error;
 pub mod member_collection;
 pub mod resolution;
 pub mod symbol_collection;
-pub mod symbol_table;
+pub mod table_construction;
 pub mod type_collection;
 pub mod validation;
 
 pub use resolution::{TypedToken, TypedTokenKind, get_typed_tokens};
-pub use symbol_table::SymbolTable;
+pub use table_construction::SymbolTable;

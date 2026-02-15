@@ -14,43 +14,43 @@
 // limitations under the License.
 //
 
-mod symbol_table {
-    use kasl::{SymbolTable, error::ErrorCollector, kasl_parser, symbol_table::build_symbol_table};
+use kasl::{
+    SymbolTable, error::ErrorCollector, kasl_parser, table_construction::build_symbol_table,
+};
 
-    #[test]
-    fn table_generation() {
-        let program = "input integer: Int = 14
-            input fac = 5
-            output out_value: Int = 0
+#[test]
+fn table_generation() {
+    let program = "input integer: Int = 14
+        input fac = 5
+        output out_value: Int = 0
 
-            struct Multiplier {
-                var value = 1
+        struct Multiplier {
+        var value = 1
 
-                init(_ value: Int) {
-                    self.value = value
-                }
-
-                func multiply(_ another: Int) -> Int {
-                    return value * another
-                }
+            init(_ value: Int) {
+                self.value = value
             }
 
-            func main() {
-                var multiplier = Multiplier()
-                out_value = multiply(multiplier)
+            func multiply(_ another: Int) -> Int {
+                return value * another
             }
+        }
 
-            func multiply(_ multiplier: Multiplier) -> Int {
-                return multiplier.value * fac
-            }
+        func main() {
+            var multiplier = Multiplier()
+            out_value = multiply(multiplier)
+        }
+
+        func multiply(_ multiplier: Multiplier) -> Int {
+            return multiplier.value * fac
+        }
         ";
 
-        let parsed_program = kasl_parser::parse(program).unwrap();
+    let parsed_program = kasl_parser::parse(program).unwrap();
 
-        let mut symbol_table = SymbolTable::new();
-        let mut ec = ErrorCollector::new();
-        build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
+    let mut symbol_table = SymbolTable::new();
+    let mut ec = ErrorCollector::new();
+    build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
 
-        symbol_table.get_func("main");
-    }
+    symbol_table.get_func("main");
 }

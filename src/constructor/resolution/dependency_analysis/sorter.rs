@@ -42,7 +42,7 @@ pub fn sort_graph(graph: &DependencyGraph) -> Result<Vec<&SymbolPath>, Vec<Symbo
     let mut sorted_nodes = Vec::new();
     while let Some(node) = queue.pop_front() {
         sorted_nodes.push(node);
-        for edge in graph.get_edges_from_node(&node) {
+        for edge in graph.get_edges_from_node(node) {
             *in_degrees.get_mut(&edge.target).unwrap() -= 1;
             if in_degrees[&edge.target] == 0 {
                 in_degrees.remove(&edge.target);
