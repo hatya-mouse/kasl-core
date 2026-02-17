@@ -1,5 +1,5 @@
 //
-// Copyright 2025-2026 Shuntaro Kasatani
+// © 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 pub mod error;
 pub mod program_builder;
 pub mod resolution;
+pub mod stmt_building;
 pub mod table_construction;
 pub mod type_collection;
 pub mod validation;

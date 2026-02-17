@@ -14,12 +14,6 @@
 // limitations under the License.
 //
 
-pub mod grammar;
-pub mod parser_ast;
+use crate::ParserStatement;
 
-pub use grammar::kasl_parser;
-pub use parser_ast::{
-    ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
-    ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement, ParserStatementKind,
-    ParserSymbolPath, ParserSymbolPathComponent,
-};
+pub fn build_statements(parser_stmts: &[ParserStatement]) {}
