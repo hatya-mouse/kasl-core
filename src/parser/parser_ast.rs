@@ -112,7 +112,7 @@ pub enum ParserBodyStmtKind {
         value: Vec<ExprToken>,
     },
     FuncCall {
-        name: ParserSymbolPath,
+        path: ParserSymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
     If {

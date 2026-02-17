@@ -28,8 +28,15 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam> {
-        self.params.iter_mut().find(|param| param.name == name)
+    pub fn get_param_name_by_label(&self, label: &str) -> Option<String> {
+        self.params
+            .iter()
+            .find(|param| param.label.as_ref().map_or(false, |l| l == label) || param.name == label)
+            .map(|param| param.name.to_string())
+    }
+
+    pub fn get_param_name_by_index(&self, index: usize) -> Option<String> {
+        self.params.get(index).map(|param| param.name.to_string())
     }
 }
 

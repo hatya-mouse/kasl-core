@@ -56,18 +56,4 @@ impl Program {
             _ => None,
         }
     }
-
-    /// Get a mutable reference to the FuncParam by its path.
-    pub fn get_func_param_by_path_mut(
-        &mut self,
-        symbol_path: &SymbolPath,
-        param_name: &str,
-    ) -> Option<&mut FuncParam> {
-        let parent_scope = self.get_to_deepest_scope_mut(&symbol_path.components)?;
-
-        match parent_scope {
-            ScopeItemMut::Func(func) => func.get_func_param_mut(param_name),
-            _ => None,
-        }
-    }
 }

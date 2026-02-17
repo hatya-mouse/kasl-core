@@ -31,7 +31,7 @@ pub enum Statement {
         value: Expression,
     },
     FuncCall {
-        name: Vec<String>,
+        path: SymbolPath,
         args: Vec<FuncCallArg>,
     },
     If {

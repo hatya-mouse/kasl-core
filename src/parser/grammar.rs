@@ -125,10 +125,10 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule func_call_statement() -> ParserBodyStmt
-        = start:position!() name:id_chain() _? "(" __? args:func_call_args() ")" end:position!() {
+        = start:position!() path:id_chain() _? "(" __? args:func_call_args() ")" end:position!() {
             ParserBodyStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::FuncCall { name, args }
+                kind: ParserBodyStmtKind::FuncCall { path, args }
             }
         }
 

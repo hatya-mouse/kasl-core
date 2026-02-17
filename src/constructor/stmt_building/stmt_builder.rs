@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserBodyStmt, ParserBodyStmtKind, Program, Statement, SymbolTable,
+    FuncCallArg, ParserBodyStmt, ParserBodyStmtKind, Program, Statement, SymbolTable,
     error::{ErrorCollector, Phase},
     resolution::expr_inference::ExprTreeBuilder,
 };
@@ -61,6 +61,52 @@ pub fn build_statements(
                 parsed_stmts.push(block_stmt);
             }
 
+            ParserBodyStmtKind::FuncCall { path, args } => {
+                let func_path = match symbol_table.resolve_path(path) {
+                    Some(parsed_target) => parsed_target,
+                    None => {
+                        ec.func_not_found(stmt.range, Phase::StatementBuilding, &path.to_string());
+                        continue;
+                    }
+                };
+                let target_func = match program.get_func_by_path(&func_path) {
+                    Some(func) => func,
+                    None => {
+                        ec.func_not_found(
+                            stmt.range,
+                            Phase::StatementBuilding,
+                            &func_path.to_string(),
+                        );
+                        continue;
+                    }
+                };
+
+                let parsed_args = Vec::new();
+                let i = 0;
+                for arg in args {
+                    let parsed_value =
+                        match program.build_expr_tree_from_raw_tokens(ec, &arg.value, symbol_table)
+                        {
+                            Some(parsed_value) => parsed_value,
+                            None => continue,
+                        };
+                    let arg_name = arg.label.map_or_else(
+                        || target_func.get_param_name_by_index(i),
+                        |label| target_func.get_param_name_by_label(&label),
+                    );
+
+                    let parsed_arg = FuncCallArg {
+                        name: arg_name,
+                        value: parsed_value,
+                    };
+                    parsed_args.push(parsed_value);
+                }
+
+                let func_call_stmt = Statement::FuncCall {
+                    path: func_path,
+                    args: parsed_args,
+                };
+            }
             _ => (),
         }
     }
