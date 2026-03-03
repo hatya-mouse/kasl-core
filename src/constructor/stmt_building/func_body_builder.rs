@@ -58,7 +58,7 @@ pub fn build_func_body_stmt(
             }
 
             ParserBodyStmtKind::Block { statements } => {
-                // Build statements within the block
+                // Collect statements within the block
                 let block_body = build_func_body_stmt(ec, program, symbol_table, statements);
                 // Create a Block statement
                 let block_stmt = Statement::Block { body: block_body };

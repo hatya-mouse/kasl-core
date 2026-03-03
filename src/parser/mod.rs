@@ -20,6 +20,7 @@ pub mod parser_ast;
 pub use grammar::kasl_parser;
 pub use parser_ast::{
     ExprToken, ExprTokenKind, ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg,
-    ParserFuncParam, ParserInputAttribute, ParserOperatorType, ParserProgram, ParserStateVar,
-    ParserSymbolPath, ParserSymbolPathComponent, ParserTopLevelStmt, ParserTopLevelStmtKind,
+    ParserFuncParam, ParserIfCond, ParserInputAttribute, ParserOperatorType, ParserProgram,
+    ParserStateVar, ParserSymbolPath, ParserSymbolPathComponent, ParserTopLevelStmt,
+    ParserTopLevelStmtKind,
 };

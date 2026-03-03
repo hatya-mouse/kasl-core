@@ -50,6 +50,7 @@ pub fn build_func_call_stmt(
     let maximum_num = target_func.max_num_of_params();
     let actual_num = args.len();
 
+    // Throw an error if the number of arguments is out of range
     if actual_num < minimum_num {
         ec.not_enough_params(
             stmt.range,

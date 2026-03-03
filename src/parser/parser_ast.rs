@@ -116,12 +116,8 @@ pub enum ParserBodyStmtKind {
         args: Vec<ParserFuncCallArg>,
     },
     If {
-        condition: Vec<ExprToken>,
-        body: Vec<ParserBodyStmt>,
-    },
-    IfElse {
-        condition: Vec<ExprToken>,
-        body: Vec<ParserBodyStmt>,
+        main: ParserIfCond,
+        else_ifs: Vec<ParserIfCond>,
         else_body: Vec<ParserBodyStmt>,
     },
     Block {
@@ -163,6 +159,13 @@ pub struct ParserFuncParam {
     pub name: String,
     pub value_type: Option<ParserSymbolPath>,
     pub def_val: Option<Vec<ExprToken>>,
+    pub range: Range,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserIfCond {
+    pub condition: Vec<ExprToken>,
+    pub body: Vec<ParserBodyStmt>,
     pub range: Range,
 }
 

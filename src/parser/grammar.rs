@@ -16,9 +16,9 @@
 
 use crate::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, LiteralBind, OperatorAssociativity,
-    ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
-    ParserOperatorType, ParserStateVar, ParserSymbolPath, ParserSymbolPathComponent,
-    ParserTopLevelStmt, ParserTopLevelStmtKind, Range,
+    ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfCond,
+    ParserInputAttribute, ParserOperatorType, ParserStateVar, ParserSymbolPath,
+    ParserSymbolPathComponent, ParserTopLevelStmt, ParserTopLevelStmtKind, Range,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -52,7 +52,6 @@ peg::parser!(pub grammar kasl_parser() for str {
         / assign_statement()
         / func_call_statement()
         / if_statement()
-        / if_else_statement()
         / block_statement()
         / expected!("statement")
 
@@ -133,25 +132,25 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule if_statement() -> ParserBodyStmt
-        = start:position!() "if" _ condition:oneline_expression() __? "{"
-        __? body:body_stmts() __?
-        "}" end:position!() {
+        = start:position!() main:if_arm()
+        else_ifs:(__? "else" _ ifCond:if_arm() { ifCond })*
+        else_body:body_stmts()?
+        end:position!() {
             ParserBodyStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::If { condition, body }
+                kind: ParserBodyStmtKind::If {
+                    main,
+                    else_ifs,
+                    else_body: else_body.unwrap_or(Vec::new()),
+                }
             }
         }
 
-    rule if_else_statement() -> ParserBodyStmt
+    rule if_arm() -> ParserIfCond
         = start:position!() "if" _ condition:oneline_expression() __? "{"
         __? body:body_stmts() __?
-        "}" __? "else" __? "{"
-        __? else_body:body_stmts() __?
         "}" end:position!() {
-            ParserBodyStmt {
-                range: Range::n(start, end),
-                kind: ParserBodyStmtKind::IfElse { condition, body, else_body }
-            }
+            ParserIfCond { condition, body, range: Range::n(start, end) }
         }
 
     rule struct_decl_statement() -> ParserTopLevelStmt
