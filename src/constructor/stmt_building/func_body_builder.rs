@@ -28,7 +28,6 @@ pub fn build_func_body_stmt(
     original_stmts: &[ParserBodyStmt],
 ) -> Vec<Statement> {
     let mut parsed_stmts = Vec::new();
-    let mut ctx = TypeResolveCtx::new(ec, program, symbol_table);
 
     for stmt in original_stmts {
         match &stmt.kind {
@@ -81,6 +80,7 @@ pub fn build_func_body_stmt(
                 value_type,
                 def_val,
             } => {
+                let mut ctx = TypeResolveCtx::new(ec, program, symbol_table);
                 if let Some((val_type, def_val)) =
                     ctx.resolve_var_type(stmt.range, value_type.as_ref(), def_val)
                 {
@@ -106,6 +106,16 @@ pub fn build_func_body_stmt(
                 else_ifs,
                 else_body,
             ),
+
+            ParserBodyStmtKind::Return { value } => {
+                let return_value = value.as_ref().and_then(|value| {
+                    program.build_expr_tree_from_raw_tokens(ec, value, symbol_table)
+                });
+                let return_stmt = Statement::Return {
+                    value: return_value,
+                };
+                parsed_stmts.push(return_stmt);
+            }
         }
     }
 
