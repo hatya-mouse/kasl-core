@@ -14,10 +14,15 @@
 // limitations under the License.
 //
 
-mod range;
-mod symbol_id;
-mod symbol_path;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct SymbolID(usize);
 
-pub use range::Range;
-pub use symbol_id::SymbolID;
-pub use symbol_path::{SymbolPath, SymbolPathComponent};
+impl SymbolID {
+    pub fn new(val: usize) -> Self {
+        Self(val)
+    }
+
+    pub fn as_usize(self) -> usize {
+        self.0
+    }
+}
