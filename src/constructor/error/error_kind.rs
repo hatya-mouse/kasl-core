@@ -24,6 +24,7 @@ pub enum ErrorKind {
     /// Title: InvalidTopExpr
     /// Phase: SymbolTableConstruction
     /// Payload: Type of the expression
+    /// * Throwed if there's a ParserTopLevelExpr with invalid type. This doesn't mean that the expression if in the top level.
     InvalidTopExpr,
 
     /// Title: InvalidParamNumbersForInfix

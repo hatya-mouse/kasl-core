@@ -16,7 +16,7 @@
 
 use crate::{
     ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolTable,
-    error::ErrorCollector,
+    error::{ErrorCollector, Ph},
 };
 
 pub fn build_symbol_table<'a>(
@@ -79,7 +79,9 @@ pub fn build_symbol_table<'a>(
                 ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
             },
 
-            _ => (),
+            _ => {
+                ec.invalid_top_expr(stmt.range, Ph::StatementBuilding, &stmt.kind.to_string());
+            }
         }
     }
 }
@@ -144,7 +146,9 @@ pub fn build_nest_symbol_table<'a>(
                 ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
             },
 
-            _ => {}
+            _ => {
+                ec.invalid_top_expr(stmt.range, Ph::StatementBuilding, &stmt.kind.to_string());
+            }
         }
     }
 }

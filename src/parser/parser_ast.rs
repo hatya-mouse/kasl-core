@@ -87,6 +87,23 @@ pub enum ParserTopLevelStmtKind {
     },
 }
 
+impl Display for ParserTopLevelStmtKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ParserTopLevelStmtKind::FuncDecl { .. } => write!(f, "func"),
+            ParserTopLevelStmtKind::Input { .. } => write!(f, "input"),
+            ParserTopLevelStmtKind::Output { .. } => write!(f, "output"),
+            ParserTopLevelStmtKind::ScopeVar { .. } => write!(f, "var"),
+            ParserTopLevelStmtKind::State { .. } => write!(f, "state"),
+            ParserTopLevelStmtKind::StructDecl { .. } => write!(f, "struct"),
+            ParserTopLevelStmtKind::Init { .. } => write!(f, "init"),
+            ParserTopLevelStmtKind::InfixDefine { .. } => write!(f, "infix"),
+            ParserTopLevelStmtKind::PrefixDefine { .. } => write!(f, "prefix"),
+            ParserTopLevelStmtKind::OperatorFunc { .. } => write!(f, "func"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserBodyStmtKind {
     Return {
