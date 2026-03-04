@@ -75,7 +75,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule input_statement() -> ParserTopLevelStmt
-        = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() attrs:(_? a:input_attr() { a })* end:position!() {
+        = start:position!() attrs:(__? a:input_attr() { a })* __ "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
                 kind: ParserTopLevelStmtKind::Input { name, value_type, def_val, attrs }

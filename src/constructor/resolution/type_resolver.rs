@@ -54,8 +54,14 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 name,
                 value_type,
                 def_val,
-                attrs: _,
-            } => ctx.resolve_input(name, value_type.as_ref(), def_val, current_stmt.range),
+                attrs,
+            } => ctx.resolve_input(
+                name,
+                value_type.as_ref(),
+                def_val,
+                attrs,
+                current_stmt.range,
+            ),
 
             ParserTopLevelStmtKind::Output {
                 name,

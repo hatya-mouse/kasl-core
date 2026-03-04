@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    ExprToken, InputVar, OutputVar, ParserSymbolPath, Range, ScopeVar, StateVar, SymbolPath,
-    error::Phase, resolution::TypeResolveCtx,
+    ExprToken, InputAttribute, InputVar, OutputVar, ParserInputAttribute, ParserSymbolPath, Range,
+    ScopeVar, StateVar, SymbolPath,
+    error::Phase,
+    resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
 };
 
 impl<'a> TypeResolveCtx<'a> {
@@ -25,15 +27,38 @@ impl<'a> TypeResolveCtx<'a> {
         name: &str,
         value_type: Option<&ParserSymbolPath>,
         def_val: &[ExprToken],
+        parser_attrs: &[ParserInputAttribute],
         decl_range: Range,
     ) {
         if let Some((value_type, def_val)) = self.resolve_var_type(decl_range, value_type, def_val)
         {
+            // Parser the attributes one by one
+            let mut attrs = Vec::new();
+            for parser_attr in parser_attrs {
+                let args = parser_attr
+                    .args
+                    .iter()
+                    .flat_map(|expr| {
+                        self.program.build_expr_tree_from_raw_tokens(
+                            self.ec,
+                            expr,
+                            self.symbol_table,
+                        )
+                    })
+                    .collect::<Vec<_>>();
+                let attr = InputAttribute {
+                    name: parser_attr.name.clone(),
+                    args,
+                };
+                attrs.push(attr);
+            }
+
+            // Create an input variable and push it to the program
             let input = InputVar {
                 name: name.to_string(),
                 value_type,
                 def_val,
-                attrs: Vec::new(),
+                attrs,
             };
             self.program.register_input(input);
         }
@@ -48,6 +73,7 @@ impl<'a> TypeResolveCtx<'a> {
     ) {
         if let Some((value_type, def_val)) = self.resolve_var_type(decl_range, value_type, def_val)
         {
+            // Create an output variable and push it to the program
             let output = OutputVar {
                 name: name.to_string(),
                 value_type,
@@ -66,6 +92,7 @@ impl<'a> TypeResolveCtx<'a> {
     ) {
         if let Some((value_type, def_val)) = self.resolve_var_type(decl_range, value_type, def_val)
         {
+            // Create a state variable and push it to the program
             let state = StateVar {
                 name: name.to_string(),
                 value_type,
@@ -85,6 +112,7 @@ impl<'a> TypeResolveCtx<'a> {
     ) {
         if let Some((value_type, def_val)) = self.resolve_var_type(decl_range, value_type, def_val)
         {
+            // Create a scope variable and push it to the program
             let var = ScopeVar {
                 name: name.to_string(),
                 value_type,
