@@ -19,6 +19,7 @@ use crate::{
     TypedTokenKind,
     error::{ErrorCollector, Phase},
     resolution::expr_inference::ExprTreeBuilder,
+    symbol_path,
 };
 
 /// Convert an RPN sequence of TypedToken into an Expression tree.
@@ -50,7 +51,7 @@ pub fn build_expr_tree_from_rpn(
                     stack.push((Expression::BoolLiteral(value), value_type))
                 }
                 ExprTokenKind::Identifier(ref path) => {
-                    let resolved_var_path = match symbol_table.resolve_path(path) {
+                    let var_id = match program.get_id_by_path(path).and_then(|ids| ids.first()) {
                         Some(path) => path,
                         None => {
                             ec.var_not_found(
@@ -61,11 +62,11 @@ pub fn build_expr_tree_from_rpn(
                             return None;
                         }
                     };
-                    stack.push((Expression::Identifier(resolved_var_path), value_type))
+                    stack.push((Expression::Identifier(*var_id), value_type))
                 }
                 ExprTokenKind::FuncCall { ref path, args } => {
-                    let resolved_func_path = match symbol_table.resolve_path(path) {
-                        Some(path) => path,
+                    let func_id = match program.get_id_by_path(path).and_then(|ids| ids.first()) {
+                        Some(id) => id,
                         None => {
                             ec.func_not_found(
                                 current_token.range,
@@ -76,13 +77,13 @@ pub fn build_expr_tree_from_rpn(
                         }
                     };
 
-                    let function = match program.get_func_by_path(&resolved_func_path) {
+                    let function = match program.get_func(func_id) {
                         Some(func) => func,
                         None => {
                             ec.func_not_found(
                                 current_token.range,
                                 Phase::TypeResolution,
-                                &resolved_func_path.to_string(),
+                                &path.to_string(),
                             );
                             return None;
                         }
@@ -124,7 +125,7 @@ pub fn build_expr_tree_from_rpn(
 
                     stack.push((
                         Expression::FuncCall {
-                            path: resolved_func_path,
+                            id: *func_id,
                             args: parsed_arguments,
                         },
                         value_type,
@@ -142,7 +143,9 @@ pub fn build_expr_tree_from_rpn(
                 };
 
                 // Get the operator in order to determine the return type
-                let operator = match program.get_prefix_func(&operand_type, symbol) {
+                let operator = match program
+                    .get_prefix_func_by_path(&symbol_path![symbol], &operand_type)
+                {
                     Some(operator) => operator,
                     None => {
                         ec.operator_not_found(current_token.range, Phase::TypeResolution, symbol);
@@ -153,10 +156,10 @@ pub fn build_expr_tree_from_rpn(
                 let operator_expr = Expression::PrefixOperator {
                     operand: Box::new(operand),
                     operand_type,
-                    return_type: operator.return_type.clone(),
+                    return_type: operator.return_type,
                 };
 
-                stack.push((operator_expr, operator.return_type.clone()));
+                stack.push((operator_expr, operator.return_type));
             }
             TypedTokenKind::InfixOperator(ref symbol) => {
                 let (rhs, rhs_type) = match stack.pop() {
@@ -175,7 +178,11 @@ pub fn build_expr_tree_from_rpn(
                 };
 
                 // Get the operator in order to determine the return type
-                let operator = match program.get_infix_func(&lhs_type, &rhs_type, symbol) {
+                let operator = match program.get_infix_func_by_path(
+                    &symbol_path![symbol],
+                    &lhs_type,
+                    &rhs_type,
+                ) {
                     Some(operator) => operator,
                     None => {
                         ec.operator_not_found(current_token.range, Phase::TypeResolution, symbol);
@@ -188,10 +195,10 @@ pub fn build_expr_tree_from_rpn(
                     lhs_type,
                     rhs: Box::new(rhs),
                     rhs_type,
-                    return_type: operator.return_type.clone(),
+                    return_type: operator.return_type,
                 };
 
-                stack.push((operator_expr, operator.return_type.clone()));
+                stack.push((operator_expr, operator.return_type));
             }
             _ => {
                 ec.comp_bug(

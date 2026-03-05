@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ExprToken, InputAttribute, InputVar, OutputVar, ParserInputAttribute, ParserSymbolPath, Range,
-    ScopeVar, StateVar, SymbolPath,
-    error::Phase,
+    ExprToken, InputAttribute, InputVar, OutputVar, ParserInputAttribute, Range, ScopeVar,
+    StateVar, SymbolPath,
+    data::ParserStmtID,
     resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
 };
 
@@ -25,7 +25,7 @@ impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_input(
         &mut self,
         name: &str,
-        value_type: Option<&ParserSymbolPath>,
+        value_type: Option<&SymbolPath>,
         def_val: &[ExprToken],
         parser_attrs: &[ParserInputAttribute],
         decl_range: Range,
@@ -67,7 +67,7 @@ impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_output(
         &mut self,
         name: &str,
-        value_type: Option<&ParserSymbolPath>,
+        value_type: Option<&SymbolPath>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {
@@ -86,7 +86,7 @@ impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_state(
         &mut self,
         name: &str,
-        value_type: Option<&ParserSymbolPath>,
+        value_type: Option<&SymbolPath>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {
@@ -105,13 +105,16 @@ impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_var(
         &mut self,
         name: &str,
-        symbol_path: &SymbolPath,
-        value_type: Option<&ParserSymbolPath>,
+        symbol_id: &ParserStmtID,
+        value_type: Option<&SymbolPath>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {
         if let Some((value_type, def_val)) = self.resolve_var_type(decl_range, value_type, def_val)
+            && let Some(path) = self.symbol_table.get_path_by_id(symbol_id)
         {
+            // Get a path from the symbol table
+
             // Create a scope variable and push it to the program
             let var = ScopeVar {
                 name: name.to_string(),
@@ -119,22 +122,8 @@ impl<'a> TypeResolveCtx<'a> {
                 def_val,
             };
 
-            // Obtain the path to the parent scope of the variable
-            let parent_path = match symbol_path.parent() {
-                Some(path) => path,
-                None => {
-                    self.ec.comp_bug(
-                        decl_range,
-                        Phase::TypeResolution,
-                        "The symbol path should include one component at least.",
-                    );
-                    return;
-                }
-            };
-
             // Register the variable in the parent scope
-            self.program
-                .register_var_by_path(self.ec, var, &parent_path, decl_range);
+            self.program.register_scope_var(var, path.clone());
         }
     }
 }

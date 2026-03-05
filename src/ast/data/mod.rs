@@ -16,8 +16,10 @@
 
 mod range;
 mod symbol_id;
+mod symbol_metadata;
 mod symbol_path;
 
 pub use range::Range;
-pub use symbol_id::SymbolID;
+pub use symbol_id::{ParserStmtID, SymbolID};
+pub use symbol_metadata::SymbolMetadata;
 pub use symbol_path::{SymbolPath, SymbolPathComponent};

@@ -17,17 +17,17 @@
 use std::collections::{HashMap, VecDeque};
 
 use crate::{
-    Range, SymbolPath, SymbolTable,
+    Range, SymbolTable,
+    data::ParserStmtID,
     error::{ErrorCollector, Phase},
     resolution::dependency_analysis::DependencyGraph,
-    table_construction::symbol_table::StatementLookup,
 };
 
-pub fn sort_graph<'a>(
+pub fn sort_graph(
     ec: &mut ErrorCollector,
     symbol_table: &SymbolTable,
-    graph: &'a DependencyGraph,
-) -> Option<Vec<&'a SymbolPath>> {
+    graph: &DependencyGraph,
+) -> Option<Vec<ParserStmtID>> {
     // Calculate the in degree of each node
     let mut in_degrees = HashMap::new();
 
@@ -42,7 +42,7 @@ pub fn sort_graph<'a>(
     // Initialize the queue with nodes that have no incoming edges
     let mut queue = VecDeque::new();
     for node in graph.node_paths() {
-        if in_degrees[node] == 0 {
+        if in_degrees[&node] == 0 {
             queue.push_back(node);
         }
     }
@@ -51,18 +51,18 @@ pub fn sort_graph<'a>(
     let mut sorted_nodes = Vec::new();
     while let Some(node) = queue.pop_front() {
         sorted_nodes.push(node);
-        for edge in graph.get_edges_from_node(node) {
+        for edge in graph.get_edges_from_node(&node) {
             *in_degrees.get_mut(&edge.target).unwrap() -= 1;
             if in_degrees[&edge.target] == 0 {
                 in_degrees.remove(&edge.target);
-                queue.push_back(&edge.target);
+                queue.push_back(edge.target);
             }
         }
     }
 
     // Drain the remaining nodes that have no incoming edges
     while let Some(node) = queue.pop_front() {
-        sorted_nodes.push(node);
+        sorted_nodes.insert(0, node);
     }
 
     // Check if the graph is acyclic
@@ -71,38 +71,44 @@ pub fn sort_graph<'a>(
         generate_cyclic_errors(ec, symbol_table, cyclic_nodes);
         None
     } else {
-        Some(sorted_nodes)
+        Some(sorted_nodes.to_vec())
     }
 }
 
 pub fn generate_cyclic_errors(
     ec: &mut ErrorCollector,
     symbol_table: &SymbolTable,
-    cyclic_nodes: Vec<&SymbolPath>,
+    cyclic_nodes: Vec<ParserStmtID>,
 ) {
-    for symbol_path in cyclic_nodes {
-        if let Some(current_stmt) = symbol_table.get_statement_by_path(symbol_path) {
-            match current_stmt {
-                StatementLookup::Single(stmt) => {
-                    // And get the range in which the statement is declared
-                    ec.dep_cycle(
+    for symbol_id in cyclic_nodes {
+        if let Some(stmt) = symbol_table.get_statement_by_id(&symbol_id) {
+            // And get the range in which the statement is declared
+            let symbol_path = match symbol_table.get_path_by_id(&symbol_id) {
+                Some(path) => path.to_string(),
+                None => {
+                    ec.comp_bug(
                         stmt.range,
                         Phase::GraphConstruction,
-                        &symbol_path.to_string(),
+                        "generate_cyclic_errors received a SymbolID that doesn't exist in the SymbolTable",
                     );
+                    return;
                 }
-                StatementLookup::Multiple(stmts) => {
-                    // Iterate over each statement and push an error for each one
-                    for stmt in stmts {
-                        ec.dep_cycle(
-                            stmt.range,
-                            Phase::GraphConstruction,
-                            &symbol_path.to_string(),
-                        );
-                    }
-                }
-            }
+            };
+
+            ec.dep_cycle(stmt.range, Phase::GraphConstruction, &symbol_path);
         } else {
+            let symbol_path = match symbol_table.get_path_by_id(&symbol_id) {
+                Some(path) => path.to_string(),
+                None => {
+                    ec.comp_bug(
+                        Range::zero(),
+                        Phase::GraphConstruction,
+                        "generate_cyclic_errors received a SymbolID that doesn't exist in the SymbolTable",
+                    );
+                    return;
+                }
+            };
+
             ec.dep_cycle(
                 Range::zero(),
                 Phase::GraphConstruction,

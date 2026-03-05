@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
+use crate::{InfixOperatorProperties, Range, SymbolPath};
 use std::fmt::Display;
-
-use crate::{InfixOperatorProperties, LiteralBind, Range};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
@@ -38,51 +37,46 @@ pub struct ParserBodyStmt {
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserTopLevelStmtKind {
     FuncDecl {
+        is_static: bool,
         name: String,
         params: Vec<ParserFuncParam>,
-        return_type: Option<ParserSymbolPath>,
+        return_type: Option<SymbolPath>,
         body: Option<Vec<ParserBodyStmt>>,
     },
     Input {
         name: String,
-        value_type: Option<ParserSymbolPath>,
+        value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
         attrs: Vec<ParserInputAttribute>,
     },
     Output {
         name: String,
-        value_type: Option<ParserSymbolPath>,
+        value_type: Option<SymbolPath>,
+        def_val: Vec<ExprToken>,
+    },
+    StateVar {
+        name: String,
+        value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
     },
     ScopeVar {
         name: String,
-        value_type: Option<ParserSymbolPath>,
+        value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
-    },
-    State {
-        vars: Vec<ParserStateVar>,
     },
     StructDecl {
         name: String,
         body: Vec<ParserTopLevelStmt>,
     },
-    Init {
-        literal_bind: Option<LiteralBind>,
-        params: Vec<ParserFuncParam>,
-        body: Option<Vec<ParserBodyStmt>>,
-    },
     InfixDefine {
         symbol: String,
         infix_properties: InfixOperatorProperties,
-    },
-    PrefixDefine {
-        symbol: String,
     },
     OperatorFunc {
         op_type: ParserOperatorType,
         symbol: String,
         params: Vec<ParserFuncParam>,
-        return_type: ParserSymbolPath,
+        return_type: SymbolPath,
         body: Vec<ParserBodyStmt>,
     },
 }
@@ -93,12 +87,10 @@ impl Display for ParserTopLevelStmtKind {
             ParserTopLevelStmtKind::FuncDecl { .. } => write!(f, "func"),
             ParserTopLevelStmtKind::Input { .. } => write!(f, "input"),
             ParserTopLevelStmtKind::Output { .. } => write!(f, "output"),
+            ParserTopLevelStmtKind::StateVar { .. } => write!(f, "state"),
             ParserTopLevelStmtKind::ScopeVar { .. } => write!(f, "var"),
-            ParserTopLevelStmtKind::State { .. } => write!(f, "state"),
             ParserTopLevelStmtKind::StructDecl { .. } => write!(f, "struct"),
-            ParserTopLevelStmtKind::Init { .. } => write!(f, "init"),
             ParserTopLevelStmtKind::InfixDefine { .. } => write!(f, "infix"),
-            ParserTopLevelStmtKind::PrefixDefine { .. } => write!(f, "prefix"),
             ParserTopLevelStmtKind::OperatorFunc { .. } => write!(f, "func"),
         }
     }
@@ -111,15 +103,15 @@ pub enum ParserBodyStmtKind {
     },
     LocalVar {
         name: String,
-        value_type: Option<ParserSymbolPath>,
+        value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
     },
     Assign {
-        target: ParserSymbolPath,
+        target: SymbolPath,
         value: Vec<ExprToken>,
     },
     FuncCall {
-        path: ParserSymbolPath,
+        path: SymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
     If {
@@ -155,7 +147,7 @@ pub struct ParserFuncCallArg {
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserStateVar {
     pub name: String,
-    pub value_type: Option<ParserSymbolPath>,
+    pub value_type: Option<SymbolPath>,
     pub def_val: Vec<ExprToken>,
     pub range: Range,
 }
@@ -164,7 +156,7 @@ pub struct ParserStateVar {
 pub struct ParserFuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub value_type: Option<ParserSymbolPath>,
+    pub value_type: Option<SymbolPath>,
     pub def_val: Option<Vec<ExprToken>>,
     pub range: Range,
 }
@@ -204,43 +196,11 @@ pub enum ExprTokenKind {
     FloatLiteral(f32),
     BoolLiteral(bool),
     Operator(String),
-    Identifier(ParserSymbolPath),
+    Identifier(SymbolPath),
     FuncCall {
-        path: ParserSymbolPath,
+        path: SymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
     LParen,
     RParen,
-}
-
-// pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;
-#[derive(Debug, PartialEq, Clone)]
-pub struct ParserSymbolPath {
-    pub path: Vec<ParserSymbolPathComponent>,
-}
-
-impl ParserSymbolPath {
-    pub fn new(path: Vec<ParserSymbolPathComponent>) -> Self {
-        Self { path }
-    }
-}
-
-impl Display for ParserSymbolPath {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.path
-                .iter()
-                .map(|p| p.symbol.clone())
-                .collect::<Vec<_>>()
-                .join(".")
-        )
-    }
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct ParserSymbolPathComponent {
-    pub range: Range,
-    pub symbol: String,
 }

@@ -14,20 +14,8 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
 mod primitive_type;
-mod program;
-mod statement;
-mod struct_decl;
-mod variables;
+mod program_type;
+mod symbol_functions;
 
-pub use expression::Expression;
-pub use function::{FuncCallArg, Function};
-pub use operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity, PrefixOperator};
-pub use primitive_type::PrimitiveType;
-pub use program::Program;
-pub use statement::{IfArm, Statement};
-pub use struct_decl::StructDecl;
-pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};
+pub use program_type::Program;

@@ -19,7 +19,7 @@ pub mod graph_builder;
 pub mod graph_def;
 pub mod sorter;
 
-pub use builders::{build_func_param_graph, build_struct_graph, build_var_graph};
+pub use builders::{build_func_param_graph, build_var_graph};
 pub use graph_builder::build_graph;
 pub use graph_def::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
 pub use sorter::sort_graph;

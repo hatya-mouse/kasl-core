@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ParserBodyStmt, ParserIfArm, Program, Statement, SymbolTable, error::ErrorCollector,
+    IfArm, ParserBodyStmt, ParserIfArm, Program, Statement, SymbolTable, error::ErrorCollector,
     resolution::expr_inference::ExprTreeBuilder,
-    stmt_building::func_body_builder::build_func_body_stmt, tree_items::statement::IfArm,
+    stmt_building::func_body_builder::build_func_body_stmt,
 };
 
 pub fn build_if_stmt(

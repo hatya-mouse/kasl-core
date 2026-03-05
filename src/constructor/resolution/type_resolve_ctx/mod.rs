@@ -18,6 +18,7 @@ pub mod func_resolver;
 pub mod infix_operator_resolver;
 pub mod param_resolver;
 pub mod prefix_operator_resolver;
+pub mod struct_resolver;
 pub mod var_resolver;
 pub mod var_type_resolver;
 

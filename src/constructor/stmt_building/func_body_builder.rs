@@ -32,7 +32,10 @@ pub fn build_func_body_stmt(
     for stmt in original_stmts {
         match &stmt.kind {
             ParserBodyStmtKind::Assign { target, value } => {
-                let parsed_target = match symbol_table.resolve_path(target) {
+                let parsed_target = match program
+                    .get_id_by_path(target)
+                    .and_then(|ids| ids.first().cloned())
+                {
                     Some(parsed_target) => parsed_target,
                     None => {
                         ec.var_not_found(stmt.range, Phase::StatementBuilding, &target.to_string());

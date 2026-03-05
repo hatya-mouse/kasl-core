@@ -15,10 +15,10 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, InfixOperatorProperties, LiteralBind, OperatorAssociativity,
-    ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm,
-    ParserInputAttribute, ParserOperatorType, ParserStateVar, ParserSymbolPath,
-    ParserSymbolPathComponent, ParserTopLevelStmt, ParserTopLevelStmtKind, Range,
+    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserBodyStmt,
+    ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
+    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, Range, SymbolPath,
+    SymbolPathComponent,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -37,10 +37,9 @@ peg::parser!(pub grammar kasl_parser() for str {
         = func_decl_statement()
         / input_statement()
         / output_statement()
+        / state_var_statement()
         / global_var_statement()
-        / state_statement()
         / struct_decl_statement()
-        / init_statement()
         / operator_definition_statement()
         / operator_func_statement()
         / expected!("statement")
@@ -55,14 +54,13 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("statement")
 
     rule func_decl_statement() -> ParserTopLevelStmt
-        = start:position!()
-        "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
+        = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
         return_type:("->" _? t:id_chain() { t })? body:(__? "{"
         __? body:body_stmts() __?
         "}" { body })? end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::FuncDecl { name, params, return_type, body }
+                kind: ParserTopLevelStmtKind::FuncDecl { is_static: is_static.is_some(), name, params, return_type, body }
             }
         }
 
@@ -90,6 +88,14 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
+    rule state_var_statement() -> ParserTopLevelStmt
+        = start:position!() "state" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+            ParserTopLevelStmt {
+                range: Range::n(start, end),
+                kind: ParserTopLevelStmtKind::StateVar { name, value_type, def_val }
+            }
+        }
+
     rule global_var_statement() -> ParserTopLevelStmt
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserTopLevelStmt {
@@ -103,14 +109,6 @@ peg::parser!(pub grammar kasl_parser() for str {
             ParserBodyStmt {
                 range: Range::n(start, end),
                 kind: ParserBodyStmtKind::LocalVar { name, value_type, def_val }
-            }
-        }
-
-    rule state_statement() -> ParserTopLevelStmt
-        = start:position!() "state" _? "{" __? vars:(state_var() ** ((_? "\n" _?)+)) __? "}" end:position!() {
-            ParserTopLevelStmt {
-                range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::State { vars }
             }
         }
 
@@ -165,16 +163,6 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    rule init_statement() -> ParserTopLevelStmt
-        = start:position!() literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" body:(__? "{"
-        __? body:body_stmts() __?
-        "}" { body })? end:position!() {
-            ParserTopLevelStmt {
-                range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::Init { literal_bind, params, body }
-            }
-        }
-
     // Infix Operator Properties
     rule infix_properties() -> InfixOperatorProperties
         = precedence:precedence_prop() __? comma() __? associativity:associativity_prop() {
@@ -199,9 +187,6 @@ peg::parser!(pub grammar kasl_parser() for str {
         = start:position!() "operator" _ kind:(
             "infix" _ symbol:operator() __? "{" __? props:infix_properties() __? "}" {
                 ParserTopLevelStmtKind::InfixDefine { symbol, infix_properties: props }
-            }
-            / "prefix" _ symbol:operator() {
-                ParserTopLevelStmtKind::PrefixDefine { symbol }
             }
         ) end:position!() {
             ParserTopLevelStmt {
@@ -246,12 +231,6 @@ peg::parser!(pub grammar kasl_parser() for str {
             ParserInputAttribute { name, args: opt_args.unwrap_or_default(), range: Range::n(start, end) }
         }
 
-    // State ScopeVar
-    rule state_var() -> ParserStateVar
-        = start:position!() name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
-            ParserStateVar { name, value_type, def_val, range: Range::n(start, end) }
-        }
-
     // Function Call Argument
     rule func_call_args() -> Vec<ParserFuncCallArg>
         = start:position!() entries:((label:(n:identifier() _? ":" _? { n })? value:multiline_expression() end:position!() {
@@ -259,12 +238,6 @@ peg::parser!(pub grammar kasl_parser() for str {
         }) ** comma()) comma()? {
             entries
         }
-
-    // Literal Binding
-    rule literal_bind() -> LiteralBind
-        = "intliteral" { LiteralBind::IntLiteral }
-        / "floatliteral" { LiteralBind::FloatLiteral }
-        / "boolliteral" { LiteralBind::BoolLiteral }
 
     // --- EXPRESSIONS ---
 
@@ -322,21 +295,19 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
         / expected!("identifier")
 
-    rule id_chain() -> ParserSymbolPath
+    rule id_chain() -> SymbolPath
         = parent:(start:position!() symbol:identifier() end:position!() {
-            ParserSymbolPathComponent {
-                range: Range::n(start, end),
+            SymbolPathComponent {
                 symbol,
             }
         }) children:(start:position!() dot() symbol:identifier() end:position!() {
-            ParserSymbolPathComponent {
-                range: Range::n(start, end),
+            SymbolPathComponent {
                 symbol,
             }
         })* {
-            let mut path = vec![parent];
-            path.extend(children);
-            ParserSymbolPath { path }
+            let mut components = vec![parent];
+            components.extend(children);
+            SymbolPath::with(components)
         }
 
     rule operator() -> String
@@ -356,9 +327,8 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("boolean")
 
     rule reserved()
-        = ("input" / "output" / "var" / "state" / "func" / "return"
-        / "if" / "else" / "struct" / "init" / "intliteral"
-        / "floatliteral" / "boolliteral" / "define" / "impl" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
+        = ("input" / "output" / "var" / "state" / "func" / "return" / "if" / "else"
+            / "struct" / "operator" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']
 

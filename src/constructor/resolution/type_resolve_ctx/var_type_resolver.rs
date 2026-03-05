@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ExprToken, Expression, ParserSymbolPath, Range, SymbolPath,
+    ExprToken, Expression, Range, SymbolPath,
+    data::SymbolID,
     error::Phase,
     resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
 };
@@ -24,9 +25,8 @@ impl<'a> TypeResolveCtx<'a> {
     /// Infer the type of the variable and convert the default value to Expression.
     ///
     /// # Arguments
-    /// - `symbol_path`: SymbolPath of the variable to infer type for.
     /// - `decl_range`: Range of the declaration statement.
-    /// - `value_type`: Type annotation of the variable in ParserSymbolPath.
+    /// - `value_type`: Type annotation of the variable in SymbolPath.
     /// - `def_val`: Default value of the variable in ExprToken.
     ///
     /// # Return
@@ -34,33 +34,43 @@ impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_var_type(
         &mut self,
         decl_range: Range,
-        value_type: Option<&ParserSymbolPath>,
+        value_type: Option<&SymbolPath>,
         def_val: &[ExprToken],
-    ) -> Option<(SymbolPath, Expression)> {
+    ) -> Option<(SymbolID, Expression)> {
         let parsed_expr =
             self.program
                 .build_expr_tree_from_raw_tokens(self.ec, def_val, self.symbol_table)?;
         let def_val_type = parsed_expr.get_type(self.ec, self.program, decl_range)?;
 
         if let Some(value_type) = value_type {
-            if let Some(annotation_type) = self.program.resolve_type_def_parser_path(value_type) {
-                // Check if the type annotation matches the inferred type
-                if annotation_type == def_val_type {
-                    Some((annotation_type, parsed_expr))
-                } else {
-                    // If the type annotation doesn't match the inferred type, throw an error
-                    self.ec.type_mismatch(
+            let annotation_type = match self
+                .program
+                .get_id_by_path(value_type)
+                .and_then(|ids| ids.first().cloned())
+            {
+                Some(resolved_path) => resolved_path,
+                None => {
+                    self.ec.type_not_found(
                         decl_range,
                         Phase::TypeResolution,
-                        &annotation_type.to_string(),
-                        &def_val_type.to_string(),
+                        &value_type.to_string(),
                     );
-                    None
+
+                    return None;
                 }
+            };
+
+            // Check if the type annotation matches the inferred type
+            if annotation_type == def_val_type {
+                Some((annotation_type, parsed_expr))
             } else {
-                // If the type annotation is not found, throw an error
-                self.ec
-                    .type_not_found(decl_range, Phase::TypeResolution, &value_type.to_string());
+                // If the type annotation doesn't match the inferred type, throw an error
+                self.ec.type_mismatch(
+                    decl_range,
+                    Phase::TypeResolution,
+                    &annotation_type.to_string(),
+                    &def_val_type.to_string(),
+                );
                 None
             }
         } else {

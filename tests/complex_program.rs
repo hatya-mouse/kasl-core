@@ -25,17 +25,15 @@ fn complex_program_parses() {
             output out_signal: Float = 0.0
 
             // State
-            state {
-                buffer: Float = 0.0
-                index: Int = 0
-            }
+            state buffer: Float = 0.0
+            state index: Int = 0
 
 
             // Delay struct
             struct Delay {
                 var feedback: Float = 0.5
 
-                init(feedback: Float) {
+                static func init(feedback: Float) -> Delay {
                     self.feedback = feedback
                 }
 
@@ -49,7 +47,7 @@ fn complex_program_parses() {
                 var raw: CompInt = CompInt()
 
                 // Bind integer literal to this type
-                intliteral init(_ value: CompInt) {
+                static func init(_ value: CompInt) -> Int {
                     self.raw = value
                 }
             }
@@ -57,7 +55,7 @@ fn complex_program_parses() {
             struct Float {
                 var raw: CompFloat = 0.0
 
-                floatliteral init(_ value: CompFloat) {
+                static func init(_ value: CompFloat) -> Float {
                     self.raw = value
                 }
             }
@@ -72,9 +70,6 @@ fn complex_program_parses() {
             func infix **(lhs: Int, rhs: Int) -> Int {
                 return lhs * rhs
             }
-
-            // Define a prefix operator (unary minus)
-            operator prefix -
 
             func prefix -(operand: Float) -> Float {
                 return operand * -1.0
@@ -118,7 +113,7 @@ fn complex_program_parses() {
             struct Multiplier {
                 var value: Int = 1
 
-                init(_ value: Int) {
+                static func init(_ value: Int) -> Multiplier {
                     self.value = value
                 }
 

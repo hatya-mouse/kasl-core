@@ -14,20 +14,21 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod primitive_type;
-mod program;
-mod statement;
-mod struct_decl;
-mod variables;
+use std::fmt::Display;
 
-pub use expression::Expression;
-pub use function::{FuncCallArg, Function};
-pub use operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity, PrefixOperator};
-pub use primitive_type::PrimitiveType;
-pub use program::Program;
-pub use statement::{IfArm, Statement};
-pub use struct_decl::StructDecl;
-pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum PrimitiveType {
+    Int,
+    Float,
+    Bool,
+}
+
+impl Display for PrimitiveType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PrimitiveType::Int => write!(f, "Int"),
+            PrimitiveType::Float => write!(f, "Float"),
+            PrimitiveType::Bool => write!(f, "Bool"),
+        }
+    }
+}

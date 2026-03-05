@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ExprTokenKind, ParserFuncParam, SymbolPath, SymbolTable,
+    ExprTokenKind, ParserFuncParam, SymbolTable,
+    data::ParserStmtID,
     error::{ErrorCollector, Phase},
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
@@ -23,8 +24,8 @@ use crate::{
 pub fn build_func_param_graph(
     ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
-    root_symbol_table: &SymbolTable,
-    func_path: &SymbolPath,
+    symbol_table: &SymbolTable,
+    func_id: ParserStmtID,
     params: &[ParserFuncParam],
 ) {
     for param in params {
@@ -35,8 +36,8 @@ pub fn build_func_param_graph(
                     // If the default value has an identifier in it,
                     // the parameter depends on the identifier
                     ExprTokenKind::Identifier(path) => {
-                        let to_path = match root_symbol_table.resolve_path(path) {
-                            Some(path) => path,
+                        let to_ids = match symbol_table.get_id_by_path(path) {
+                            Some(ids) => ids,
                             None => {
                                 ec.var_not_found(
                                     expr.range,
@@ -47,14 +48,16 @@ pub fn build_func_param_graph(
                             }
                         };
 
-                        graph.add_edge(func_path, &to_path);
-                        graph.add_node(DependencyGraphNode::new(func_path.clone()));
-                        graph.add_node(DependencyGraphNode::new(to_path));
+                        graph.add_node(DependencyGraphNode::new(func_id));
+                        for to_id in to_ids {
+                            graph.add_edge(func_id, *to_id);
+                            graph.add_node(DependencyGraphNode::new(*to_id));
+                        }
                     }
 
                     ExprTokenKind::FuncCall { path, .. } => {
-                        let to_path = match root_symbol_table.resolve_path(path) {
-                            Some(path) => path,
+                        let to_ids = match symbol_table.get_id_by_path(path) {
+                            Some(ids) => ids,
                             None => {
                                 ec.func_not_found(
                                     expr.range,
@@ -65,9 +68,11 @@ pub fn build_func_param_graph(
                             }
                         };
 
-                        graph.add_edge(func_path, &to_path);
-                        graph.add_node(DependencyGraphNode::new(func_path.clone()));
-                        graph.add_node(DependencyGraphNode::new(to_path));
+                        graph.add_node(DependencyGraphNode::new(func_id));
+                        for to_id in to_ids {
+                            graph.add_edge(func_id, *to_id);
+                            graph.add_node(DependencyGraphNode::new(*to_id));
+                        }
                     }
 
                     _ => (),

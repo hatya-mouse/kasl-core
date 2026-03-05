@@ -14,6 +14,13 @@
 // limitations under the License.
 //
 
-pub mod type_collector;
+#[derive(Debug, PartialEq, Clone)]
+pub struct StructDecl {
+    pub name: String,
+}
 
-pub use type_collector::collect_all_types;
+impl StructDecl {
+    pub fn new(name: String) -> Self {
+        StructDecl { name }
+    }
+}

@@ -15,17 +15,16 @@
 //
 
 use kasl::{
-    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
-    SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
+    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, PrimitiveType,
+    Program, Range, SymbolTable, TypedToken, TypedTokenKind,
+    data::SymbolID,
     error::{EK, ErrorCollector, Pl},
     get_typed_tokens,
     resolution::{
         expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
         type_resolver::resolve_types,
     },
-    symbol_path,
     table_construction::build_symbol_table,
-    type_collection::collect_all_types,
 };
 
 /// Create a new value token.
@@ -36,7 +35,7 @@ fn v() -> TypedToken {
                 kind: ExprTokenKind::IntLiteral(0),
                 range: Range::zero(),
             },
-            value_type: SymbolPath::comp_int(),
+            value_type: SymbolID::new(0),
         },
         Range::zero(),
     )
@@ -89,11 +88,9 @@ fn short_repr(tokens: &[TypedToken]) -> Vec<String> {
 #[test]
 fn only_variable() {
     let mut program = Program::new();
-    let symbol_table = SymbolTable::new();
     let mut ec = ErrorCollector::new();
 
-    let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
-    program.set_int_literal(&mut ec, int_type, Range::zero());
+    program.add_primitive_type(PrimitiveType::Int);
 
     let expr_tokens = vec![ExprToken {
         kind: ExprTokenKind::IntLiteral(5),
@@ -101,7 +98,7 @@ fn only_variable() {
     }];
 
     // Convert the token to TypedToken, and then rearrange it to RPN
-    let typed_tokens = match get_typed_tokens(&mut ec, &program, &symbol_table, &expr_tokens) {
+    let typed_tokens = match get_typed_tokens(&mut ec, &program, &expr_tokens) {
         Some(tokens) => tokens,
         None => panic!("Couldn't convert tokens to typed tokens:\n{:#?}", ec),
     };
@@ -111,7 +108,7 @@ fn only_variable() {
     };
 
     let got = short_repr(&res);
-    let expected = vec!["V<Int>"];
+    let expected = vec!["V<0>"];
     assert_eq!(got, expected);
 }
 
@@ -124,7 +121,7 @@ fn simple_subtraction() {
     let mut ec = ErrorCollector::new();
 
     program.register_infix_operator(
-        "-".to_string(),
+        "-",
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
@@ -138,7 +135,7 @@ fn simple_subtraction() {
     };
 
     let got = short_repr(&res);
-    let want = vec!["V<CompInt>", "V<CompInt>", "-", "V<CompInt>", "-"];
+    let want = vec!["V<0>", "V<0>", "-", "V<0>", "-"];
     assert_eq!(got, want);
 }
 
@@ -151,14 +148,14 @@ fn sub_and_mul() {
     let mut ec = ErrorCollector::new();
 
     program.register_infix_operator(
-        "-".to_string(),
+        "-",
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
         },
     );
     program.register_infix_operator(
-        "*".to_string(),
+        "*",
         InfixOperatorProperties {
             precedence: 20,
             associativity: OperatorAssociativity::Left,
@@ -172,7 +169,7 @@ fn sub_and_mul() {
     };
 
     let got = short_repr(&res);
-    let want = vec!["V<CompInt>", "V<CompInt>", "V<CompInt>", "*", "-"];
+    let want = vec!["V<0>", "V<0>", "V<0>", "*", "-"];
     assert_eq!(got, want);
 }
 
@@ -184,16 +181,15 @@ fn prefix_and_infix() {
     let mut program = Program::new();
     let mut ec = ErrorCollector::new();
 
-    program.register_prefix_operator("-".to_string());
     program.register_infix_operator(
-        "*".to_string(),
+        "*",
         InfixOperatorProperties {
             precedence: 20,
             associativity: OperatorAssociativity::Left,
         },
     );
     program.register_infix_operator(
-        "+".to_string(),
+        "+",
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
@@ -207,7 +203,7 @@ fn prefix_and_infix() {
     };
 
     let got = short_repr(&res);
-    let want = vec!["V<CompInt>", "pre-", "V<CompInt>", "*", "V<CompInt>", "+"];
+    let want = vec!["V<0>", "pre-", "V<0>", "*", "V<0>", "+"];
     assert_eq!(got, want);
 }
 
@@ -220,7 +216,7 @@ fn non_associative_chain_error() {
     let mut ec = ErrorCollector::new();
 
     program.register_infix_operator(
-        "<".to_string(),
+        "<",
         InfixOperatorProperties {
             precedence: 5,
             associativity: OperatorAssociativity::None,
@@ -241,7 +237,7 @@ fn unmatched_parentheses_detected_on_drain() {
     let mut ec = ErrorCollector::new();
 
     program.register_infix_operator(
-        "+".to_string(),
+        "+",
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
@@ -262,7 +258,7 @@ fn unmatched_parentheses_right_paren_error() {
     let mut ec = ErrorCollector::new();
 
     program.register_infix_operator(
-        "+".to_string(),
+        "+",
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
@@ -300,11 +296,6 @@ fn complex_expression_test() {
     let mut symbol_table = SymbolTable::new();
     let mut ec = ErrorCollector::new();
 
-    // Set types for literals and variables
-    let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
-    // let float_type = symbol_path![SymbolPathComponent::TypeDef("Float".to_string())];
-    program.set_int_literal(&mut ec, int_type.clone(), Range::zero());
-
     // Build a symbol table by parsing a small program that declares the needed symbols.
     // Use top-level inputs and a valid function name (no dot in identifier).
     let program_src = r#"
@@ -332,11 +323,8 @@ operator infix ^ {
 }
 func infix ^ (lhs: Int, rhs: Int) -> Int {}
 
-operator prefix -
 func prefix - (value: Int) -> Int {}
 
-struct Int {}
-struct Float {}
 func foo_bar(x: Int) -> Float { }
 input a: Int = 0
 input b: Int = 0
@@ -348,10 +336,7 @@ input e: Int = 0
     let parsed_program = kasl::kasl_parser::parse(program_src)
         .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
     build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
-    collect_all_types(&mut program, &symbol_table);
     resolve_types(&mut ec, &mut program, &symbol_table);
-
-    println!("{:#?}", program);
 
     // 2. --- Parsing ---
     // Parse the string directly using the `kasl_parser::expression` rule
@@ -360,29 +345,44 @@ input e: Int = 0
         .unwrap_or_else(|e| panic!("Parser failed: {}", e));
 
     // 3. --- Typing & RPN Conversion ---
-    let typed_tokens = match get_typed_tokens(&mut ec, &program, &symbol_table, &expr_tokens) {
+    let typed_tokens = match get_typed_tokens(&mut ec, &program, &expr_tokens) {
         Some(tokens) => tokens,
         None => panic!("Couldn't convert tokens to typed tokens:\n{:#?}", ec),
     };
+
+    println!("{:#?}", ec);
 
     let rpn_tokens = match rearrange_tokens_to_rpn(&mut ec, &program, typed_tokens) {
         Some(tokens) => tokens,
         None => panic!("Couldn't convert typed tokens to RPN:\n{:#?}", ec),
     };
 
+    let int_value = format!(
+        "V<{}>",
+        program
+            .get_id_of_primitive_type(&PrimitiveType::Int)
+            .unwrap()
+    );
+    let float_value = format!(
+        "V<{}>",
+        program
+            .get_id_of_primitive_type(&PrimitiveType::Float)
+            .unwrap()
+    );
+
     // 4. --- Validation ---
     let got = short_repr(&rpn_tokens);
     let want = vec![
-        "V<Float>", // Result of foo.bar(a + 2)
-        "V<Int>",   // b
-        "pre-",     // - (prefix)
-        "*",        // *
-        "V<Int>",   // c
-        "V<Int>",   // d
-        "V<Int>",   // e
-        "+",        // +
-        "^",        // ^
-        "-",        // - (infix)
+        &float_value, // Result of foo.bar(a + 2)
+        &int_value,   // b
+        "pre-",       // - (prefix)
+        "*",          // *
+        &int_value,   // c
+        &int_value,   // d
+        &int_value,   // e
+        "+",          // +
+        "^",          // ^
+        "-",          // - (infix)
     ];
 
     assert_eq!(got, want, "The RPN sequence did not match the expectation.");

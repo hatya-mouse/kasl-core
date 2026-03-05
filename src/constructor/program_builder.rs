@@ -19,15 +19,13 @@ use crate::{
     error::{ErrorCollector, ErrorRecord},
     resolution::type_resolver::resolve_types,
     table_construction::build_symbol_table,
-    type_collection::collect_all_types,
     validation::validator::validate,
 };
 
 /// Process order:
 /// 1. `symbol_table`: Build symbol table
-/// 2. `type_collection`: Collect types
-/// 3. `validation`: Validate program
-/// 6. `resolve_types`: Resolve types and construct the AST
+/// 2. `validation`: Validate program
+/// 3. `resolve_types`: Resolve types and construct the AST
 pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<ErrorRecord>> {
     let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
@@ -36,13 +34,10 @@ pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<
     // 1. Build symbol table
     build_symbol_table(&mut error_collector, &mut symbol_table, &statements);
 
-    // 2. Collect types
-    collect_all_types(&mut program, &symbol_table);
-
-    // 3. Validate program
+    // 2. Validate program
     validate(&mut error_collector, &symbol_table);
 
-    // 4. Infer the types of symbols
+    // 3. Infer the types of symbols
     resolve_types(&mut error_collector, &mut program, &symbol_table);
 
     error_collector.as_result()
