@@ -15,125 +15,61 @@
 //
 
 use crate::{
-    Function, Initializer, LiteralBind, ParserFuncParam, ParserSymbolPath, Range, SymbolPath,
-    error::Phase, resolution::TypeResolveCtx,
+    Function, ParserFuncParam, Range, SymbolPath, data::ParserStmtID, error::Phase,
+    resolution::TypeResolveCtx,
 };
 
 impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_func(
         &mut self,
+        is_static: bool,
         name: &str,
-        symbol_path: &SymbolPath,
+        symbol_id: &ParserStmtID,
         params: &[ParserFuncParam],
-        return_type: Option<&ParserSymbolPath>,
+        return_type: Option<&SymbolPath>,
         decl_range: Range,
     ) {
-        // If the function has a return type, resolve the type
-        let resolved_return_type = match return_type {
-            Some(return_type) => match self.program.resolve_type_def_parser_path(return_type) {
-                Some(resolved_path) => Some(resolved_path),
-                None => {
-                    self.ec.type_not_found(
-                        decl_range,
-                        Phase::TypeResolution,
-                        &return_type.to_string(),
-                    );
-                    None
-                }
-            },
-            None => None,
-        };
+        if let Some(path) = self.symbol_table.get_path_by_id(symbol_id) {
+            // If the function has a return type, resolve the type
+            let resolved_return_type = match return_type {
+                Some(return_type) => match self
+                    .program
+                    .get_id_by_path(return_type)
+                    .and_then(|ids| ids.first().cloned())
+                {
+                    Some(resolved_path) => Some(resolved_path),
+                    None => {
+                        self.ec.type_not_found(
+                            decl_range,
+                            Phase::TypeResolution,
+                            &return_type.to_string(),
+                        );
+                        None
+                    }
+                },
+                None => None,
+            };
 
-        // Resolve the variables
-        let mut resolved_params = Vec::new();
-        for param in params {
-            match self.resolve_param(param) {
-                Some(param) => resolved_params.push(param),
-                None => return,
-            }
-        }
-
-        // Construct a function and push it to the program
-        let func = Function {
-            name: name.to_string(),
-            params: resolved_params,
-            return_type: resolved_return_type,
-            body: Vec::new(),
-        };
-
-        // Obtain the path to the parent scope of the function
-        let parent_path = match symbol_path.parent() {
-            Some(path) => path,
-            None => {
-                self.ec.comp_bug(
-                    decl_range,
-                    Phase::TypeResolution,
-                    "The symbol path should include one component at least.",
-                );
-                return;
-            }
-        };
-
-        // Register the function to the Program
-        self.program
-            .register_func_by_path(self.ec, func, &parent_path, decl_range);
-    }
-
-    pub fn resolve_init(
-        &mut self,
-        symbol_path: &SymbolPath,
-        literal_bind: Option<&LiteralBind>,
-        params: &[ParserFuncParam],
-        decl_range: Range,
-    ) {
-        let mut resolved_params = Vec::new();
-        for param in params {
-            match self.resolve_param(param) {
-                Some(param) => resolved_params.push(param),
-                None => return,
-            }
-        }
-
-        // Construct a function and push it to the program
-        let init = Initializer {
-            literal_bind: literal_bind.cloned(),
-            params: resolved_params,
-            body: Vec::new(),
-        };
-
-        // Obtain the path to the parent scope of the function
-        let parent_path = match symbol_path.parent() {
-            Some(path) => path,
-            None => {
-                self.ec.comp_bug(
-                    decl_range,
-                    Phase::TypeResolution,
-                    "The symbol path should include one component at least.",
-                );
-                return;
-            }
-        };
-
-        // Register the function to the Program
-        self.program
-            .register_init_by_path(self.ec, init, &parent_path, decl_range);
-
-        // Register the intializer as a literal bind if it is specified
-        if let Some(literal_bind) = literal_bind {
-            match literal_bind {
-                LiteralBind::IntLiteral => {
-                    self.program
-                        .set_int_literal(self.ec, parent_path, decl_range);
-                }
-                LiteralBind::FloatLiteral => {
-                    self.program
-                        .set_float_literal(self.ec, parent_path, decl_range)
-                }
-                LiteralBind::BoolLiteral => {
-                    self.program
-                        .set_bool_literal(self.ec, parent_path, decl_range)
+            // Resolve the variables
+            let mut resolved_params = Vec::new();
+            for param in params {
+                match self.resolve_param(param) {
+                    Some(param) => resolved_params.push(param),
+                    None => return,
                 }
             }
+
+            // Construct a function and push it to the program
+            let func = Function {
+                name: name.to_string(),
+                is_static,
+                params: resolved_params,
+                return_type: resolved_return_type,
+                body: Vec::new(),
+            };
+
+            // Register the function to the Program
+            self.program.register_func(func, path.clone());
         }
     }
 }

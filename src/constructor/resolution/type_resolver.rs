@@ -15,18 +15,21 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, Program, Range, SymbolPath,
-    SymbolTable,
+    ParserOperatorType, ParserTopLevelStmtKind, PrimitiveType, Program, Range, SymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{
         TypeResolveCtx,
         dependency_analysis::{build_graph, sort_graph},
     },
-    table_construction::symbol_table::StatementLookup,
 };
 
 /// Infer the types of symbols (input, output, state, var, and function parameters) in the program.
 pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_table: &SymbolTable) {
+    // Register primitive types
+    program.add_primitive_type(PrimitiveType::Int);
+    program.add_primitive_type(PrimitiveType::Float);
+    program.add_primitive_type(PrimitiveType::Bool);
+
     // Build the type dependency graph
     let graph = match build_graph(ec, symbol_table) {
         Some(graph) => graph,
@@ -40,13 +43,29 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
     };
 
     // Get references from the sorted symbol paths
-    let statements = get_statements(ec, symbol_table, sorted_list);
+    let mut statements = Vec::new();
+
+    for symbol_id in &sorted_list {
+        // Get the statements in order
+        if let Some(current_stmt) = symbol_table.get_statement_by_id(symbol_id) {
+            statements.push(current_stmt);
+        } else {
+            ec.comp_bug(
+                Range::zero(),
+                Phase::GraphConstruction,
+                &format!(
+                    "SymbolPath(s) in the dependency graph must be valid: {:?}",
+                    symbol_id
+                ),
+            );
+        }
+    }
 
     // Create a TypeResolveCtx instance
     let mut ctx = TypeResolveCtx::new(ec, program, symbol_table);
 
     // Infer the type of each symbol in the sorted order
-    for (symbol_path, current_stmt) in statements {
+    for (symbol_id, current_stmt) in sorted_list.iter().zip(statements) {
         // Check if the symbol has already got a type annotation
         // If not, infer the type
         match &current_stmt.kind {
@@ -69,16 +88,11 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 def_val,
             } => ctx.resolve_output(name, value_type.as_ref(), def_val, current_stmt.range),
 
-            ParserTopLevelStmtKind::State { vars } => {
-                for var in vars {
-                    ctx.resolve_state(
-                        &var.name,
-                        var.value_type.as_ref(),
-                        &var.def_val,
-                        current_stmt.range,
-                    );
-                }
-            }
+            ParserTopLevelStmtKind::StateVar {
+                name,
+                value_type,
+                def_val,
+            } => ctx.resolve_state(name, value_type.as_ref(), def_val, current_stmt.range),
 
             ParserTopLevelStmtKind::ScopeVar {
                 name,
@@ -86,33 +100,24 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 def_val,
             } => ctx.resolve_var(
                 name,
-                symbol_path,
+                symbol_id,
                 value_type.as_ref(),
                 def_val,
                 current_stmt.range,
             ),
 
             ParserTopLevelStmtKind::FuncDecl {
+                is_static,
                 name,
                 params,
                 return_type,
                 body: _,
             } => ctx.resolve_func(
+                *is_static,
                 name,
-                symbol_path,
+                symbol_id,
                 params,
                 return_type.as_ref(),
-                current_stmt.range,
-            ),
-
-            ParserTopLevelStmtKind::Init {
-                literal_bind,
-                params,
-                body: _,
-            } => ctx.resolve_init(
-                symbol_path,
-                literal_bind.as_ref(),
-                params,
                 current_stmt.range,
             ),
 
@@ -136,44 +141,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 infix_properties,
             } => ctx.register_infix_define(symbol, infix_properties.clone()),
 
-            ParserTopLevelStmtKind::PrefixDefine { symbol } => ctx.register_prefix_define(symbol),
-
-            _ => (),
+            ParserTopLevelStmtKind::StructDecl { name, .. } => ctx.register_struct(symbol_id, name),
         }
     }
-}
-
-fn get_statements<'a>(
-    ec: &mut ErrorCollector,
-    symbol_table: &'a SymbolTable,
-    symbol_paths: Vec<&'a SymbolPath>,
-) -> Vec<(&'a SymbolPath, &'a ParserTopLevelStmt)> {
-    let mut statements = Vec::new();
-
-    for symbol_path in symbol_paths {
-        // Get the symbol declaration statement
-        if let Some(current_stmt) = symbol_table.get_statement_by_path(symbol_path) {
-            match current_stmt {
-                StatementLookup::Single(stmt) => {
-                    statements.push((symbol_path, stmt));
-                }
-                StatementLookup::Multiple(stmts) => {
-                    for stmt in stmts {
-                        statements.push((symbol_path, stmt));
-                    }
-                }
-            }
-        } else {
-            ec.comp_bug(
-                Range::zero(),
-                Phase::GraphConstruction,
-                &format!(
-                    "SymbolPath(s) in the dependency graph must be valid: {:?}",
-                    symbol_path
-                ),
-            );
-        }
-    }
-
-    statements
 }

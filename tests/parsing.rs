@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use kasl::{
-    ExprToken, ParserSymbolPath, ParserSymbolPathComponent, Range, kasl_parser,
-    parser_ast::ExprTokenKind,
-};
+use kasl::{ExprToken, Range, kasl_parser, parser_ast::ExprTokenKind, symbol_path};
 
 /// Test parsing of chained expressions.
 #[test]
@@ -28,12 +25,7 @@ fn chaining() {
         object,
         Ok(vec![ExprToken {
             range: Range::n(0, 6),
-            kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
-                ParserSymbolPathComponent {
-                    range: Range::n(0, 6),
-                    symbol: "object".to_string(),
-                }
-            ]))
+            kind: ExprTokenKind::Identifier(symbol_path!["object".to_string()])
         }])
     );
 
@@ -43,16 +35,10 @@ fn chaining() {
         object_property,
         Ok(vec![ExprToken {
             range: Range::n(0, 15),
-            kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
-                ParserSymbolPathComponent {
-                    range: Range::n(0, 6),
-                    symbol: "object".to_string()
-                },
-                ParserSymbolPathComponent {
-                    range: Range::n(6, 15),
-                    symbol: "property".to_string()
-                }
-            ]))
+            kind: ExprTokenKind::Identifier(symbol_path![
+                "object".to_string(),
+                "property".to_string()
+            ])
         }])
     );
 }
@@ -68,7 +54,7 @@ fn easy_program() {
             struct Multiplier {
                 var value = 1
 
-                init(_ value: Int) {
+                static func init(_ value: Int) {
                     self.value = value
                 }
 

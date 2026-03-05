@@ -14,28 +14,20 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserSymbolPath, ParserTopLevelStmt, SymbolPath, SymbolPathComponent,
-    error::{ErrorCollector, Ph},
-};
-use std::collections::{HashMap, hash_map::Entry};
+use crate::{ParserTopLevelStmt, SymbolPath, data::ParserStmtID};
+use std::collections::HashMap;
 
 /// SymbolTable stores a reference to the declaration statement (ParserTopLevelStmt) of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
-    pub inputs: HashMap<String, &'a ParserTopLevelStmt>,
-    pub outputs: HashMap<String, &'a ParserTopLevelStmt>,
-    pub states: HashMap<String, &'a ParserTopLevelStmt>,
-    pub vars: HashMap<String, &'a ParserTopLevelStmt>,
-    pub funcs: HashMap<String, &'a ParserTopLevelStmt>,
-    pub type_defs: HashMap<String, (&'a ParserTopLevelStmt, SymbolTable<'a>)>,
-    pub infix_defines: HashMap<String, &'a ParserTopLevelStmt>,
-    /// Infix functions with the same symbol can be defined, so they are stored in a vector.
-    pub infix_funcs: HashMap<String, Vec<&'a ParserTopLevelStmt>>,
-    pub prefix_defines: HashMap<String, &'a ParserTopLevelStmt>,
-    /// Prefix functions with the same symbol can be defined, so they are stored in a vector.
-    pub prefix_funcs: HashMap<String, Vec<&'a ParserTopLevelStmt>>,
-    pub inits: Vec<&'a ParserTopLevelStmt>,
+    statements: HashMap<ParserStmtID, &'a ParserTopLevelStmt>,
+    /// Contains a mapping of symbol paths to their corresponding IDs.
+    path_to_id: HashMap<SymbolPath, Vec<ParserStmtID>>,
+    /// Contains a mapping of symbol IDs to their corresponding paths.
+    id_to_path: HashMap<ParserStmtID, SymbolPath>,
+
+    /// The next ID number.
+    next_id: usize,
 }
 
 pub enum StatementLookup<'a> {
@@ -52,288 +44,58 @@ impl<'a> Default for SymbolTable<'a> {
 impl<'a> SymbolTable<'a> {
     pub fn new() -> Self {
         Self {
-            inputs: HashMap::new(),
-            outputs: HashMap::new(),
-            states: HashMap::new(),
-            vars: HashMap::new(),
-            funcs: HashMap::new(),
-            type_defs: HashMap::new(),
-            infix_defines: HashMap::new(),
-            prefix_defines: HashMap::new(),
-            infix_funcs: HashMap::new(),
-            prefix_funcs: HashMap::new(),
-            inits: Vec::new(),
+            statements: HashMap::new(),
+            path_to_id: HashMap::new(),
+            id_to_path: HashMap::new(),
+            next_id: 0,
         }
     }
 
-    /// Resolves a ParserSymbolPath into a SymbolPath.
-    pub fn resolve_path(&self, parser_path: &ParserSymbolPath) -> Option<SymbolPath> {
-        let mut result_path = SymbolPath::new();
-        let mut current_scope = self;
+    /// Resolves a SymbolPath into a ParserStmtID.
+    pub fn get_id_by_path(&self, path: &SymbolPath) -> Option<&Vec<ParserStmtID>> {
+        self.path_to_id.get(path)
+    }
 
-        for component in &parser_path.path {
-            if &component.symbol == "CompInt" {
-                result_path.push(SymbolPathComponent::CompInt);
-            } else if &component.symbol == "CompFloat" {
-                result_path.push(SymbolPathComponent::CompFloat);
-            } else if &component.symbol == "CompBool" {
-                result_path.push(SymbolPathComponent::CompBool);
-            } else if current_scope.get_input(&component.symbol).is_some() {
-                result_path.push(SymbolPathComponent::InputVar(component.symbol.clone()));
-            } else if current_scope.get_output(&component.symbol).is_some() {
-                result_path.push(SymbolPathComponent::OutputVar(component.symbol.clone()));
-            } else if current_scope.get_state(&component.symbol).is_some() {
-                result_path.push(SymbolPathComponent::StateVar(component.symbol.clone()));
-            } else if current_scope.get_var(&component.symbol).is_some() {
-                result_path.push(SymbolPathComponent::Var(component.symbol.clone()));
-            } else if current_scope.get_func(&component.symbol).is_some() {
-                result_path.push(SymbolPathComponent::Func(component.symbol.clone()));
-            } else if let Some(type_def) = current_scope.get_type_def(&component.symbol) {
-                result_path.push(SymbolPathComponent::TypeDef(component.symbol.clone()));
-                current_scope = &type_def.1;
-            } else {
-                return None;
-            }
-        }
-
-        Some(result_path)
+    /// Returns a SymbolPath for the given ParserStmtID.
+    pub fn get_path_by_id(&self, id: &ParserStmtID) -> Option<&SymbolPath> {
+        self.id_to_path.get(id)
     }
 
     /// Checks if the symbol is already defined in the current scope.
-    pub fn is_symbol_defined(&self, name: &str) -> bool {
-        self.vars.contains_key(name)
-            || self.funcs.contains_key(name)
-            || self.type_defs.contains_key(name)
-            || self.inputs.contains_key(name)
-            || self.outputs.contains_key(name)
-            || self.states.contains_key(name)
+    pub fn is_symbol_defined(&self, path: &SymbolPath) -> bool {
+        self.path_to_id.contains_key(path)
     }
 
-    // Insert functions
-
-    pub fn insert_input(
-        &mut self,
-        ec: &mut ErrorCollector,
-        name: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        if self.is_symbol_defined(&name) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
-        } else {
-            self.inputs.insert(name, stmt);
-        }
+    /// Returns the next available SymbolID.
+    pub fn next_id(&mut self) -> ParserStmtID {
+        let id = self.next_id;
+        self.next_id += 1;
+        ParserStmtID::new(id)
     }
 
-    pub fn insert_output(
-        &mut self,
-        ec: &mut ErrorCollector,
-        name: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        if self.is_symbol_defined(&name) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
-        } else {
-            self.outputs.insert(name, stmt);
-        }
+    /// Inserts a statement into the symbol table.
+    pub fn insert_statement(&mut self, path: SymbolPath, stmt: &'a ParserTopLevelStmt) {
+        let id = self.next_id();
+        self.path_to_id.entry(path.clone()).or_default().push(id);
+        self.id_to_path.insert(id, path);
+        self.statements.insert(id, stmt);
     }
 
-    pub fn insert_state(
-        &mut self,
-        ec: &mut ErrorCollector,
-        name: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        if self.is_symbol_defined(&name) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
-        } else {
-            self.states.insert(name, stmt);
-        }
+    /// Gets the statement by SymbolID.
+    pub fn get_statement_by_id(&self, id: &ParserStmtID) -> Option<&&ParserTopLevelStmt> {
+        self.statements.get(id)
     }
 
-    pub fn insert_var(
-        &mut self,
-        ec: &mut ErrorCollector,
-        name: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        if self.is_symbol_defined(&name) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
-        } else {
-            self.vars.insert(name, stmt);
-        }
+    /// Iterates over all statements and their corresponding SymbolIDs.
+    pub fn get_tuples(&self) -> Vec<(ParserStmtID, &&ParserTopLevelStmt)> {
+        self.statements
+            .iter()
+            .map(|(id, stmt)| (*id, stmt))
+            .collect()
     }
 
-    pub fn insert_func(
-        &mut self,
-        ec: &mut ErrorCollector,
-        name: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        if self.is_symbol_defined(&name) {
-            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
-        } else {
-            self.funcs.insert(name, stmt);
-        }
-    }
-
-    pub fn insert_type_def(
-        &mut self,
-        name: String,
-        stmt: &'a ParserTopLevelStmt,
-        sub_table: SymbolTable<'a>,
-    ) {
-        self.type_defs.insert(name, (stmt, sub_table));
-    }
-
-    pub fn insert_infix_define(
-        &mut self,
-        ec: &mut ErrorCollector,
-        symbol: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        match self.infix_defines.entry(symbol) {
-            Entry::Vacant(vacant) => {
-                vacant.insert(stmt);
-            }
-            Entry::Occupied(occupied) => {
-                ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, occupied.key())
-            }
-        }
-    }
-
-    pub fn insert_prefix_define(
-        &mut self,
-        ec: &mut ErrorCollector,
-        symbol: String,
-        stmt: &'a ParserTopLevelStmt,
-    ) {
-        match self.prefix_defines.entry(symbol) {
-            Entry::Vacant(vacant) => {
-                vacant.insert(stmt);
-            }
-            Entry::Occupied(occupied) => {
-                ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, occupied.key())
-            }
-        }
-    }
-
-    pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserTopLevelStmt) {
-        let target_vec = self.infix_funcs.entry(symbol).or_default();
-        target_vec.push(stmt);
-    }
-
-    pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserTopLevelStmt) {
-        let target_vec = self.prefix_funcs.entry(symbol).or_default();
-        target_vec.push(stmt);
-    }
-
-    pub fn insert_init(&mut self, stmt: &'a ParserTopLevelStmt) {
-        self.inits.push(stmt);
-    }
-
-    // Getter functions
-
-    pub fn get_input(&self, name: &str) -> Option<&ParserTopLevelStmt> {
-        self.inputs.get(name).copied()
-    }
-
-    pub fn get_output(&self, name: &str) -> Option<&ParserTopLevelStmt> {
-        self.outputs.get(name).copied()
-    }
-
-    pub fn get_state(&self, name: &str) -> Option<&ParserTopLevelStmt> {
-        self.states.get(name).copied()
-    }
-
-    pub fn get_var(&self, name: &str) -> Option<&ParserTopLevelStmt> {
-        self.vars.get(name).copied()
-    }
-
-    pub fn get_func(&self, name: &str) -> Option<&ParserTopLevelStmt> {
-        self.funcs.get(name).copied()
-    }
-
-    pub fn get_type_def(&self, name: &str) -> Option<&(&ParserTopLevelStmt, SymbolTable<'a>)> {
-        self.type_defs.get(name)
-    }
-
-    pub fn get_infix_define(&self, symbol: &str) -> Option<&'a ParserTopLevelStmt> {
-        self.infix_defines.get(symbol).copied()
-    }
-
-    pub fn get_prefix_define(&self, symbol: &str) -> Option<&'a ParserTopLevelStmt> {
-        self.prefix_defines.get(symbol).copied()
-    }
-
-    pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserTopLevelStmt>> {
-        self.infix_funcs.get(symbol)
-    }
-
-    pub fn get_prefix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserTopLevelStmt>> {
-        self.prefix_funcs.get(symbol)
-    }
-
-    pub fn get_inits(&self) -> &Vec<&ParserTopLevelStmt> {
-        &self.inits
-    }
-
-    /// Gets the statement by SymbolPath.
-    /// Componenets except the last one must be a Type statement.
-    pub fn get_statement_by_path(
-        &'a self,
-        symbol_path: &SymbolPath,
-    ) -> Option<StatementLookup<'a>> {
-        let mut current_scope = self;
-        let last_index = symbol_path.components.len().checked_sub(1)?;
-
-        for i in 0..last_index {
-            match &symbol_path.components[i] {
-                SymbolPathComponent::TypeDef(type_name) => {
-                    if let Some(type_def_entry) = current_scope.type_defs.get(type_name) {
-                        current_scope = &type_def_entry.1;
-                    } else {
-                        return None;
-                    }
-                }
-                _ => return None,
-            }
-        }
-
-        match &symbol_path.components[last_index] {
-            SymbolPathComponent::InputVar(name) => {
-                current_scope.get_input(name).map(StatementLookup::Single)
-            }
-            SymbolPathComponent::OutputVar(name) => {
-                current_scope.get_output(name).map(StatementLookup::Single)
-            }
-            SymbolPathComponent::StateVar(name) => {
-                current_scope.get_state(name).map(StatementLookup::Single)
-            }
-            SymbolPathComponent::Var(name) => {
-                current_scope.get_var(name).map(StatementLookup::Single)
-            }
-            SymbolPathComponent::Func(name) => {
-                current_scope.get_func(name).map(StatementLookup::Single)
-            }
-            SymbolPathComponent::InfixDef(symbol) => current_scope
-                .get_infix_define(symbol)
-                .map(StatementLookup::Single),
-            SymbolPathComponent::InfixFunc(symbol) => current_scope
-                .get_infix_funcs(symbol)
-                .map(|stmts| StatementLookup::Multiple(stmts)),
-            SymbolPathComponent::PrefixDef(symbol) => current_scope
-                .get_prefix_define(symbol)
-                .map(StatementLookup::Single),
-            SymbolPathComponent::PrefixFunc(symbol) => current_scope
-                .get_prefix_funcs(symbol)
-                .map(|stmts| StatementLookup::Multiple(stmts)),
-            SymbolPathComponent::TypeDef(name) => current_scope
-                .get_type_def(name)
-                .map(|entry| entry.0)
-                .map(StatementLookup::Single),
-            SymbolPathComponent::CompInt
-            | SymbolPathComponent::CompFloat
-            | SymbolPathComponent::CompBool => None,
-        }
+    /// Iterates over all statements.
+    pub fn get_statements(&self) -> Vec<&&ParserTopLevelStmt> {
+        self.statements.values().collect()
     }
 }

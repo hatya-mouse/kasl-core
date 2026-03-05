@@ -14,15 +14,14 @@
 // limitations under the License.
 //
 
-use std::fmt::Display;
-
-use crate::{Expression, FuncParam, Statement, SymbolPath};
+use crate::{Expression, FuncParam, Statement, data::SymbolID};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
     pub name: String,
+    pub is_static: bool,
     pub params: Vec<FuncParam>,
-    pub return_type: Option<SymbolPath>,
+    pub return_type: Option<SymbolID>,
     pub body: Vec<Statement>,
 }
 
@@ -54,37 +53,4 @@ impl Function {
 pub struct FuncCallArg {
     pub name: String,
     pub value: Expression,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Initializer {
-    pub literal_bind: Option<LiteralBind>,
-    pub params: Vec<FuncParam>,
-    pub body: Vec<Statement>,
-}
-
-impl Initializer {
-    pub fn does_params_match(&self, param_types: &[SymbolPath]) -> bool {
-        self.params
-            .iter()
-            .zip(param_types)
-            .all(|(param, ty)| &param.value_type == ty)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Clone)]
-pub enum LiteralBind {
-    IntLiteral,
-    FloatLiteral,
-    BoolLiteral,
-}
-
-impl Display for LiteralBind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            LiteralBind::IntLiteral => write!(f, "intliteral"),
-            LiteralBind::FloatLiteral => write!(f, "floatliteral"),
-            LiteralBind::BoolLiteral => write!(f, "boolliteral"),
-        }
-    }
 }

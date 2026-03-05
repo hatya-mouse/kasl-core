@@ -15,51 +15,35 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolTable,
+    ParserOperatorType, ParserTopLevelStmtKind, SymbolTable,
     error::{ErrorCollector, Ph},
 };
 
 /// Check for errors in the given symbol table.
 pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
-    let infix_funcs = &symbol_table
-        .infix_funcs
-        .values()
-        .flatten()
-        .collect::<Vec<&&ParserTopLevelStmt>>();
+    for stmt in symbol_table.get_statements() {
+        match &stmt.kind {
+            ParserTopLevelStmtKind::OperatorFunc {
+                op_type,
+                symbol: _,
+                params,
+                return_type: _,
+                body: _,
+            } if op_type == &ParserOperatorType::Infix && params.len() != 2 => {
+                ec.invalid_param_numbers_for_infix(stmt.range, Ph::Validation, params.len());
+            }
 
-    for stmt in infix_funcs {
-        if let ParserTopLevelStmtKind::OperatorFunc {
-            op_type,
-            symbol: _,
-            params,
-            return_type: _,
-            body: _,
-        } = &stmt.kind
-            && op_type == &ParserOperatorType::Infix
-            && params.len() != 2
-        {
-            ec.invalid_param_numbers_for_infix(stmt.range, Ph::Validation, params.len());
-        }
-    }
+            ParserTopLevelStmtKind::OperatorFunc {
+                op_type,
+                symbol: _,
+                params,
+                return_type: _,
+                body: _,
+            } if op_type == &ParserOperatorType::Prefix && params.len() != 1 => {
+                ec.invalid_param_numbers_for_prefix(stmt.range, Ph::Validation, params.len());
+            }
 
-    let prefix_funcs = &symbol_table
-        .prefix_funcs
-        .values()
-        .flatten()
-        .collect::<Vec<&&ParserTopLevelStmt>>();
-
-    for stmt in prefix_funcs {
-        if let ParserTopLevelStmtKind::OperatorFunc {
-            op_type,
-            symbol: _,
-            params,
-            return_type: _,
-            body: _,
-        } = &stmt.kind
-            && op_type == &ParserOperatorType::Prefix
-            && params.len() != 1
-        {
-            ec.invalid_param_numbers_for_prefix(stmt.range, Ph::Validation, params.len());
+            _ => (),
         }
     }
 }

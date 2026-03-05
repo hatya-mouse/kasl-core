@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, LiteralBind, Program, Range, SymbolPath, SymbolTable,
-    error::{ErrorCollector, Phase},
+    ExprToken, ExprTokenKind, PrimitiveType, Program, Range,
+    data::SymbolID,
+    error::{ErrorCollector, Ph, Phase},
+    resolution::expr_inference::SymbolTypeGetter,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -35,7 +37,7 @@ impl TypedToken {
 pub enum TypedTokenKind {
     Value {
         expr_token: ExprToken,
-        value_type: SymbolPath,
+        value_type: SymbolID,
     },
     PrefixOperator(String),
     InfixOperator(String),
@@ -47,7 +49,6 @@ pub enum TypedTokenKind {
 pub fn get_typed_tokens(
     ec: &mut ErrorCollector,
     program: &Program,
-    symbol_table: &SymbolTable,
     expr: &[ExprToken],
 ) -> Option<Vec<TypedToken>> {
     let expr_iter = expr.iter().peekable();
@@ -55,99 +56,97 @@ pub fn get_typed_tokens(
 
     for token in expr_iter {
         match &token.kind {
-            ExprTokenKind::IntLiteral(_) => match &program.int_literal_type {
-                Some(int_literal_type) => result.push(TypedToken::new(
-                    TypedTokenKind::Value {
-                        expr_token: token.clone(),
-                        value_type: int_literal_type.clone(),
-                    },
-                    token.range,
-                )),
-                None => {
-                    ec.no_literal_bind(token.range, Phase::TypeResolution, LiteralBind::IntLiteral);
-                    return None;
-                }
-            },
-
-            ExprTokenKind::FloatLiteral(_) => match &program.float_literal_type {
-                Some(float_literal_type) => result.push(TypedToken::new(
-                    TypedTokenKind::Value {
-                        expr_token: token.clone(),
-                        value_type: float_literal_type.clone(),
-                    },
-                    token.range,
-                )),
-                None => {
-                    ec.no_literal_bind(
+            ExprTokenKind::IntLiteral(_) => {
+                if let Some(type_id) = program.get_id_of_primitive_type(&PrimitiveType::Int) {
+                    result.push(TypedToken {
+                        kind: TypedTokenKind::Value {
+                            expr_token: token.clone(),
+                            value_type: type_id,
+                        },
+                        range: token.range,
+                    });
+                } else {
+                    ec.comp_bug(
                         token.range,
-                        Phase::TypeResolution,
-                        LiteralBind::FloatLiteral,
+                        Ph::TypeResolution,
+                        "get_typed_tokens before primitive types are added to the program.",
                     );
                     return None;
                 }
-            },
-
-            ExprTokenKind::BoolLiteral(_) => match &program.bool_literal_type {
-                Some(bool_literal_type) => result.push(TypedToken::new(
-                    TypedTokenKind::Value {
-                        expr_token: token.clone(),
-                        value_type: bool_literal_type.clone(),
-                    },
-                    token.range,
-                )),
-                None => {
-                    ec.no_literal_bind(
-                        token.range,
-                        Phase::TypeResolution,
-                        LiteralBind::FloatLiteral,
-                    );
-                    return None;
-                }
-            },
-
-            ExprTokenKind::Identifier(parser_path) => {
-                let var_type = match program.get_var_type(parser_path, symbol_table) {
-                    Some(var_type) => var_type,
-                    None => {
-                        ec.var_not_found(
-                            token.range,
-                            Phase::TypeResolution,
-                            &parser_path.to_string(),
-                        );
-                        return None;
-                    }
-                };
-                result.push(TypedToken::new(
-                    TypedTokenKind::Value {
-                        expr_token: token.clone(),
-                        value_type: var_type.clone(),
-                    },
-                    token.range,
-                ));
             }
 
-            ExprTokenKind::FuncCall {
-                path: func_parser_path,
-                args: _,
-            } => {
-                let func_type = match program.get_func_type(func_parser_path, symbol_table) {
-                    Some(func_type) => func_type,
-                    None => {
-                        ec.func_not_found(
-                            token.range,
-                            Phase::TypeResolution,
-                            &func_parser_path.to_string(),
-                        );
-                        return None;
-                    }
-                };
-                result.push(TypedToken::new(
-                    TypedTokenKind::Value {
-                        expr_token: token.clone(),
-                        value_type: func_type.clone(),
-                    },
-                    token.range,
-                ));
+            ExprTokenKind::FloatLiteral(_) => {
+                if let Some(type_id) = program.get_id_of_primitive_type(&PrimitiveType::Float) {
+                    result.push(TypedToken {
+                        kind: TypedTokenKind::Value {
+                            expr_token: token.clone(),
+                            value_type: type_id,
+                        },
+                        range: token.range,
+                    });
+                } else {
+                    ec.comp_bug(
+                        token.range,
+                        Ph::TypeResolution,
+                        "get_typed_tokens before primitive types are added to the program.",
+                    );
+                    return None;
+                }
+            }
+
+            ExprTokenKind::BoolLiteral(_) => {
+                if let Some(type_id) = program.get_id_of_primitive_type(&PrimitiveType::Bool) {
+                    result.push(TypedToken {
+                        kind: TypedTokenKind::Value {
+                            expr_token: token.clone(),
+                            value_type: type_id,
+                        },
+                        range: token.range,
+                    });
+                } else {
+                    ec.comp_bug(
+                        token.range,
+                        Ph::TypeResolution,
+                        "get_typed_tokens before primitive types are added to the program.",
+                    );
+                    return None;
+                }
+            }
+
+            ExprTokenKind::Identifier(path) => {
+                if let Some(symbol_type) =
+                    program.get_first_type_from_path(ec, path, token.range, |ec, path| {
+                        ec.var_not_found(token.range, Phase::TypeResolution, &path.to_string());
+                    })
+                {
+                    result.push(TypedToken::new(
+                        TypedTokenKind::Value {
+                            expr_token: token.clone(),
+                            value_type: symbol_type,
+                        },
+                        token.range,
+                    ));
+                } else {
+                    return None;
+                }
+            }
+
+            ExprTokenKind::FuncCall { path, .. } => {
+                if let Some(symbol_type) =
+                    program.get_first_type_from_path(ec, path, token.range, |ec, path| {
+                        ec.func_not_found(token.range, Phase::TypeResolution, &path.to_string());
+                    })
+                {
+                    result.push(TypedToken::new(
+                        TypedTokenKind::Value {
+                            expr_token: token.clone(),
+                            value_type: symbol_type,
+                        },
+                        token.range,
+                    ));
+                } else {
+                    return None;
+                }
             }
 
             ExprTokenKind::Operator(operator_symbol) => {

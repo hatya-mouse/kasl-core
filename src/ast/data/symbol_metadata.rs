@@ -14,20 +14,25 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod primitive_type;
-mod program;
-mod statement;
-mod struct_decl;
-mod variables;
+use crate::data::SymbolID;
 
-pub use expression::Expression;
-pub use function::{FuncCallArg, Function};
-pub use operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity, PrefixOperator};
-pub use primitive_type::PrimitiveType;
-pub use program::Program;
-pub use statement::{IfArm, Statement};
-pub use struct_decl::StructDecl;
-pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SymbolMetadata {
+    pub symbol_type: Option<SymbolID>,
+}
+
+impl SymbolMetadata {
+    pub fn new(symbol_type: Option<SymbolID>) -> Self {
+        Self { symbol_type }
+    }
+
+    pub fn with_type(symbol_type: SymbolID) -> Self {
+        Self {
+            symbol_type: Some(symbol_type),
+        }
+    }
+
+    pub fn no_type() -> Self {
+        Self { symbol_type: None }
+    }
+}

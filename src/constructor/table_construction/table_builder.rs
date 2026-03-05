@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolTable,
+    ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolPath, SymbolPathComponent, SymbolTable,
     error::{ErrorCollector, Ph},
+    symbol_path,
 };
 
 pub fn build_symbol_table<'a>(
@@ -26,58 +27,23 @@ pub fn build_symbol_table<'a>(
 ) {
     for stmt in statements {
         match &stmt.kind {
-            ParserTopLevelStmtKind::FuncDecl {
-                name,
-                params: _,
-                return_type: _,
-                body: _,
-            } => {
-                symbol_table.insert_func(ec, name.clone(), stmt);
+            ParserTopLevelStmtKind::FuncDecl { name, .. }
+            | ParserTopLevelStmtKind::Input { name, .. }
+            | ParserTopLevelStmtKind::Output { name, .. }
+            | ParserTopLevelStmtKind::StateVar { name, .. } => {
+                symbol_table.insert_statement(symbol_path![name.clone()], stmt);
             }
 
-            ParserTopLevelStmtKind::Input {
-                name,
-                value_type: _,
-                def_val: _,
-                attrs: _,
-            } => {
-                symbol_table.insert_input(ec, name.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::Output {
-                name,
-                value_type: _,
-                def_val: _,
-            } => {
-                symbol_table.insert_output(ec, name.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::State { vars } => {
-                for var in vars {
-                    symbol_table.insert_state(ec, var.name.clone(), stmt);
-                }
+            ParserTopLevelStmtKind::InfixDefine { symbol, .. }
+            | ParserTopLevelStmtKind::OperatorFunc { symbol, .. } => {
+                symbol_table.insert_statement(symbol_path![symbol.clone()], stmt);
             }
 
             ParserTopLevelStmtKind::StructDecl { name, body } => {
-                let mut nested_table = SymbolTable::new();
-                build_nest_symbol_table(ec, &mut nested_table, body);
-                symbol_table.insert_type_def(name.clone(), stmt, nested_table);
+                let struct_path = symbol_path![name.clone()];
+                build_nest_symbol_table(ec, symbol_table, &struct_path, body);
+                symbol_table.insert_statement(struct_path, stmt);
             }
-
-            ParserTopLevelStmtKind::InfixDefine { symbol, .. } => {
-                symbol_table.insert_infix_define(ec, symbol.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::PrefixDefine { symbol } => {
-                symbol_table.insert_prefix_define(ec, symbol.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::OperatorFunc {
-                op_type, symbol, ..
-            } => match op_type {
-                ParserOperatorType::Infix => symbol_table.insert_infix_func(symbol.clone(), stmt),
-                ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
-            },
 
             _ => {
                 ec.invalid_top_expr(stmt.range, Ph::StatementBuilding, &stmt.kind.to_string());
@@ -89,62 +55,28 @@ pub fn build_symbol_table<'a>(
 pub fn build_nest_symbol_table<'a>(
     ec: &mut ErrorCollector,
     symbol_table: &mut SymbolTable<'a>,
+    type_path: &SymbolPath,
     statements: &'a [ParserTopLevelStmt],
 ) {
     for stmt in statements {
         match &stmt.kind {
-            ParserTopLevelStmtKind::ScopeVar {
-                name,
-                value_type: _,
-                def_val: _,
-            } => {
-                symbol_table.insert_var(ec, name.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::FuncDecl {
-                name,
-                params: _,
-                return_type: _,
-                body: _,
-            } => {
-                symbol_table.insert_func(ec, name.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::Init {
-                literal_bind: _,
-                params: _,
-                body: _,
-            } => {
-                symbol_table.insert_init(stmt);
+            ParserTopLevelStmtKind::ScopeVar { name, .. }
+            | ParserTopLevelStmtKind::FuncDecl { name, .. } => {
+                symbol_table.insert_statement(
+                    type_path.extended(SymbolPathComponent {
+                        symbol: name.clone(),
+                    }),
+                    stmt,
+                );
             }
 
             ParserTopLevelStmtKind::StructDecl { name, body } => {
-                let mut nested_table = SymbolTable::new();
-                build_nest_symbol_table(ec, &mut nested_table, body);
-                symbol_table.insert_type_def(name.clone(), stmt, nested_table);
+                let struct_path = type_path.extended(SymbolPathComponent {
+                    symbol: name.clone(),
+                });
+                build_nest_symbol_table(ec, symbol_table, &struct_path, body);
+                symbol_table.insert_statement(struct_path, stmt);
             }
-
-            ParserTopLevelStmtKind::InfixDefine {
-                symbol,
-                infix_properties: _,
-            } => {
-                symbol_table.insert_infix_define(ec, symbol.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::PrefixDefine { symbol } => {
-                symbol_table.insert_prefix_define(ec, symbol.clone(), stmt);
-            }
-
-            ParserTopLevelStmtKind::OperatorFunc {
-                op_type,
-                symbol,
-                params: _,
-                return_type: _,
-                body: _,
-            } => match op_type {
-                ParserOperatorType::Infix => symbol_table.insert_infix_func(symbol.clone(), stmt),
-                ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
-            },
 
             _ => {
                 ec.invalid_top_expr(stmt.range, Ph::StatementBuilding, &stmt.kind.to_string());

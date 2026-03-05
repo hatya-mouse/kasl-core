@@ -24,8 +24,12 @@ impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_param(&mut self, param: &ParserFuncParam) -> Option<FuncParam> {
         if let Some(value_type) = &param.value_type {
             // If the parameter has a type annotation, use it
-            let resolved_type = match self.program.resolve_type_def_parser_path(value_type) {
-                Some(value_type) => value_type,
+            let resolved_type = match self
+                .program
+                .get_id_by_path(value_type)
+                .and_then(|ids| ids.first().cloned())
+            {
+                Some(resolved_path) => resolved_path,
                 None => {
                     self.ec.type_not_found(
                         param.range,

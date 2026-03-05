@@ -85,7 +85,6 @@ pub fn rearrange_tokens_to_rpn(
                     && let Some(top_token) = operator_stack.last()
                     && let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind
                 {
-                    // Get the precedence and associativity of the operator from the stack
                     let top_props = match program.get_infix_operator(top_op_symbol) {
                         Some(props) => props,
                         None => {

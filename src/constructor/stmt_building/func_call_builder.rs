@@ -15,8 +15,7 @@
 //
 
 use crate::{
-    FuncCallArg, ParserBodyStmt, ParserFuncCallArg, ParserSymbolPath, Program, Statement,
-    SymbolTable,
+    FuncCallArg, ParserBodyStmt, ParserFuncCallArg, Program, Statement, SymbolPath, SymbolTable,
     error::{ErrorCollector, Phase},
     resolution::expr_inference::ExprTreeBuilder,
 };
@@ -27,20 +26,20 @@ pub fn build_func_call_stmt(
     symbol_table: &SymbolTable,
     parsed_stmts: &mut Vec<Statement>,
     stmt: &ParserBodyStmt,
-    path: &ParserSymbolPath,
+    path: &SymbolPath,
     args: &[ParserFuncCallArg],
 ) {
-    let func_path = match symbol_table.resolve_path(path) {
+    let func_id = match program.get_id_by_path(path).and_then(|ids| ids.first()) {
         Some(parsed_target) => parsed_target,
         None => {
             ec.func_not_found(stmt.range, Phase::StatementBuilding, &path.to_string());
             return;
         }
     };
-    let target_func = match program.get_func_by_path(&func_path) {
+    let target_func = match program.get_func(func_id) {
         Some(func) => func,
         None => {
-            ec.func_not_found(stmt.range, Phase::StatementBuilding, &func_path.to_string());
+            ec.func_not_found(stmt.range, Phase::StatementBuilding, &path.to_string());
             return;
         }
     };
@@ -55,7 +54,7 @@ pub fn build_func_call_stmt(
         ec.not_enough_params(
             stmt.range,
             Phase::StatementBuilding,
-            &func_path.to_string(),
+            &path.to_string(),
             minimum_num,
             actual_num,
         );
@@ -66,7 +65,7 @@ pub fn build_func_call_stmt(
         ec.too_many_params(
             stmt.range,
             Phase::StatementBuilding,
-            &func_path.to_string(),
+            &path.to_string(),
             maximum_num,
             actual_num,
         );
@@ -89,7 +88,7 @@ pub fn build_func_call_stmt(
                     ec.param_not_found(
                         stmt.range,
                         Phase::StatementBuilding,
-                        &func_path.to_string(),
+                        &path.to_string(),
                         label,
                     );
                     return;
@@ -110,7 +109,7 @@ pub fn build_func_call_stmt(
 
     // Create a FuncCall statement
     let func_call_stmt = Statement::FuncCall {
-        path: func_path,
+        path: *func_id,
         args: parsed_args,
     };
     parsed_stmts.push(func_call_stmt);

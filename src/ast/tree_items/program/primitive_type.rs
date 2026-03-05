@@ -14,8 +14,17 @@
 // limitations under the License.
 //
 
-pub mod item_getter;
-pub mod literal_bind;
-pub mod member_registration;
-pub mod type_getter;
-pub mod type_utils;
+use crate::{PrimitiveType, Program, data::SymbolID, symbol_path};
+
+impl Program {
+    pub fn add_primitive_type(&mut self, ty: PrimitiveType) {
+        let id = self.get_next_id();
+        self.register_id(symbol_path![ty.to_string()], id);
+        self.primitive_types.insert(id, ty);
+    }
+
+    pub fn get_id_of_primitive_type(&self, ty: &PrimitiveType) -> Option<SymbolID> {
+        self.get_id_by_path(&symbol_path![ty.to_string()])
+            .and_then(|ids| ids.first().copied())
+    }
+}

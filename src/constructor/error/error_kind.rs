@@ -37,11 +37,6 @@ pub enum ErrorKind {
     /// Payload: None
     InvalidParamNumbersForPrefix,
 
-    /// Title: DuplicateLiteralBind
-    /// Phase: TypeResolution
-    /// Payload: Type of the duplicate literal bind
-    DuplicateLiteralBind,
-
     /// Title: VariableNotFound
     /// Phase: TypeResolution
     /// Payload: Path of the variable which could not be found
@@ -66,11 +61,6 @@ pub enum ErrorKind {
     /// Phase: TypeResolution
     /// Payload: Path to the cycle symbols
     DependencyCycle,
-
-    /// Title: NoLiteralBind
-    /// Phase: TypeResolution
-    /// Payload: Type of the literal bind
-    NoLiteralBind,
 
     /// Title: OpCannotBeChained
     /// Phase: TypeResolution

@@ -15,22 +15,11 @@
 //
 
 use crate::{
-    LiteralBind, Range,
+    Range,
     error::{EK, ErrorCollector, Phase, Pl, Sv},
 };
 
 impl ErrorCollector {
-    /// Wrapper function for DuplicateLiteralBind error.
-    pub fn dup_literal_bind(&mut self, range: Range, phase: Phase, bind: LiteralBind) {
-        self.emit(
-            EK::DuplicateLiteralBind,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(bind.to_string()),
-        );
-    }
-
     /// Wrapper function for VariableNotFound error.
     pub fn var_not_found(&mut self, range: Range, phase: Phase, path: &str) {
         self.emit(
@@ -83,17 +72,6 @@ impl ErrorCollector {
             phase,
             Sv::Error,
             Pl::Str(path.to_string()),
-        );
-    }
-
-    /// Wrapper function for NoLiteralBind error.
-    pub fn no_literal_bind(&mut self, range: Range, phase: Phase, bind: LiteralBind) {
-        self.emit(
-            EK::NoLiteralBind,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(bind.to_string()),
         );
     }
 

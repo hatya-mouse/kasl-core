@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-use crate::SymbolPath;
+use crate::data::ParserStmtID;
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct DependencyGraph {
-    pub nodes: HashMap<SymbolPath, DependencyGraphNode>,
+    pub nodes: HashMap<ParserStmtID, DependencyGraphNode>,
     pub edges: Vec<DependencyGraphEdge>,
 }
 
@@ -38,41 +38,26 @@ impl DependencyGraph {
     }
 
     pub fn add_node(&mut self, node: DependencyGraphNode) {
-        self.nodes.insert(node.name.clone(), node);
+        self.nodes.insert(node.id, node);
     }
 
-    pub fn add_edge(&mut self, from: &SymbolPath, target: &SymbolPath) {
-        self.edges
-            .push(DependencyGraphEdge::new(from.clone(), target.clone()));
+    pub fn add_edge(&mut self, from: ParserStmtID, target: ParserStmtID) {
+        self.edges.push(DependencyGraphEdge::new(from, target));
     }
 
-    pub fn node_paths(&self) -> Vec<&SymbolPath> {
-        self.nodes.keys().collect()
+    pub fn node_paths(&self) -> Vec<ParserStmtID> {
+        self.nodes.keys().cloned().collect()
     }
 
     pub fn edges(&self) -> Vec<&DependencyGraphEdge> {
         self.edges.iter().collect()
     }
 
-    pub fn node(&self, name: &SymbolPath) -> Option<&DependencyGraphNode> {
-        self.nodes.get(name)
+    pub fn node(&self, id: &ParserStmtID) -> Option<&DependencyGraphNode> {
+        self.nodes.get(id)
     }
 
-    pub fn edge(&self, from: &SymbolPath, target: &SymbolPath) -> Option<&DependencyGraphEdge> {
-        self.edges
-            .iter()
-            .find(|edge| edge.from == *from && edge.target == *target)
-    }
-
-    pub fn get_edge_nodes(
-        &self,
-        edge: &DependencyGraphEdge,
-    ) -> Option<(&DependencyGraphNode, &DependencyGraphNode)> {
-        self.node(&edge.from)
-            .and_then(|from| self.node(&edge.target).map(|target| (from, target)))
-    }
-
-    pub fn get_edges_from_node(&self, path: &SymbolPath) -> Vec<&DependencyGraphEdge> {
+    pub fn get_edges_from_node(&self, path: &ParserStmtID) -> Vec<&DependencyGraphEdge> {
         self.edges
             .iter()
             .filter(|edge| edge.from == *path)
@@ -82,20 +67,18 @@ impl DependencyGraph {
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct DependencyGraphNode {
-    name: SymbolPath,
+    id: ParserStmtID,
 }
 
 impl DependencyGraphNode {
-    pub fn new(name: SymbolPath) -> Self {
-        DependencyGraphNode { name }
+    pub fn new(id: ParserStmtID) -> Self {
+        DependencyGraphNode { id }
     }
 }
 
 impl Clone for DependencyGraphNode {
     fn clone(&self) -> Self {
-        DependencyGraphNode {
-            name: self.name.clone(),
-        }
+        DependencyGraphNode { id: self.id }
     }
 }
 
@@ -105,12 +88,12 @@ impl Clone for DependencyGraphNode {
 /// Edge `A -> B` means that "A depends on B", therefore B must be resolved before A.
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct DependencyGraphEdge {
-    pub from: SymbolPath,
-    pub target: SymbolPath,
+    pub from: ParserStmtID,
+    pub target: ParserStmtID,
 }
 
 impl DependencyGraphEdge {
-    pub fn new(from: SymbolPath, target: SymbolPath) -> Self {
+    pub fn new(from: ParserStmtID, target: ParserStmtID) -> Self {
         DependencyGraphEdge { from, target }
     }
 }

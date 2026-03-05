@@ -18,7 +18,7 @@ use std::{fmt::Display, ops::Index};
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct SymbolPath {
-    pub components: Vec<SymbolPathComponent>,
+    components: Vec<SymbolPathComponent>,
 }
 
 impl Default for SymbolPath {
@@ -29,53 +29,23 @@ impl Default for SymbolPath {
 
 impl SymbolPath {
     pub fn new() -> Self {
-        SymbolPath {
+        Self {
             components: Vec::new(),
         }
     }
 
-    pub fn root() -> Self {
-        SymbolPath {
-            components: Vec::new(),
-        }
-    }
-
-    pub fn from(path: &[SymbolPathComponent]) -> Self {
-        SymbolPath {
-            components: path.to_vec(),
-        }
-    }
-
-    pub fn comp_int() -> Self {
-        SymbolPath {
-            components: vec![SymbolPathComponent::CompInt],
-        }
-    }
-
-    pub fn comp_float() -> Self {
-        SymbolPath {
-            components: vec![SymbolPathComponent::CompFloat],
-        }
-    }
-
-    pub fn comp_bool() -> Self {
-        SymbolPath {
-            components: vec![SymbolPathComponent::CompBool],
-        }
+    pub fn with(components: Vec<SymbolPathComponent>) -> Self {
+        Self { components }
     }
 
     pub fn push(&mut self, component: SymbolPathComponent) {
         self.components.push(component);
     }
 
-    pub fn parent(&self) -> Option<SymbolPath> {
-        if self.components.is_empty() {
-            None
-        } else {
-            Some(SymbolPath {
-                components: self.components[..self.components.len() - 1].to_vec(),
-            })
-        }
+    pub fn extended(&self, component: SymbolPathComponent) -> Self {
+        let mut new_path = self.clone();
+        new_path.components.push(component);
+        new_path
     }
 }
 
@@ -94,48 +64,16 @@ impl Display for SymbolPath {
             "{}",
             self.components
                 .iter()
-                .map(|c| c.to_string())
-                .collect::<Vec<String>>()
+                .map(|p| p.symbol.clone())
+                .collect::<Vec<_>>()
                 .join(".")
         )
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
-pub enum SymbolPathComponent {
-    CompInt,
-    CompFloat,
-    CompBool,
-    Var(String),
-    StateVar(String),
-    InputVar(String),
-    OutputVar(String),
-    Func(String),
-    InfixDef(String),
-    InfixFunc(String),
-    PrefixDef(String),
-    PrefixFunc(String),
-    TypeDef(String),
-}
-
-impl Display for SymbolPathComponent {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SymbolPathComponent::CompInt => write!(f, "CompInt"),
-            SymbolPathComponent::CompFloat => write!(f, "CompFloat"),
-            SymbolPathComponent::CompBool => write!(f, "CompBool"),
-            SymbolPathComponent::Var(name)
-            | SymbolPathComponent::StateVar(name)
-            | SymbolPathComponent::InputVar(name)
-            | SymbolPathComponent::OutputVar(name)
-            | SymbolPathComponent::Func(name)
-            | SymbolPathComponent::InfixDef(name)
-            | SymbolPathComponent::InfixFunc(name)
-            | SymbolPathComponent::PrefixDef(name)
-            | SymbolPathComponent::PrefixFunc(name)
-            | SymbolPathComponent::TypeDef(name) => write!(f, "{}", name),
-        }
-    }
+pub struct SymbolPathComponent {
+    pub symbol: String,
 }
 
 // Use this macro to create a SymbolPath from a simple list of components
@@ -150,10 +88,10 @@ macro_rules! symbol_path {
             let mut temp_path = $crate::ast::data::SymbolPath::new();
             $(
                 let temp_val = $x;
-                // Type check to ensure it's SymbolPathComponent
-                let _: &$crate::ast::data::SymbolPathComponent = &temp_val;
+                // Type check to ensure it's a String
+                let _: &String = &temp_val;
                 // Push the component to the vector
-                temp_path.push(temp_val);
+                temp_path.push($crate::SymbolPathComponent { symbol: temp_val.to_string() });
             )*
             temp_path
         }

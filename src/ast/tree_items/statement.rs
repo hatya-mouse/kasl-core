@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncCallArg, SymbolPath};
+use crate::{Expression, FuncCallArg, data::SymbolID};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
@@ -23,15 +23,15 @@ pub enum Statement {
     },
     VarDecl {
         name: String,
-        value_type: SymbolPath,
+        value_type: SymbolID,
         def_val: Expression,
     },
     Assign {
-        target: SymbolPath,
+        target: SymbolID,
         value: Expression,
     },
     FuncCall {
-        path: SymbolPath,
+        path: SymbolID,
         args: Vec<FuncCallArg>,
     },
     If {

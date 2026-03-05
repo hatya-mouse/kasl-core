@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    ExprToken, ExprTokenKind, SymbolTable,
+    data::ParserStmtID,
     error::{ErrorCollector, Phase},
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
@@ -23,54 +24,43 @@ use crate::{
 pub fn build_var_graph(
     ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
-    root_symbol_table: &SymbolTable,
-    var_path: &SymbolPath,
+    symbol_table: &SymbolTable,
+    var_id: ParserStmtID,
     def_val: &Vec<ExprToken>,
 ) {
     // If the default value has any identifiers, thus the variable depends on them
     for expr in def_val {
         match &expr.kind {
             ExprTokenKind::Identifier(path) => {
-                let resolved_path = match root_symbol_table.resolve_path(path) {
-                    Some(path) => path,
+                let to_ids = match symbol_table.get_id_by_path(path) {
+                    Some(ids) => ids,
                     None => {
                         ec.var_not_found(expr.range, Phase::GraphConstruction, &path.to_string());
                         return;
                     }
                 };
 
-                // Normalize the path to remove unnecessary components
-                // Because we just need to infer the type of the top variable or function
-                let mut to_path = SymbolPath::new();
-                for component in resolved_path.components {
-                    match component {
-                        SymbolPathComponent::Var(_) | SymbolPathComponent::Func(_) => {
-                            // If the path reached a variable or a function, stop here
-                            to_path.push(component);
-                            break;
-                        }
-                        _ => to_path.push(component),
-                    }
-                }
-
-                if !to_path.components.is_empty() {
-                    graph.add_edge(var_path, &to_path);
-                    graph.add_node(DependencyGraphNode::new(to_path));
+                graph.add_node(DependencyGraphNode::new(var_id));
+                for to_id in to_ids {
+                    graph.add_edge(var_id, *to_id);
+                    graph.add_node(DependencyGraphNode::new(*to_id));
                 }
             }
 
             ExprTokenKind::FuncCall { path, .. } => {
-                let to_path = match root_symbol_table.resolve_path(path) {
-                    Some(path) => path,
+                let to_ids = match symbol_table.get_id_by_path(path) {
+                    Some(ids) => ids,
                     None => {
                         ec.func_not_found(expr.range, Phase::GraphConstruction, &path.to_string());
                         return;
                     }
                 };
 
-                graph.add_edge(var_path, &to_path);
-                graph.add_node(DependencyGraphNode::new(var_path.clone()));
-                graph.add_node(DependencyGraphNode::new(to_path));
+                graph.add_node(DependencyGraphNode::new(var_id));
+                for to_id in to_ids {
+                    graph.add_edge(var_id, *to_id);
+                    graph.add_node(DependencyGraphNode::new(*to_id));
+                }
             }
 
             _ => (),

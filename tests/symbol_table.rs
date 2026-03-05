@@ -15,7 +15,8 @@
 //
 
 use kasl::{
-    SymbolTable, error::ErrorCollector, kasl_parser, table_construction::build_symbol_table,
+    SymbolTable, error::ErrorCollector, kasl_parser, symbol_path,
+    table_construction::build_symbol_table,
 };
 
 #[test]
@@ -27,7 +28,7 @@ fn table_generation() {
         struct Multiplier {
             var value = 1
 
-            init(_ value: Int) {
+            static func init(_ value: Int) {
                 self.value = value
             }
 
@@ -52,5 +53,11 @@ fn table_generation() {
     let mut ec = ErrorCollector::new();
     build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
 
-    symbol_table.get_func("main");
+    let func_path = symbol_path!["main".to_string()];
+    let func_id = symbol_table
+        .get_id_by_path(&func_path)
+        .unwrap()
+        .first()
+        .unwrap();
+    symbol_table.get_statement_by_id(func_id).unwrap();
 }

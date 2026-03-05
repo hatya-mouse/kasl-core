@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserFuncParam, ParserSymbolPath, PrefixOperator, Range, error::Phase,
+    ParserFuncParam, PrefixOperator, Range, SymbolPath, error::Phase,
     resolution::type_resolve_ctx::TypeResolveCtx,
 };
 
@@ -24,12 +24,16 @@ impl<'a> TypeResolveCtx<'a> {
         &mut self,
         symbol: &str,
         params: &[ParserFuncParam],
-        return_type: &ParserSymbolPath,
+        return_type: &SymbolPath,
         decl_range: Range,
     ) {
-        // Get the return type path
-        let return_type_path = match self.program.resolve_type_def_parser_path(return_type) {
-            Some(return_type_path) => return_type_path,
+        // Get the return type id
+        let resolved_return_type = match self
+            .program
+            .get_id_by_path(return_type)
+            .and_then(|ids| ids.first().cloned())
+        {
+            Some(resolved_path) => resolved_path,
             None => {
                 self.ec
                     .type_not_found(decl_range, Phase::TypeResolution, &return_type.to_string());
@@ -47,13 +51,9 @@ impl<'a> TypeResolveCtx<'a> {
         let prefix = PrefixOperator {
             symbol: symbol.to_string(),
             operand,
-            return_type: return_type_path,
+            return_type: resolved_return_type,
             body: Vec::new(),
         };
         self.program.register_prefix_func(prefix);
-    }
-
-    pub fn register_prefix_define(&mut self, symbol: &str) {
-        self.program.register_prefix_operator(symbol.to_string());
     }
 }

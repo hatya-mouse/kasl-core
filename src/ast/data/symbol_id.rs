@@ -14,15 +14,30 @@
 // limitations under the License.
 //
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+use std::fmt::Display;
+
+/// A symbol ID used in the Program to distinguish symbols.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct SymbolID(usize);
 
 impl SymbolID {
     pub fn new(val: usize) -> Self {
         Self(val)
     }
+}
 
-    pub fn as_usize(self) -> usize {
-        self.0
+impl Display for SymbolID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+/// A symbol ID used in SymbolTable. Not related to SymbolID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+pub struct ParserStmtID(usize);
+
+impl ParserStmtID {
+    pub fn new(id: usize) -> Self {
+        Self(id)
     }
 }

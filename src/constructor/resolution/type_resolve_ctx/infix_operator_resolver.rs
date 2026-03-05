@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    InfixOperator, InfixOperatorProperties, ParserFuncParam, ParserSymbolPath, Range, error::Phase,
+    InfixOperator, InfixOperatorProperties, ParserFuncParam, Range, SymbolPath, error::Phase,
     resolution::TypeResolveCtx,
 };
 
@@ -24,12 +24,16 @@ impl<'a> TypeResolveCtx<'a> {
         &mut self,
         symbol: &str,
         params: &[ParserFuncParam],
-        return_type: &ParserSymbolPath,
+        return_type: &SymbolPath,
         decl_range: Range,
     ) {
-        // Get the return type
-        let return_type_path = match self.program.resolve_type_def_parser_path(return_type) {
-            Some(path) => path,
+        // Get the return type id
+        let resolved_return_type = match self
+            .program
+            .get_id_by_path(return_type)
+            .and_then(|ids| ids.first().cloned())
+        {
+            Some(resolved_path) => resolved_path,
             None => {
                 self.ec
                     .type_not_found(decl_range, Phase::TypeResolution, &return_type.to_string());
@@ -51,14 +55,13 @@ impl<'a> TypeResolveCtx<'a> {
             symbol: symbol.to_string(),
             lhs,
             rhs,
-            return_type: return_type_path,
+            return_type: resolved_return_type,
             body: Vec::new(),
         };
         self.program.register_infix_func(infix);
     }
 
     pub fn register_infix_define(&mut self, symbol: &str, properties: InfixOperatorProperties) {
-        self.program
-            .register_infix_operator(symbol.to_string(), properties);
+        self.program.register_infix_operator(symbol, properties);
     }
 }

@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    FuncCallArg, LiteralBind, Program, Range, SymbolPath,
+    FuncCallArg, PrimitiveType, Program, Range,
+    data::SymbolID,
     error::{ErrorCollector, Phase},
 };
 
@@ -26,19 +27,19 @@ pub enum Expression {
     BoolLiteral(bool),
     PrefixOperator {
         operand: Box<Expression>,
-        operand_type: SymbolPath,
-        return_type: SymbolPath,
+        operand_type: SymbolID,
+        return_type: SymbolID,
     },
     InfixOperator {
         lhs: Box<Expression>,
-        lhs_type: SymbolPath,
+        lhs_type: SymbolID,
         rhs: Box<Expression>,
-        rhs_type: SymbolPath,
-        return_type: SymbolPath,
+        rhs_type: SymbolID,
+        return_type: SymbolID,
     },
-    Identifier(SymbolPath),
+    Identifier(SymbolID),
     FuncCall {
-        path: SymbolPath,
+        id: SymbolID,
         args: Vec<FuncCallArg>,
     },
 }
@@ -49,44 +50,38 @@ impl Expression {
         ec: &mut ErrorCollector,
         program: &Program,
         error_range: Range,
-    ) -> Option<SymbolPath> {
+    ) -> Option<SymbolID> {
         match self {
-            Expression::IntLiteral(_) => match &program.int_literal_type {
-                Some(type_path) => Some(type_path.clone()),
-                None => {
-                    ec.no_literal_bind(error_range, Phase::TypeResolution, LiteralBind::IntLiteral);
-                    None
-                }
-            },
-            Expression::FloatLiteral(_) => match &program.float_literal_type {
-                Some(type_path) => Some(type_path.clone()),
-                None => {
-                    ec.no_literal_bind(
-                        error_range,
-                        Phase::TypeResolution,
-                        LiteralBind::FloatLiteral,
-                    );
-                    None
-                }
-            },
-            Expression::BoolLiteral(_) => match program.bool_literal_type.clone() {
+            Expression::IntLiteral(_) => program.get_id_of_primitive_type(&PrimitiveType::Int),
+            Expression::FloatLiteral(_) => program.get_id_of_primitive_type(&PrimitiveType::Float),
+            Expression::BoolLiteral(_) => program.get_id_of_primitive_type(&PrimitiveType::Bool),
+            Expression::PrefixOperator { return_type, .. } => Some(*return_type),
+            Expression::InfixOperator { return_type, .. } => Some(*return_type),
+            Expression::Identifier(symbol_id) => match program.get_symbol_type(symbol_id) {
                 Some(type_path) => Some(type_path),
                 None => {
-                    ec.no_literal_bind(
+                    ec.comp_bug(
                         error_range,
                         Phase::TypeResolution,
-                        LiteralBind::BoolLiteral,
+                        &format!(
+                            "Identifier with ID {} which should have been resolved",
+                            symbol_id
+                        ),
                     );
                     None
                 }
             },
-            Expression::PrefixOperator { return_type, .. } => Some(return_type.clone()),
-            Expression::InfixOperator { return_type, .. } => Some(return_type.clone()),
-            Expression::Identifier(symbol_path) => Some(symbol_path.clone()),
-            Expression::FuncCall { path, .. } => match program.get_func_by_path(path) {
-                Some(func) => func.return_type.clone(),
+            Expression::FuncCall { id: func_id, .. } => match program.get_func(func_id) {
+                Some(func) => func.return_type,
                 None => {
-                    ec.func_not_found(error_range, Phase::TypeResolution, &path.to_string());
+                    ec.comp_bug(
+                        error_range,
+                        Phase::TypeResolution,
+                        &format!(
+                            "Call to function with ID {} which should have been resolved",
+                            func_id
+                        ),
+                    );
                     None
                 }
             },

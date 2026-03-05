@@ -14,20 +14,15 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod primitive_type;
-mod program;
-mod statement;
-mod struct_decl;
-mod variables;
+use crate::{StructDecl, data::ParserStmtID, resolution::type_resolve_ctx::TypeResolveCtx};
 
-pub use expression::Expression;
-pub use function::{FuncCallArg, Function};
-pub use operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity, PrefixOperator};
-pub use primitive_type::PrimitiveType;
-pub use program::Program;
-pub use statement::{IfArm, Statement};
-pub use struct_decl::StructDecl;
-pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};
+impl<'a> TypeResolveCtx<'a> {
+    pub fn register_struct(&mut self, symbol_id: &ParserStmtID, name: &str) {
+        if let Some(path) = self.symbol_table.get_path_by_id(symbol_id) {
+            let struct_decl = StructDecl {
+                name: name.to_string(),
+            };
+            self.program.register_struct_decl(struct_decl, path.clone());
+        }
+    }
+}
