@@ -88,7 +88,7 @@ macro_rules! symbol_path {
             let mut temp_path = $crate::ast::data::SymbolPath::new();
             $(
                 let temp_val = $x;
-                // Type check to ensure it's SymbolPathComponent
+                // Type check to ensure it's a String
                 let _: &String = &temp_val;
                 // Push the component to the vector
                 temp_path.push($crate::SymbolPathComponent { symbol: temp_val.to_string() });

@@ -71,7 +71,7 @@ impl Program {
         }
     }
 
-    /// Resolves a SymbolPath into a SymbolID.
+    /// Returns a SymbolID for the given SymbolPath.
     pub fn get_id_by_path(&self, path: &SymbolPath) -> Option<&Vec<SymbolID>> {
         self.path_to_id.get(path)
     }

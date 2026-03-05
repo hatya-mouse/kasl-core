@@ -350,8 +350,6 @@ input e: Int = 0
         None => panic!("Couldn't convert tokens to typed tokens:\n{:#?}", ec),
     };
 
-    println!("{:#?}", ec);
-
     let rpn_tokens = match rearrange_tokens_to_rpn(&mut ec, &program, typed_tokens) {
         Some(tokens) => tokens,
         None => panic!("Couldn't convert typed tokens to RPN:\n{:#?}", ec),

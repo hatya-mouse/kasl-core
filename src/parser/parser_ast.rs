@@ -145,14 +145,6 @@ pub struct ParserFuncCallArg {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ParserStateVar {
-    pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Vec<ExprToken>,
-    pub range: Range,
-}
-
-#[derive(Debug, PartialEq, Clone)]
 pub struct ParserFuncParam {
     pub label: Option<String>,
     pub name: String,

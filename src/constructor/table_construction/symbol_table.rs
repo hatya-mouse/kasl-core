@@ -21,9 +21,9 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
     statements: HashMap<ParserStmtID, &'a ParserTopLevelStmt>,
-    /// Contains a mapping of symbol IDs to their corresponding paths.
-    path_to_id: HashMap<SymbolPath, Vec<ParserStmtID>>,
     /// Contains a mapping of symbol paths to their corresponding IDs.
+    path_to_id: HashMap<SymbolPath, Vec<ParserStmtID>>,
+    /// Contains a mapping of symbol IDs to their corresponding paths.
     id_to_path: HashMap<ParserStmtID, SymbolPath>,
 
     /// The next ID number.

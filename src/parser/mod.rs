@@ -21,5 +21,5 @@ pub use grammar::kasl_parser;
 pub use parser_ast::{
     ExprToken, ExprTokenKind, ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg,
     ParserFuncParam, ParserIfArm, ParserInputAttribute, ParserOperatorType, ParserProgram,
-    ParserStateVar, ParserTopLevelStmt, ParserTopLevelStmtKind,
+    ParserTopLevelStmt, ParserTopLevelStmtKind,
 };

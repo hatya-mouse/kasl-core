@@ -17,7 +17,7 @@
 use crate::{
     ExprToken, ExprTokenKind, PrimitiveType, Program, Range,
     data::SymbolID,
-    error::{ErrorCollector, Phase},
+    error::{ErrorCollector, Ph, Phase},
     resolution::expr_inference::SymbolTypeGetter,
 };
 
@@ -65,6 +65,13 @@ pub fn get_typed_tokens(
                         },
                         range: token.range,
                     });
+                } else {
+                    ec.comp_bug(
+                        token.range,
+                        Ph::TypeResolution,
+                        "get_typed_tokens before primitive types are added to the program.",
+                    );
+                    return None;
                 }
             }
 
@@ -77,6 +84,13 @@ pub fn get_typed_tokens(
                         },
                         range: token.range,
                     });
+                } else {
+                    ec.comp_bug(
+                        token.range,
+                        Ph::TypeResolution,
+                        "get_typed_tokens before primitive types are added to the program.",
+                    );
+                    return None;
                 }
             }
 
@@ -89,10 +103,35 @@ pub fn get_typed_tokens(
                         },
                         range: token.range,
                     });
+                } else {
+                    ec.comp_bug(
+                        token.range,
+                        Ph::TypeResolution,
+                        "get_typed_tokens before primitive types are added to the program.",
+                    );
+                    return None;
                 }
             }
 
-            ExprTokenKind::Identifier(path) | ExprTokenKind::FuncCall { path, .. } => {
+            ExprTokenKind::Identifier(path) => {
+                if let Some(symbol_type) =
+                    program.get_first_type_from_path(ec, path, token.range, |ec, path| {
+                        ec.var_not_found(token.range, Phase::TypeResolution, &path.to_string());
+                    })
+                {
+                    result.push(TypedToken::new(
+                        TypedTokenKind::Value {
+                            expr_token: token.clone(),
+                            value_type: symbol_type,
+                        },
+                        token.range,
+                    ));
+                } else {
+                    return None;
+                }
+            }
+
+            ExprTokenKind::FuncCall { path, .. } => {
                 if let Some(symbol_type) =
                     program.get_first_type_from_path(ec, path, token.range, |ec, path| {
                         ec.func_not_found(token.range, Phase::TypeResolution, &path.to_string());
@@ -105,6 +144,8 @@ pub fn get_typed_tokens(
                         },
                         token.range,
                     ));
+                } else {
+                    return None;
                 }
             }
 
