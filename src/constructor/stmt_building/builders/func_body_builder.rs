@@ -18,7 +18,7 @@ use crate::{
     ParserBodyStmt, ParserBodyStmtKind, Program, Statement, SymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
-    stmt_building::{func_call_builder::build_func_call_stmt, if_builder::build_if_stmt},
+    stmt_building::builders::{func_call_builder::build_func_call_stmt, if_builder::build_if_stmt},
 };
 
 pub fn build_func_body_stmt(

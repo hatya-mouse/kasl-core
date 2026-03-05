@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-mod builder_caller;
-mod builders;
+mod func_body_builder;
+mod func_call_builder;
+mod if_builder;
 
-pub use builder_caller::build_func_bodies;
-pub use builders::build_func_body_stmt;
+pub use func_body_builder::build_func_body_stmt;

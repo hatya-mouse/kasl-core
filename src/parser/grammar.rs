@@ -55,9 +55,9 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule func_decl_statement() -> ParserTopLevelStmt
         = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
-        return_type:("->" _? t:id_chain() { t })? body:(__? "{"
+        return_type:("->" _? t:id_chain() { t })? __? "{"
         __? body:body_stmts() __?
-        "}" { body })? end:position!() {
+        "}" end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
                 kind: ParserTopLevelStmtKind::FuncDecl { is_static: is_static.is_some(), name, params, return_type, body }

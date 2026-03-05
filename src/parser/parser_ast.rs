@@ -41,7 +41,7 @@ pub enum ParserTopLevelStmtKind {
         name: String,
         params: Vec<ParserFuncParam>,
         return_type: Option<SymbolPath>,
-        body: Option<Vec<ParserBodyStmt>>,
+        body: Vec<ParserBodyStmt>,
     },
     Input {
         name: String,
