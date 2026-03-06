@@ -14,7 +14,17 @@
 // limitations under the License.
 //
 
-use crate::{Program, error::ErrorCollector};
+use crate::data::SymbolID;
 
-/// Check for errors in the given symbol table.
-pub fn validate(ec: &mut ErrorCollector, program: &Program) {}
+/// A function dependency graph node to detect recursive function call.
+/// `from` is an ID of the function that calles the `to` function.
+pub struct FunctionGraphEdge {
+    pub from: SymbolID,
+    pub to: SymbolID,
+}
+
+impl FunctionGraphEdge {
+    pub fn new(from: SymbolID, to: SymbolID) -> Self {
+        Self { from, to }
+    }
+}

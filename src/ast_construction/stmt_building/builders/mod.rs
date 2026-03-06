@@ -17,5 +17,6 @@
 mod func_body_builder;
 mod func_call_builder;
 mod if_builder;
+mod stmt_building_ctx;
 
-pub use func_body_builder::build_func_body_stmt;
+pub use stmt_building_ctx::StmtBuildingCtx;

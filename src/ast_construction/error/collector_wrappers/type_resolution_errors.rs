@@ -134,15 +134,15 @@ impl ErrorCollector {
         &mut self,
         range: Range,
         phase: Phase,
-        expected_type: &str,
-        actual_type: &str,
+        annotation_type: &str,
+        expression_type: &str,
     ) {
         self.emit(
             EK::TypeMismatch,
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(expected_type.to_string(), actual_type.to_string()),
+            Pl::StrPair(annotation_type.to_string(), expression_type.to_string()),
         );
     }
 }

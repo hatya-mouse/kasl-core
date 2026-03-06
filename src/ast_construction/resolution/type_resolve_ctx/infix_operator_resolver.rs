@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    InfixOperator, InfixOperatorProperties, ParserFuncParam, Range, SymbolPath, error::Phase,
+    InfixOperator, InfixOperatorProperties, ParserFuncParam, Range, SymbolPath, error::Ph,
     resolution::TypeResolveCtx,
 };
 
@@ -36,11 +36,19 @@ impl<'a> TypeResolveCtx<'a> {
             Some(resolved_path) => resolved_path,
             None => {
                 self.ec
-                    .type_not_found(decl_range, Phase::TypeResolution, &return_type.to_string());
+                    .type_not_found(decl_range, Ph::TypeResolution, &return_type.to_string());
                 return;
             }
         };
 
+        // Check if the function has two parameters
+        if params.len() != 2 {
+            self.ec
+                .invalid_param_numbers_for_infix(decl_range, Ph::TypeResolution, params.len());
+            return;
+        }
+
+        // Resolve the parameters
         let lhs = match self.resolve_param(&params[0]) {
             Some(operand) => operand,
             None => return,
@@ -49,6 +57,16 @@ impl<'a> TypeResolveCtx<'a> {
             Some(operand) => operand,
             None => return,
         };
+
+        // Ensure that the parameters don't have any default value
+        if lhs.def_val.is_some() {
+            self.ec
+                .op_def_val(decl_range, Ph::TypeResolution, &lhs.name);
+        }
+        if rhs.def_val.is_some() {
+            self.ec
+                .op_def_val(decl_range, Ph::TypeResolution, &rhs.name);
+        }
 
         // Once we've got the types, we can get the exact operator
         let infix = InfixOperator {

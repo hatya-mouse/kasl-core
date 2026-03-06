@@ -14,7 +14,24 @@
 // limitations under the License.
 //
 
-use crate::{Program, error::ErrorCollector};
+use crate::{Program, SymbolTable, error::ErrorCollector};
 
-/// Check for errors in the given symbol table.
-pub fn validate(ec: &mut ErrorCollector, program: &Program) {}
+pub struct TypeResolveCtx<'a> {
+    pub ec: &'a mut ErrorCollector,
+    pub program: &'a mut Program,
+    pub symbol_table: &'a SymbolTable<'a>,
+}
+
+impl<'a> TypeResolveCtx<'a> {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        program: &'a mut Program,
+        symbol_table: &'a SymbolTable<'a>,
+    ) -> Self {
+        TypeResolveCtx {
+            ec,
+            program,
+            symbol_table,
+        }
+    }
+}

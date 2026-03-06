@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserFuncParam, PrefixOperator, Range, SymbolPath, error::Phase,
+    ParserFuncParam, PrefixOperator, Range, SymbolPath, error::Ph,
     resolution::type_resolve_ctx::TypeResolveCtx,
 };
 
@@ -36,10 +36,17 @@ impl<'a> TypeResolveCtx<'a> {
             Some(resolved_path) => resolved_path,
             None => {
                 self.ec
-                    .type_not_found(decl_range, Phase::TypeResolution, &return_type.to_string());
+                    .type_not_found(decl_range, Ph::TypeResolution, &return_type.to_string());
                 return;
             }
         };
+
+        // Check if the function has one parameter
+        if params.len() != 1 {
+            self.ec
+                .invalid_param_numbers_for_prefix(decl_range, Ph::TypeResolution, params.len());
+            return;
+        }
 
         // Resolve the operand
         let operand = match self.resolve_param(&params[0]) {

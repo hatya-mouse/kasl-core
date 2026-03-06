@@ -31,14 +31,14 @@ pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<
     // 1. Build symbol table
     build_symbol_table(&mut error_collector, &mut symbol_table, &statements);
 
-    // 2. Validate program
-    validate(&mut error_collector, &symbol_table);
-
-    // 3. Resolve types and construct the AST
+    // 2. Resolve types and construct the AST
     resolve_types(&mut error_collector, &mut program, &symbol_table);
 
-    // 4. Build the function bodies
+    // 3. Build the function bodies
     build_func_bodies(&mut error_collector, &mut program, &symbol_table);
+
+    // 4. Validate program
+    validate(&mut error_collector, &program);
 
     error_collector.as_result()
 }

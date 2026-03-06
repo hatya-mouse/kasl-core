@@ -15,57 +15,51 @@
 //
 
 use crate::{
-    IfArm, ParserBodyStmt, ParserIfArm, Program, Statement, SymbolTable, error::ErrorCollector,
-    resolution::expr_inference::ExprTreeBuilder,
-    stmt_building::builders::func_body_builder::build_func_body_stmt,
+    IfArm, ParserBodyStmt, ParserIfArm, Statement, data::SymbolID,
+    resolution::expr_inference::ExprTreeBuilder, stmt_building::StmtBuildingCtx,
 };
 
-pub fn build_if_stmt(
-    ec: &mut ErrorCollector,
-    program: &mut Program,
-    symbol_table: &SymbolTable,
-    parsed_stmts: &mut Vec<Statement>,
-    parser_main: &ParserIfArm,
-    parser_else_ifs: &Vec<ParserIfArm>,
-    parser_else_body: &[ParserBodyStmt],
-) {
-    // Parse the main (if) arm
-    let main = match build_if_arm(ec, program, symbol_table, parser_main) {
-        Some(arm) => arm,
-        None => return,
-    };
+impl<'a> StmtBuildingCtx<'a> {
+    pub fn build_if_stmt(
+        &mut self,
+        function_id: SymbolID,
+        parser_main: &ParserIfArm,
+        parser_else_ifs: &Vec<ParserIfArm>,
+        parser_else_body: &[ParserBodyStmt],
+    ) -> Option<Statement> {
+        // Parse the main (if) arm
+        let main = self.build_if_arm(function_id, parser_main)?;
 
-    // Parse each arms in the parser_else_ifs
-    let mut else_ifs = Vec::new();
-    for parser_arm in parser_else_ifs {
-        match build_if_arm(ec, program, symbol_table, parser_arm) {
-            Some(arm) => else_ifs.push(arm),
-            None => continue,
+        // Parse each arms in the parser_else_ifs
+        let mut else_ifs = Vec::new();
+        for parser_arm in parser_else_ifs {
+            match self.build_if_arm(function_id, parser_arm) {
+                Some(arm) => else_ifs.push(arm),
+                None => continue,
+            }
         }
+
+        // Parse the else body
+        let else_body = self.build_func_body_stmt(function_id, parser_else_body);
+
+        Some(Statement::If {
+            main,
+            else_ifs,
+            else_body,
+        })
     }
 
-    // Parse the else body
-    let else_body = build_func_body_stmt(ec, program, symbol_table, parser_else_body);
-
-    let if_stmt = Statement::If {
-        main,
-        else_ifs,
-        else_body,
-    };
-
-    // Push the statement onto the parsed_stmts
-    parsed_stmts.push(if_stmt);
-}
-
-pub fn build_if_arm(
-    ec: &mut ErrorCollector,
-    program: &mut Program,
-    symbol_table: &SymbolTable,
-    parser_arm: &ParserIfArm,
-) -> Option<IfArm> {
-    // Parse the main (if) condition
-    let condition =
-        match program.build_expr_tree_from_raw_tokens(ec, &parser_arm.condition, symbol_table) {
+    pub fn build_if_arm(
+        &mut self,
+        function_id: SymbolID,
+        parser_arm: &ParserIfArm,
+    ) -> Option<IfArm> {
+        // Parse the main (if) condition
+        let condition = match self.program.build_expr_tree_from_raw_tokens(
+            self.ec,
+            &parser_arm.condition,
+            self.symbol_table,
+        ) {
             Some(parsed_value) => parsed_value,
             None => {
                 // Error should have been reported in the build_expr_tree_from_raw_tokens function so we don't need to report it here
@@ -73,8 +67,9 @@ pub fn build_if_arm(
             }
         };
 
-    // Collect the main body statements
-    let body = build_func_body_stmt(ec, program, symbol_table, &parser_arm.body);
+        // Collect the main body statements
+        let body = self.build_func_body_stmt(function_id, &parser_arm.body);
 
-    Some(IfArm::new(condition, body))
+        Some(IfArm::new(condition, body))
+    }
 }

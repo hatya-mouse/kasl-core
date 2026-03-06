@@ -27,16 +27,6 @@ pub enum ErrorKind {
     /// * Throwed if there's a ParserTopLevelExpr with invalid type. This doesn't mean that the expression if in the top level.
     InvalidTopExpr,
 
-    /// Title: InvalidParamNumbersForInfix
-    /// Phase: Validation
-    /// Payload: None
-    InvalidParamNumbersForInfix,
-
-    /// Title: InvalidParamNumbersForPrefix
-    /// Phase: Validation
-    /// Payload: None
-    InvalidParamNumbersForPrefix,
-
     /// Title: VariableNotFound
     /// Phase: TypeResolution
     /// Payload: Path of the variable which could not be found
@@ -87,6 +77,16 @@ pub enum ErrorKind {
     /// Phase: TypeResolution
     /// Payload: Name of the parameter which doesn't have a type annotation
     ParamWithoutType,
+
+    /// Title: InvalidParamNumbersForInfix
+    /// Phase: TypeResolution
+    /// Payload: None
+    InvalidParamNumbersForInfix,
+
+    /// Title: InvalidParamNumbersForPrefix
+    /// Phase: TypeResolution
+    /// Payload: None
+    InvalidParamNumbersForPrefix,
 
     /// Title: OpCannotHaveDefaultValue
     /// Phase: TypeResolution

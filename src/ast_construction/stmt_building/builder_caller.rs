@@ -17,7 +17,7 @@
 use crate::{
     ParserTopLevelStmtKind, Program, Range, SymbolTable,
     error::{ErrorCollector, Ph},
-    stmt_building::build_func_body_stmt,
+    stmt_building::StmtBuildingCtx,
 };
 
 pub fn build_func_bodies(
@@ -43,8 +43,11 @@ pub fn build_func_bodies(
                 },
                 None => None,
             } {
+                // Create a building context
+                let mut ctx = StmtBuildingCtx::new(ec, program, symbol_table);
                 // Build the function body
-                let built_body = build_func_body_stmt(ec, program, symbol_table, func_body_stmts);
+                let built_body = ctx.build_func_body_stmt(func_id, func_body_stmts);
+
                 match program.get_func_mut(&func_id) {
                     // Update the function body in the Program
                     Some(func) => func.body = built_body,
