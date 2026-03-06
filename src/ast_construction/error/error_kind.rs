@@ -113,6 +113,11 @@ pub enum ErrorKind {
     /// Payload: Function path, required number of parameters, actual number of parameters
     NotEnoughParams,
 
+    /// Title: RecursiveFunc
+    /// Phase: StatementBuilding
+    /// Payload: Function path to the recursive function
+    RecursiveFunc,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

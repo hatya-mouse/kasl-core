@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-mod builder_caller;
-mod builders;
+mod building_ctx;
 mod function_graph;
+mod stmt_builder;
 
-pub use builder_caller::build_func_bodies;
-pub use builders::StmtBuildingCtx;
+pub use building_ctx::StmtBuildingCtx;
+pub use stmt_builder::build_statements;

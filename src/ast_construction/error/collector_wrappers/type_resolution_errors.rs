@@ -118,6 +118,38 @@ impl ErrorCollector {
         );
     }
 
+    /// Wrapper function for InvalidParamNumbersForInfix error.
+    pub fn invalid_param_numbers_for_infix(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        got_params: usize,
+    ) {
+        self.emit(
+            EK::InvalidParamNumbersForInfix,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Num(got_params),
+        );
+    }
+
+    /// Wrapper function for InvalidParamNumbersForPrefix error.
+    pub fn invalid_param_numbers_for_prefix(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        got_params: usize,
+    ) {
+        self.emit(
+            EK::InvalidParamNumbersForPrefix,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Num(got_params),
+        );
+    }
+
     /// Wrapper function for OperatorHasDefaultValue error.
     pub fn op_def_val(&mut self, range: Range, phase: Phase, symbol: &str) {
         self.emit(

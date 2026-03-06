@@ -32,11 +32,11 @@ pub fn sort_graph(
     let mut in_degrees = HashMap::new();
 
     for node in graph.node_paths() {
-        in_degrees.insert(node, 0);
+        in_degrees.entry(node).or_insert(0);
     }
 
     for edge in graph.edges() {
-        *in_degrees.get_mut(&edge.target).unwrap() += 1;
+        *in_degrees.entry(edge.target).or_default() += 1;
     }
 
     // Initialize the queue with nodes that have no incoming edges

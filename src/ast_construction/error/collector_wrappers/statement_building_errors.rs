@@ -72,4 +72,15 @@ impl ErrorCollector {
             Pl::StrAndNumPair(func_path.to_string(), required_num, actual_num),
         );
     }
+
+    /// Wrapper function for RecursiveFunc error.
+    pub fn recursive_func(&mut self, range: Range, phase: Phase, func_path: &str) {
+        self.emit(
+            EK::RecursiveFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(func_path.to_string()),
+        );
+    }
 }

@@ -15,11 +15,8 @@
 //
 
 use crate::{
-    FuncCallArg, ParserBodyStmt, ParserFuncCallArg, Statement, SymbolPath,
-    data::SymbolID,
-    error::Phase,
-    resolution::expr_inference::ExprTreeBuilder,
-    stmt_building::{StmtBuildingCtx, function_graph::FunctionGraphEdge},
+    FuncCallArg, ParserBodyStmt, ParserFuncCallArg, Statement, SymbolPath, data::SymbolID,
+    error::Phase, resolution::expr_inference::ExprTreeBuilder, stmt_building::StmtBuildingCtx,
 };
 
 impl<'a> StmtBuildingCtx<'a> {
@@ -53,8 +50,7 @@ impl<'a> StmtBuildingCtx<'a> {
         };
 
         // Push an edge to the function graph
-        let edge = FunctionGraphEdge::new(caller_id, *func_id);
-        self.function_graph.push(edge);
+        self.function_graph.add_edge(caller_id, *func_id);
 
         // Check if the number of arguments is within the valid range
         let minimum_num = target_func.min_num_of_params();

@@ -18,7 +18,7 @@ use crate::{
     ParserTopLevelStmt, Program, SymbolTable,
     error::{ErrorCollector, ErrorRecord},
     resolution::type_resolver::resolve_types,
-    stmt_building::build_func_bodies,
+    stmt_building::build_statements,
     table_construction::build_symbol_table,
     validation::validator::validate,
 };
@@ -35,7 +35,7 @@ pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<
     resolve_types(&mut error_collector, &mut program, &symbol_table);
 
     // 3. Build the function bodies
-    build_func_bodies(&mut error_collector, &mut program, &symbol_table);
+    build_statements(&mut error_collector, &mut program, &symbol_table);
 
     // 4. Validate program
     validate(&mut error_collector, &program);

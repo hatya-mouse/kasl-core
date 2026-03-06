@@ -14,17 +14,31 @@
 // limitations under the License.
 //
 
+use std::collections::HashMap;
+
 use crate::data::SymbolID;
 
-/// A function dependency graph node to detect recursive function call.
-/// `from` is an ID of the function that calles the `to` function.
-pub struct FunctionGraphEdge {
-    pub from: SymbolID,
-    pub to: SymbolID,
+/// A function dependency graph to detect recursive function call.
+pub struct FunctionGraph {
+    pub nodes: Vec<SymbolID>,
+    /// A map from a function ID to its outgoing edges.
+    /// The key is an ID of the function that calls the function with an ID in the value.
+    pub edges: HashMap<SymbolID, Vec<SymbolID>>,
 }
 
-impl FunctionGraphEdge {
-    pub fn new(from: SymbolID, to: SymbolID) -> Self {
-        Self { from, to }
+impl FunctionGraph {
+    pub fn new() -> Self {
+        Self {
+            nodes: Vec::new(),
+            edges: HashMap::new(),
+        }
+    }
+
+    pub fn add_edge(&mut self, from: SymbolID, to: SymbolID) {
+        self.edges.entry(from).or_default().push(to);
+    }
+
+    pub fn add_node(&mut self, id: SymbolID) {
+        self.nodes.push(id);
     }
 }

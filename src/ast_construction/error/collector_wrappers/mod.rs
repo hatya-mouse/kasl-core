@@ -18,4 +18,3 @@ mod compiler_errors;
 mod statement_building_errors;
 mod symbol_table_construction_errors;
 mod type_resolution_errors;
-mod validation_errors;
