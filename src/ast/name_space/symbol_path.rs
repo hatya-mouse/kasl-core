@@ -39,13 +39,9 @@ impl SymbolPath {
         Self { components }
     }
 
-    pub fn push(&mut self, component: SymbolPathComponent) {
-        self.components.push(component);
-    }
-
-    pub fn extended(&self, component: SymbolPathComponent) -> Self {
+    pub fn extended(&self, component: Vec<SymbolPathComponent>) -> Self {
         let mut new_path = self.clone();
-        new_path.components.push(component);
+        new_path.components.extend(component);
         new_path
     }
 
@@ -87,6 +83,12 @@ impl Display for SymbolPath {
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct SymbolPathComponent {
     pub symbol: String,
+}
+
+impl SymbolPathComponent {
+    pub fn new(symbol: String) -> Self {
+        Self { symbol }
+    }
 }
 
 // Use this macro to create a SymbolPath from a simple list of components

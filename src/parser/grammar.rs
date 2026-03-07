@@ -15,10 +15,10 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
-    ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
-    ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, Range, SymbolPath,
-    SymbolPathComponent,
+    ChainOp, ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity,
+    ParserDeclStmt, ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm,
+    ParserInputAttribute, ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, Range,
+    SymbolPath, SymbolPathComponent,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -38,7 +38,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / input_statement()
         / output_statement()
         / state_var_statement()
-        / global_var_statement()
+        / struct_field_statement()
         / struct_decl_statement()
         / operator_definition_statement()
         / operator_func_statement()
@@ -55,7 +55,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule func_decl_statement() -> ParserDeclStmt
         = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
-        return_type:("->" _? t:id_chain() { t })? __? "{"
+        return_type:("->" _? t:type_name() { t })? __? "{"
         __? body:body_stmts() __?
         "}" end:position!() {
             ParserDeclStmt {
@@ -73,7 +73,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule input_statement() -> ParserDeclStmt
-        = start:position!() attrs:(__? a:input_attr() { a })* __? "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+        = start:position!() attrs:(__? a:input_attr() { a })* __? "input" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
                 kind: ParserDeclStmtKind::Input { name, value_type, def_val, attrs }
@@ -81,7 +81,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule output_statement() -> ParserDeclStmt
-        = start:position!() "output" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+        = start:position!() "output" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
                 kind: ParserDeclStmtKind::Output { name, value_type, def_val }
@@ -89,23 +89,23 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule state_var_statement() -> ParserDeclStmt
-        = start:position!() "state" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+        = start:position!() "state" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
                 kind: ParserDeclStmtKind::StateVar { name, value_type, def_val }
             }
         }
 
-    rule global_var_statement() -> ParserDeclStmt
-        = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+    rule struct_field_statement() -> ParserDeclStmt
+        = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserDeclStmtKind::ScopeVar { name, value_type, def_val }
+                kind: ParserDeclStmtKind::StructField { name, value_type, def_val }
             }
         }
 
     rule local_var_statement() -> ParserScopeStmt
-        = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+        = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::LocalVar { name, value_type, def_val }
@@ -113,7 +113,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule assign_statement() -> ParserScopeStmt
-        = start:position!() target:id_chain() _ "=" _ value:oneline_expression() end:position!() {
+        = start:position!() target:type_name() _ "=" _ value:oneline_expression() end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::Assign { target, value }
@@ -121,7 +121,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule func_call_statement() -> ParserScopeStmt
-        = start:position!() path:id_chain() _? "(" __? args:func_call_args() ")" end:position!() {
+        = start:position!() path:type_name() _? "(" __? args:func_call_args() ")" end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::FuncCall { path, args }
@@ -197,7 +197,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // Operator Function
     rule operator_func_statement() -> ParserDeclStmt
-        = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
+        = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:type_name() __? body:("{"
         __? body:body_stmts() __?
         "}" { body }) end:position!() {
             ParserDeclStmt {
@@ -218,7 +218,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // Function Parameter
     rule func_param() -> ParserFuncParam
-        = start:position!() label:param_label()? name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:multiline_expression() { v })? end:position!() {
+        = start:position!() label:param_label()? name:identifier() value_type:(_? ":" _? t:type_name() { t })? def_val:(_? "=" _? v:multiline_expression() { v })? end:position!() {
             ParserFuncParam { label, name, value_type, def_val, range: Range::n(start, end) }
         }
 
@@ -242,51 +242,66 @@ peg::parser!(pub grammar kasl_parser() for str {
     // --- EXPRESSIONS ---
 
     pub rule oneline_expression() -> Vec<ExprToken>
-        = parts:( expr_element() ** (_?) ) {
-            parts.into_iter().flatten().collect()
-        }
+        = expr_token() ** (_?)
 
     pub rule multiline_expression() -> Vec<ExprToken>
-        = parts:( expr_element() ** (__?) ) {
-            parts.into_iter().flatten().collect()
-        }
-
-    rule expr_element() -> Vec<ExprToken>
-        = lparen_start:position!() "(" _? inner:multiline_expression() _? rparen_start:position!() ")" {
-            let mut v = vec![ExprToken::lparen(Range::n(lparen_start, lparen_start + 1))];
-            v.extend(inner);
-            v.push(ExprToken::rparen(Range::n(rparen_start, rparen_start + 1)));
-            v
-        }
-        / single:expr_token() { vec![single] }
+        = expr_token() ** (__?)
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
             literal()
             / func_call()
-            / id_chain_token()
+            / identifier_token()
             / operator_token()
+            / parenthesized_token()
+        ) end:position!() {
+            ExprToken { range: Range::n(start, end), kind }
+        }
+        / token:chain_token() { token }
+
+    rule primary() -> ExprToken
+        = start:position!() kind:(
+            literal()
+            / func_call()
+            / identifier_token()
+            / parenthesized_token()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }
 
-    rule func_call() -> ExprTokenKind
-        = path:id_chain() _? "(" __? args:func_call_args() ")" {
-            ExprTokenKind::FuncCall { path, args }
-        }
+    // --- TOKENS ---
 
     rule literal() -> ExprTokenKind
         = decimal:decimal() { ExprTokenKind::FloatLiteral(decimal) }
         / integer:integer() { ExprTokenKind::IntLiteral(integer) }
-        / boolean:boolean() { ExprTokenKind::BoolLiteral(boolean)}
+        / boolean:boolean() { ExprTokenKind::BoolLiteral(boolean) }
 
-    rule id_chain_token() -> ExprTokenKind
-        = ids:id_chain() { ExprTokenKind::Identifier(ids) }
+    rule func_call() -> ExprTokenKind
+        = id:identifier() _? "(" __? args:func_call_args() ")" {
+            ExprTokenKind::FuncCall { name: id, args }
+        }
+
+    rule identifier_token() -> ExprTokenKind
+        = id:identifier() { ExprTokenKind::Access(id) }
 
     rule operator_token() -> ExprTokenKind
         = op:operator() { ExprTokenKind::Operator(op) }
 
-    // --- TOKENS ---
+    rule parenthesized_token() -> ExprTokenKind
+        = "(" __? expr:multiline_expression() ")" { ExprTokenKind::Pharenthesized(expr) }
+
+    rule chain_token() -> ExprToken
+    = lhs:primary() extensions:(start:position!() __? "." __? op:chain_op() end:position!() { (op, Range::n(start, end)) })+ {
+            extensions.into_iter().fold(lhs, |lhs, op| {
+                ExprToken { range: op.1, kind: ExprTokenKind::Chain { lhs: Box::new(lhs), op: op.0 } }
+            })
+        }
+
+    rule chain_op() -> ChainOp
+        = id:identifier() { ChainOp::Access(id) }
+        / id:identifier() __? "(" __? args:func_call_args() __? ")" {
+            ChainOp::FuncCall { name: id, args }
+        }
 
     rule identifier() -> String
         = quiet!{
@@ -295,19 +310,11 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
         / expected!("identifier")
 
-    rule id_chain() -> SymbolPath
-        = parent:(start:position!() symbol:identifier() end:position!() {
-            SymbolPathComponent {
-                symbol,
-            }
-        }) children:(start:position!() dot() symbol:identifier() end:position!() {
-            SymbolPathComponent {
-                symbol,
-            }
-        })* {
-            let mut components = vec![parent];
-            components.extend(children);
-            SymbolPath::with(components)
+    rule type_name() -> SymbolPath
+        = first:identifier() extensions:(_? "." _? id:identifier() _? { id })* {
+            let first = SymbolPathComponent::new(first);
+            let extensions = extensions.into_iter().map(|id| SymbolPathComponent::new(id)).collect();
+            SymbolPath::with(vec![first]).extended(extensions)
         }
 
     rule operator() -> String

@@ -16,29 +16,17 @@
 
 use crate::{
     Range,
-    error::{EK, ErrorCollector, Phase, Pl, Sv},
+    error::{EK, ErrorCollector, Ph, Pl, Sv},
 };
 
 impl ErrorCollector {
-    /// Wrapper function for DuplicateSymbol error.
-    pub fn dup_sym(&mut self, range: Range, phase: Phase, sym: &str) {
+    pub fn top_level_struct_field(&mut self, range: Range, field_name: &str) {
         self.emit(
-            EK::DuplicateSymbol,
+            EK::TopLevelStructField,
             range,
-            phase,
+            Ph::GlobalDeclCollection,
             Sv::Error,
-            Pl::Str(sym.to_string()),
-        );
-    }
-
-    /// Wrapper function for InvalidTopExpr
-    pub fn invalid_top_expr(&mut self, range: Range, phase: Phase, expr: &str) {
-        self.emit(
-            EK::InvalidTopExpr,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(expr.to_string()),
+            Pl::Str(field_name.to_string()),
         );
     }
 }

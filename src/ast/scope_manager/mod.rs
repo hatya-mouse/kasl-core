@@ -18,22 +18,24 @@ mod scope;
 mod scope_var;
 
 pub use scope::Scope;
-pub use scope_var::VariableKind;
+pub use scope_var::{ScopeVar, VariableKind};
 
 use crate::VariableID;
 use std::collections::HashMap;
 
-pub struct ScopeManager {
+pub struct ScopeRegistry {
     pub scopes: HashMap<ScopeID, Scope>,
+    variables: HashMap<VariableID, ScopeVar>,
     global_scope_id: ScopeID,
     next_id: usize,
 }
 
-impl ScopeManager {
-    /// Creates a new `ScopeManager` with a new global scope.
+impl ScopeRegistry {
+    /// Creates a new `ScopeRegistry` with a new global scope.
     pub fn new() -> Self {
         let mut manager = Self {
             scopes: HashMap::new(),
+            variables: HashMap::new(),
             global_scope_id: ScopeID(0),
             next_id: 0,
         };
@@ -42,9 +44,14 @@ impl ScopeManager {
         manager
     }
 
-    /// Returns a reference to the global scope.
-    pub fn get_global_scope(&self) -> &Scope {
-        &self.scopes[&self.global_scope_id]
+    /// Returns a mutable reference to the global scope.
+    pub fn get_global_scope_mut(&mut self) -> &mut Scope {
+        self.scopes.get_mut(&self.global_scope_id).unwrap()
+    }
+
+    /// Returns a reference to the scope with the given `ScopeID`.
+    pub fn get_scope(&self, scope_id: ScopeID) -> Option<&Scope> {
+        self.scopes.get(&scope_id)
     }
 
     /// Generates a new `ScopeID` for a new scope.
@@ -73,6 +80,18 @@ impl ScopeManager {
             target = scope.parent;
         }
         None
+    }
+
+    /// Returns a reference to the variable by ID.
+    pub fn get_var_by_id(&self, id: &VariableID) -> Option<&ScopeVar> {
+        self.variables.get(id)
+    }
+
+    // Registers a variable in the scope registry.
+    pub fn register_var(&mut self, var: ScopeVar, name: String, id: VariableID, scope: ScopeID) {
+        let target_scope = self.scopes.get_mut(&scope).unwrap();
+        target_scope.register_var(name, id);
+        self.variables.insert(id, var);
     }
 }
 

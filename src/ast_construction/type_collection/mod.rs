@@ -19,7 +19,7 @@ mod stmt_process;
 use crate::{NameSpace, ParserDeclStmt, type_registry::TypeRegistry};
 
 pub struct TypeCollector<'a> {
-    pub decl_stmts: &'a Vec<ParserDeclStmt>,
+    pub decl_stmts: &'a [ParserDeclStmt],
     pub name_space: &'a mut NameSpace,
     pub type_registry: &'a mut TypeRegistry,
 }

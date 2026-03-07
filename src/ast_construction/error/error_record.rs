@@ -61,11 +61,8 @@ impl ErrorKey {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Phase {
     Parse = 0,
-    SymbolTableConstruction = 10,
-    GraphConstruction = 20,
-    TypeResolution = 30,
-    StatementBuilding = 40,
-    Validation = 50,
+    StructCollection = 10,
+    GlobalDeclCollection = 20,
 }
 
 #[derive(Clone, Debug)]

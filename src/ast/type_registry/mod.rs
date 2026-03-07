@@ -24,7 +24,7 @@ pub use resolved_type::ResolvedType;
 pub use struct_decl::StructDecl;
 pub use struct_field::StructField;
 
-use crate::{Range, StructID, SymbolPath};
+use crate::{StructID, SymbolPath};
 use std::collections::HashMap;
 
 #[derive(Debug)]

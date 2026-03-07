@@ -14,4 +14,33 @@
 // limitations under the License.
 //
 
-struct GlobalDeclCollector {}
+mod expr_builder;
+mod resolvers;
+mod stmt_process;
+mod struct_process;
+
+use crate::{
+    NameSpace, ParserDeclStmt,
+    error::ErrorCollector,
+    scope_manager::ScopeRegistry,
+    symbol_table::{FunctionContext, OperatorContext},
+    type_registry::TypeRegistry,
+};
+
+struct GlobalDeclCollector<'a> {
+    pub ec: &'a mut ErrorCollector,
+    pub decl_stmts: &'a [ParserDeclStmt],
+    pub name_space: &'a mut NameSpace,
+    pub type_registry: &'a mut TypeRegistry,
+    pub function_ctx: &'a mut FunctionContext,
+    pub operator_ctx: &'a mut OperatorContext,
+    pub scope_registry: &'a mut ScopeRegistry,
+}
+
+impl GlobalDeclCollector<'_> {
+    pub fn process(&mut self) {
+        for stmt in self.decl_stmts.iter() {
+            self.process_stmt(stmt);
+        }
+    }
+}

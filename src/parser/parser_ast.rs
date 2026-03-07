@@ -59,7 +59,7 @@ pub enum ParserDeclStmtKind {
         value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
     },
-    ScopeVar {
+    StructField {
         name: String,
         value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
@@ -88,7 +88,7 @@ impl Display for ParserDeclStmtKind {
             ParserDeclStmtKind::Input { .. } => write!(f, "input"),
             ParserDeclStmtKind::Output { .. } => write!(f, "output"),
             ParserDeclStmtKind::StateVar { .. } => write!(f, "state"),
-            ParserDeclStmtKind::ScopeVar { .. } => write!(f, "var"),
+            ParserDeclStmtKind::StructField { .. } => write!(f, "var"),
             ParserDeclStmtKind::StructDecl { .. } => write!(f, "struct"),
             ParserDeclStmtKind::InfixDefine { .. } => write!(f, "infix"),
             ParserDeclStmtKind::OperatorFunc { .. } => write!(f, "func"),
@@ -166,33 +166,29 @@ pub struct ExprToken {
     pub kind: ExprTokenKind,
 }
 
-impl ExprToken {
-    pub fn lparen(range: Range) -> Self {
-        Self {
-            range,
-            kind: ExprTokenKind::LParen,
-        }
-    }
-
-    pub fn rparen(range: Range) -> Self {
-        Self {
-            range,
-            kind: ExprTokenKind::RParen,
-        }
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum ExprTokenKind {
     IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     Operator(String),
-    Identifier(SymbolPath),
+    Access(String),
     FuncCall {
-        path: SymbolPath,
+        name: String,
         args: Vec<ParserFuncCallArg>,
     },
-    LParen,
-    RParen,
+    Chain {
+        lhs: Box<ExprToken>,
+        op: ChainOp,
+    },
+    Parenthesized(Vec<ExprToken>),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ChainOp {
+    Access(String),
+    FuncCall {
+        name: String,
+        args: Vec<ParserFuncCallArg>,
+    },
 }

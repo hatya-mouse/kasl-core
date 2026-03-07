@@ -14,17 +14,4 @@
 // limitations under the License.
 //
 
-use crate::{
-    Range,
-    error::{EK, ErrorCollector, Phase, Pl, Sv},
-};
-
-impl ErrorCollector {
-    pub fn no_main_func(&mut self, phase: Phase) {
-        self.emit(EK::NoMainFunc, Range::zero(), phase, Sv::Error, Pl::None);
-    }
-
-    pub fn main_stmt_not_func(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::MainStmtNotFunc, range, phase, Sv::Error, Pl::None);
-    }
-}
+mod input_resolver;

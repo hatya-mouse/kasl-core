@@ -14,12 +14,14 @@
 // limitations under the License.
 //
 
-use crate::{Function, FunctionID, type_registry::ResolvedType};
+use crate::{Function, FunctionID, StructID, type_registry::ResolvedType};
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct FunctionContext {
-    pub funcs: HashMap<FunctionID, Function>,
+    funcs: HashMap<FunctionID, Function>,
+    member_functions: HashMap<StructID, HashMap<String, FunctionID>>,
+    global_functions: HashMap<String, FunctionID>,
 }
 
 impl FunctionContext {
@@ -35,5 +37,15 @@ impl FunctionContext {
 
     pub fn get_func(&self, symbol_id: &FunctionID) -> Option<&Function> {
         self.funcs.get(symbol_id)
+    }
+
+    pub fn get_global_func_by_name(&self, name: &str) -> Option<&FunctionID> {
+        self.global_functions.get(name)
+    }
+
+    pub fn get_member_func_by_name(&self, struct_id: &StructID, name: &str) -> Option<&FunctionID> {
+        self.member_functions
+            .get(struct_id)
+            .and_then(|funcs| funcs.get(name))
     }
 }
