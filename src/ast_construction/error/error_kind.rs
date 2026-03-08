@@ -94,6 +94,12 @@ pub enum ErrorKind {
     /// Not enough arguments are given.
     MissingArg,
 
+    /// Title: MissingArgLabel
+    /// Phase: GlobalDeclCollection
+    /// Payload: The range of the call expression and the name of the function
+    /// A label of the argument is missing, but the argument requires a label.
+    MissingArgLabel,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

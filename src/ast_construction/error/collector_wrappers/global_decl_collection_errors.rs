@@ -149,4 +149,14 @@ impl ErrorCollector {
             Pl::Str(func_name.to_string()),
         );
     }
+
+    pub fn missing_arg_label(&mut self, range: Range, func_name: &str) {
+        self.emit(
+            EK::MissingArgLabel,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
+        );
+    }
 }

@@ -95,6 +95,11 @@ impl ExpressionResolver<'_> {
                     self.ec.extra_arg(no_type_arg.range, &func.name);
                     return None;
                 }
+                // Check if the target argument doesn't require a label
+                if func.params[next_unlabeled_index].label.is_some() {
+                    self.ec.missing_arg_label(no_type_arg.range, &func.name);
+                    return None;
+                }
 
                 slots[next_unlabeled_index] = Some(FuncCallArg {
                     arg_name: func.params[next_unlabeled_index].name.clone(),
