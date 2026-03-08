@@ -25,10 +25,21 @@ impl GlobalDeclCollector<'_> {
                 def_val,
                 attrs,
             } => self.resolve_input(name, value_type, def_val, attrs, stmt.range),
-            ParserDeclStmtKind::Output { .. } => self.resolve_output(stmt),
-            ParserDeclStmtKind::StateVar { .. } => self.resolve_state_var(stmt),
-            ParserDeclStmtKind::StructDecl { .. } => self.resolve_struct_decl(stmt),
+            ParserDeclStmtKind::Output {
+                name,
+                value_type,
+                def_val,
+            } => self.resolve_output(name, value_type, def_val, stmt.range),
+            ParserDeclStmtKind::StateVar {
+                name,
+                value_type,
+                def_val,
+            } => self.resolve_state_var(name, value_type, def_val, stmt.range),
+
+            ParserDeclStmtKind::StructDecl { name, body } => self.resolve_struct_decl(stmt),
+
             ParserDeclStmtKind::FuncDecl { .. } => self.resolve_func_decl(stmt),
+
             ParserDeclStmtKind::InfixDefine { .. } => self.resolve_infix_define(stmt),
             ParserDeclStmtKind::OperatorFunc { .. } => self.resolve_operator_func(stmt, op_type),
             ParserDeclStmtKind::StructField { name, .. } => {

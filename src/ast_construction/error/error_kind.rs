@@ -72,7 +72,7 @@ pub enum ErrorKind {
 
     /// Title: ArgOrderIncorrect
     /// Phase: GlobalDeclCollection
-    /// Payload: The range of the call expression and the name of the function
+    /// Payload: The name of the function and the name of the argument that is out of order
     /// Argument order is incorrect.
     ArgOrderIncorrect,
 
@@ -84,21 +84,33 @@ pub enum ErrorKind {
 
     /// Title: ExtraArg
     /// Phase: GlobalDeclCollection
-    /// Payload: The range of the call expression and the name of the function
+    /// Payload: The name of the function
     /// Too many arguments are given.
     ExtraArg,
 
     /// Title: MissingArg
     /// Phase: GlobalDeclCollection
-    /// Payload: The range of the call expression and the name of the function
+    /// Payload: The name of the function
     /// Not enough arguments are given.
     MissingArg,
 
     /// Title: MissingArgLabel
     /// Phase: GlobalDeclCollection
-    /// Payload: The range of the call expression and the name of the function
+    /// Payload: The name of the function
     /// A label of the argument is missing, but the argument requires a label.
     MissingArgLabel,
+
+    /// Title: TypeAnnotationMismatch
+    /// Phase: GlobalDeclCollection
+    /// Payload: The type of the annotation and the type of the expression
+    /// The type annotation does not match the type of the expression.
+    TypeAnnotationMismatch,
+
+    /// Title: InvalidStructStmt
+    /// Phase: GlobalDeclCollection
+    /// Payload: The kind of the statement that is invalid
+    /// An unexpected statement was found in the struct body.
+    InvalidStructStmt,
 
     /// Title: CompilerBug
     /// Payload: Error message

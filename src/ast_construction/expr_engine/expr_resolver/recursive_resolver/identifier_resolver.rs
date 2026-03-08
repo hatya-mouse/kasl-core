@@ -25,7 +25,7 @@ impl ExpressionResolver<'_> {
                 name,
                 id: Some(*var_id),
             },
-            var.value_type.clone(),
+            var.def_val.value_type.clone(),
             range,
         ))
     }

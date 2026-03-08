@@ -14,4 +14,6 @@
 // limitations under the License.
 //
 
-mod input_resolver;
+mod global_var_registrar;
+mod struct_resolver;
+mod var_resolver;

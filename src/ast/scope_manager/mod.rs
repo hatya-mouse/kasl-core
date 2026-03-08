@@ -18,7 +18,7 @@ mod scope;
 mod scope_var;
 
 pub use scope::Scope;
-pub use scope_var::{ScopeVar, VariableKind};
+pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
 use crate::VariableID;
 use std::collections::HashMap;
@@ -45,6 +45,11 @@ impl ScopeRegistry {
         // Create the global scope
         manager.global_scope_id = manager.create_scope(None);
         manager
+    }
+
+    /// Returns the ID of the global scope.
+    pub fn get_global_scope_id(&self) -> ScopeID {
+        self.global_scope_id
     }
 
     /// Returns a mutable reference to the global scope.

@@ -25,7 +25,7 @@ pub use name_space::{
     FunctionID, NameSpace, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent,
     VariableID,
 };
-pub use scope_manager::{Scope, ScopeID, ScopeRegistry, ScopeVar};
+pub use scope_manager::{InputAttribute, Scope, ScopeID, ScopeRegistry, ScopeVar};
 pub use symbol_table::{
     Expr, ExprKind, FuncCallArg, FuncParam, Function, IfArm, InfixOperator,
     InfixOperatorProperties, OperatorAssociativity, OperatorContext, PostfixOperator,

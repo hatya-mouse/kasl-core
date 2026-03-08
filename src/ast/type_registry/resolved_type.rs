@@ -15,6 +15,7 @@
 //
 
 use crate::{StructID, type_registry::PrimitiveType};
+use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ResolvedType {
@@ -25,5 +26,14 @@ pub enum ResolvedType {
 impl PartialEq<ResolvedType> for &ResolvedType {
     fn eq(&self, other: &ResolvedType) -> bool {
         self == other
+    }
+}
+
+impl Display for ResolvedType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ResolvedType::Primitive(ty) => write!(f, "{}", ty),
+            ResolvedType::Struct(id) => write!(f, "struct({})", id),
+        }
     }
 }

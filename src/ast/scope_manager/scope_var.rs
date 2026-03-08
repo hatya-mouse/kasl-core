@@ -19,7 +19,6 @@ use crate::{Expr, Range, type_registry::ResolvedType};
 #[derive(Debug, PartialEq, Clone)]
 pub struct ScopeVar {
     pub name: String,
-    pub value_type: ResolvedType,
     pub def_val: Expr<ResolvedType>,
     pub range: Range,
     pub var_kind: VariableKind,

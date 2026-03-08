@@ -69,6 +69,12 @@ impl StructDecl {
         self.field_offsets.get(field_index).copied()
     }
 
+    pub fn register_field(&mut self, field: StructField) {
+        let field_index = self.fields.len();
+        self.indices.insert(field.name.clone(), field_index);
+        self.fields.push(field);
+    }
+
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
         let mut offset = 0;
         let mut max_alignment = 1;

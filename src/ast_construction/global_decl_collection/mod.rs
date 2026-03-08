@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-mod expr_builder;
-mod expr_resolver;
 mod resolvers;
 mod stmt_process;
 mod struct_process;
@@ -23,25 +21,42 @@ mod struct_process;
 use crate::{
     NameSpace, ParserDeclStmt,
     error::ErrorCollector,
-    global_decl_collection::expr_builder::ExpressionBuilder,
     scope_manager::ScopeRegistry,
     symbol_table::{FunctionContext, OperatorContext},
     type_registry::TypeRegistry,
 };
 
 pub struct GlobalDeclCollector<'a> {
-    pub ec: &'a mut ErrorCollector,
-    pub decl_stmts: &'a [ParserDeclStmt],
-    pub name_space: &'a mut NameSpace,
-    pub type_registry: &'a mut TypeRegistry,
-    pub function_ctx: &'a mut FunctionContext,
-    pub operator_ctx: &'a mut OperatorContext,
-    pub scope_registry: &'a mut ScopeRegistry,
-
-    expression_builder: &'a mut ExpressionBuilder,
+    ec: &'a mut ErrorCollector,
+    decl_stmts: &'a [ParserDeclStmt],
+    name_space: &'a mut NameSpace,
+    type_registry: &'a mut TypeRegistry,
+    func_ctx: &'a mut FunctionContext,
+    op_ctx: &'a mut OperatorContext,
+    scope_registry: &'a mut ScopeRegistry,
 }
 
-impl GlobalDeclCollector<'_> {
+impl<'a> GlobalDeclCollector<'a> {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        decl_stmts: &'a [ParserDeclStmt],
+        name_space: &'a mut NameSpace,
+        type_registry: &'a mut TypeRegistry,
+        func_ctx: &'a mut FunctionContext,
+        op_ctx: &'a mut OperatorContext,
+        scope_registry: &'a mut ScopeRegistry,
+    ) -> Self {
+        Self {
+            ec,
+            decl_stmts,
+            name_space,
+            type_registry,
+            func_ctx,
+            op_ctx,
+            scope_registry,
+        }
+    }
+
     pub fn process(&mut self) {
         for stmt in self.decl_stmts.iter() {
             self.process_stmt(stmt);

@@ -26,8 +26,8 @@ use crate::{
 pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
     let mut ec = ErrorCollector::new();
     let mut name_space = NameSpace::new();
-    let mut function_ctx = FunctionContext::new();
-    let mut operator_ctx = OperatorContext::new();
+    let mut func_ctx = FunctionContext::new();
+    let mut op_ctx = OperatorContext::new();
     let mut scope_registry = ScopeRegistry::new();
     let mut type_registry = TypeRegistry::new();
 
@@ -45,8 +45,8 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
         decl_stmts: &statements,
         name_space: &mut name_space,
         type_registry: &mut type_registry,
-        function_ctx: &mut function_ctx,
-        operator_ctx: &mut operator_ctx,
+        func_ctx: &mut func_ctx,
+        op_ctx: &mut op_ctx,
         scope_registry: &mut scope_registry,
     };
     global_decl_collector.process();

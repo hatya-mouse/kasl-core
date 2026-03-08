@@ -159,4 +159,29 @@ impl ErrorCollector {
             Pl::Str(func_name.to_string()),
         );
     }
+
+    pub fn type_annotation_mismatch(
+        &mut self,
+        range: Range,
+        annotation_type: &str,
+        expr_type: &str,
+    ) {
+        self.emit(
+            EK::TypeAnnotationMismatch,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrPair(annotation_type.to_string(), expr_type.to_string()),
+        );
+    }
+
+    pub fn invalid_struct_stmt(&mut self, range: Range, stmt_kind: String) {
+        self.emit(
+            EK::InvalidStructStmt,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(stmt_kind),
+        );
+    }
 }
