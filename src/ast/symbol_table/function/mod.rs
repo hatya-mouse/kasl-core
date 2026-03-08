@@ -25,6 +25,7 @@ use std::collections::HashMap;
 pub struct FunctionContext {
     funcs: HashMap<FunctionID, Function>,
     member_functions: HashMap<StructID, HashMap<String, FunctionID>>,
+    static_functions: HashMap<StructID, HashMap<String, FunctionID>>,
     global_functions: HashMap<String, FunctionID>,
 }
 
@@ -33,6 +34,7 @@ impl FunctionContext {
         Self {
             funcs: HashMap::new(),
             member_functions: HashMap::new(),
+            static_functions: HashMap::new(),
             global_functions: HashMap::new(),
         }
     }
@@ -50,6 +52,19 @@ impl FunctionContext {
         func_id: FunctionID,
     ) {
         self.member_functions
+            .entry(struct_id)
+            .or_insert_with(HashMap::new)
+            .insert(func.name.clone(), func_id);
+        self.funcs.insert(func_id, func);
+    }
+
+    pub fn register_static_func(
+        &mut self,
+        func: Function,
+        struct_id: StructID,
+        func_id: FunctionID,
+    ) {
+        self.static_functions
             .entry(struct_id)
             .or_insert_with(HashMap::new)
             .insert(func.name.clone(), func_id);

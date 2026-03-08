@@ -111,6 +111,11 @@ impl GlobalDeclCollector<'_> {
 
         // Register the function
         let func_id = self.name_space.generate_function_id();
-        self.func_ctx.register_member_func(func, struct_id, func_id);
+
+        if is_static {
+            self.func_ctx.register_static_func(func, struct_id, func_id);
+        } else {
+            self.func_ctx.register_member_func(func, struct_id, func_id);
+        }
     }
 }

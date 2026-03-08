@@ -48,7 +48,15 @@ impl GlobalDeclCollector<'_> {
                 body: _,
             } => self.resolve_global_func_decl(*is_static, name, params, return_type, stmt.range),
 
-            ParserDeclStmtKind::InfixDefine { .. } => self.resolve_infix_define(stmt),
+            ParserDeclStmtKind::InfixDefine { symbol, props } => {
+                self.resolve_infix_define(symbol, props, stmt.range)
+            }
+            ParserDeclStmtKind::PrefixDefine { symbol, props } => {
+                self.resolve_prefix_define(symbol, props, stmt.range)
+            }
+            ParserDeclStmtKind::PostfixDefine { symbol, props } => {
+                self.resolve_postfix_define(symbol, props, stmt.range)
+            }
             ParserDeclStmtKind::OperatorFunc { .. } => self.resolve_operator_func(stmt, op_type),
 
             ParserDeclStmtKind::StructField { name, .. } => {
