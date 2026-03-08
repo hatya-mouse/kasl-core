@@ -18,7 +18,7 @@ use crate::{
     Expr, ExprKind, ExprToken, ExprTokenKind, OperatorAssociativity, ParserFuncCallArg,
     ParserMemberAccess,
     error::Ph,
-    global_decl_collection::expr_builder::ExpressionBuilder,
+    expr_engine::ExpressionBuilder,
     symbol_table::{MemberAccess, NoTypeFuncCallArg},
 };
 use std::{iter::Peekable, slice::Iter};

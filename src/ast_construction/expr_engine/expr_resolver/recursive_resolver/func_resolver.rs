@@ -15,9 +15,8 @@
 //
 
 use crate::{
-    Expr, ExprKind, FuncCallArg, Function, Range,
-    global_decl_collection::expr_resolver::ExpressionResolver, symbol_table::NoTypeFuncCallArg,
-    type_registry::ResolvedType,
+    Expr, ExprKind, FuncCallArg, Function, Range, expr_engine::ExpressionResolver,
+    symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {

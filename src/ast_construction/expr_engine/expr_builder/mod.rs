@@ -16,17 +16,18 @@
 
 mod climb_precedence;
 
-use crate::{
-    Expr, ExprToken, ExprTokenKind, ScopeID, error::ErrorCollector, symbol_table::OperatorContext,
-};
+use crate::{Expr, ExprToken, ExprTokenKind, error::ErrorCollector, symbol_table::OperatorContext};
 
 pub struct ExpressionBuilder<'a> {
-    pub ec: &'a mut ErrorCollector,
-    pub op_ctx: &'a OperatorContext,
-    pub current_scope: ScopeID,
+    ec: &'a mut ErrorCollector,
+    op_ctx: &'a OperatorContext,
 }
 
-impl ExpressionBuilder<'_> {
+impl<'a> ExpressionBuilder<'a> {
+    pub fn new(ec: &'a mut ErrorCollector, op_ctx: &'a OperatorContext) -> Self {
+        Self { ec, op_ctx }
+    }
+
     pub fn build(&mut self, tokens: Vec<ExprToken>) -> Option<Expr<()>> {
         // First, build the parenthesized tokens by calling `build` recursively
         let mut processed_tokens: Vec<ExprToken> = Vec::new();

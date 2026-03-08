@@ -23,6 +23,7 @@ mod struct_process;
 use crate::{
     NameSpace, ParserDeclStmt,
     error::ErrorCollector,
+    global_decl_collection::expr_builder::ExpressionBuilder,
     scope_manager::ScopeRegistry,
     symbol_table::{FunctionContext, OperatorContext},
     type_registry::TypeRegistry,
@@ -36,6 +37,8 @@ pub struct GlobalDeclCollector<'a> {
     pub function_ctx: &'a mut FunctionContext,
     pub operator_ctx: &'a mut OperatorContext,
     pub scope_registry: &'a mut ScopeRegistry,
+
+    expression_builder: &'a mut ExpressionBuilder,
 }
 
 impl GlobalDeclCollector<'_> {

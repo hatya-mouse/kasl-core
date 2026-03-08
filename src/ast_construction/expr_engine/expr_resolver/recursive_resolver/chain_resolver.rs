@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, global_decl_collection::expr_resolver::ExpressionResolver,
-    symbol_table::MemberAccess, type_registry::ResolvedType,
+    Expr, ExprKind, Range, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
+    type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {

@@ -16,7 +16,7 @@
 
 use crate::{
     Expr, ExprKind, Range,
-    global_decl_collection::expr_resolver::ExpressionResolver,
+    expr_engine::ExpressionResolver,
     symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef},
     type_registry::ResolvedType,
 };

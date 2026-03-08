@@ -20,10 +20,7 @@ mod identifier_resolver;
 mod literal_resolver;
 mod operator_resolver;
 
-use crate::{
-    Expr, ExprKind, global_decl_collection::expr_resolver::ExpressionResolver,
-    type_registry::ResolvedType,
-};
+use crate::{Expr, ExprKind, expr_engine::ExpressionResolver, type_registry::ResolvedType};
 
 impl ExpressionResolver<'_> {
     pub fn resolve_recursively(&mut self, expr: Expr<()>) -> Option<Expr<ResolvedType>> {

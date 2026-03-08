@@ -24,15 +24,33 @@ use crate::{
 };
 
 pub struct ExpressionResolver<'a> {
-    pub ec: &'a mut ErrorCollector,
-    pub op_ctx: &'a OperatorContext,
-    pub func_ctx: &'a FunctionContext,
-    pub scope_registry: &'a ScopeRegistry,
-    pub type_registry: &'a TypeRegistry,
-    pub current_scope: ScopeID,
+    ec: &'a mut ErrorCollector,
+    op_ctx: &'a OperatorContext,
+    func_ctx: &'a FunctionContext,
+    scope_registry: &'a ScopeRegistry,
+    type_registry: &'a TypeRegistry,
+    current_scope: ScopeID,
 }
 
-impl ExpressionResolver<'_> {
+impl<'a> ExpressionResolver<'a> {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        op_ctx: &'a OperatorContext,
+        func_ctx: &'a FunctionContext,
+        scope_registry: &'a ScopeRegistry,
+        type_registry: &'a TypeRegistry,
+        current_scope: ScopeID,
+    ) -> Self {
+        Self {
+            ec,
+            op_ctx,
+            func_ctx,
+            scope_registry,
+            type_registry,
+            current_scope,
+        }
+    }
+
     pub fn resolve(&mut self, expr: Expr<()>) -> Option<Expr<ResolvedType>> {
         self.resolve_recursively(expr)
     }

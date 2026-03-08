@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    Expr, ExprKind, Range, global_decl_collection::expr_resolver::ExpressionResolver,
-    type_registry::ResolvedType,
-};
+use crate::{Expr, ExprKind, Range, expr_engine::ExpressionResolver, type_registry::ResolvedType};
 
 impl ExpressionResolver<'_> {
     pub fn resolve_identifier(&self, name: String, range: Range) -> Option<Expr<ResolvedType>> {

@@ -15,6 +15,7 @@
 //
 
 pub mod error;
+pub mod expr_engine;
 pub mod global_decl_collection;
 pub mod program_builder;
 pub mod type_collection;
