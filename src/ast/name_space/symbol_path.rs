@@ -39,6 +39,10 @@ impl SymbolPath {
         Self { components }
     }
 
+    pub fn push(&mut self, component: SymbolPathComponent) {
+        self.components.push(component);
+    }
+
     pub fn extended(&self, component: Vec<SymbolPathComponent>) -> Self {
         let mut new_path = self.clone();
         new_path.components.extend(component);
