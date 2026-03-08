@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, ExprToken, Range, ScopeVar, SymbolPath, expr_engine::resolve_expr,
+    Expr, ExprToken, Range, ScopeVar, SymbolPath, error::Ph, expr_engine::resolve_expr,
     global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind,
     type_registry::ResolvedType,
 };
@@ -48,6 +48,7 @@ impl GlobalDeclCollector<'_> {
         if resolved_def_val.value_type != resolved_type_annotation {
             self.ec.type_annotation_mismatch(
                 decl_range,
+                Ph::GlobalDeclCollection,
                 resolved_type_annotation.to_string(),
                 resolved_def_val.value_type.to_string(),
             );

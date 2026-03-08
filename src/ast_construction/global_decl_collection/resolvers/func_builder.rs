@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FuncParam, Function, ParserFuncParam, Range, SymbolPath, expr_engine::resolve_expr,
+    FuncParam, Function, ParserFuncParam, Range, SymbolPath, error::Ph, expr_engine::resolve_expr,
     global_decl_collection::GlobalDeclCollector,
 };
 
@@ -37,7 +37,8 @@ impl GlobalDeclCollector<'_> {
             Some(path) => match self.type_registry.resolve_type_path(path) {
                 Some(resolved) => Some(resolved),
                 None => {
-                    self.ec.type_not_found(decl_range, path.to_string());
+                    self.ec
+                        .type_not_found(decl_range, Ph::GlobalDeclCollection, path.to_string());
                     return None;
                 }
             },
@@ -87,6 +88,7 @@ impl GlobalDeclCollector<'_> {
                 if resolved_annotation_type != resolved_def_val.value_type {
                     self.ec.type_annotation_mismatch(
                         param.range,
+                        Ph::GlobalDeclCollection,
                         resolved_annotation_type.to_string(),
                         resolved_def_val.value_type.to_string(),
                     );
@@ -113,7 +115,8 @@ impl GlobalDeclCollector<'_> {
                 range: param.range,
             })
         } else {
-            self.ec.no_type_annotation_or_def_val(param.range);
+            self.ec
+                .no_type_annotation_or_def_val(param.range, Ph::GlobalDeclCollection);
             None
         }
     }

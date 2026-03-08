@@ -14,10 +14,19 @@
 // limitations under the License.
 //
 
-mod compiler_errors;
-mod func_errors;
-mod op_errors;
-mod struct_errors;
-mod syntax_errors;
-mod type_errors;
-mod variable_errors;
+use crate::{
+    Range,
+    error::{EK, ErrorCollector, Phase, Pl, Sv},
+};
+
+impl ErrorCollector {
+    pub fn type_not_found(&mut self, range: Range, phase: Phase, type_name: String) {
+        self.emit(
+            EK::TypeNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+}

@@ -63,8 +63,11 @@ impl ExpressionBuilder<'_> {
                     Some(op_props) => op_props,
                     None => {
                         // If the both infix and postfix operators are not found, emit an error
-                        self.ec
-                            .infix_or_postfix_op_not_found(op_token.range, &op_symbol);
+                        self.ec.infix_or_postfix_op_not_found(
+                            op_token.range,
+                            Ph::ExprEngine,
+                            &op_symbol,
+                        );
                         break;
                     }
                 };
@@ -78,7 +81,8 @@ impl ExpressionBuilder<'_> {
                     && op_props.associativity == OperatorAssociativity::None
                 {
                     // Throw an error if the operator is not associative but consecutively used
-                    self.ec.op_not_associative(op_token.range, &op_symbol);
+                    self.ec
+                        .op_not_associative(op_token.range, Ph::ExprEngine, &op_symbol);
                     return None;
                 }
 
@@ -124,7 +128,8 @@ impl ExpressionBuilder<'_> {
                 let prefix_prec = match self.op_ctx.get_prefix_props(&symbol) {
                     Some(op_props) => op_props.precedence,
                     None => {
-                        self.ec.prefix_op_not_found(token.range, &symbol);
+                        self.ec
+                            .prefix_op_not_found(token.range, Ph::ExprEngine, &symbol);
                         return None;
                     }
                 };

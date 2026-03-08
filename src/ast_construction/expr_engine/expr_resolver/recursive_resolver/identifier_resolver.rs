@@ -14,13 +14,15 @@
 // limitations under the License.
 //
 
-use crate::{Expr, ExprKind, Range, expr_engine::ExpressionResolver, type_registry::ResolvedType};
+use crate::{
+    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver, type_registry::ResolvedType,
+};
 
 impl ExpressionResolver<'_> {
     pub fn resolve_identifier(&mut self, name: String, range: Range) -> Option<Expr<ResolvedType>> {
         // Get the variable ID from the scope registry
         let Some(var_id) = self.scope_registry.lookup_var(self.current_scope, &name) else {
-            self.ec.var_not_found(range, &name);
+            self.ec.var_not_found(range, Ph::ExprEngine, &name);
             return None;
         };
         let var = self.scope_registry.get_var_by_id(var_id)?;

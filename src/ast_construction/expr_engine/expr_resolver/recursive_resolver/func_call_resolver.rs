@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, ExprKind, FuncCallArg, Function, Range, expr_engine::ExpressionResolver,
+    Expr, ExprKind, FuncCallArg, Function, Range, error::Ph, expr_engine::ExpressionResolver,
     symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
@@ -28,7 +28,7 @@ impl ExpressionResolver<'_> {
     ) -> Option<Expr<ResolvedType>> {
         // Get a reference to the function
         let Some(func_id) = self.func_ctx.get_global_func_by_name(&name) else {
-            self.ec.func_not_found(range, &name);
+            self.ec.func_not_found(range, Ph::ExprEngine, &name);
             return None;
         };
         let func = self.func_ctx.get_func(&func_id)?;
@@ -36,7 +36,7 @@ impl ExpressionResolver<'_> {
         let args = self.resolve_func_call_args(&func, &no_type_args, range)?;
 
         let Some(return_type) = &func.return_type else {
-            self.ec.no_return_func_in_expr(range, &name);
+            self.ec.no_return_func_in_expr(range, Ph::ExprEngine, &name);
             return None;
         };
 
@@ -76,13 +76,18 @@ impl ExpressionResolver<'_> {
 
                 // If the slot is already occupied, throw an duplicate parameter error
                 if slots[param_index].is_some() {
-                    self.ec.duplicate_arg(no_type_arg.range, &func.name, &label);
+                    self.ec
+                        .duplicate_arg(no_type_arg.range, Ph::ExprEngine, &func.name, &label);
                     return None;
                 }
                 // If the label order is incorrect, throw an error
                 if param_index <= next_unlabeled_index {
-                    self.ec
-                        .arg_order_incorrect(no_type_arg.range, &func.name, &label);
+                    self.ec.arg_order_incorrect(
+                        no_type_arg.range,
+                        Ph::ExprEngine,
+                        &func.name,
+                        &label,
+                    );
                     return None;
                 }
 
@@ -94,12 +99,14 @@ impl ExpressionResolver<'_> {
             } else {
                 // Check if the index is within bounds
                 if next_unlabeled_index >= slots.len() {
-                    self.ec.extra_arg(no_type_arg.range, &func.name);
+                    self.ec
+                        .extra_arg(no_type_arg.range, Ph::ExprEngine, &func.name);
                     return None;
                 }
                 // Check if the target argument doesn't require a label
                 if func.params[next_unlabeled_index].label.is_some() {
-                    self.ec.missing_arg_label(no_type_arg.range, &func.name);
+                    self.ec
+                        .missing_arg_label(no_type_arg.range, Ph::ExprEngine, &func.name);
                     return None;
                 }
 
@@ -124,7 +131,8 @@ impl ExpressionResolver<'_> {
                             value: def_val.clone(),
                         }),
                         None => {
-                            self.ec.missing_arg(func_call_range, &func.name);
+                            self.ec
+                                .missing_arg(func_call_range, Ph::ExprEngine, &func.name);
                             return None;
                         }
                     }

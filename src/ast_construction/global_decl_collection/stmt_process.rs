@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-use crate::{ParserDeclStmt, ParserDeclStmtKind, global_decl_collection::GlobalDeclCollector};
+use crate::{
+    ParserDeclStmt, ParserDeclStmtKind, error::Ph, global_decl_collection::GlobalDeclCollector,
+};
 
 impl GlobalDeclCollector<'_> {
     pub fn process_stmt(&mut self, stmt: &ParserDeclStmt) {
@@ -67,7 +69,8 @@ impl GlobalDeclCollector<'_> {
             } => self.resolve_operator_func(op_type, symbol, params, return_type, stmt.range),
 
             ParserDeclStmtKind::StructField { name, .. } => {
-                self.ec.top_level_struct_field(stmt.range, name)
+                self.ec
+                    .top_level_struct_field(stmt.range, Ph::GlobalDeclCollection, name)
             }
         }
     }

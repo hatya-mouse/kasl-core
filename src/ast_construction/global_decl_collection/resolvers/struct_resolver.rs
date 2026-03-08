@@ -16,6 +16,7 @@
 
 use crate::{
     ExprToken, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, Range, StructID, SymbolPath,
+    error::Ph,
     global_decl_collection::GlobalDeclCollector,
     symbol_path,
     type_registry::{StructDecl, StructField},
@@ -63,8 +64,11 @@ impl GlobalDeclCollector<'_> {
                 ),
 
                 _ => {
-                    self.ec
-                        .invalid_struct_stmt(stmt.range, stmt.kind.to_string());
+                    self.ec.invalid_struct_stmt(
+                        stmt.range,
+                        Ph::GlobalDeclCollection,
+                        stmt.kind.to_string(),
+                    );
                 }
             }
         }

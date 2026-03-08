@@ -63,6 +63,8 @@ pub enum Phase {
     Parse = 0,
     StructCollection = 10,
     GlobalDeclCollection = 20,
+    StatementCollection = 30,
+    ExprEngine = 40,
 }
 
 #[derive(Clone, Debug)]

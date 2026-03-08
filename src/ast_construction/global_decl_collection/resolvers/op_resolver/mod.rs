@@ -19,7 +19,7 @@ mod postfix_op;
 mod prefix_op;
 
 use crate::{
-    ParserFuncParam, ParserOperatorType, Range, SymbolPath,
+    ParserFuncParam, ParserOperatorType, Range, SymbolPath, error::Ph,
     global_decl_collection::GlobalDeclCollector,
 };
 
@@ -38,7 +38,11 @@ impl GlobalDeclCollector<'_> {
         };
         // Resolve return type
         let Some(return_type) = self.type_registry.resolve_type_path(return_type) else {
-            self.ec.type_not_found(decl_range, return_type.to_string());
+            self.ec.type_not_found(
+                decl_range,
+                Ph::GlobalDeclCollection,
+                return_type.to_string(),
+            );
             return;
         };
 

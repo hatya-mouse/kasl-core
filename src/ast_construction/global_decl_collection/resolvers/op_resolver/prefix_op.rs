@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FuncParam, PrefixOperator, PrefixOperatorProperties, Range,
+    FuncParam, PrefixOperator, PrefixOperatorProperties, Range, error::Ph,
     global_decl_collection::GlobalDeclCollector, type_registry::ResolvedType,
 };
 
@@ -33,8 +33,12 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) {
         if params.len() != 1 {
-            self.ec
-                .wrong_param_count_for_prefix(decl_range, symbol, params.len());
+            self.ec.wrong_param_count_for_prefix(
+                decl_range,
+                Ph::GlobalDeclCollection,
+                symbol,
+                params.len(),
+            );
             return;
         }
 

@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-use crate::{ParserFuncParam, Range, SymbolPath, global_decl_collection::GlobalDeclCollector};
+use crate::{
+    ParserFuncParam, Range, SymbolPath, error::Ph, global_decl_collection::GlobalDeclCollector,
+};
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_global_func_decl(
@@ -27,7 +29,8 @@ impl GlobalDeclCollector<'_> {
     ) {
         // Check if is_static is not set
         if is_static {
-            self.ec.global_func_cannot_be_static(decl_range, name);
+            self.ec
+                .global_func_cannot_be_static(decl_range, Ph::GlobalDeclCollection, name);
             return;
         }
 

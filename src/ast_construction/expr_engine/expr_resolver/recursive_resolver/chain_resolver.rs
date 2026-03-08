@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
+    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
     type_registry::ResolvedType,
 };
 
@@ -52,7 +52,7 @@ impl ExpressionResolver<'_> {
         match lhs_type {
             // If the LHS is a primitive type, the member access is invalid
             ResolvedType::Primitive(_) => {
-                self.ec.member_access_on_primitive(range);
+                self.ec.member_access_on_primitive(range, Ph::ExprEngine);
                 None
             }
 
@@ -66,6 +66,7 @@ impl ExpressionResolver<'_> {
                     let Some(field_index) = struct_decl.get_field_index(&name) else {
                         self.ec.member_field_not_found(
                             range,
+                            Ph::ExprEngine,
                             struct_decl.name.clone(),
                             name.clone(),
                         );
@@ -91,15 +92,20 @@ impl ExpressionResolver<'_> {
                     let Some(func_id) = self.func_ctx.get_member_func_by_name(&struct_id, &name)
                     else {
                         let struct_decl = self.type_registry.get_struct(&struct_id)?;
-                        self.ec
-                            .member_func_not_found(range, struct_decl.name.clone(), name);
+                        self.ec.member_func_not_found(
+                            range,
+                            Ph::ExprEngine,
+                            struct_decl.name.clone(),
+                            name,
+                        );
                         return None;
                     };
 
                     // Get the function by ID
                     let func = self.func_ctx.get_func(&func_id)?;
                     let Some(return_type) = &func.return_type else {
-                        self.ec.no_return_func_in_expr(range, &func.name);
+                        self.ec
+                            .no_return_func_in_expr(range, Ph::ExprEngine, &func.name);
                         return None;
                     };
 
