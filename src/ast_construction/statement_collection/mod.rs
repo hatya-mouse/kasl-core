@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-pub mod error;
-pub mod expr_engine;
-pub mod global_decl_collection;
-pub mod program_builder;
-pub mod statement_collection;
-pub mod type_collection;
+pub struct StatementCollector {}
 
-pub use program_builder::construct_program;
+impl StatementCollector {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
