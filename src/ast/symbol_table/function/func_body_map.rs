@@ -14,10 +14,21 @@
 // limitations under the License.
 //
 
-pub struct StatementCollector {}
+use crate::{FunctionID, ParserScopeStmt};
+use std::collections::HashMap;
 
-impl StatementCollector {
+pub struct FuncBodyMap<'a> {
+    pub func_map: HashMap<FunctionID, &'a Vec<ParserScopeStmt>>,
+}
+
+impl<'a> FuncBodyMap<'a> {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            func_map: HashMap::new(),
+        }
+    }
+
+    pub fn register(&mut self, func_id: FunctionID, body: &'a Vec<ParserScopeStmt>) {
+        self.func_map.insert(func_id, body);
     }
 }

@@ -15,15 +15,21 @@
 //
 
 use crate::{
-    ExprToken, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, Range, StructID, SymbolPath,
+    ExprToken, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, ParserScopeStmt, Range,
+    StructID, SymbolPath,
     error::Ph,
     global_decl_collection::GlobalDeclCollector,
     symbol_path,
     type_registry::{StructDecl, StructField},
 };
 
-impl GlobalDeclCollector<'_> {
-    pub fn resolve_struct_decl(&mut self, name: &str, body: &[ParserDeclStmt], decl_range: Range) {
+impl<'a> GlobalDeclCollector<'a> {
+    pub fn resolve_struct_decl(
+        &mut self,
+        name: &str,
+        body: &'a [ParserDeclStmt],
+        decl_range: Range,
+    ) {
         let struct_path = symbol_path![name.to_string()];
         let struct_id = self.name_space.generate_struct_id();
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
@@ -38,7 +44,7 @@ impl GlobalDeclCollector<'_> {
         &mut self,
         struct_id: StructID,
         struct_decl: &mut StructDecl,
-        body: &[ParserDeclStmt],
+        body: &'a [ParserDeclStmt],
     ) {
         for stmt in body {
             match &stmt.kind {
@@ -53,13 +59,14 @@ impl GlobalDeclCollector<'_> {
                     name,
                     params,
                     return_type,
-                    body: _,
+                    body,
                 } => self.resolve_member_func_decl(
                     struct_id,
                     *is_static,
                     name,
                     params,
                     return_type,
+                    body,
                     stmt.range,
                 ),
 
@@ -105,6 +112,7 @@ impl GlobalDeclCollector<'_> {
         name: &str,
         params: &[ParserFuncParam],
         return_type: &Option<SymbolPath>,
+        body: &'a Vec<ParserScopeStmt>,
         decl_range: Range,
     ) {
         // Build the function node
@@ -121,5 +129,8 @@ impl GlobalDeclCollector<'_> {
         } else {
             self.func_ctx.register_member_func(func, struct_id, func_id);
         }
+
+        // Register the function body to the func body map
+        self.func_body_map.register(func_id, body);
     }
 }

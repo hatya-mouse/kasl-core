@@ -18,7 +18,7 @@ use crate::{
     NameSpace, OperatorContext, ParserDeclStmt, ScopeRegistry,
     error::{ErrorCollector, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
-    symbol_table::FunctionContext,
+    symbol_table::{FuncBodyMap, FunctionContext},
     type_collection::TypeCollector,
     type_registry::TypeRegistry,
 };
@@ -27,6 +27,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     let mut ec = ErrorCollector::new();
     let mut name_space = NameSpace::new();
     let mut func_ctx = FunctionContext::new();
+    let mut func_body_map = FuncBodyMap::new();
     let mut op_ctx = OperatorContext::new();
     let mut scope_registry = ScopeRegistry::new();
     let mut type_registry = TypeRegistry::new();
@@ -40,15 +41,16 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     type_collector.process();
 
     // 2. Collect global declarations, such as inputs, outputs, states, struct fields and functions
-    let mut global_decl_collector = GlobalDeclCollector {
-        ec: &mut ec,
-        decl_stmts: &statements,
-        name_space: &mut name_space,
-        type_registry: &mut type_registry,
-        func_ctx: &mut func_ctx,
-        op_ctx: &mut op_ctx,
-        scope_registry: &mut scope_registry,
-    };
+    let mut global_decl_collector = GlobalDeclCollector::new(
+        &mut ec,
+        &statements,
+        &mut name_space,
+        &mut type_registry,
+        &mut func_ctx,
+        &mut func_body_map,
+        &mut op_ctx,
+        &mut scope_registry,
+    );
     global_decl_collector.process();
 
     ec.as_result()

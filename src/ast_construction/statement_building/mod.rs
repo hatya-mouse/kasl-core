@@ -14,18 +14,25 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod statement;
+use crate::{
+    ParserDeclStmt,
+    symbol_table::{FuncBodyMap, FunctionContext},
+};
 
-pub use expression::{Expr, ExprKind, MemberAccess};
-pub use function::{
-    FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
-};
-pub use operator::{
-    InfixOperator, InfixOperatorProperties, InfixQueryRef, OperatorAssociativity, OperatorContext,
-    PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
-    PrefixOperatorProperties, PrefixQueryRef,
-};
-pub use statement::{IfArm, Statement};
+pub struct StatementBuilder<'a> {
+    func_ctx: &'a mut FunctionContext,
+    func_body_map: &'a FuncBodyMap<'a>,
+}
+
+impl<'a> StatementBuilder<'a> {
+    pub fn new(func_ctx: &'a mut FunctionContext, func_body_map: &'a FuncBodyMap<'a>) -> Self {
+        Self {
+            func_ctx,
+            func_body_map,
+        }
+    }
+
+    pub fn collect(&mut self, stmts: &mut Vec<ParserDeclStmt>) {
+        for func in self.func_ctx.funcs_mut() {}
+    }
+}

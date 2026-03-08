@@ -18,8 +18,8 @@ use crate::{
     ParserDeclStmt, ParserDeclStmtKind, error::Ph, global_decl_collection::GlobalDeclCollector,
 };
 
-impl GlobalDeclCollector<'_> {
-    pub fn process_stmt(&mut self, stmt: &ParserDeclStmt) {
+impl<'a> GlobalDeclCollector<'a> {
+    pub fn process_stmt(&mut self, stmt: &'a ParserDeclStmt) {
         match &stmt.kind {
             ParserDeclStmtKind::Input {
                 name,
@@ -52,8 +52,15 @@ impl GlobalDeclCollector<'_> {
                 name,
                 params,
                 return_type,
-                body: _,
-            } => self.resolve_global_func_decl(*is_static, name, params, return_type, stmt.range),
+                body,
+            } => self.resolve_global_func_decl(
+                *is_static,
+                name,
+                params,
+                return_type,
+                body,
+                stmt.range,
+            ),
 
             ParserDeclStmtKind::InfixDefine { symbol, props } => {
                 self.resolve_infix_define(symbol, props)

@@ -21,7 +21,7 @@ use crate::{
     NameSpace, ParserDeclStmt,
     error::ErrorCollector,
     scope_manager::ScopeRegistry,
-    symbol_table::{FunctionContext, OperatorContext},
+    symbol_table::{FuncBodyMap, FunctionContext, OperatorContext},
     type_registry::TypeRegistry,
 };
 
@@ -31,6 +31,7 @@ pub struct GlobalDeclCollector<'a> {
     name_space: &'a mut NameSpace,
     type_registry: &'a mut TypeRegistry,
     func_ctx: &'a mut FunctionContext,
+    func_body_map: &'a mut FuncBodyMap<'a>,
     op_ctx: &'a mut OperatorContext,
     scope_registry: &'a mut ScopeRegistry,
 }
@@ -42,6 +43,7 @@ impl<'a> GlobalDeclCollector<'a> {
         name_space: &'a mut NameSpace,
         type_registry: &'a mut TypeRegistry,
         func_ctx: &'a mut FunctionContext,
+        func_body_map: &'a mut FuncBodyMap<'a>,
         op_ctx: &'a mut OperatorContext,
         scope_registry: &'a mut ScopeRegistry,
     ) -> Self {
@@ -51,6 +53,7 @@ impl<'a> GlobalDeclCollector<'a> {
             name_space,
             type_registry,
             func_ctx,
+            func_body_map,
             op_ctx,
             scope_registry,
         }

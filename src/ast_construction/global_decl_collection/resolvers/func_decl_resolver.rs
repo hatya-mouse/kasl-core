@@ -15,16 +15,18 @@
 //
 
 use crate::{
-    ParserFuncParam, Range, SymbolPath, error::Ph, global_decl_collection::GlobalDeclCollector,
+    ParserFuncParam, ParserScopeStmt, Range, SymbolPath, error::Ph,
+    global_decl_collection::GlobalDeclCollector,
 };
 
-impl GlobalDeclCollector<'_> {
+impl<'a> GlobalDeclCollector<'a> {
     pub fn resolve_global_func_decl(
         &mut self,
         is_static: bool,
         name: &str,
         params: &[ParserFuncParam],
         return_type: &Option<SymbolPath>,
+        body: &'a Vec<ParserScopeStmt>,
         decl_range: Range,
     ) {
         // Check if is_static is not set
@@ -43,5 +45,8 @@ impl GlobalDeclCollector<'_> {
         // Register the function
         let func_id = self.name_space.generate_function_id();
         self.func_ctx.register_global_func(func, func_id);
+
+        // Register the function body to the function body map
+        self.func_body_map.register(func_id, body);
     }
 }

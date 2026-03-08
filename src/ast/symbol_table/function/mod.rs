@@ -14,8 +14,10 @@
 // limitations under the License.
 //
 
+mod func_body_map;
 mod function_def;
 
+pub use func_body_map::FuncBodyMap;
 pub use function_def::{FuncCallArg, FuncParam, Function, NoTypeFuncCallArg};
 
 use crate::{FunctionID, StructID, type_registry::ResolvedType};
@@ -89,5 +91,9 @@ impl FunctionContext {
             .get(struct_id)
             .and_then(|funcs| funcs.get(name))
             .copied()
+    }
+
+    pub fn funcs_mut(&mut self) -> Vec<&mut Function> {
+        self.funcs.values_mut().collect()
     }
 }
