@@ -62,6 +62,11 @@ pub enum ParserDeclStmtKind {
         value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,
     },
+    GlobalConst {
+        name: String,
+        value_type: Option<SymbolPath>,
+        def_val: Vec<ExprToken>,
+    },
     StructField {
         name: String,
         value_type: Option<SymbolPath>,
@@ -99,6 +104,7 @@ impl Display for ParserDeclStmtKind {
             ParserDeclStmtKind::Input { .. } => write!(f, "input"),
             ParserDeclStmtKind::Output { .. } => write!(f, "output"),
             ParserDeclStmtKind::StateVar { .. } => write!(f, "state"),
+            ParserDeclStmtKind::GlobalConst { .. } => write!(f, "let"),
             ParserDeclStmtKind::StructField { .. } => write!(f, "var"),
             ParserDeclStmtKind::StructDecl { .. } => write!(f, "struct"),
             ParserDeclStmtKind::InfixDefine { .. } => write!(f, "infix"),
@@ -115,6 +121,11 @@ pub enum ParserScopeStmtKind {
         value: Option<Vec<ExprToken>>,
     },
     LocalVar {
+        name: String,
+        value_type: Option<SymbolPath>,
+        def_val: Vec<ExprToken>,
+    },
+    LocalConst {
         name: String,
         value_type: Option<SymbolPath>,
         def_val: Vec<ExprToken>,

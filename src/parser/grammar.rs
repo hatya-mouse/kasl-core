@@ -23,31 +23,33 @@ use crate::{
 
 peg::parser!(pub grammar kasl_parser() for str {
     pub rule parse() -> Vec<ParserDeclStmt>
-        = top_level_stmts()
+        = decl_stmts()
 
     // --- STATEMENTS ---
 
-    rule top_level_stmts() -> Vec<ParserDeclStmt>
-        = __? statements:(top_level_stmt() ** ((_? "\n" _?)+)) __? { statements }
+    rule decl_stmts() -> Vec<ParserDeclStmt>
+        = __? statements:(decl_stmt() ** ((_? "\n" _?)+)) __? { statements }
 
-    rule body_stmts() -> Vec<ParserScopeStmt>
-        = __? statements:(body_stmt() ** ((_? "\n" _?)+)) __? { statements }
+    rule scope_stmts() -> Vec<ParserScopeStmt>
+        = __? statements:(scope_stmt() ** ((_? "\n" _?)+)) __? { statements }
 
-    rule top_level_stmt() -> ParserDeclStmt
+    rule decl_stmt() -> ParserDeclStmt
         = func_decl_statement()
         / input_statement()
         / output_statement()
         / state_var_statement()
+        / global_let_statement()
         / struct_field_statement()
         / struct_decl_statement()
         / operator_definition_statement()
         / operator_func_statement()
         / expected!("statement")
 
-    rule body_stmt() -> ParserScopeStmt
+    rule scope_stmt() -> ParserScopeStmt
         = return_statement()
         / local_var_statement()
         / assign_statement()
+        / local_let_statement()
         / func_call_statement()
         / if_statement()
         / block_statement()
@@ -56,7 +58,7 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule func_decl_statement() -> ParserDeclStmt
         = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
         return_type:("->" _? t:type_name() { t })? __? "{"
-        __? body:body_stmts() __?
+        __? body:scope_stmts() __?
         "}" end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
@@ -96,6 +98,14 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
+    rule global_let_statement() -> ParserDeclStmt
+        = start:position!() "let" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+            ParserDeclStmt {
+                range: Range::n(start, end),
+                kind: ParserDeclStmtKind::GlobalConst { name, value_type, def_val }
+            }
+        }
+
     rule struct_field_statement() -> ParserDeclStmt
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserDeclStmt {
@@ -109,6 +119,14 @@ peg::parser!(pub grammar kasl_parser() for str {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::LocalVar { name, value_type, def_val }
+            }
+        }
+
+    rule local_let_statement() -> ParserScopeStmt
+        = start:position!() "let" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+            ParserScopeStmt {
+                range: Range::n(start, end),
+                kind: ParserScopeStmtKind::LocalConst { name, value_type, def_val }
             }
         }
 
@@ -131,7 +149,7 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule if_statement() -> ParserScopeStmt
         = start:position!() main:if_arm()
         else_ifs:(__? "else" _ ifCond:if_arm() { ifCond })*
-        else_body:body_stmts()?
+        else_body:scope_stmts()?
         end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
@@ -145,14 +163,14 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule if_arm() -> ParserIfArm
         = start:position!() "if" _ condition:oneline_expression() __? "{"
-        __? body:body_stmts() __?
+        __? body:scope_stmts() __?
         "}" end:position!() {
             ParserIfArm { condition, body, range: Range::n(start, end) }
         }
 
     rule struct_decl_statement() -> ParserDeclStmt
         = start:position!() "struct" _ name:identifier() __? "{"
-        __? body:top_level_stmts() __?
+        __? body:decl_stmts() __?
         "}" end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
@@ -214,7 +232,7 @@ peg::parser!(pub grammar kasl_parser() for str {
     // Operator Function
     rule operator_func_statement() -> ParserDeclStmt
         = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:type_name() __? body:("{"
-        __? body:body_stmts() __?
+        __? body:scope_stmts() __?
         "}" { body }) end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
@@ -223,7 +241,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule block_statement() -> ParserScopeStmt
-        = start:position!() "{" _? statements:body_stmts() _? "}" end:position!() {
+        = start:position!() "{" _? statements:scope_stmts() _? "}" end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::Block { statements }

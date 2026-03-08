@@ -37,6 +37,11 @@ impl GlobalDeclCollector<'_> {
                 value_type,
                 def_val,
             } => self.resolve_state_var(name, value_type, def_val, stmt.range),
+            ParserDeclStmtKind::GlobalConst {
+                name,
+                value_type,
+                def_val,
+            } => self.resolve_global_const(name, value_type, def_val, stmt.range),
 
             ParserDeclStmtKind::StructDecl { name, body } => {
                 self.resolve_struct_decl(name, body, stmt.range)

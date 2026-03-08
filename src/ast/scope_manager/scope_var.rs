@@ -29,7 +29,9 @@ pub enum VariableKind {
     Input { attrs: Vec<InputAttribute> },
     Output,
     State,
-    Local,
+    GlobalConst,
+    LocalVar,
+    LocalConst,
 }
 
 #[derive(Debug, PartialEq, Clone)]

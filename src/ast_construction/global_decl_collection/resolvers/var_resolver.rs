@@ -65,6 +65,22 @@ impl GlobalDeclCollector<'_> {
         self.register_var_globally(name, value_type, def_val, VariableKind::State, decl_range);
     }
 
+    pub fn resolve_global_const(
+        &mut self,
+        name: &str,
+        value_type: &Option<SymbolPath>,
+        def_val: &Vec<ExprToken>,
+        decl_range: Range,
+    ) {
+        self.register_var_globally(
+            name,
+            value_type,
+            def_val,
+            VariableKind::GlobalConst,
+            decl_range,
+        );
+    }
+
     fn resolve_attrs(&mut self, attrs: Vec<ParserInputAttribute>) -> Option<Vec<InputAttribute>> {
         let mut resolved_attrs = Vec::new();
         let global_scope_id = self.scope_registry.get_global_scope_id();
