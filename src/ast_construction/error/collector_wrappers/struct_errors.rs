@@ -61,4 +61,14 @@ impl ErrorCollector {
             Pl::StrPair(struct_name, func_name),
         );
     }
+
+    pub fn duplicate_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
+        self.emit(
+            EK::DuplicateStructName,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(struct_name.to_string()),
+        );
+    }
 }

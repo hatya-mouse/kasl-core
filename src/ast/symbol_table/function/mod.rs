@@ -100,4 +100,8 @@ impl FunctionContext {
     pub fn func_ids(&self) -> Vec<FunctionID> {
         self.funcs.keys().copied().collect()
     }
+
+    pub fn has_global_func(&self, name: &str) -> bool {
+        self.global_functions.contains_key(name)
+    }
 }

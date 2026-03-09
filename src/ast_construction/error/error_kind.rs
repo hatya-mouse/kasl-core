@@ -136,6 +136,16 @@ pub enum ErrorKind {
     /// A variable with the same name already exists in the current scope, or its parent scopes.
     DuplicateVarName,
 
+    /// Title: DuplicateStructName
+    /// Payload: The name of the struct
+    /// A struct with the same name already exists in the current scope, or its parent scopes.
+    DuplicateStructName,
+
+    /// Title: DuplicateFuncName
+    /// Payload: The name of the function
+    /// A function with the same name already exists in the current scope, or its parent scopes.
+    DuplicateFuncName,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

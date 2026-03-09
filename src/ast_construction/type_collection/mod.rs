@@ -16,15 +16,30 @@
 
 mod stmt_process;
 
-use crate::{NameSpace, ParserDeclStmt, type_registry::TypeRegistry};
+use crate::{NameSpace, ParserDeclStmt, error::ErrorCollector, type_registry::TypeRegistry};
 
 pub struct TypeCollector<'a> {
-    pub decl_stmts: &'a [ParserDeclStmt],
-    pub name_space: &'a mut NameSpace,
-    pub type_registry: &'a mut TypeRegistry,
+    ec: &'a mut ErrorCollector,
+    decl_stmts: &'a [ParserDeclStmt],
+    name_space: &'a mut NameSpace,
+    type_registry: &'a mut TypeRegistry,
 }
 
-impl TypeCollector<'_> {
+impl<'a> TypeCollector<'a> {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        decl_stmts: &'a [ParserDeclStmt],
+        name_space: &'a mut NameSpace,
+        type_registry: &'a mut TypeRegistry,
+    ) -> Self {
+        Self {
+            ec,
+            decl_stmts,
+            name_space,
+            type_registry,
+        }
+    }
+
     pub fn process(&mut self) {
         for stmt in self.decl_stmts.iter() {
             self.process_stmt(stmt);

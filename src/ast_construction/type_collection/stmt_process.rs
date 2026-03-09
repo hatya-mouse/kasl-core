@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserDeclStmt, ParserDeclStmtKind, symbol_path, type_collection::TypeCollector,
+    ParserDeclStmt, ParserDeclStmtKind, error::Ph, symbol_path, type_collection::TypeCollector,
     type_registry::StructDecl,
 };
 
@@ -23,8 +23,16 @@ impl TypeCollector<'_> {
     pub fn process_stmt(&mut self, stmt: &ParserDeclStmt) {
         match &stmt.kind {
             ParserDeclStmtKind::StructDecl { name, .. } => {
-                let struct_decl = StructDecl::new(name.clone(), stmt.range);
                 let path = symbol_path![name.clone()];
+
+                // Check if the struct with the same name already exists
+                if self.type_registry.has_struct(&path) {
+                    self.ec
+                        .duplicate_struct_name(stmt.range, Ph::StructCollection, name);
+                }
+
+                // Create a new struct declaration
+                let struct_decl = StructDecl::new(name.clone(), stmt.range);
                 let id = self.name_space.generate_struct_id();
                 self.type_registry.register_struct(struct_decl, path, id);
             }

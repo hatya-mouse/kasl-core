@@ -78,4 +78,8 @@ impl TypeRegistry {
     pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
         self.structs.get(id)
     }
+
+    pub fn has_struct(&self, path: &SymbolPath) -> bool {
+        self.path_to_id.contains_key(path)
+    }
 }
