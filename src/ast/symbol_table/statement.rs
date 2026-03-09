@@ -14,12 +14,35 @@
 // limitations under the License.
 //
 
-use crate::{Expr, FuncCallArg, VariableID, type_registry::ResolvedType};
+use crate::{Expr, FuncCallArg, ScopeID, VariableID, type_registry::ResolvedType};
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Block {
+    pub body: Vec<Statement>,
+    scope_id: ScopeID,
+}
+
+impl Block {
+    pub fn new(scope_id: ScopeID) -> Self {
+        Self {
+            body: Vec::new(),
+            scope_id,
+        }
+    }
+
+    pub fn set_stmt(&mut self, stmts: Vec<Statement>) {
+        self.body = stmts;
+    }
+
+    pub fn get_scope_id(&self) -> ScopeID {
+        self.scope_id
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     Block {
-        body: Vec<Statement>,
+        block: Block,
     },
     LocalVar {
         name: String,
@@ -42,7 +65,7 @@ pub enum Statement {
     If {
         main: IfArm,
         else_ifs: Vec<IfArm>,
-        else_body: Vec<Statement>,
+        else_block: Block,
     },
     Return {
         value: Option<Expr<ResolvedType>>,
@@ -52,11 +75,11 @@ pub enum Statement {
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfArm {
     pub condition: Expr<ResolvedType>,
-    pub body: Vec<Statement>,
+    pub block: Block,
 }
 
 impl IfArm {
-    pub fn new(condition: Expr<ResolvedType>, body: Vec<Statement>) -> Self {
-        Self { condition, body }
+    pub fn new(condition: Expr<ResolvedType>, block: Block) -> Self {
+        Self { condition, block }
     }
 }

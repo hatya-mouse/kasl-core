@@ -14,23 +14,34 @@
 // limitations under the License.
 //
 
+mod builders;
 mod stmt_builder;
 
 use crate::{
-    ParserDeclStmt,
+    ScopeRegistry,
+    error::ErrorCollector,
     symbol_table::{FuncBodyMap, FunctionContext},
 };
 
 pub struct StatementBuilder<'a> {
+    ec: &'a mut ErrorCollector,
     func_ctx: &'a mut FunctionContext,
     func_body_map: &'a FuncBodyMap,
+    scope_registry: &'a mut ScopeRegistry,
 }
 
 impl<'a> StatementBuilder<'a> {
-    pub fn new(func_ctx: &'a mut FunctionContext, func_body_map: &'a FuncBodyMap) -> Self {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        func_ctx: &'a mut FunctionContext,
+        func_body_map: &'a FuncBodyMap,
+        scope_registry: &'a mut ScopeRegistry,
+    ) -> Self {
         Self {
+            ec,
             func_ctx,
             func_body_map,
+            scope_registry,
         }
     }
 

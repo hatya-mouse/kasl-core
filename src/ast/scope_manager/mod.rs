@@ -63,7 +63,7 @@ impl ScopeRegistry {
     }
 
     /// Generates a new `ScopeID` for a new scope.
-    pub fn generate_id(&mut self) -> ScopeID {
+    pub fn generate_scope_id(&mut self) -> ScopeID {
         let id = self.next_id;
         self.next_id += 1;
         ScopeID(id)
@@ -71,7 +71,7 @@ impl ScopeRegistry {
 
     /// Creates a new scope with the given parent scope.
     pub fn create_scope(&mut self, parent: Option<ScopeID>) -> ScopeID {
-        let id = self.generate_id();
+        let id = self.generate_scope_id();
         let scope = Scope::new(parent);
         self.scopes.insert(id, scope);
         id
