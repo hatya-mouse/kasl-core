@@ -91,7 +91,7 @@ impl ScopeRegistry {
     }
 
     /// Returns whether a variable with the given name exists in the current scope or its parents.
-    pub fn contains_var(&self, current_scope: ScopeID, name: &str) -> bool {
+    pub fn has_var(&self, current_scope: ScopeID, name: &str) -> bool {
         let mut target = Some(current_scope);
         while let Some(scope_id) = target {
             let scope = &self.scopes[&scope_id];

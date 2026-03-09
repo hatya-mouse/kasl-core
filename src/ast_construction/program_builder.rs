@@ -33,11 +33,8 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     let mut type_registry = TypeRegistry::new();
 
     // 1. Collect types
-    let mut type_collector = TypeCollector {
-        decl_stmts: &statements,
-        name_space: &mut name_space,
-        type_registry: &mut type_registry,
-    };
+    let mut type_collector =
+        TypeCollector::new(&mut ec, &statements, &mut name_space, &mut type_registry);
     type_collector.process();
 
     // 2. Collect global declarations, such as inputs, outputs, states, struct fields and functions
