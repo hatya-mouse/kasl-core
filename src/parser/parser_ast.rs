@@ -117,8 +117,8 @@ impl Display for ParserDeclStmtKind {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserScopeStmtKind {
-    Return {
-        value: Option<Vec<ExprToken>>,
+    Block {
+        statements: Vec<ParserScopeStmt>,
     },
     LocalVar {
         name: String,
@@ -143,8 +143,8 @@ pub enum ParserScopeStmtKind {
         else_ifs: Vec<ParserIfArm>,
         else_body: Vec<ParserScopeStmt>,
     },
-    Block {
-        statements: Vec<ParserScopeStmt>,
+    Return {
+        value: Option<Vec<ExprToken>>,
     },
 }
 

@@ -78,10 +78,6 @@ impl FunctionContext {
         self.funcs.insert(func_id, func);
     }
 
-    pub fn get_func(&self, symbol_id: &FunctionID) -> Option<&Function> {
-        self.funcs.get(symbol_id)
-    }
-
     pub fn get_global_func_by_name(&self, name: &str) -> Option<FunctionID> {
         self.global_functions.get(name).copied()
     }
@@ -93,7 +89,11 @@ impl FunctionContext {
             .copied()
     }
 
-    pub fn funcs_mut(&mut self) -> Vec<&mut Function> {
-        self.funcs.values_mut().collect()
+    pub fn get_func(&self, symbol_id: &FunctionID) -> Option<&Function> {
+        self.funcs.get(symbol_id)
+    }
+
+    pub fn func_ids(&self) -> Vec<FunctionID> {
+        self.funcs.keys().copied().collect()
     }
 }

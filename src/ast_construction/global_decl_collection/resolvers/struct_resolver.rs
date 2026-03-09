@@ -131,6 +131,6 @@ impl<'a> GlobalDeclCollector<'a> {
         }
 
         // Register the function body to the func body map
-        self.func_body_map.register(func_id, body);
+        self.func_body_map.register(func_id, body.clone());
     }
 }

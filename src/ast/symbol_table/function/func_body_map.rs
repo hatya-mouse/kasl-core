@@ -17,18 +17,22 @@
 use crate::{FunctionID, ParserScopeStmt};
 use std::collections::HashMap;
 
-pub struct FuncBodyMap<'a> {
-    pub func_map: HashMap<FunctionID, &'a Vec<ParserScopeStmt>>,
+pub struct FuncBodyMap {
+    pub func_map: HashMap<FunctionID, Vec<ParserScopeStmt>>,
 }
 
-impl<'a> FuncBodyMap<'a> {
+impl FuncBodyMap {
     pub fn new() -> Self {
         Self {
             func_map: HashMap::new(),
         }
     }
 
-    pub fn register(&mut self, func_id: FunctionID, body: &'a Vec<ParserScopeStmt>) {
+    pub fn register(&mut self, func_id: FunctionID, body: Vec<ParserScopeStmt>) {
         self.func_map.insert(func_id, body);
+    }
+
+    pub fn get_body(&self, func_id: &FunctionID) -> Option<&Vec<ParserScopeStmt>> {
+        self.func_map.get(func_id)
     }
 }

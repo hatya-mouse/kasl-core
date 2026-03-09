@@ -31,7 +31,7 @@ pub struct GlobalDeclCollector<'a> {
     name_space: &'a mut NameSpace,
     type_registry: &'a mut TypeRegistry,
     func_ctx: &'a mut FunctionContext,
-    func_body_map: &'a mut FuncBodyMap<'a>,
+    func_body_map: &'a mut FuncBodyMap,
     op_ctx: &'a mut OperatorContext,
     scope_registry: &'a mut ScopeRegistry,
 }
@@ -43,7 +43,7 @@ impl<'a> GlobalDeclCollector<'a> {
         name_space: &'a mut NameSpace,
         type_registry: &'a mut TypeRegistry,
         func_ctx: &'a mut FunctionContext,
-        func_body_map: &'a mut FuncBodyMap<'a>,
+        func_body_map: &'a mut FuncBodyMap,
         op_ctx: &'a mut OperatorContext,
         scope_registry: &'a mut ScopeRegistry,
     ) -> Self {

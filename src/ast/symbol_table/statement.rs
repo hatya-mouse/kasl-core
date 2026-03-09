@@ -21,7 +21,12 @@ pub enum Statement {
     Block {
         body: Vec<Statement>,
     },
-    VarDecl {
+    LocalVar {
+        name: String,
+        value_type: VariableID,
+        def_val: Expr<ResolvedType>,
+    },
+    LocalConst {
         name: String,
         value_type: VariableID,
         def_val: Expr<ResolvedType>,

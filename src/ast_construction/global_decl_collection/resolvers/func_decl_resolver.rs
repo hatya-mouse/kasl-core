@@ -47,6 +47,6 @@ impl<'a> GlobalDeclCollector<'a> {
         self.func_ctx.register_global_func(func, func_id);
 
         // Register the function body to the function body map
-        self.func_body_map.register(func_id, body);
+        self.func_body_map.register(func_id, body.clone());
     }
 }

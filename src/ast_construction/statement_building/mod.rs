@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+mod stmt_builder;
+
 use crate::{
     ParserDeclStmt,
     symbol_table::{FuncBodyMap, FunctionContext},
@@ -21,18 +23,20 @@ use crate::{
 
 pub struct StatementBuilder<'a> {
     func_ctx: &'a mut FunctionContext,
-    func_body_map: &'a FuncBodyMap<'a>,
+    func_body_map: &'a FuncBodyMap,
 }
 
 impl<'a> StatementBuilder<'a> {
-    pub fn new(func_ctx: &'a mut FunctionContext, func_body_map: &'a FuncBodyMap<'a>) -> Self {
+    pub fn new(func_ctx: &'a mut FunctionContext, func_body_map: &'a FuncBodyMap) -> Self {
         Self {
             func_ctx,
             func_body_map,
         }
     }
 
-    pub fn collect(&mut self, stmts: &mut Vec<ParserDeclStmt>) {
-        for func in self.func_ctx.funcs_mut() {}
+    pub fn build_stmts(&mut self) {
+        for func_id in self.func_ctx.func_ids() {
+            self.build_stmt_for_func(func_id);
+        }
     }
 }
