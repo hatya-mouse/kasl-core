@@ -55,4 +55,14 @@ impl ErrorCollector {
             Pl::StrPair(annotation_type.to_string(), expr_type.to_string()),
         );
     }
+
+    pub fn duplicate_var_name(&mut self, range: Range, phase: Phase, var_name: &str) {
+        self.emit(
+            EK::DuplicateVarName,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(var_name.to_string()),
+        );
+    }
 }

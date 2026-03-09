@@ -131,6 +131,11 @@ pub enum ErrorKind {
     /// A postfix operator definition has a wrong number of parameters.
     WrongParamCountForPostfix,
 
+    /// Title: DuplicateVarName
+    /// Payload: The name of the variable
+    /// A variable with the same name already exists in the current scope, or its parent scopes.
+    DuplicateVarName,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

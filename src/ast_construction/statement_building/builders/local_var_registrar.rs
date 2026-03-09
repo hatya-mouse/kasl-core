@@ -87,6 +87,13 @@ impl StatementBuilder<'_> {
             var_kind,
         };
 
+        // Check if the name is already in use in this scope
+        if self.scope_registry.contains_var(current_scope_id, name) {
+            self.ec
+                .duplicate_var_name(decl_range, Ph::StatementCollection, name);
+            return None;
+        }
+
         // Register the variable in the scope
         let var_id = self.name_space.generate_variable_id();
         self.scope_registry

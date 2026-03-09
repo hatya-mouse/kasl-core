@@ -35,6 +35,10 @@ impl Scope {
         self.name_to_id.get(name)
     }
 
+    pub fn has_var(&self, name: &str) -> bool {
+        self.name_to_id.contains_key(name)
+    }
+
     pub fn register_var(&mut self, name: String, id: VariableID) {
         self.name_to_id.insert(name, id);
     }

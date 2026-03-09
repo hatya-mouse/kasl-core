@@ -73,6 +73,16 @@ impl GlobalDeclCollector<'_> {
             return;
         };
 
+        // Get the global scope ID
+        let global_scope_id = self.scope_registry.get_global_scope_id();
+
+        // Check if the name is already in use in this scope
+        if self.scope_registry.contains_var(global_scope_id, name) {
+            self.ec
+                .duplicate_var_name(decl_range, Ph::StatementCollection, name);
+            return;
+        }
+
         // Register the variable in the global scope
         let var = ScopeVar {
             name: name.to_string(),
@@ -81,7 +91,6 @@ impl GlobalDeclCollector<'_> {
             var_kind,
         };
         let variable_id = self.name_space.generate_variable_id();
-        let global_scope_id = self.scope_registry.get_global_scope_id();
         self.scope_registry
             .register_var(var, name.to_string(), variable_id, global_scope_id);
     }

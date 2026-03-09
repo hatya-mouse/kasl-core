@@ -24,7 +24,7 @@ impl StatementBuilder<'_> {
         &mut self,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         current_scope_id: ScopeID,
         decl_range: Range,
     ) -> Option<Statement> {
@@ -47,7 +47,7 @@ impl StatementBuilder<'_> {
         &mut self,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         current_scope_id: ScopeID,
         decl_range: Range,
     ) -> Option<Statement> {
