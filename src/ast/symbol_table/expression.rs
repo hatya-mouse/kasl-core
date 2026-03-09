@@ -88,24 +88,8 @@ pub enum MemberAccess {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum LValue {
-    Identifier {
-        name: String,
-        id: VariableID,
-        value_type: ResolvedType,
-    },
-    Chain {
-        lhs: Box<LValue>,
-        offset: usize,
-        value_type: ResolvedType,
-    },
-}
-
-impl LValue {
-    pub fn value_type(&self) -> ResolvedType {
-        match self {
-            LValue::Identifier { value_type, .. } => *value_type,
-            LValue::Chain { value_type, .. } => *value_type,
-        }
-    }
+pub struct LValue {
+    pub var_id: VariableID,
+    pub offset: usize,
+    pub value_type: ResolvedType,
 }

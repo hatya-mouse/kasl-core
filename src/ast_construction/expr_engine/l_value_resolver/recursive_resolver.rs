@@ -40,9 +40,9 @@ impl LValueResolver<'_> {
         let value_type = var.def_val.value_type;
 
         // Create and return a LValue
-        Some(LValue::Identifier {
-            name: name.to_string(),
-            id: *var_id,
+        Some(LValue {
+            var_id: *var_id,
+            offset: 0,
             value_type,
         })
     }
@@ -59,7 +59,7 @@ impl LValueResolver<'_> {
                 let lhs = self.resolve_recursively(&lhs)?;
 
                 // Get the StructDecl
-                let ResolvedType::Struct(struct_id) = lhs.value_type() else {
+                let ResolvedType::Struct(struct_id) = lhs.value_type else {
                     self.ec.member_access_on_primitive(range, Ph::ExprEngine);
                     return None;
                 };
@@ -81,12 +81,13 @@ impl LValueResolver<'_> {
 
                 // Get the offset
                 let struct_offset = struct_decl.get_offset_by_index(struct_field_index)?;
+                let offset = lhs.offset + struct_offset;
                 // Get the value type of the StructField
                 let struct_field = struct_decl.get_field_by_index(struct_field_index)?;
 
-                Some(LValue::Chain {
-                    lhs: Box::new(lhs),
-                    offset: struct_offset,
+                Some(LValue {
+                    var_id: lhs.var_id,
+                    offset,
                     value_type: struct_field.value_type,
                 })
             }
