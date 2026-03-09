@@ -32,11 +32,11 @@ pub struct StructDecl {
     pub static_methods: Vec<VariableID>,
 
     /// The map of field names to their offsets in bytes.
-    pub field_offsets: Vec<u32>,
+    pub field_offsets: Vec<usize>,
     /// The total size of the struct in bytes.
-    pub total_size: u32,
+    pub total_size: usize,
     /// The alignment of the struct in bytes.
-    pub alignment: u32,
+    pub alignment: usize,
 
     /// The range of the struct declaration in the source code.
     pub range: Range,
@@ -65,7 +65,7 @@ impl StructDecl {
         self.indices.get(field_name).copied()
     }
 
-    pub fn get_offset_by_index(&self, field_index: usize) -> Option<u32> {
+    pub fn get_offset_by_index(&self, field_index: usize) -> Option<usize> {
         self.field_offsets.get(field_index).copied()
     }
 

@@ -17,7 +17,7 @@
 use crate::{StructID, type_registry::PrimitiveType};
 use std::fmt::Display;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ResolvedType {
     Primitive(PrimitiveType),
     Struct(StructID),

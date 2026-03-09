@@ -42,9 +42,7 @@ impl FunctionContext {
     }
 
     pub fn get_type(&self, symbol_id: &FunctionID) -> Option<ResolvedType> {
-        self.funcs
-            .get(symbol_id)
-            .and_then(|func| func.return_type.clone())
+        self.funcs.get(symbol_id).and_then(|func| func.return_type)
     }
 
     pub fn register_member_func(

@@ -16,6 +16,7 @@
 
 use crate::{
     FuncCallArg, FunctionID, OperatorID, Range, VariableID, symbol_table::NoTypeFuncCallArg,
+    type_registry::ResolvedType,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -76,7 +77,7 @@ pub enum ExprKind<T> {
 pub enum MemberAccess {
     Access {
         name: String,
-        offset: Option<u32>,
+        offset: Option<usize>,
     },
     FuncCall {
         name: String,
@@ -84,4 +85,27 @@ pub enum MemberAccess {
         no_type_args: Vec<NoTypeFuncCallArg>,
         args: Option<Vec<FuncCallArg>>,
     },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum LValue {
+    Identifier {
+        name: String,
+        id: VariableID,
+        value_type: ResolvedType,
+    },
+    Chain {
+        lhs: Box<LValue>,
+        offset: Option<usize>,
+        value_type: ResolvedType,
+    },
+}
+
+impl LValue {
+    pub fn value_type(&self) -> &ResolvedType {
+        match self {
+            LValue::Identifier { value_type, .. } => value_type,
+            LValue::Chain { value_type, .. } => value_type,
+        }
+    }
 }

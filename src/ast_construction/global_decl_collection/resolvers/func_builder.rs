@@ -104,7 +104,7 @@ impl GlobalDeclCollector<'_> {
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
-                value_type: resolved_def_val.value_type.clone(),
+                value_type: resolved_def_val.value_type,
                 def_val: Some(resolved_def_val),
                 range: param.range,
             })

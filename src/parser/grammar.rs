@@ -131,7 +131,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule assign_statement() -> ParserScopeStmt
-        = start:position!() target:type_name() _ "=" _ value:oneline_expression() end:position!() {
+        = start:position!() target:oneline_expression() _ "=" _ value:oneline_expression() end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::Assign { target, value }
@@ -139,7 +139,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule func_call_statement() -> ParserScopeStmt
-        = start:position!() path:type_name() _? "(" __? args:func_call_args() ")" end:position!() {
+        = start:position!() path:oneline_expression() _? "(" __? args:func_call_args() ")" end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::FuncCall { path, args }

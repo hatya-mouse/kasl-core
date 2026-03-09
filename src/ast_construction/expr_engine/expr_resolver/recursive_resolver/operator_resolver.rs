@@ -40,7 +40,7 @@ impl ExpressionResolver<'_> {
         })?;
         let op = self.op_ctx.get_infix_op(&op_id)?;
         // Get the return type of the operator
-        let return_type = op.return_type.clone();
+        let return_type = op.return_type;
         Some(Expr::new(
             ExprKind::InfixOp {
                 symbol,
@@ -68,7 +68,7 @@ impl ExpressionResolver<'_> {
         })?;
         let op = self.op_ctx.get_prefix_op(&op_id)?;
         // Get the return type of the operator
-        let return_type = op.return_type.clone();
+        let return_type = op.return_type;
         Some(Expr::new(
             ExprKind::PrefixOp {
                 symbol,
@@ -95,7 +95,7 @@ impl ExpressionResolver<'_> {
         })?;
         let op = self.op_ctx.get_postfix_op(&op_id)?;
         // Get the return type of the operator
-        let return_type = op.return_type.clone();
+        let return_type = op.return_type;
         Some(Expr::new(
             ExprKind::PostfixOp {
                 symbol,

@@ -81,7 +81,7 @@ impl ExpressionResolver<'_> {
                             name,
                             offset: Some(offset),
                         },
-                        field.value_type.clone(),
+                        field.value_type,
                     ))
                 }
 
@@ -118,7 +118,7 @@ impl ExpressionResolver<'_> {
                             args: Some(args),
                             id: Some(func_id),
                         },
-                        return_type.clone(),
+                        *return_type,
                     ))
                 }
             },

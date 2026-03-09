@@ -120,10 +120,7 @@ impl Node for AudioShaderNode {
 
         let output = match exec.run(
             input_vec,
-            self.output
-                .iter()
-                .map(|info| info.value_type.clone())
-                .collect(),
+            self.output.iter().map(|info| info.value_type).collect(),
         ) {
             Ok(r) => r,
             Err(_) => return Ok(()),

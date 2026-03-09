@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+/// Builds an Assign statement.
+mod assign_builder;
 /// Builds a block statement.
 mod block_builder;
 /// Builds a LocalVar and LocalConst statements which declare local variables and constants.

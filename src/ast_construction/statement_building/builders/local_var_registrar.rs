@@ -26,7 +26,7 @@ impl StatementBuilder<'_> {
         def_val: &[ExprToken],
         value_type: &Option<SymbolPath>,
         current_scope_id: ScopeID,
-        decl_range: Range,
+        stmt_range: Range,
     ) -> Option<Expr<ResolvedType>> {
         let resolved_def_val = resolve_expr(
             self.ec,
@@ -44,7 +44,7 @@ impl StatementBuilder<'_> {
                 self.type_registry.resolve_type_path(type_annotation)
             else {
                 self.ec.type_not_found(
-                    decl_range,
+                    stmt_range,
                     Ph::StatementCollection,
                     type_annotation.to_string(),
                 );
@@ -54,7 +54,7 @@ impl StatementBuilder<'_> {
             // Check if the resolved value type matches the type annotation
             if resolved_type_annotation != resolved_def_val.value_type {
                 self.ec.type_annotation_mismatch(
-                    decl_range,
+                    stmt_range,
                     Ph::StatementCollection,
                     resolved_type_annotation.to_string(),
                     resolved_def_val.value_type.to_string(),
@@ -72,25 +72,25 @@ impl StatementBuilder<'_> {
         value_type: &Option<SymbolPath>,
         def_val: &[ExprToken],
         current_scope_id: ScopeID,
-        decl_range: Range,
+        stmt_range: Range,
         var_kind: VariableKind,
     ) -> Option<VariableID> {
         // Resolve the default value expression
         let resolved_def_val =
-            self.resolve_def_val(def_val, value_type, current_scope_id, decl_range)?;
+            self.resolve_def_val(def_val, value_type, current_scope_id, stmt_range)?;
 
         // Create a ScopeVar
         let scope_var = ScopeVar {
             name: name.to_string(),
             def_val: resolved_def_val,
-            range: decl_range,
+            range: stmt_range,
             var_kind,
         };
 
         // Check if the name is already in use in this scope
         if self.scope_registry.has_var(current_scope_id, name) {
             self.ec
-                .duplicate_var_name(decl_range, Ph::StatementCollection, name);
+                .duplicate_var_name(stmt_range, Ph::StatementCollection, name);
             return None;
         }
 

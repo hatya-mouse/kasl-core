@@ -26,7 +26,7 @@ impl StatementBuilder<'_> {
         value_type: &Option<SymbolPath>,
         def_val: &[ExprToken],
         current_scope_id: ScopeID,
-        decl_range: Range,
+        stmt_range: Range,
     ) -> Option<Statement> {
         // Build and register the scope variable
         let var_id = self.build_and_register_scope_var(
@@ -34,7 +34,7 @@ impl StatementBuilder<'_> {
             value_type,
             def_val,
             current_scope_id,
-            decl_range,
+            stmt_range,
             VariableKind::LocalVar,
         )?;
 
@@ -49,7 +49,7 @@ impl StatementBuilder<'_> {
         value_type: &Option<SymbolPath>,
         def_val: &[ExprToken],
         current_scope_id: ScopeID,
-        decl_range: Range,
+        stmt_range: Range,
     ) -> Option<Statement> {
         // Build and register the scope variable
         let var_id = self.build_and_register_scope_var(
@@ -57,7 +57,7 @@ impl StatementBuilder<'_> {
             value_type,
             def_val,
             current_scope_id,
-            decl_range,
+            stmt_range,
             VariableKind::LocalConst,
         )?;
 

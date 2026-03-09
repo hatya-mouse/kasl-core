@@ -47,7 +47,7 @@ impl ExpressionResolver<'_> {
                 no_type_args,
                 args: Some(args),
             },
-            return_type.clone(),
+            *return_type,
             range,
         ))
     }

@@ -131,11 +131,11 @@ pub enum ParserScopeStmtKind {
         def_val: Vec<ExprToken>,
     },
     Assign {
-        target: SymbolPath,
+        target: Vec<ExprToken>,
         value: Vec<ExprToken>,
     },
     FuncCall {
-        path: SymbolPath,
+        path: Vec<ExprToken>,
         args: Vec<ParserFuncCallArg>,
     },
     If {

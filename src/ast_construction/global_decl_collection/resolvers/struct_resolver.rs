@@ -97,7 +97,7 @@ impl<'a> GlobalDeclCollector<'a> {
         // Create a struct field
         let struct_field = StructField {
             name: name.to_string(),
-            value_type: def_val.value_type.clone(),
+            value_type: def_val.value_type,
             def_val,
             range: decl_range,
         };
