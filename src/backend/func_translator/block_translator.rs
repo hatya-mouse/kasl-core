@@ -31,13 +31,15 @@ impl FuncTranslator<'_> {
             Statement::LocalVar { var_id } => self.translate_local_var(var_id),
             Statement::LocalConst { var_id } => self.translate_local_const(var_id),
             Statement::Assign { target, value } => self.translate_assign(target, value),
-            Statement::Expression { expr } => {}
+            Statement::Expression { expr } => {
+                self.translate_expr(expr);
+            }
             Statement::If {
                 main,
                 else_ifs,
                 else_block,
             } => {}
-            Statement::Return { value } => {}
+            Statement::Return { value } => self.translate_return(value),
         }
     }
 }

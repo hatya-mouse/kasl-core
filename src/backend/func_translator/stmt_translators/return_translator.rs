@@ -14,7 +14,15 @@
 // limitations under the License.
 //
 
-mod assign_translator;
-mod local_decl_translator;
-mod return_translator;
-mod var_declaration;
+use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use cranelift::prelude::InstBuilder;
+
+impl FuncTranslator<'_> {
+    pub fn translate_return(&mut self, value: &Option<Expr<ResolvedType>>) {
+        if let Some(return_val) = value.as_ref().map(|val| self.translate_expr(val)) {
+            self.builder.ins().return_(&[return_val]);
+        } else {
+            self.builder.ins().return_(&[]);
+        }
+    }
+}
