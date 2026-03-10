@@ -23,7 +23,7 @@ pub struct Function {
     pub is_static: bool,
     pub params: Vec<FuncParam>,
     pub return_type: Option<ResolvedType>,
-    pub block: Block,
+    pub block: Option<Block>,
     pub range: Range,
 }
 
@@ -51,7 +51,7 @@ impl Function {
     }
 
     pub fn set_block(&mut self, block: Block) {
-        self.block = block;
+        self.block = Some(block);
     }
 }
 

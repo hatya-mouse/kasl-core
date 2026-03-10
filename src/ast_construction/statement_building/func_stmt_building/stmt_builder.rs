@@ -21,31 +21,15 @@ use crate::{
 impl FuncStmtBuilder<'_> {
     pub fn build_func_body(&mut self) {
         if let Some(body) = self.func_body_map.get_body(&self.func_id) {
-            // Get the scope ID of the function
-            let Some(scope_id) = self
-                .func_ctx
-                .get_func_mut(&self.func_id)
-                .map(|func| func.block.get_scope_id())
-            else {
-                return;
-            };
-
-            let mut resolved_body = Vec::new();
-            for stmt in body {
-                // Build the body one by one
-                let Some(resolved_stmt) = self.build_stmt(stmt, scope_id) else {
-                    // Errors should have been emitted inside the build_stmt function
-                    // thus it is okay to continue without emitting any additional errors here
-                    continue;
-                };
-                resolved_body.push(resolved_stmt);
-            }
+            // Generate a new Scope for the function
+            let global_scope_id = self.scope_registry.get_global_scope_id();
+            let resolved_body = self.build_scope_block(body, global_scope_id);
 
             // Store the resolved body in the function
             let Some(func) = self.func_ctx.get_func_mut(&self.func_id) else {
                 return;
             };
-            func.block.set_stmt(resolved_body);
+            func.set_block(resolved_body);
         }
     }
 

@@ -21,6 +21,7 @@ pub use func_stmt_building::FuncStmtBuilder;
 use crate::{
     NameSpace, OperatorContext, ScopeRegistry,
     error::ErrorCollector,
+    scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, FunctionContext},
     type_registry::TypeRegistry,
 };
@@ -33,6 +34,8 @@ pub struct StatementBuilder<'a> {
     func_body_map: &'a FuncBodyMap,
     op_ctx: &'a OperatorContext,
     scope_registry: &'a mut ScopeRegistry,
+
+    scope_graph: &'a mut ScopeGraph,
 }
 
 impl<'a> StatementBuilder<'a> {
@@ -44,6 +47,7 @@ impl<'a> StatementBuilder<'a> {
         func_body_map: &'a FuncBodyMap,
         op_ctx: &'a OperatorContext,
         scope_registry: &'a mut ScopeRegistry,
+        scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
@@ -53,6 +57,7 @@ impl<'a> StatementBuilder<'a> {
             func_body_map,
             op_ctx,
             scope_registry,
+            scope_graph,
         }
     }
 
@@ -66,6 +71,7 @@ impl<'a> StatementBuilder<'a> {
                 self.func_body_map,
                 self.op_ctx,
                 self.scope_registry,
+                self.scope_graph,
                 func_id,
             );
             func_stmt_builder.build_func_body();

@@ -16,7 +16,7 @@
 
 use crate::{
     FuncParam, Function, ParserFuncParam, Range, SymbolPath, error::Ph, expr_engine::resolve_expr,
-    global_decl_collection::GlobalDeclCollector, symbol_table::Block,
+    global_decl_collection::GlobalDeclCollector,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -45,18 +45,13 @@ impl GlobalDeclCollector<'_> {
             None => None,
         };
 
-        // Generate a new Scope for the function
-        let global_scope_id = self.scope_registry.get_global_scope_id();
-        let scope_id = self.scope_registry.create_scope(Some(global_scope_id));
-        let block = Block::new(scope_id);
-
         Some(Function {
             name: name.to_string(),
             is_member,
             is_static,
             params,
             return_type,
-            block,
+            block: None,
             range: decl_range,
         })
     }

@@ -34,6 +34,9 @@ impl FuncStmtBuilder<'_> {
             body.push(resolved_stmt);
         }
 
+        // Add an edge from the parent scope to the block scope
+        self.scope_graph.add_edge(parent_scope_id, block_scope_id);
+
         // Create a block for the resolved statements
         let mut block = Block::new(block_scope_id);
         block.set_stmt(body);

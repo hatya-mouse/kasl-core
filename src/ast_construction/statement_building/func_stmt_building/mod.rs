@@ -22,6 +22,7 @@ mod stmt_builder;
 use crate::{
     FunctionID, NameSpace, OperatorContext, ScopeRegistry,
     error::ErrorCollector,
+    scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, FunctionContext},
     type_registry::{ResolvedType, TypeRegistry},
 };
@@ -35,6 +36,7 @@ pub struct FuncStmtBuilder<'a> {
     op_ctx: &'a OperatorContext,
     scope_registry: &'a mut ScopeRegistry,
 
+    scope_graph: &'a mut ScopeGraph,
     func_id: FunctionID,
     expected_return_type: Option<ResolvedType>,
 }
@@ -48,6 +50,7 @@ impl<'a> FuncStmtBuilder<'a> {
         func_body_map: &'a FuncBodyMap,
         op_ctx: &'a OperatorContext,
         scope_registry: &'a mut ScopeRegistry,
+        scope_graph: &'a mut ScopeGraph,
         func_id: FunctionID,
     ) -> Self {
         let func = func_ctx.get_func(&func_id);
@@ -61,6 +64,7 @@ impl<'a> FuncStmtBuilder<'a> {
             func_body_map,
             op_ctx,
             scope_registry,
+            scope_graph,
             func_id,
             expected_return_type,
         }

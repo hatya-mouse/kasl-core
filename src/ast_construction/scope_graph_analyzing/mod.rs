@@ -14,12 +14,8 @@
 // limitations under the License.
 //
 
-pub mod error;
-pub mod expr_engine;
-pub mod global_decl_collection;
-pub mod program_builder;
-pub mod scope_graph_analyzing;
-pub mod statement_building;
-pub mod type_collection;
+use crate::scope_manager::ScopeGraph;
 
-pub use program_builder::construct_program;
+pub struct ScopeGraphAnalyzer<'a> {
+    scope_graph: &'a ScopeGraph,
+}
