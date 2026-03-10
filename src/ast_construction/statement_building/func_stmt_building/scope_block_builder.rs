@@ -34,8 +34,6 @@ impl FuncStmtBuilder<'_> {
             body.push(resolved_stmt);
         }
 
-        // Add a scope for the block
-        self.scope_graph.add_scope(block_scope_id);
         // Add an edge from the parent scope to the block scope
         self.scope_graph.add_edge(parent_scope_id, block_scope_id);
 

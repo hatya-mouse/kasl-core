@@ -57,14 +57,15 @@ impl ErrorKey {
     }
 }
 
-#[repr(i32)]
+#[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Phase {
     Parse = 0,
-    StructCollection = 10,
-    GlobalDeclCollection = 20,
-    StatementCollection = 30,
-    ExprEngine = 40,
+    StructCollection = 1,
+    GlobalDeclCollection = 2,
+    StatementCollection = 3,
+    ExprEngine = 4,
+    ScopeGraphAnalyzing = 5,
 }
 
 #[derive(Clone, Debug)]

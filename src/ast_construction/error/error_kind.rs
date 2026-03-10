@@ -176,6 +176,11 @@ pub enum ErrorKind {
     /// A return statement without a value is used in a function that returns a value.
     ReturnWithoutValueForReturnFunc,
 
+    /// Title: RecursiveCall
+    /// Payload: None
+    /// A recursive function call is found.
+    RecursiveCall,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

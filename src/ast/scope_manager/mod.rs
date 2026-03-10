@@ -14,15 +14,17 @@
 // limitations under the License.
 //
 
+mod memory_layout;
 mod scope;
 mod scope_graph;
 mod scope_var;
 
+pub use memory_layout::MemoryLayout;
 pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::{VariableID, type_registry::TypeRegistry};
+use crate::VariableID;
 use std::collections::HashMap;
 
 /// ScopeRegistry manages scopes and variables belonging to them.
@@ -60,8 +62,8 @@ impl ScopeRegistry {
     }
 
     /// Returns a reference to the scope with the given `ScopeID`.
-    pub fn get_scope(&self, scope_id: ScopeID) -> Option<&Scope> {
-        self.scopes.get(&scope_id)
+    pub fn get_scope(&self, scope_id: &ScopeID) -> Option<&Scope> {
+        self.scopes.get(scope_id)
     }
 
     /// Generates a new `ScopeID` for a new scope.
@@ -117,16 +119,9 @@ impl ScopeRegistry {
         self.variables.insert(id, var);
     }
 
-    /// Calculates the size of the scope, ignoring the child scopes.
-    pub fn scope_size(&self, type_registry: &TypeRegistry, scope_id: ScopeID) -> usize {
-        let scope = &self.scopes[&scope_id];
-        let mut size = 0;
-        for var_id in &scope.variables {
-            let var = self.variables.get(var_id).unwrap();
-            let var_type = var.def_val.value_type;
-            size += type_registry.get_type_size(&var_type);
-        }
-        size
+    /// Returns the vector of all scope IDs.
+    pub fn all_scope_ids(&self) -> Vec<ScopeID> {
+        self.scopes.keys().copied().collect()
     }
 }
 

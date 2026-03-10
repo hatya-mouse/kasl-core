@@ -14,35 +14,29 @@
 // limitations under the License.
 //
 
+use crate::VariableID;
 use std::collections::HashMap;
 
-use crate::ScopeID;
-
-pub struct ScopeGraph {
-    pub caller_to_callee: HashMap<ScopeID, Vec<ScopeID>>,
-    pub callee_to_caller: HashMap<ScopeID, Vec<ScopeID>>,
+pub struct MemoryLayout {
+    /// Total size of the memory layout in bytes.
+    pub total_size: usize,
+    /// Offset of each variables in bytes.
+    pub offsets: HashMap<VariableID, usize>,
 }
 
-impl ScopeGraph {
+impl MemoryLayout {
     pub fn new() -> Self {
         Self {
-            caller_to_callee: HashMap::new(),
-            callee_to_caller: HashMap::new(),
+            total_size: 0,
+            offsets: HashMap::new(),
         }
     }
 
-    pub fn add_edge(&mut self, caller: ScopeID, callee: ScopeID) {
-        self.caller_to_callee
-            .entry(caller)
-            .or_default()
-            .push(callee);
-        self.callee_to_caller
-            .entry(callee)
-            .or_default()
-            .push(caller);
+    pub fn register_offset(&mut self, var_id: VariableID, offset: usize) {
+        self.offsets.insert(var_id, offset);
     }
 
-    pub fn get_callees(&self, caller: &ScopeID) -> Option<&Vec<ScopeID>> {
-        self.caller_to_callee.get(caller)
+    pub fn set_total_size(&mut self, size: usize) {
+        self.total_size = size;
     }
 }

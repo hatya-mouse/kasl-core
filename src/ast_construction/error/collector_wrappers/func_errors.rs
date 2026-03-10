@@ -121,4 +121,8 @@ impl ErrorCollector {
             Pl::Str(func_name.to_string()),
         );
     }
+
+    pub fn recursive_call(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::RecursiveCall, range, phase, Sv::Error, Pl::None);
+    }
 }
