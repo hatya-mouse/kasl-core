@@ -53,6 +53,10 @@ impl SymbolPath {
         self.components.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.components.is_empty()
+    }
+
     pub fn first(&self) -> Option<&SymbolPathComponent> {
         self.components.first()
     }

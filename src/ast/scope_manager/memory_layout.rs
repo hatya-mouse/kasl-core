@@ -17,6 +17,7 @@
 use crate::VariableID;
 use std::collections::HashMap;
 
+#[derive(Default)]
 pub struct MemoryLayout {
     /// Total size of the memory layout in bytes.
     pub total_size: usize,
@@ -25,13 +26,6 @@ pub struct MemoryLayout {
 }
 
 impl MemoryLayout {
-    pub fn new() -> Self {
-        Self {
-            total_size: 0,
-            offsets: HashMap::new(),
-        }
-    }
-
     pub fn register_offset(&mut self, var_id: VariableID, offset: usize) {
         self.offsets.insert(var_id, offset);
     }

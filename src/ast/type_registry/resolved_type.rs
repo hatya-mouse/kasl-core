@@ -25,7 +25,11 @@ pub enum ResolvedType {
 
 impl PartialEq<ResolvedType> for &ResolvedType {
     fn eq(&self, other: &ResolvedType) -> bool {
-        self == other
+        match (self, other) {
+            (ResolvedType::Primitive(ty1), ResolvedType::Primitive(ty2)) => ty1 == ty2,
+            (ResolvedType::Struct(id1), ResolvedType::Struct(id2)) => id1 == id2,
+            _ => false,
+        }
     }
 }
 

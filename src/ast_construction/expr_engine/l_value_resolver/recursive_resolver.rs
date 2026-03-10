@@ -30,7 +30,7 @@ impl LValueResolver<'_> {
 
     pub fn resolve_identifier(&mut self, name: &str, range: Range) -> Option<LValue> {
         // Look up the variable ID in the current scope
-        let Some(var_id) = self.scope_registry.lookup_var(self.current_scope, &name) else {
+        let Some(var_id) = self.scope_registry.lookup_var(self.current_scope, name) else {
             self.ec.var_not_found(range, Ph::ExprEngine, name);
             return None;
         };
@@ -56,7 +56,7 @@ impl LValueResolver<'_> {
         match member {
             ParserMemberAccess::Access(name) => {
                 // Resolve the LHS
-                let lhs = self.resolve_recursively(&lhs)?;
+                let lhs = self.resolve_recursively(lhs)?;
 
                 // Get the StructDecl
                 let ResolvedType::Struct(struct_id) = lhs.value_type else {

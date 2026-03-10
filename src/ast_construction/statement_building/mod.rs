@@ -19,21 +19,15 @@ mod func_stmt_building;
 pub use func_stmt_building::FuncStmtBuilder;
 
 use crate::{
-    NameSpace, OperatorContext, ScopeRegistry,
-    error::ErrorCollector,
-    scope_manager::ScopeGraph,
-    symbol_table::{FuncBodyMap, FunctionContext},
-    type_registry::TypeRegistry,
+    CompilationState, NameSpace, error::ErrorCollector, scope_manager::ScopeGraph,
+    symbol_table::FuncBodyMap,
 };
 
 pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
     name_space: &'a mut NameSpace,
-    type_registry: &'a TypeRegistry,
-    func_ctx: &'a mut FunctionContext,
     func_body_map: &'a FuncBodyMap,
-    op_ctx: &'a OperatorContext,
-    scope_registry: &'a mut ScopeRegistry,
+    compilation_state: &'a mut CompilationState,
 
     scope_graph: &'a mut ScopeGraph,
 }
@@ -42,35 +36,26 @@ impl<'a> StatementBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         name_space: &'a mut NameSpace,
-        type_registry: &'a TypeRegistry,
-        func_ctx: &'a mut FunctionContext,
         func_body_map: &'a FuncBodyMap,
-        op_ctx: &'a OperatorContext,
-        scope_registry: &'a mut ScopeRegistry,
+        compilation_state: &'a mut CompilationState,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
             name_space,
-            type_registry,
-            func_ctx,
             func_body_map,
-            op_ctx,
-            scope_registry,
+            compilation_state,
             scope_graph,
         }
     }
 
     pub fn build_all(&mut self) {
-        for func_id in self.func_ctx.func_ids() {
+        for func_id in self.compilation_state.func_ctx.func_ids() {
             let mut func_stmt_builder = FuncStmtBuilder::new(
                 self.ec,
                 self.name_space,
-                self.type_registry,
-                self.func_ctx,
                 self.func_body_map,
-                self.op_ctx,
-                self.scope_registry,
+                self.compilation_state,
                 self.scope_graph,
                 func_id,
             );

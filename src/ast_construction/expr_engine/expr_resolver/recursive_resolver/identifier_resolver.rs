@@ -21,11 +21,18 @@ use crate::{
 impl ExpressionResolver<'_> {
     pub fn resolve_identifier(&mut self, name: String, range: Range) -> Option<Expr<ResolvedType>> {
         // Get the variable ID from the scope registry
-        let Some(var_id) = self.scope_registry.lookup_var(self.current_scope, &name) else {
+        let Some(var_id) = self
+            .compilation_state
+            .scope_registry
+            .lookup_var(self.current_scope, &name)
+        else {
             self.ec.var_not_found(range, Ph::ExprEngine, &name);
             return None;
         };
-        let var = self.scope_registry.get_var_by_id(var_id)?;
+        let var = self
+            .compilation_state
+            .scope_registry
+            .get_var_by_id(var_id)?;
 
         Some(Expr::new(
             ExprKind::Identifier {

@@ -18,8 +18,8 @@ pub const MAIN_FUNCTION_NAME: &str = "main";
 
 pub mod ast;
 pub mod ast_construction;
-pub mod compilation;
 pub mod parser;
+pub mod translation;
 
 pub use ast::*;
 pub use ast_construction::*;

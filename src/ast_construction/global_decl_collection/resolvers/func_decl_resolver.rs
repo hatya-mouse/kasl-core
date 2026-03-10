@@ -15,45 +15,46 @@
 //
 
 use crate::{
-    ParserFuncParam, ParserScopeStmt, Range, SymbolPath, error::Ph,
-    global_decl_collection::GlobalDeclCollector,
+    Range,
+    error::Ph,
+    global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
 };
 
-impl<'a> GlobalDeclCollector<'a> {
-    pub fn resolve_global_func_decl(
-        &mut self,
-        is_static: bool,
-        name: &str,
-        params: &[ParserFuncParam],
-        return_type: &Option<SymbolPath>,
-        body: &'a Vec<ParserScopeStmt>,
-        decl_range: Range,
-    ) {
+impl GlobalDeclCollector<'_> {
+    pub fn resolve_global_func_decl(&mut self, decl_range: Range, info: FuncDeclInfo<'_>) {
         // Check if is_static is not set
-        if is_static {
+        if info.is_static {
             self.ec
-                .global_func_cannot_be_static(decl_range, Ph::GlobalDeclCollection, name);
+                .global_func_cannot_be_static(decl_range, Ph::GlobalDeclCollection, info.name);
             return;
         }
 
         // Build the function node
-        let Some(func) = self.build_func(false, is_static, name, params, return_type, decl_range)
-        else {
+        let Some(func) = self.build_func(
+            false,
+            info.is_static,
+            info.name,
+            info.params,
+            info.return_type,
+            decl_range,
+        ) else {
             return;
         };
 
         // Check if a function with the same name already exists
-        if self.func_ctx.has_global_func(name) {
+        if self.compilation_state.func_ctx.has_global_func(info.name) {
             self.ec
-                .duplicate_func_name(decl_range, Ph::GlobalDeclCollection, name);
+                .duplicate_func_name(decl_range, Ph::GlobalDeclCollection, info.name);
             return;
         }
 
         // Register the function
         let func_id = self.name_space.generate_function_id();
-        self.func_ctx.register_global_func(func, func_id);
+        self.compilation_state
+            .func_ctx
+            .register_global_func(func, func_id);
 
         // Register the function body to the function body map
-        self.func_body_map.register(func_id, body.clone());
+        self.func_body_map.register(func_id, info.body.to_vec());
     }
 }

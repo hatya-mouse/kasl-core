@@ -24,8 +24,8 @@ impl GlobalDeclCollector<'_> {
         &mut self,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
-        attrs: &Vec<ParserInputAttribute>,
+        def_val: &[ExprToken],
+        attrs: &[ParserInputAttribute],
         decl_range: Range,
     ) {
         // Resolve the attributes
@@ -49,7 +49,7 @@ impl GlobalDeclCollector<'_> {
         &mut self,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         decl_range: Range,
     ) {
         self.register_var_globally(name, value_type, def_val, VariableKind::Output, decl_range);
@@ -59,7 +59,7 @@ impl GlobalDeclCollector<'_> {
         &mut self,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         decl_range: Range,
     ) {
         self.register_var_globally(name, value_type, def_val, VariableKind::State, decl_range);
@@ -69,7 +69,7 @@ impl GlobalDeclCollector<'_> {
         &mut self,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         decl_range: Range,
     ) {
         self.register_var_globally(
@@ -83,22 +83,15 @@ impl GlobalDeclCollector<'_> {
 
     fn resolve_attrs(&mut self, attrs: &[ParserInputAttribute]) -> Option<Vec<InputAttribute>> {
         let mut resolved_attrs = Vec::new();
-        let global_scope_id = self.scope_registry.get_global_scope_id();
+        let global_scope_id = self.compilation_state.scope_registry.get_global_scope_id();
 
         // Resolve each attribute's arguments and construct InputAttribute
         for attr in attrs {
             let mut resolved_args = Vec::new();
             for arg in &attr.args {
                 // Resolve the expression of the argument
-                let resolved_arg = resolve_expr(
-                    self.ec,
-                    self.op_ctx,
-                    self.func_ctx,
-                    self.scope_registry,
-                    self.type_registry,
-                    global_scope_id,
-                    arg,
-                )?;
+                let resolved_arg =
+                    resolve_expr(self.ec, self.compilation_state, global_scope_id, arg)?;
                 resolved_args.push(resolved_arg);
             }
 

@@ -30,6 +30,7 @@ use std::collections::HashMap;
 /// ScopeRegistry manages scopes and variables belonging to them.
 /// It only manages the top-level variables and local variables,
 /// and doesn't manage the struct fields.
+#[derive(Debug)]
 pub struct ScopeRegistry {
     pub scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,
@@ -37,9 +38,8 @@ pub struct ScopeRegistry {
     next_id: usize,
 }
 
-impl ScopeRegistry {
-    /// Creates a new `ScopeRegistry` with a new global scope.
-    pub fn new() -> Self {
+impl Default for ScopeRegistry {
+    fn default() -> Self {
         let mut manager = Self {
             scopes: HashMap::new(),
             variables: HashMap::new(),
@@ -50,7 +50,9 @@ impl ScopeRegistry {
         manager.global_scope_id = manager.create_scope(None);
         manager
     }
+}
 
+impl ScopeRegistry {
     /// Returns the ID of the global scope.
     pub fn get_global_scope_id(&self) -> ScopeID {
         self.global_scope_id

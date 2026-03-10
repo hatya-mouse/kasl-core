@@ -20,7 +20,7 @@ mod symbol_path;
 pub use symbol_id::{FunctionID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct NameSpace {
     next_variable_id: usize,
     next_struct_id: usize,
@@ -29,15 +29,6 @@ pub struct NameSpace {
 }
 
 impl NameSpace {
-    pub fn new() -> Self {
-        Self {
-            next_variable_id: 0,
-            next_struct_id: 0,
-            next_function_id: 0,
-            next_operator_id: 0,
-        }
-    }
-
     pub fn generate_variable_id(&mut self) -> VariableID {
         let id = VariableID::new(self.next_variable_id);
         self.next_variable_id += 1;

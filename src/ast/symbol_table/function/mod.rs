@@ -23,7 +23,7 @@ pub use function_def::{FuncCallArg, FuncParam, Function, NoTypeFuncCallArg};
 use crate::{FunctionID, StructID, type_registry::ResolvedType};
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FunctionContext {
     funcs: HashMap<FunctionID, Function>,
     member_functions: HashMap<StructID, HashMap<String, FunctionID>>,
@@ -32,15 +32,6 @@ pub struct FunctionContext {
 }
 
 impl FunctionContext {
-    pub fn new() -> Self {
-        Self {
-            funcs: HashMap::new(),
-            member_functions: HashMap::new(),
-            static_functions: HashMap::new(),
-            global_functions: HashMap::new(),
-        }
-    }
-
     pub fn get_type(&self, symbol_id: &FunctionID) -> Option<ResolvedType> {
         self.funcs.get(symbol_id).and_then(|func| func.return_type)
     }
@@ -53,7 +44,7 @@ impl FunctionContext {
     ) {
         self.member_functions
             .entry(struct_id)
-            .or_insert_with(HashMap::new)
+            .or_default()
             .insert(func.name.clone(), func_id);
         self.funcs.insert(func_id, func);
     }
@@ -66,7 +57,7 @@ impl FunctionContext {
     ) {
         self.static_functions
             .entry(struct_id)
-            .or_insert_with(HashMap::new)
+            .or_default()
             .insert(func.name.clone(), func_id);
         self.funcs.insert(func_id, func);
     }

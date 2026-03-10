@@ -27,13 +27,17 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Get a reference to the function
-        let Some(func_id) = self.func_ctx.get_global_func_by_name(&name) else {
+        let Some(func_id) = self
+            .compilation_state
+            .func_ctx
+            .get_global_func_by_name(&name)
+        else {
             self.ec.func_not_found(range, Ph::ExprEngine, &name);
             return None;
         };
-        let func = self.func_ctx.get_func(&func_id)?;
+        let func = self.compilation_state.func_ctx.get_func(&func_id)?;
 
-        let args = self.resolve_func_call_args(&func, &no_type_args, range)?;
+        let args = self.resolve_func_call_args(func, &no_type_args, range)?;
 
         let Some(return_type) = &func.return_type else {
             self.ec.no_return_func_in_expr(range, Ph::ExprEngine, &name);
@@ -77,7 +81,7 @@ impl ExpressionResolver<'_> {
                 // If the slot is already occupied, throw an duplicate parameter error
                 if slots[param_index].is_some() {
                     self.ec
-                        .duplicate_arg(no_type_arg.range, Ph::ExprEngine, &func.name, &label);
+                        .duplicate_arg(no_type_arg.range, Ph::ExprEngine, &func.name, label);
                     return None;
                 }
                 // If the label order is incorrect, throw an error
@@ -86,7 +90,7 @@ impl ExpressionResolver<'_> {
                         no_type_arg.range,
                         Ph::ExprEngine,
                         &func.name,
-                        &label,
+                        label,
                     );
                     return None;
                 }
@@ -119,11 +123,10 @@ impl ExpressionResolver<'_> {
         }
 
         let mut resolved_args = Vec::new();
-        for i in 0..slots.len() {
-            match &slots[i] {
+        for (slot, param) in slots.iter().zip(func.params.iter()) {
+            match slot {
                 Some(arg) => resolved_args.push(arg.clone()),
                 None => {
-                    let param = &func.params[i];
                     match param.def_val {
                         // If the parameter has a default value, use it
                         Some(ref def_val) => resolved_args.push(FuncCallArg {

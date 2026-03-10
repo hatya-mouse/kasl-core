@@ -16,35 +16,23 @@
 
 mod recursive_resolver;
 
-use crate::{
-    OperatorContext, ScopeID, ScopeRegistry, error::ErrorCollector, symbol_table::FunctionContext,
-    type_registry::TypeRegistry,
-};
+use crate::{CompilationState, ScopeID, error::ErrorCollector};
 
 pub struct ExpressionResolver<'a> {
     ec: &'a mut ErrorCollector,
-    op_ctx: &'a OperatorContext,
-    func_ctx: &'a FunctionContext,
-    scope_registry: &'a ScopeRegistry,
-    type_registry: &'a TypeRegistry,
+    compilation_state: &'a CompilationState,
     current_scope: ScopeID,
 }
 
 impl<'a> ExpressionResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        op_ctx: &'a OperatorContext,
-        func_ctx: &'a FunctionContext,
-        scope_registry: &'a ScopeRegistry,
-        type_registry: &'a TypeRegistry,
+        compilation_state: &'a CompilationState,
         current_scope: ScopeID,
     ) -> Self {
         Self {
             ec,
-            op_ctx,
-            func_ctx,
-            scope_registry,
-            type_registry,
+            compilation_state,
             current_scope,
         }
     }

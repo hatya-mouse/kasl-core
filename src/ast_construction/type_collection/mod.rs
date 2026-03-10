@@ -16,13 +16,13 @@
 
 mod stmt_process;
 
-use crate::{NameSpace, ParserDeclStmt, error::ErrorCollector, type_registry::TypeRegistry};
+use crate::{CompilationState, NameSpace, ParserDeclStmt, error::ErrorCollector};
 
 pub struct TypeCollector<'a> {
     ec: &'a mut ErrorCollector,
     decl_stmts: &'a [ParserDeclStmt],
     name_space: &'a mut NameSpace,
-    type_registry: &'a mut TypeRegistry,
+    compilation_state: &'a mut CompilationState,
 }
 
 impl<'a> TypeCollector<'a> {
@@ -30,13 +30,13 @@ impl<'a> TypeCollector<'a> {
         ec: &'a mut ErrorCollector,
         decl_stmts: &'a [ParserDeclStmt],
         name_space: &'a mut NameSpace,
-        type_registry: &'a mut TypeRegistry,
+        compilation_state: &'a mut CompilationState,
     ) -> Self {
         Self {
             ec,
             decl_stmts,
             name_space,
-            type_registry,
+            compilation_state,
         }
     }
 

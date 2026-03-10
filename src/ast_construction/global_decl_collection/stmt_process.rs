@@ -15,7 +15,9 @@
 //
 
 use crate::{
-    ParserDeclStmt, ParserDeclStmtKind, error::Ph, global_decl_collection::GlobalDeclCollector,
+    ParserDeclStmt, ParserDeclStmtKind,
+    error::Ph,
+    global_decl_collection::{FuncDeclInfo, GlobalDeclCollector},
 };
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -53,14 +55,16 @@ impl<'a> GlobalDeclCollector<'a> {
                 params,
                 return_type,
                 body,
-            } => self.resolve_global_func_decl(
-                *is_static,
-                name,
-                params,
-                return_type,
-                body,
-                stmt.range,
-            ),
+            } => {
+                let info = FuncDeclInfo {
+                    is_static: *is_static,
+                    name,
+                    params,
+                    return_type,
+                    body,
+                };
+                self.resolve_global_func_decl(stmt.range, info)
+            }
 
             ParserDeclStmtKind::InfixDefine { symbol, props } => {
                 self.resolve_infix_define(symbol, props)

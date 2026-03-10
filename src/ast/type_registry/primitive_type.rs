@@ -15,7 +15,7 @@
 //
 
 use cranelift::prelude::{Type, types};
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PrimitiveType {
@@ -58,13 +58,17 @@ impl PrimitiveType {
             PrimitiveType::Float => 4,
         }
     }
+}
 
-    pub fn from_str(s: &str) -> Option<Self> {
+impl FromStr for PrimitiveType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Int" => Some(PrimitiveType::Int),
-            "Float" => Some(PrimitiveType::Float),
-            "Bool" => Some(PrimitiveType::Bool),
-            _ => None,
+            "Int" => Ok(PrimitiveType::Int),
+            "Float" => Ok(PrimitiveType::Float),
+            "Bool" => Ok(PrimitiveType::Bool),
+            _ => Err(()),
         }
     }
 }

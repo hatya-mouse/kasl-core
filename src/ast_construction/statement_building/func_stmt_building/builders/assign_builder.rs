@@ -32,31 +32,28 @@ impl FuncStmtBuilder<'_> {
         // Resolve the target variable
         let mut l_value_resolver = LValueResolver::new(
             self.ec,
-            self.scope_registry,
-            self.type_registry,
+            &self.compilation_state.scope_registry,
+            &self.compilation_state.type_registry,
             current_scope_id,
         );
         // Error will be thrown by the LValueResolver so no need to check for None
         let target_l_value = l_value_resolver.resolve_recursively(target)?;
 
         // Resolve the expression
-        let resolved_value = resolve_expr(
-            self.ec,
-            self.op_ctx,
-            self.func_ctx,
-            self.scope_registry,
-            self.type_registry,
-            current_scope_id,
-            value,
-        )?;
+        let resolved_value =
+            resolve_expr(self.ec, self.compilation_state, current_scope_id, value)?;
 
         // Check if the target and value types match
         if target_l_value.value_type != resolved_value.value_type {
             self.ec.assign_type_mismatch(
                 stmt_range,
                 Ph::StatementCollection,
-                self.type_registry.format_type(&target_l_value.value_type),
-                self.type_registry.format_type(&resolved_value.value_type),
+                self.compilation_state
+                    .type_registry
+                    .format_type(&target_l_value.value_type),
+                self.compilation_state
+                    .type_registry
+                    .format_type(&resolved_value.value_type),
             );
             return None;
         }

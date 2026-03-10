@@ -348,7 +348,7 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule type_name() -> SymbolPath
         = first:identifier() extensions:(_? "." _? id:identifier() _? { id })* {
             let first = SymbolPathComponent::new(first);
-            let extensions = extensions.into_iter().map(|id| SymbolPathComponent::new(id)).collect();
+            let extensions = extensions.into_iter().map(SymbolPathComponent::new).collect();
             SymbolPath::with(vec![first]).extended(extensions)
         }
 

@@ -20,7 +20,7 @@ impl FuncStmtBuilder<'_> {
     /// Builds a block statement from a list of statements.
     pub fn build_block_stmt(
         &mut self,
-        statements: &Vec<ParserScopeStmt>,
+        statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
     ) -> Option<Statement> {
         let block = self.build_scope_block(statements, parent_scope_id);

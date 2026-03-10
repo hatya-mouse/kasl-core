@@ -17,23 +17,18 @@
 mod resolvers;
 mod stmt_process;
 
+pub use resolvers::FuncDeclInfo;
+
 use crate::{
-    NameSpace, ParserDeclStmt,
-    error::ErrorCollector,
-    scope_manager::ScopeRegistry,
-    symbol_table::{FuncBodyMap, FunctionContext, OperatorContext},
-    type_registry::TypeRegistry,
+    CompilationState, NameSpace, ParserDeclStmt, error::ErrorCollector, symbol_table::FuncBodyMap,
 };
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
     decl_stmts: &'a [ParserDeclStmt],
     name_space: &'a mut NameSpace,
-    type_registry: &'a mut TypeRegistry,
-    func_ctx: &'a mut FunctionContext,
     func_body_map: &'a mut FuncBodyMap,
-    op_ctx: &'a mut OperatorContext,
-    scope_registry: &'a mut ScopeRegistry,
+    compilation_state: &'a mut CompilationState,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -41,21 +36,15 @@ impl<'a> GlobalDeclCollector<'a> {
         ec: &'a mut ErrorCollector,
         decl_stmts: &'a [ParserDeclStmt],
         name_space: &'a mut NameSpace,
-        type_registry: &'a mut TypeRegistry,
-        func_ctx: &'a mut FunctionContext,
         func_body_map: &'a mut FuncBodyMap,
-        op_ctx: &'a mut OperatorContext,
-        scope_registry: &'a mut ScopeRegistry,
+        compilation_state: &'a mut CompilationState,
     ) -> Self {
         Self {
             ec,
             decl_stmts,
             name_space,
-            type_registry,
-            func_ctx,
             func_body_map,
-            op_ctx,
-            scope_registry,
+            compilation_state,
         }
     }
 

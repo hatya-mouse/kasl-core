@@ -15,10 +15,9 @@
 //
 
 use crate::{
-    ExprToken, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, ParserScopeStmt, Range,
-    StructID, SymbolPath,
+    ExprToken, ParserDeclStmt, ParserDeclStmtKind, Range, StructID, SymbolPath,
     error::Ph,
-    global_decl_collection::GlobalDeclCollector,
+    global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
     symbol_path,
     type_registry::{StructDecl, StructField},
 };
@@ -36,7 +35,8 @@ impl<'a> GlobalDeclCollector<'a> {
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
         // Register the struct in the type registry with a generated ID
-        self.type_registry
+        self.compilation_state
+            .type_registry
             .register_struct(struct_decl, struct_path, struct_id);
     }
 
@@ -60,15 +60,16 @@ impl<'a> GlobalDeclCollector<'a> {
                     params,
                     return_type,
                     body,
-                } => self.resolve_member_func_decl(
-                    struct_id,
-                    *is_static,
-                    name,
-                    params,
-                    return_type,
-                    body,
-                    stmt.range,
-                ),
+                } => {
+                    let info = FuncDeclInfo {
+                        is_static: *is_static,
+                        name,
+                        params,
+                        return_type,
+                        body,
+                    };
+                    self.resolve_member_func_decl(struct_id, stmt.range, info);
+                }
 
                 _ => {
                     self.ec.invalid_struct_stmt(
@@ -86,7 +87,7 @@ impl<'a> GlobalDeclCollector<'a> {
         struct_decl: &mut StructDecl,
         name: &str,
         value_type: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         decl_range: Range,
     ) {
         // Resolve the default value expression
@@ -108,29 +109,35 @@ impl<'a> GlobalDeclCollector<'a> {
     fn resolve_member_func_decl(
         &mut self,
         struct_id: StructID,
-        is_static: bool,
-        name: &str,
-        params: &[ParserFuncParam],
-        return_type: &Option<SymbolPath>,
-        body: &'a Vec<ParserScopeStmt>,
         decl_range: Range,
+        info: FuncDeclInfo<'_>,
     ) {
         // Build the function node
-        let Some(func) = self.build_func(false, is_static, name, params, return_type, decl_range)
-        else {
+        let Some(func) = self.build_func(
+            true,
+            info.is_static,
+            info.name,
+            info.params,
+            info.return_type,
+            decl_range,
+        ) else {
             return;
         };
 
         // Register the function
         let func_id = self.name_space.generate_function_id();
 
-        if is_static {
-            self.func_ctx.register_static_func(func, struct_id, func_id);
+        if info.is_static {
+            self.compilation_state
+                .func_ctx
+                .register_static_func(func, struct_id, func_id);
         } else {
-            self.func_ctx.register_member_func(func, struct_id, func_id);
+            self.compilation_state
+                .func_ctx
+                .register_member_func(func, struct_id, func_id);
         }
 
         // Register the function body to the func body map
-        self.func_body_map.register(func_id, body.clone());
+        self.func_body_map.register(func_id, info.body.to_vec());
     }
 }

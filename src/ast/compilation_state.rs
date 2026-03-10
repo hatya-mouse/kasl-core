@@ -14,13 +14,14 @@
 // limitations under the License.
 //
 
-use crate::InputVar;
-use cranelift_codegen::ir::Value;
+use crate::{
+    OperatorContext, ScopeRegistry, symbol_table::FunctionContext, type_registry::TypeRegistry,
+};
 
-pub trait InputProvider {
-    /// Define a new input variable with the given name, type, value and attributes.
-    fn define_input(&mut self, input: &InputVar);
-
-    /// Get a value for the given input variable.
-    fn get_input(&self, name: &str) -> Option<Value>;
+#[derive(Debug, Default)]
+pub struct CompilationState {
+    pub func_ctx: FunctionContext,
+    pub op_ctx: OperatorContext,
+    pub scope_registry: ScopeRegistry,
+    pub type_registry: TypeRegistry,
 }

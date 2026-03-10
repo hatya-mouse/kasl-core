@@ -14,12 +14,14 @@
 // limitations under the License.
 //
 
+pub mod compilation_state;
 pub mod data;
 pub mod name_space;
 pub mod scope_manager;
 pub mod symbol_table;
 pub mod type_registry;
 
+pub use compilation_state::CompilationState;
 pub use data::Range;
 pub use name_space::{
     FunctionID, NameSpace, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent,

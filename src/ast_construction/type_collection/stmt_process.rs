@@ -21,22 +21,21 @@ use crate::{
 
 impl TypeCollector<'_> {
     pub fn process_stmt(&mut self, stmt: &ParserDeclStmt) {
-        match &stmt.kind {
-            ParserDeclStmtKind::StructDecl { name, .. } => {
-                let path = symbol_path![name.clone()];
+        if let ParserDeclStmtKind::StructDecl { name, .. } = &stmt.kind {
+            let path = symbol_path![name.clone()];
 
-                // Check if the struct with the same name already exists
-                if self.type_registry.has_struct(&path) {
-                    self.ec
-                        .duplicate_struct_name(stmt.range, Ph::StructCollection, name);
-                }
-
-                // Create a new struct declaration
-                let struct_decl = StructDecl::new(name.clone(), stmt.range);
-                let id = self.name_space.generate_struct_id();
-                self.type_registry.register_struct(struct_decl, path, id);
+            // Check if the struct with the same name already exists
+            if self.compilation_state.type_registry.has_struct(&path) {
+                self.ec
+                    .duplicate_struct_name(stmt.range, Ph::StructCollection, name);
             }
-            _ => {}
+
+            // Create a new struct declaration
+            let struct_decl = StructDecl::new(name.clone(), stmt.range);
+            let id = self.name_space.generate_struct_id();
+            self.compilation_state
+                .type_registry
+                .register_struct(struct_decl, path, id);
         }
     }
 }

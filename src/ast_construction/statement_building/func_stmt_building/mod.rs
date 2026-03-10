@@ -20,21 +20,15 @@ mod scope_block_builder;
 mod stmt_builder;
 
 use crate::{
-    FunctionID, NameSpace, OperatorContext, ScopeRegistry,
-    error::ErrorCollector,
-    scope_manager::ScopeGraph,
-    symbol_table::{FuncBodyMap, FunctionContext},
-    type_registry::{ResolvedType, TypeRegistry},
+    CompilationState, FunctionID, NameSpace, error::ErrorCollector, scope_manager::ScopeGraph,
+    symbol_table::FuncBodyMap, type_registry::ResolvedType,
 };
 
 pub struct FuncStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
     name_space: &'a mut NameSpace,
-    type_registry: &'a TypeRegistry,
-    func_ctx: &'a mut FunctionContext,
     func_body_map: &'a FuncBodyMap,
-    op_ctx: &'a OperatorContext,
-    scope_registry: &'a mut ScopeRegistry,
+    compilation_state: &'a mut CompilationState,
 
     scope_graph: &'a mut ScopeGraph,
     func_id: FunctionID,
@@ -42,28 +36,23 @@ pub struct FuncStmtBuilder<'a> {
 }
 
 impl<'a> FuncStmtBuilder<'a> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         ec: &'a mut ErrorCollector,
         name_space: &'a mut NameSpace,
-        type_registry: &'a TypeRegistry,
-        func_ctx: &'a mut FunctionContext,
         func_body_map: &'a FuncBodyMap,
-        op_ctx: &'a OperatorContext,
-        scope_registry: &'a mut ScopeRegistry,
+        compilation_state: &'a mut CompilationState,
         scope_graph: &'a mut ScopeGraph,
         func_id: FunctionID,
     ) -> Self {
-        let func = func_ctx.get_func(&func_id);
-        let expected_return_type = func.and_then(|f| f.return_type.clone());
+        let func = compilation_state.func_ctx.get_func(&func_id);
+        let expected_return_type = func.and_then(|f| f.return_type);
 
         Self {
             ec,
             name_space,
-            type_registry,
-            func_ctx,
             func_body_map,
-            op_ctx,
-            scope_registry,
+            compilation_state,
             scope_graph,
             func_id,
             expected_return_type,

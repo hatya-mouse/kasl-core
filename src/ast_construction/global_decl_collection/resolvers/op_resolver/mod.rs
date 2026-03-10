@@ -37,7 +37,11 @@ impl GlobalDeclCollector<'_> {
             return;
         };
         // Resolve return type
-        let Some(return_type) = self.type_registry.resolve_type_path(return_type) else {
+        let Some(return_type) = self
+            .compilation_state
+            .type_registry
+            .resolve_type_path(return_type)
+        else {
             self.ec.type_not_found(
                 decl_range,
                 Ph::GlobalDeclCollection,

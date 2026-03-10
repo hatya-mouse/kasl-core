@@ -17,17 +17,12 @@
 use crate::{FunctionID, ParserScopeStmt};
 use std::collections::HashMap;
 
+#[derive(Default)]
 pub struct FuncBodyMap {
     pub func_map: HashMap<FunctionID, Vec<ParserScopeStmt>>,
 }
 
 impl FuncBodyMap {
-    pub fn new() -> Self {
-        Self {
-            func_map: HashMap::new(),
-        }
-    }
-
     pub fn register(&mut self, func_id: FunctionID, body: Vec<ParserScopeStmt>) {
         self.func_map.insert(func_id, body);
     }

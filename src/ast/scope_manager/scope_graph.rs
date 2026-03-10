@@ -18,19 +18,13 @@ use std::collections::HashMap;
 
 use crate::ScopeID;
 
+#[derive(Default)]
 pub struct ScopeGraph {
     pub caller_to_callee: HashMap<ScopeID, Vec<ScopeID>>,
     pub callee_to_caller: HashMap<ScopeID, Vec<ScopeID>>,
 }
 
 impl ScopeGraph {
-    pub fn new() -> Self {
-        Self {
-            caller_to_callee: HashMap::new(),
-            callee_to_caller: HashMap::new(),
-        }
-    }
-
     pub fn add_edge(&mut self, caller: ScopeID, callee: ScopeID) {
         self.caller_to_callee
             .entry(caller)

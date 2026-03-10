@@ -34,19 +34,19 @@ impl ExpressionResolver<'_> {
                 operator: _,
                 lhs,
                 rhs,
-            } => self.resolve_infix_op(symbol, lhs, rhs, expr.range),
+            } => self.resolve_infix_op(symbol, *lhs, *rhs, expr.range),
 
             ExprKind::PrefixOp {
                 symbol,
                 operator: _,
                 operand,
-            } => self.resolve_prefix_op(symbol, operand, expr.range),
+            } => self.resolve_prefix_op(symbol, *operand, expr.range),
 
             ExprKind::PostfixOp {
                 symbol,
                 operator: _,
                 operand,
-            } => self.resolve_postfix_op(symbol, operand, expr.range),
+            } => self.resolve_postfix_op(symbol, *operand, expr.range),
 
             ExprKind::Identifier { name, id: _ } => self.resolve_identifier(name, expr.range),
 
@@ -57,7 +57,7 @@ impl ExpressionResolver<'_> {
                 args: _,
             } => self.resolve_func_call(name, no_type_args, expr.range),
 
-            ExprKind::Chain { lhs, access } => self.resolve_chain(lhs, access, expr.range),
+            ExprKind::Chain { lhs, access } => self.resolve_chain(*lhs, access, expr.range),
         }
     }
 }

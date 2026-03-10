@@ -22,11 +22,11 @@ impl FuncStmtBuilder<'_> {
     pub fn build_func_body(&mut self) {
         if let Some(body) = self.func_body_map.get_body(&self.func_id) {
             // Generate a new Scope for the function
-            let global_scope_id = self.scope_registry.get_global_scope_id();
+            let global_scope_id = self.compilation_state.scope_registry.get_global_scope_id();
             let resolved_body = self.build_scope_block(body, global_scope_id);
 
             // Store the resolved body in the function
-            let Some(func) = self.func_ctx.get_func_mut(&self.func_id) else {
+            let Some(func) = self.compilation_state.func_ctx.get_func_mut(&self.func_id) else {
                 return;
             };
             func.set_block(resolved_body);

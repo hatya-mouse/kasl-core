@@ -25,7 +25,10 @@ impl FuncStmtBuilder<'_> {
         let mut body = Vec::new();
 
         // Create a new scope for the block
-        let block_scope_id = self.scope_registry.create_scope(Some(parent_scope_id));
+        let block_scope_id = self
+            .compilation_state
+            .scope_registry
+            .create_scope(Some(parent_scope_id));
         // Build each statement in the block scope
         for stmt in statements {
             let Some(resolved_stmt) = self.build_stmt(stmt, block_scope_id) else {

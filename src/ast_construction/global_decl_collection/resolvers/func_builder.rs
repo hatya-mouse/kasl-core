@@ -34,7 +34,7 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the return type
         let return_type = match return_type {
-            Some(path) => match self.type_registry.resolve_type_path(path) {
+            Some(path) => match self.compilation_state.type_registry.resolve_type_path(path) {
                 Some(resolved) => Some(resolved),
                 None => {
                     self.ec
@@ -67,30 +67,29 @@ impl GlobalDeclCollector<'_> {
     }
 
     pub fn resolve_func_param(&mut self, param: &ParserFuncParam) -> Option<FuncParam> {
-        let global_scope_id = self.scope_registry.get_global_scope_id();
+        let global_scope_id = self.compilation_state.scope_registry.get_global_scope_id();
 
         if let Some(def_val) = &param.def_val {
             // Resolve the default value expression
-            let resolved_def_val = resolve_expr(
-                self.ec,
-                self.op_ctx,
-                self.func_ctx,
-                self.scope_registry,
-                self.type_registry,
-                global_scope_id,
-                def_val,
-            )?;
+            let resolved_def_val =
+                resolve_expr(self.ec, self.compilation_state, global_scope_id, def_val)?;
 
             // If a type annotation is provided, check if it matches the resolved default value type
             if let Some(annotation_type) = &param.value_type {
-                let resolved_annotation_type =
-                    self.type_registry.resolve_type_path(&annotation_type)?;
+                let resolved_annotation_type = self
+                    .compilation_state
+                    .type_registry
+                    .resolve_type_path(annotation_type)?;
                 if resolved_annotation_type != resolved_def_val.value_type {
                     self.ec.type_annotation_mismatch(
                         param.range,
                         Ph::GlobalDeclCollection,
-                        self.type_registry.format_type(&resolved_annotation_type),
-                        self.type_registry.format_type(&resolved_def_val.value_type),
+                        self.compilation_state
+                            .type_registry
+                            .format_type(&resolved_annotation_type),
+                        self.compilation_state
+                            .type_registry
+                            .format_type(&resolved_def_val.value_type),
                     );
                     return None;
                 }
@@ -105,8 +104,10 @@ impl GlobalDeclCollector<'_> {
             })
         } else if let Some(annotation_type) = &param.value_type {
             // If no default value is provided, use the annotation type
-            let resolved_annotation_type =
-                self.type_registry.resolve_type_path(&annotation_type)?;
+            let resolved_annotation_type = self
+                .compilation_state
+                .type_registry
+                .resolve_type_path(annotation_type)?;
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),

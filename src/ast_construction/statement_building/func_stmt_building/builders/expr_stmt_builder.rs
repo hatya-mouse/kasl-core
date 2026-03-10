@@ -24,15 +24,7 @@ impl FuncStmtBuilder<'_> {
         expr: &[ExprToken],
         current_scope_id: ScopeID,
     ) -> Option<Statement> {
-        let expr = resolve_expr(
-            self.ec,
-            self.op_ctx,
-            self.func_ctx,
-            self.scope_registry,
-            self.type_registry,
-            current_scope_id,
-            expr,
-        )?;
+        let expr = resolve_expr(self.ec, self.compilation_state, current_scope_id, expr)?;
         Some(Statement::Expression { expr })
     }
 }

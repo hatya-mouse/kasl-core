@@ -25,28 +25,20 @@ pub use struct_decl::StructDecl;
 pub use struct_field::StructField;
 
 use crate::{StructID, SymbolPath};
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct TypeRegistry {
     pub structs: HashMap<StructID, StructDecl>,
     pub path_to_id: HashMap<SymbolPath, StructID>,
 }
 
 impl TypeRegistry {
-    pub fn new() -> Self {
-        Self {
-            structs: HashMap::new(),
-            path_to_id: HashMap::new(),
-        }
-    }
-
     pub fn resolve_type_path(&self, type_path: &SymbolPath) -> Option<ResolvedType> {
-        if type_path.len() == 1 {
-            if let Some(primitive_type) = PrimitiveType::from_str(&type_path.last().unwrap().symbol)
-            {
-                return Some(ResolvedType::Primitive(primitive_type));
-            }
+        if type_path.len() == 1
+            && let Ok(primitive_type) = PrimitiveType::from_str(&type_path.last().unwrap().symbol)
+        {
+            return Some(ResolvedType::Primitive(primitive_type));
         }
         let id = self.get_struct_id_by_path(type_path)?;
         Some(ResolvedType::Struct(id))

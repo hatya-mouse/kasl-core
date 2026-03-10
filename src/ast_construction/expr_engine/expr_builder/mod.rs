@@ -15,6 +15,7 @@
 //
 
 mod climb_precedence;
+mod lhs_parser;
 
 use crate::{Expr, ExprToken, ExprTokenKind, error::ErrorCollector, symbol_table::OperatorContext};
 

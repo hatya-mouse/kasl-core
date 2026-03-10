@@ -28,20 +28,15 @@ impl FuncStmtBuilder<'_> {
         current_scope_id: ScopeID,
         stmt_range: Range,
     ) -> Option<Expr<ResolvedType>> {
-        let resolved_def_val = resolve_expr(
-            self.ec,
-            self.op_ctx,
-            self.func_ctx,
-            self.scope_registry,
-            self.type_registry,
-            current_scope_id,
-            def_val,
-        )?;
+        let resolved_def_val =
+            resolve_expr(self.ec, self.compilation_state, current_scope_id, def_val)?;
 
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {
-            let Some(resolved_type_annotation) =
-                self.type_registry.resolve_type_path(type_annotation)
+            let Some(resolved_type_annotation) = self
+                .compilation_state
+                .type_registry
+                .resolve_type_path(type_annotation)
             else {
                 self.ec.type_not_found(
                     stmt_range,
@@ -56,8 +51,12 @@ impl FuncStmtBuilder<'_> {
                 self.ec.type_annotation_mismatch(
                     stmt_range,
                     Ph::StatementCollection,
-                    self.type_registry.format_type(&resolved_type_annotation),
-                    self.type_registry.format_type(&resolved_def_val.value_type),
+                    self.compilation_state
+                        .type_registry
+                        .format_type(&resolved_type_annotation),
+                    self.compilation_state
+                        .type_registry
+                        .format_type(&resolved_def_val.value_type),
                 );
                 return None;
             }
@@ -88,7 +87,11 @@ impl FuncStmtBuilder<'_> {
         };
 
         // Check if the name is already in use in this scope
-        if self.scope_registry.has_var(current_scope_id, name) {
+        if self
+            .compilation_state
+            .scope_registry
+            .has_var(current_scope_id, name)
+        {
             self.ec
                 .duplicate_var_name(stmt_range, Ph::StatementCollection, name);
             return None;
@@ -96,8 +99,12 @@ impl FuncStmtBuilder<'_> {
 
         // Register the variable in the scope
         let var_id = self.name_space.generate_variable_id();
-        self.scope_registry
-            .register_var(scope_var, name.to_string(), var_id, current_scope_id);
+        self.compilation_state.scope_registry.register_var(
+            scope_var,
+            name.to_string(),
+            var_id,
+            current_scope_id,
+        );
 
         Some(var_id)
     }

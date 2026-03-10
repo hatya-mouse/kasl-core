@@ -24,33 +24,30 @@ impl GlobalDeclCollector<'_> {
     pub fn resolve_def_val_global(
         &mut self,
         type_annotation: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         decl_range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Resolve the default value expression
-        let global_scope_id = self.scope_registry.get_global_scope_id();
-        let resolved_def_val = resolve_expr(
-            self.ec,
-            self.op_ctx,
-            self.func_ctx,
-            self.scope_registry,
-            self.type_registry,
-            global_scope_id,
-            def_val,
-        )?;
+        let global_scope_id = self.compilation_state.scope_registry.get_global_scope_id();
+        let resolved_def_val =
+            resolve_expr(self.ec, self.compilation_state, global_scope_id, def_val)?;
 
         // Resolve the type annotation if provided
         let resolved_type_annotation = type_annotation
             .as_ref()
-            .and_then(|path| self.type_registry.resolve_type_path(path))?;
+            .and_then(|path| self.compilation_state.type_registry.resolve_type_path(path))?;
 
         // If the type annotation provided by the user does not match the default value type throw an error
         if resolved_def_val.value_type != resolved_type_annotation {
             self.ec.type_annotation_mismatch(
                 decl_range,
                 Ph::GlobalDeclCollection,
-                self.type_registry.format_type(&resolved_type_annotation),
-                self.type_registry.format_type(&resolved_def_val.value_type),
+                self.compilation_state
+                    .type_registry
+                    .format_type(&resolved_type_annotation),
+                self.compilation_state
+                    .type_registry
+                    .format_type(&resolved_def_val.value_type),
             );
             return None;
         }
@@ -62,7 +59,7 @@ impl GlobalDeclCollector<'_> {
         &mut self,
         name: &str,
         type_annotation: &Option<SymbolPath>,
-        def_val: &Vec<ExprToken>,
+        def_val: &[ExprToken],
         var_kind: VariableKind,
         decl_range: Range,
     ) {
@@ -74,10 +71,14 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Get the global scope ID
-        let global_scope_id = self.scope_registry.get_global_scope_id();
+        let global_scope_id = self.compilation_state.scope_registry.get_global_scope_id();
 
         // Check if the name is already in use in this scope
-        if self.scope_registry.has_var(global_scope_id, name) {
+        if self
+            .compilation_state
+            .scope_registry
+            .has_var(global_scope_id, name)
+        {
             self.ec
                 .duplicate_var_name(decl_range, Ph::StatementCollection, name);
             return;
@@ -91,7 +92,11 @@ impl GlobalDeclCollector<'_> {
             var_kind,
         };
         let variable_id = self.name_space.generate_variable_id();
-        self.scope_registry
-            .register_var(var, name.to_string(), variable_id, global_scope_id);
+        self.compilation_state.scope_registry.register_var(
+            var,
+            name.to_string(),
+            variable_id,
+            global_scope_id,
+        );
     }
 }

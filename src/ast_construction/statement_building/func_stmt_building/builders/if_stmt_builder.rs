@@ -52,10 +52,7 @@ impl FuncStmtBuilder<'_> {
         // Resolve the condition expression and verify it has a bool type
         let condition = resolve_expr(
             self.ec,
-            self.op_ctx,
-            self.func_ctx,
-            self.scope_registry,
-            self.type_registry,
+            self.compilation_state,
             current_scope_id,
             &arm.condition,
         )?;
@@ -63,7 +60,9 @@ impl FuncStmtBuilder<'_> {
             self.ec.non_bool_type_for_condition(
                 arm.range,
                 Ph::StatementCollection,
-                self.type_registry.format_type(&condition.value_type),
+                self.compilation_state
+                    .type_registry
+                    .format_type(&condition.value_type),
             );
             return None;
         }
