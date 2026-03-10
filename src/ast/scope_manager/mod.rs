@@ -14,12 +14,10 @@
 // limitations under the License.
 //
 
-mod memory_layout;
 mod scope;
 mod scope_graph;
 mod scope_var;
 
-pub use memory_layout::MemoryLayout;
 pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};

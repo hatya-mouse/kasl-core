@@ -44,6 +44,7 @@ impl LValueResolver<'_> {
             var_id: *var_id,
             offset: 0,
             value_type,
+            is_field: false,
         })
     }
 
@@ -89,6 +90,7 @@ impl LValueResolver<'_> {
                     var_id: lhs.var_id,
                     offset,
                     value_type: struct_field.value_type,
+                    is_field: true,
                 })
             }
             ParserMemberAccess::FuncCall { .. } => {

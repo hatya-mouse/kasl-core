@@ -77,7 +77,7 @@ pub enum ExprKind<T> {
 pub enum MemberAccess {
     Access {
         name: String,
-        offset: Option<usize>,
+        offset: Option<i32>,
     },
     FuncCall {
         name: String,
@@ -90,6 +90,7 @@ pub enum MemberAccess {
 #[derive(Debug, PartialEq, Clone)]
 pub struct LValue {
     pub var_id: VariableID,
-    pub offset: usize,
+    pub offset: i32,
     pub value_type: ResolvedType,
+    pub is_field: bool,
 }

@@ -19,9 +19,7 @@ mod recursive_traversal;
 use std::collections::HashMap;
 
 use crate::{
-    ScopeID, ScopeRegistry,
-    error::ErrorCollector,
-    scope_manager::{MemoryLayout, ScopeGraph},
+    ScopeID, ScopeRegistry, error::ErrorCollector, scope_manager::ScopeGraph,
     type_registry::TypeRegistry,
 };
 
@@ -30,7 +28,6 @@ pub struct ScopeGraphAnalyzer<'a> {
     scope_graph: &'a ScopeGraph,
     scope_registry: &'a ScopeRegistry,
     type_registry: &'a TypeRegistry,
-    memory_layout: &'a mut MemoryLayout,
 }
 
 impl<'a> ScopeGraphAnalyzer<'a> {
@@ -39,14 +36,12 @@ impl<'a> ScopeGraphAnalyzer<'a> {
         scope_graph: &'a ScopeGraph,
         scope_registry: &'a ScopeRegistry,
         type_registry: &'a TypeRegistry,
-        memory_layout: &'a mut MemoryLayout,
     ) -> Self {
         Self {
             ec,
             scope_graph,
             scope_registry,
             type_registry,
-            memory_layout,
         }
     }
 
@@ -61,12 +56,10 @@ impl<'a> ScopeGraphAnalyzer<'a> {
             .map(|scope_id| (scope_id, ScopeState::Unvisited))
             .collect();
         // Create a total sizes map for all scopes
-        let mut total_sizes = HashMap::new();
+        let mut total_sizes: HashMap<ScopeID, i32> = HashMap::new();
 
         // Analyze the scope graph starting from the global scope
-        self.analyze_scope(&global_scope_id, &mut states, &mut total_sizes, 0);
-        let total_size = total_sizes[&global_scope_id];
-        self.memory_layout.set_total_size(total_size);
+        self.analyze_scope(&global_scope_id, &mut states, &mut total_sizes);
     }
 }
 

@@ -14,32 +14,50 @@
 // limitations under the License.
 //
 
-mod stmt_translator;
-mod translators;
+mod block_translator;
+mod expr_translators;
+mod stmt_translators;
+mod type_converter;
 
-use crate::{CompilationState, FunctionID};
-use cranelift::prelude::FunctionBuilderContext;
+pub use type_converter::TypeConverter;
+
+use crate::{CompilationState, FunctionID, VariableID};
+use cranelift::prelude::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
+use std::collections::HashMap;
 
 pub struct FuncTranslator<'a> {
-    build_ctx: &'a mut FunctionBuilderContext,
-    module: &'a JITModule,
+    pub builder: FunctionBuilder<'a>,
+    type_converter: TypeConverter,
 
     comp_state: &'a CompilationState,
+    variables: HashMap<VariableID, Variable>,
 }
 
 impl<'a> FuncTranslator<'a> {
     pub fn new(
-        build_ctx: &'a mut FunctionBuilderContext,
+        builder: FunctionBuilder<'a>,
         module: &'a JITModule,
         comp_state: &'a CompilationState,
     ) -> Self {
+        let type_converter = TypeConverter::new(module);
+
         Self {
-            build_ctx,
-            module,
+            builder,
+            type_converter,
             comp_state,
+            variables: HashMap::new(),
         }
     }
 
-    pub fn translate(&mut self, entry_point: &FunctionID) {}
+    pub fn translate(&mut self, entry_point: &FunctionID) {
+        // Get the entry point function node
+        let Some(entry_func_node) = self.comp_state.func_ctx.get_func(entry_point) else {
+            return;
+        };
+
+        if let Some(block) = &entry_func_node.block {
+            self.translate_block(block);
+        }
+    }
 }

@@ -14,23 +14,12 @@
 // limitations under the License.
 //
 
-use crate::VariableID;
-use std::collections::HashMap;
+use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use cranelift_codegen::ir;
 
-#[derive(Default)]
-pub struct MemoryLayout {
-    /// Total size of the memory layout in bytes.
-    pub total_size: usize,
-    /// Offset of each variables in bytes.
-    pub offsets: HashMap<VariableID, usize>,
-}
-
-impl MemoryLayout {
-    pub fn register_offset(&mut self, var_id: VariableID, offset: usize) {
-        self.offsets.insert(var_id, offset);
-    }
-
-    pub fn set_total_size(&mut self, size: usize) {
-        self.total_size = size;
+impl FuncTranslator<'_> {
+    pub fn translate_expr(&mut self, expr: &Expr<ResolvedType>) -> ir::Value {
+        // TODO: Implement Expr translation logic
+        todo!()
     }
 }

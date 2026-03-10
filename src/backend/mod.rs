@@ -17,12 +17,14 @@
 mod func_translator;
 
 use crate::{CompilationState, FunctionID, backend::func_translator::FuncTranslator};
-use cranelift::prelude::{Configurable, FunctionBuilderContext};
+use cranelift::prelude::{Configurable, FunctionBuilder, FunctionBuilderContext};
 use cranelift_codegen::settings;
 use cranelift_jit::{JITBuilder, JITModule};
+use cranelift_module::Module;
 
 pub struct Backend {
     builder_ctx: FunctionBuilderContext,
+    ctx: cranelift_codegen::Context,
     module: JITModule,
 }
 
@@ -41,14 +43,26 @@ impl Default for Backend {
 
         Self {
             builder_ctx: FunctionBuilderContext::new(),
+            ctx: module.make_context(),
             module,
         }
     }
 }
 
 impl Backend {
-    pub fn compile(&mut self, comp_state: &CompilationState, entry_point: &FunctionID) {
-        let mut translator = FuncTranslator::new(&mut self.builder_ctx, &self.module, comp_state);
+    pub fn translate(&mut self, comp_state: &CompilationState, entry_point: &FunctionID) {
+        // Create a function builder
+        let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_ctx);
+        // Create an entry block and and switch to the block
+        let entry_block = builder.create_block();
+        builder.switch_to_block(entry_block);
+        builder.seal_block(entry_block);
+
+        // Create a FuncTranslator and translate the function
+        let mut translator = FuncTranslator::new(builder, &self.module, comp_state);
         translator.translate(entry_point);
+
+        // Finalize the function
+        translator.builder.finalize();
     }
 }

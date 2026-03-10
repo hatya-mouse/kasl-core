@@ -32,11 +32,11 @@ pub struct StructDecl {
     pub static_methods: Vec<VariableID>,
 
     /// The map of field names to their offsets in bytes.
-    pub field_offsets: Vec<usize>,
+    pub field_offsets: Vec<i32>,
     /// The total size of the struct in bytes.
-    pub total_size: usize,
+    pub total_size: i32,
     /// The alignment of the struct in bytes.
-    pub alignment: usize,
+    pub alignment: i32,
 
     /// The range of the struct declaration in the source code.
     pub range: Range,
@@ -65,7 +65,7 @@ impl StructDecl {
         self.indices.get(field_name).copied()
     }
 
-    pub fn get_offset_by_index(&self, field_index: usize) -> Option<usize> {
+    pub fn get_offset_by_index(&self, field_index: usize) -> Option<i32> {
         self.field_offsets.get(field_index).copied()
     }
 
@@ -76,8 +76,8 @@ impl StructDecl {
     }
 
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
-        let mut offset = 0;
-        let mut max_alignment = 1;
+        let mut offset: i32 = 0;
+        let mut max_alignment: i32 = 1;
 
         for field in &mut self.fields {
             // Get the size and alignment of the field's type

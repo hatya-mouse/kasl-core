@@ -14,22 +14,18 @@
 // limitations under the License.
 //
 
-use crate::{Statement, backend::func_translator::FuncTranslator};
+use crate::{VariableID, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use cranelift::prelude::Variable;
 
 impl FuncTranslator<'_> {
-    pub fn translate_stmt(&mut self, stmt: &Statement) {
-        match stmt {
-            Statement::Block { block } => {}
-            Statement::LocalVar { var_id } => {}
-            Statement::LocalConst { var_id } => {}
-            Statement::Assign { target, value } => {}
-            Statement::Expression { expr } => {}
-            Statement::If {
-                main,
-                else_ifs,
-                else_block,
-            } => {}
-            Statement::Return { value } => {}
-        }
+    pub fn declare_var(&mut self, var_id: VariableID, var_type: &ResolvedType) -> Variable {
+        // Convert the ResolvedType into Type
+        let ir_type = self.type_converter.convert(var_type);
+
+        // Declare the var and store it to the map
+        *self
+            .variables
+            .entry(var_id)
+            .or_insert_with(|| self.builder.declare_var(ir_type))
     }
 }
