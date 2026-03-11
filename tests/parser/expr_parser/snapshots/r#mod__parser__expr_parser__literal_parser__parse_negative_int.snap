@@ -1,0 +1,27 @@
+---
+source: tests/parser/expr_parser/literal_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 12,
+        },
+        kind: GlobalConst {
+            name: "int",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 10,
+                        end: 12,
+                    },
+                    kind: IntLiteral(
+                        -5,
+                    ),
+                },
+            ],
+        },
+    },
+]

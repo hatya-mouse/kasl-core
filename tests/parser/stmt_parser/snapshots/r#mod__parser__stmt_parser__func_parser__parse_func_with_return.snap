@@ -1,0 +1,27 @@
+---
+source: tests/parser/stmt_parser/func_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 24,
+        },
+        kind: FuncDecl {
+            is_static: false,
+            name: "main",
+            params: [],
+            return_type: Some(
+                SymbolPath {
+                    components: [
+                        SymbolPathComponent {
+                            symbol: "Return",
+                        },
+                    ],
+                },
+            ),
+            body: [],
+        },
+    },
+]

@@ -1,0 +1,27 @@
+---
+source: tests/parser/expr_parser/literal_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 16,
+        },
+        kind: GlobalConst {
+            name: "bool",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 11,
+                        end: 16,
+                    },
+                    kind: BoolLiteral(
+                        false,
+                    ),
+                },
+            ],
+        },
+    },
+]

@@ -352,7 +352,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("boolean")
 
     rule reserved()
-        = ("input" / "output" / "var" / "state" / "static" / "func" / "return" / "if" / "else"
+        = ("input" / "output" / "var" / "let" / "state" / "static" / "func" / "return" / "if" / "else"
             / "struct" / "operator" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']

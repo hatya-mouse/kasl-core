@@ -1,0 +1,106 @@
+---
+source: tests/parser/expr_parser/identifier_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 41,
+        },
+        kind: GlobalConst {
+            name: "value",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 12,
+                        end: 19,
+                    },
+                    kind: Parenthesized(
+                        [
+                            ExprToken {
+                                range: Range {
+                                    start: 13,
+                                    end: 14,
+                                },
+                                kind: IntLiteral(
+                                    1,
+                                ),
+                            },
+                            ExprToken {
+                                range: Range {
+                                    start: 15,
+                                    end: 16,
+                                },
+                                kind: Operator(
+                                    "+",
+                                ),
+                            },
+                            ExprToken {
+                                range: Range {
+                                    start: 17,
+                                    end: 18,
+                                },
+                                kind: IntLiteral(
+                                    7,
+                                ),
+                            },
+                        ],
+                    ),
+                },
+                ExprToken {
+                    range: Range {
+                        start: 19,
+                        end: 20,
+                    },
+                    kind: Dot,
+                },
+                ExprToken {
+                    range: Range {
+                        start: 20,
+                        end: 27,
+                    },
+                    kind: FuncCall {
+                        name: "chain",
+                        args: [],
+                    },
+                },
+                ExprToken {
+                    range: Range {
+                        start: 27,
+                        end: 28,
+                    },
+                    kind: Dot,
+                },
+                ExprToken {
+                    range: Range {
+                        start: 28,
+                        end: 35,
+                    },
+                    kind: FuncCall {
+                        name: "chain",
+                        args: [],
+                    },
+                },
+                ExprToken {
+                    range: Range {
+                        start: 35,
+                        end: 36,
+                    },
+                    kind: Dot,
+                },
+                ExprToken {
+                    range: Range {
+                        start: 36,
+                        end: 41,
+                    },
+                    kind: FuncCall {
+                        name: "new",
+                        args: [],
+                    },
+                },
+            ],
+        },
+    },
+]

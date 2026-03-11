@@ -1,0 +1,23 @@
+---
+source: tests/parser/stmt_parser/op_decl_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 64,
+        },
+        kind: InfixDefine {
+            symbol: "+",
+            props: InfixOperatorProperties {
+                precedence: 80,
+                associativity: None,
+                range: Range {
+                    start: 23,
+                    end: 62,
+                },
+            },
+        },
+    },
+]

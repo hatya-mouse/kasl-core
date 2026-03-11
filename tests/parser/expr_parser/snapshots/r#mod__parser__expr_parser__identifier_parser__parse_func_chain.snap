@@ -1,0 +1,62 @@
+---
+source: tests/parser/expr_parser/identifier_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 33,
+        },
+        kind: GlobalConst {
+            name: "value",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 12,
+                        end: 19,
+                    },
+                    kind: FuncCall {
+                        name: "chain",
+                        args: [],
+                    },
+                },
+                ExprToken {
+                    range: Range {
+                        start: 19,
+                        end: 20,
+                    },
+                    kind: Dot,
+                },
+                ExprToken {
+                    range: Range {
+                        start: 20,
+                        end: 27,
+                    },
+                    kind: FuncCall {
+                        name: "chain",
+                        args: [],
+                    },
+                },
+                ExprToken {
+                    range: Range {
+                        start: 27,
+                        end: 28,
+                    },
+                    kind: Dot,
+                },
+                ExprToken {
+                    range: Range {
+                        start: 28,
+                        end: 33,
+                    },
+                    kind: FuncCall {
+                        name: "new",
+                        args: [],
+                    },
+                },
+            ],
+        },
+    },
+]
