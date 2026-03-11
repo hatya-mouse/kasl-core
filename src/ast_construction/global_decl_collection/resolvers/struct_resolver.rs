@@ -34,6 +34,9 @@ impl<'a> GlobalDeclCollector<'a> {
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
+        // Calculate the struct layout
+        struct_decl.compute_layout(&self.comp_state.type_registry);
+
         // Register the struct in the type registry with a generated ID
         self.comp_state
             .type_registry
