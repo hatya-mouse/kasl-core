@@ -14,29 +14,39 @@
 // limitations under the License.
 //
 
-use crate::{FunctionID, backend::func_translator::FuncTranslator};
+use crate::{FuncCallArg, FunctionID, backend::func_translator::FuncTranslator, symbol_table};
 use cranelift_codegen::ir;
 
-impl<'a> FuncTranslator<'a> {
-    pub fn translate_func_call_expr(&mut self) -> ir::Value {}
+impl FuncTranslator<'_> {
+    pub fn translate_func_call_expr(
+        &mut self,
+        func_id: &FunctionID,
+        args: &[FuncCallArg],
+    ) -> ir::Value {
+        // Get the function block
+        let func_block = &self.comp_state.func_ctx.get_func(func_id).unwrap().block;
+        self.call_func(func_block, args)
+    }
 
-    pub fn call_func(&'a mut self, func_id: &FunctionID) -> ir::Value {
-        // Create a return block
-        let return_block = self.builder.create_block();
-        // Create a translator
-        let mut translator = FuncTranslator::new(
-            &mut self.builder,
-            self.module,
-            self.comp_state,
-            return_block,
-        );
-        translator.translate(func_id);
+    pub fn call_func(&mut self, block: &symbol_table::Block, args: &[FuncCallArg]) -> ir::Value {
+        // Define the argument as variables
+        for arg in args {
+            let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
+            let translated_val = self.translate_expr(&arg.value);
+            self.builder.def_var(arg_var, translated_val);
+        }
+
+        // Create a return block and set it as the return block
+        let func_return_block = self.builder.create_block();
+
+        // Translate the block
+        self.translate_block(block, func_return_block);
 
         // Add some arguments to the return block
-        translator.builder.switch_to_block(return_block);
-        translator.builder.seal_block(return_block);
+        self.builder.switch_to_block(func_return_block);
+        self.builder.seal_block(func_return_block);
 
         // Retrieve the return value
-        translator.builder.block_params(return_block)[0]
+        self.builder.block_params(func_return_block)[0]
     }
 }

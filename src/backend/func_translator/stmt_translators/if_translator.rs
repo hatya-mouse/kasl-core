@@ -24,20 +24,21 @@ impl FuncTranslator<'_> {
         main: &IfArm,
         else_ifs: &[IfArm],
         else_block: Option<&symbol_table::Block>,
+        return_block: ir::Block,
     ) {
         // Create a merge arm
         let merge_block = self.builder.create_block();
         let mut else_ir_block;
 
         // Translate the main arm
-        else_ir_block = self.translate_if_arm(main, merge_block);
+        else_ir_block = self.translate_if_arm(main, merge_block, return_block);
         // Switch to the else block
         self.builder.switch_to_block(else_ir_block);
         self.builder.seal_block(else_ir_block);
 
         // Translate the if-else arms
         for arm in else_ifs {
-            else_ir_block = self.translate_if_arm(arm, merge_block);
+            else_ir_block = self.translate_if_arm(arm, merge_block, return_block);
             // Switch to the else block
             self.builder.switch_to_block(else_ir_block);
             self.builder.seal_block(else_ir_block);
@@ -45,7 +46,7 @@ impl FuncTranslator<'_> {
 
         // Build the else block
         if let Some(else_block) = else_block {
-            self.translate_block(else_block);
+            self.translate_block(else_block, return_block);
         }
         self.builder.ins().jump(merge_block, &[]);
 
@@ -55,7 +56,12 @@ impl FuncTranslator<'_> {
     }
 
     /// Creates an if arm and returns the else block.
-    pub fn translate_if_arm(&mut self, if_arm: &IfArm, merge_block: ir::Block) -> ir::Block {
+    pub fn translate_if_arm(
+        &mut self,
+        if_arm: &IfArm,
+        merge_block: ir::Block,
+        return_block: ir::Block,
+    ) -> ir::Block {
         // Create a else block
         let then_block = self.builder.create_block();
         let else_block = self.builder.create_block();
@@ -70,7 +76,7 @@ impl FuncTranslator<'_> {
         self.builder.switch_to_block(then_block);
         self.builder.seal_block(then_block);
 
-        self.translate_block(&if_arm.block);
+        self.translate_block(&if_arm.block, return_block);
 
         // Jump to the merge block
         self.builder.ins().jump(merge_block, &[]);

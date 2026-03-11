@@ -14,20 +14,22 @@
 // limitations under the License.
 //
 
+use cranelift_codegen::ir;
+
 use crate::{Statement, backend::func_translator::FuncTranslator, symbol_table::Block};
 
 impl FuncTranslator<'_> {
     /// Translates the given block. This method does not create any new blocks.
-    pub fn translate_block(&mut self, block: &Block) {
+    pub fn translate_block(&mut self, block: &Block, return_block: ir::Block) {
         // Loop over the statements in the function and translate them
         for stmt in &block.body {
-            self.translate_stmt(stmt);
+            self.translate_stmt(stmt, return_block);
         }
     }
 
-    fn translate_stmt(&mut self, stmt: &Statement) {
+    fn translate_stmt(&mut self, stmt: &Statement, return_block: ir::Block) {
         match stmt {
-            Statement::Block { block } => self.translate_block(block),
+            Statement::Block { block } => self.translate_block(block, return_block),
             Statement::LocalVar { var_id } => self.translate_local_var(var_id),
             Statement::LocalConst { var_id } => self.translate_local_const(var_id),
             Statement::Assign { target, value } => self.translate_assign(target, value),
@@ -38,8 +40,8 @@ impl FuncTranslator<'_> {
                 main,
                 else_ifs,
                 else_block,
-            } => self.translate_if(main, else_ifs, else_block.as_ref()),
-            Statement::Return { value } => self.translate_return(value),
+            } => self.translate_if(main, else_ifs, else_block.as_ref(), return_block),
+            Statement::Return { value } => self.translate_return(value, return_block),
         }
     }
 }

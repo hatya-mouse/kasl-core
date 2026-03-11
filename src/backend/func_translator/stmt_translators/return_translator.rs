@@ -16,16 +16,20 @@
 
 use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
 use cranelift::prelude::InstBuilder;
-use cranelift_codegen::ir::BlockArg;
+use cranelift_codegen::ir::{self, BlockArg};
 
 impl FuncTranslator<'_> {
-    pub fn translate_return(&mut self, value: &Option<Expr<ResolvedType>>) {
+    pub fn translate_return(
+        &mut self,
+        value: &Option<Expr<ResolvedType>>,
+        return_block: ir::Block,
+    ) {
         if let Some(return_val) = value.as_ref().map(|val| self.translate_expr(val)) {
             self.builder
                 .ins()
-                .jump(self.return_block, &[BlockArg::Value(return_val)]);
+                .jump(return_block, &[BlockArg::Value(return_val)]);
         } else {
-            self.builder.ins().jump(self.return_block, &[]);
+            self.builder.ins().jump(return_block, &[]);
         }
     }
 }

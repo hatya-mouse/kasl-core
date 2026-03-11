@@ -28,42 +28,40 @@ use cranelift_jit::JITModule;
 use std::collections::HashMap;
 
 pub struct FuncTranslator<'a> {
-    pub builder: &'a mut FunctionBuilder<'a>,
+    pub builder: FunctionBuilder<'a>,
     type_converter: TypeConverter,
-    module: &'a JITModule,
 
     comp_state: &'a CompilationState,
     variables: HashMap<VariableID, Variable>,
-    return_block: ir::Block,
 }
 
 impl<'a> FuncTranslator<'a> {
     pub fn new(
-        builder: &'a mut FunctionBuilder<'a>,
+        builder: FunctionBuilder<'a>,
         module: &'a JITModule,
         comp_state: &'a CompilationState,
-        return_block: ir::Block,
     ) -> Self {
         let type_converter = TypeConverter::new(module);
 
         Self {
             builder,
             type_converter,
-            module,
             comp_state,
             variables: HashMap::new(),
-            return_block,
         }
     }
 
-    pub fn translate(&mut self, entry_point: &FunctionID) {
+    pub fn translate_func(&mut self, entry_point: &FunctionID, return_block: ir::Block) {
         // Get the entry point function node
-        let Some(entry_func_node) = self.comp_state.func_ctx.get_func(entry_point) else {
+        let Some(func_block) = self
+            .comp_state
+            .func_ctx
+            .get_func(entry_point)
+            .map(|func| &func.block)
+        else {
             return;
         };
 
-        if let Some(block) = &entry_func_node.block {
-            self.translate_block(block);
-        }
+        self.translate_block(func_block, return_block);
     }
 }

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expr, Range, symbol_table::Block, type_registry::ResolvedType};
+use crate::{Expr, Range, VariableID, symbol_table::Block, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
@@ -60,7 +60,7 @@ pub struct NoTypeFuncCallArg {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FuncCallArg {
-    pub arg_name: String,
+    pub var_id: VariableID,
     pub value: Expr<ResolvedType>,
 }
 
@@ -68,6 +68,7 @@ pub struct FuncCallArg {
 pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,
+    pub var_id: VariableID,
     pub value_type: ResolvedType,
     pub def_val: Option<Expr<ResolvedType>>,
     pub range: Range,

@@ -50,66 +50,36 @@ impl ErrorCollector {
         );
     }
 
-    pub fn arg_order_incorrect(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        func_name: &str,
-        param_label: &str,
-    ) {
+    pub fn arg_order_incorrect(&mut self, range: Range, phase: Phase, param_label: &str) {
         self.emit(
             EK::ArgOrderIncorrect,
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(func_name.to_string(), param_label.to_string()),
+            Pl::Str(param_label.to_string()),
         );
     }
 
-    pub fn duplicate_arg(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        func_name: &str,
-        param_label: &str,
-    ) {
+    pub fn duplicate_arg(&mut self, range: Range, phase: Phase, param_label: &str) {
         self.emit(
             EK::DuplicateArg,
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(func_name.to_string(), param_label.to_string()),
+            Pl::Str(param_label.to_string()),
         );
     }
 
-    pub fn extra_arg(&mut self, range: Range, phase: Phase, func_name: &str) {
-        self.emit(
-            EK::ExtraArg,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(func_name.to_string()),
-        );
+    pub fn extra_arg(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::ExtraArg, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn missing_arg(&mut self, range: Range, phase: Phase, func_name: &str) {
-        self.emit(
-            EK::MissingArg,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(func_name.to_string()),
-        );
+    pub fn missing_arg(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::MissingArg, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn missing_arg_label(&mut self, range: Range, phase: Phase, func_name: &str) {
-        self.emit(
-            EK::MissingArgLabel,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(func_name.to_string()),
-        );
+    pub fn missing_arg_label(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::MissingArgLabel, range, phase, Sv::Error, Pl::None);
     }
 
     pub fn duplicate_func_name(&mut self, range: Range, phase: Phase, func_name: &str) {

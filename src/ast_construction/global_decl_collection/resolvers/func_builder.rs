@@ -96,11 +96,8 @@ impl GlobalDeclCollector<'_> {
 
         if let Some(def_val) = &param.def_val {
             // Resolve the default value expression
-            let Some(resolved_def_val) =
-                self.resolve_def_val_global(&param.value_type, def_val, param.range)
-            else {
-                return None;
-            };
+            let resolved_def_val =
+                self.resolve_def_val_global(&param.value_type, def_val, param.range)?;
 
             // Register the variable in the function scope
             let var = ScopeVar {
@@ -121,6 +118,7 @@ impl GlobalDeclCollector<'_> {
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
+                var_id: variable_id,
                 value_type: resolved_def_val.value_type,
                 def_val: Some(resolved_def_val),
                 range: param.range,
@@ -151,6 +149,7 @@ impl GlobalDeclCollector<'_> {
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
+                var_id: variable_id,
                 value_type: resolved_annotation_type,
                 def_val: None,
                 range: param.range,

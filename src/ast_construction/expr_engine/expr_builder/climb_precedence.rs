@@ -48,7 +48,8 @@ impl ExpressionBuilder<'_> {
                     ExprKind::PostfixOp {
                         symbol: op_symbol,
                         operator: None,
-                        operand: Box::new(lhs),
+                        operand_expr: Box::new(lhs),
+                        operand: None,
                     },
                     (),
                     op_range,
@@ -98,8 +99,10 @@ impl ExpressionBuilder<'_> {
                     ExprKind::InfixOp {
                         symbol: op_symbol,
                         operator: None,
-                        lhs: Box::new(lhs),
-                        rhs: Box::new(rhs),
+                        lhs_expr: Box::new(lhs),
+                        lhs: None,
+                        rhs_expr: Box::new(rhs),
+                        rhs: None,
                     },
                     (),
                     op_range,

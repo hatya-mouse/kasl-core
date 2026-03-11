@@ -44,18 +44,22 @@ pub enum ExprKind<T> {
     InfixOp {
         symbol: String,
         operator: Option<OperatorID>,
-        lhs: Box<Expr<T>>,
-        rhs: Box<Expr<T>>,
+        lhs_expr: Box<Expr<T>>,
+        lhs: Option<Box<FuncCallArg>>,
+        rhs_expr: Box<Expr<T>>,
+        rhs: Option<Box<FuncCallArg>>,
     },
     PrefixOp {
         symbol: String,
         operator: Option<OperatorID>,
-        operand: Box<Expr<T>>,
+        operand_expr: Box<Expr<T>>,
+        operand: Option<Box<FuncCallArg>>,
     },
     PostfixOp {
         symbol: String,
         operator: Option<OperatorID>,
-        operand: Box<Expr<T>>,
+        operand_expr: Box<Expr<T>>,
+        operand: Option<Box<FuncCallArg>>,
     },
     Identifier {
         name: String,

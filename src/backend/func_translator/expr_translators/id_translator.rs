@@ -14,9 +14,13 @@
 // limitations under the License.
 //
 
-use crate::backend::func_translator::FuncTranslator;
+use crate::{VariableID, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_infix_op_expr(&mut self) -> ir::Value {}
+    pub fn translate_identifier(&mut self, var_id: &VariableID) -> ir::Value {
+        // Get the variable and get the value
+        let var = self.variables[var_id];
+        self.builder.use_var(var)
+    }
 }

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range,
+    Expr, ExprKind, FuncCallArg, Range,
     expr_engine::ExpressionResolver,
     symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef},
     type_registry::ResolvedType,
@@ -39,14 +39,25 @@ impl ExpressionResolver<'_> {
             rhs_type: &rhs.value_type,
         })?;
         let op = self.comp_state.op_ctx.get_infix_op(&op_id)?;
+        // Construct arguments
+        let lhs_arg = FuncCallArg {
+            var_id: op.lhs.var_id,
+            value: lhs.clone(),
+        };
+        let rhs_arg = FuncCallArg {
+            var_id: op.rhs.var_id,
+            value: rhs.clone(),
+        };
         // Get the return type of the operator
         let return_type = op.return_type;
         Some(Expr::new(
             ExprKind::InfixOp {
                 symbol,
                 operator: Some(op_id),
-                lhs: Box::new(lhs),
-                rhs: Box::new(rhs),
+                lhs_expr: Box::new(lhs),
+                lhs: Some(Box::new(lhs_arg)),
+                rhs_expr: Box::new(rhs),
+                rhs: Some(Box::new(rhs_arg)),
             },
             return_type,
             range,
@@ -67,13 +78,19 @@ impl ExpressionResolver<'_> {
             operand_type: &operand.value_type,
         })?;
         let op = self.comp_state.op_ctx.get_prefix_op(&op_id)?;
+        // Construct arguments
+        let operand_arg = FuncCallArg {
+            var_id: op.operand.var_id,
+            value: operand.clone(),
+        };
         // Get the return type of the operator
         let return_type = op.return_type;
         Some(Expr::new(
             ExprKind::PrefixOp {
                 symbol,
                 operator: Some(op_id),
-                operand: Box::new(operand),
+                operand_expr: Box::new(operand),
+                operand: Some(Box::new(operand_arg)),
             },
             return_type,
             range,
@@ -94,13 +111,19 @@ impl ExpressionResolver<'_> {
             operand_type: &operand.value_type,
         })?;
         let op = self.comp_state.op_ctx.get_postfix_op(&op_id)?;
+        // Construct arguments
+        let operand_arg = FuncCallArg {
+            var_id: op.operand.var_id,
+            value: operand.clone(),
+        };
         // Get the return type of the operator
         let return_type = op.return_type;
         Some(Expr::new(
             ExprKind::PostfixOp {
                 symbol,
                 operator: Some(op_id),
-                operand: Box::new(operand),
+                operand_expr: Box::new(operand),
+                operand: Some(Box::new(operand_arg)),
             },
             return_type,
             range,

@@ -49,7 +49,8 @@ impl ExpressionBuilder<'_> {
                     ExprKind::PrefixOp {
                         symbol: symbol.clone(),
                         operator: None,
-                        operand: Box::new(operand),
+                        operand_expr: Box::new(operand),
+                        operand: None,
                     },
                     (),
                     token.range,

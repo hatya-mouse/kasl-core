@@ -26,10 +26,11 @@ impl FuncTranslator<'_> {
             .unwrap();
 
         // Declare the variable
-        let var = self.declare_var(*var_id, &local_var.def_val.value_type);
+        let var = self.declare_var(*var_id, &local_var.value_type);
 
         // Translate the expression and store the value
-        let value = self.translate_expr(&local_var.def_val);
+        // The variable is a local variable so it should be safe to unwrap the value
+        let value = self.translate_expr(local_var.expect_def_val());
         self.builder.def_var(var, value);
     }
 
@@ -42,10 +43,11 @@ impl FuncTranslator<'_> {
             .unwrap();
 
         // Declare the variable
-        let var = self.declare_var(*var_id, &local_const.def_val.value_type);
+        let var = self.declare_var(*var_id, &local_const.value_type);
 
         // Translate the expression and store the value
-        let value = self.translate_expr(&local_const.def_val);
+        // The variable is a local constant so it should be safe to unwrap the value
+        let value = self.translate_expr(local_const.expect_def_val());
         self.builder.def_var(var, value);
     }
 }

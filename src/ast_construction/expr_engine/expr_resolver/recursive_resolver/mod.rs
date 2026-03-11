@@ -31,22 +31,22 @@ impl ExpressionResolver<'_> {
 
             ExprKind::InfixOp {
                 symbol,
-                operator: _,
-                lhs,
-                rhs,
-            } => self.resolve_infix_op(symbol, *lhs, *rhs, expr.range),
+                lhs_expr,
+                rhs_expr,
+                ..
+            } => self.resolve_infix_op(symbol, *lhs_expr, *rhs_expr, expr.range),
 
             ExprKind::PrefixOp {
                 symbol,
-                operator: _,
-                operand,
-            } => self.resolve_prefix_op(symbol, *operand, expr.range),
+                operand_expr,
+                ..
+            } => self.resolve_prefix_op(symbol, *operand_expr, expr.range),
 
             ExprKind::PostfixOp {
                 symbol,
-                operator: _,
-                operand,
-            } => self.resolve_postfix_op(symbol, *operand, expr.range),
+                operand_expr,
+                ..
+            } => self.resolve_postfix_op(symbol, *operand_expr, expr.range),
 
             ExprKind::Identifier { name, id: _ } => self.resolve_identifier(name, expr.range),
 

@@ -113,7 +113,7 @@ impl ExpressionResolver<'_> {
                     };
 
                     // Resolve the arguments
-                    let args = self.resolve_func_call_args(func, &no_type_args, range)?;
+                    let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
                     Some((
                         MemberAccess::FuncCall {
                             name,

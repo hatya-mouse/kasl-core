@@ -14,9 +14,11 @@
 // limitations under the License.
 //
 
+mod chain_translator;
 mod func_call_translator;
-mod infix_op_translator;
+mod id_translator;
 mod literal_translator;
+mod op_call_translator;
 
 use crate::{
     Expr, ExprKind, backend::func_translator::FuncTranslator, type_registry::ResolvedType,
@@ -30,11 +32,23 @@ impl FuncTranslator<'_> {
             ExprKind::FloatLiteral(val) => self.translate_float_literal(*val),
             ExprKind::BoolLiteral(val) => self.translate_bool_literal(*val),
             ExprKind::InfixOp {
-                symbol,
-                operator,
-                lhs,
-                rhs,
-            } => self.translate_infix_op_expr(*val),
+                operator, lhs, rhs, ..
+            } => self.translate_infix_op_expr(
+                &operator.unwrap(),
+                lhs.as_ref().unwrap(),
+                rhs.as_ref().unwrap(),
+            ),
+            ExprKind::PrefixOp {
+                operator, operand, ..
+            } => self.translate_prefix_op_expr(&operator.unwrap(), operand.as_ref().unwrap()),
+            ExprKind::PostfixOp {
+                operator, operand, ..
+            } => self.translate_postfix_op_expr(&operator.unwrap(), operand.as_ref().unwrap()),
+            ExprKind::Identifier { id, .. } => self.translate_identifier(&id.unwrap()),
+            ExprKind::FuncCall { id, args, .. } => {
+                self.translate_func_call_expr(&id.unwrap(), args.as_ref().unwrap())
+            }
+            ExprKind::Chain { lhs, access } => self.translate_chain(lhs, access, &expr.value_type),
         }
     }
 }
