@@ -17,8 +17,8 @@
 use crate::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
     ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
-    ParserMemberAccess, ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind,
-    PostfixOperatorProperties, PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
+    ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, PostfixOperatorProperties,
+    PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -114,7 +114,6 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-
     rule struct_decl_statement() -> ParserDeclStmt
         = start:position!() "struct" _ name:identifier() __? "{"
         __? body:decl_stmts() __?
@@ -145,7 +144,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule assign_statement() -> ParserScopeStmt
-        = start:position!() target:expr_token() _ "=" _ value:oneline_expression() end:position!() {
+        = start:position!() target:oneline_expression() _ "=" _ value:oneline_expression() end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::Assign { target, value }
@@ -232,7 +231,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // Operator Function
     rule operator_func_statement() -> ParserDeclStmt
-        = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:type_name() __? body:("{"
+        = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix } / "postfix" { ParserOperatorType::Postfix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:type_name() __? body:("{"
         __? body:scope_stmts() __?
         "}" { body }) end:position!() {
             ParserDeclStmt {
@@ -277,10 +276,10 @@ peg::parser!(pub grammar kasl_parser() for str {
     // --- EXPRESSIONS ---
 
     pub rule oneline_expression() -> Vec<ExprToken>
-        = expr_token() ** (_?)
+        = expr_token() ++ (_?)
 
     pub rule multiline_expression() -> Vec<ExprToken>
-        = expr_token() ** (__?)
+        = expr_token() ++ (__?)
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
@@ -289,17 +288,7 @@ peg::parser!(pub grammar kasl_parser() for str {
             / identifier_token()
             / operator_token()
             / parenthesized_token()
-        ) end:position!() {
-            ExprToken { range: Range::n(start, end), kind }
-        }
-        / token:chain_token() { token }
-
-    rule primary() -> ExprToken
-        = start:position!() kind:(
-            literal()
-            / func_call()
-            / identifier_token()
-            / parenthesized_token()
+            / dot_token()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }
@@ -325,18 +314,8 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule parenthesized_token() -> ExprTokenKind
         = "(" __? expr:multiline_expression() ")" { ExprTokenKind::Parenthesized(expr) }
 
-    rule chain_token() -> ExprToken
-        = lhs:primary() extensions:(start:position!() __? "." __? member_access:member_access() end:position!() { (member_access, Range::n(start, end)) })+ {
-            extensions.into_iter().fold(lhs, |lhs, member_access| {
-                ExprToken { range: member_access.1, kind: ExprTokenKind::Chain { lhs: Box::new(lhs), member: member_access.0 } }
-            })
-        }
-
-    rule member_access() -> ParserMemberAccess
-        = id:identifier() { ParserMemberAccess::Access(id) }
-        / id:identifier() __? "(" __? args:func_call_args() __? ")" {
-            ParserMemberAccess::FuncCall { name: id, args }
-        }
+    rule dot_token() -> ExprTokenKind
+        = "." { ExprTokenKind::Dot }
 
     rule identifier() -> String
         = quiet!{
@@ -363,8 +342,9 @@ peg::parser!(pub grammar kasl_parser() for str {
         = is_neg:("-" _?)? n:number() { n as i32 * if is_neg.is_some() { -1 } else { 1 } }
 
     rule decimal() -> f32
-        = n:$(['0'..='9']+) "." d:$(['0'..='9']+) {
-            (n.to_owned() + "." + d).parse().unwrap()
+        = is_neg:("-" _?)? n:$(['0'..='9']+) "." d:$(['0'..='9']+) {
+            (n.to_owned() + "." + d).parse::<f32>().unwrap()
+            * (if is_neg.is_some() { -1.0 } else { 1.0 })
         }
 
     rule boolean() -> bool
@@ -372,8 +352,8 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("boolean")
 
     rule reserved()
-        = ("input" / "output" / "var" / "state" / "static" / "func" / "return" / "if" / "else"
-            / "struct" / "operator" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
+        = ("input" / "output" / "var" / "let" / "state" / "static" / "func" / "return" / "if" / "else"
+            / "struct" / "operator" / "infix" / "prefix" / "postfix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']
 

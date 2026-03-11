@@ -1,0 +1,22 @@
+---
+source: tests/parser/stmt_parser/op_decl_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 37,
+        },
+        kind: PostfixDefine {
+            symbol: "!",
+            props: PostfixOperatorProperties {
+                precedence: 20,
+                range: Range {
+                    start: 21,
+                    end: 35,
+                },
+            },
+        },
+    },
+]

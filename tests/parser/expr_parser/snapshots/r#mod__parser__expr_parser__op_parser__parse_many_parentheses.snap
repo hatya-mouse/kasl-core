@@ -1,0 +1,101 @@
+---
+source: tests/parser/expr_parser/op_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 29,
+        },
+        kind: GlobalConst {
+            name: "value",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 12,
+                        end: 19,
+                    },
+                    kind: Parenthesized(
+                        [
+                            ExprToken {
+                                range: Range {
+                                    start: 13,
+                                    end: 14,
+                                },
+                                kind: IntLiteral(
+                                    3,
+                                ),
+                            },
+                            ExprToken {
+                                range: Range {
+                                    start: 15,
+                                    end: 16,
+                                },
+                                kind: Operator(
+                                    "+",
+                                ),
+                            },
+                            ExprToken {
+                                range: Range {
+                                    start: 17,
+                                    end: 18,
+                                },
+                                kind: IntLiteral(
+                                    7,
+                                ),
+                            },
+                        ],
+                    ),
+                },
+                ExprToken {
+                    range: Range {
+                        start: 20,
+                        end: 21,
+                    },
+                    kind: Operator(
+                        "*",
+                    ),
+                },
+                ExprToken {
+                    range: Range {
+                        start: 22,
+                        end: 29,
+                    },
+                    kind: Parenthesized(
+                        [
+                            ExprToken {
+                                range: Range {
+                                    start: 23,
+                                    end: 24,
+                                },
+                                kind: IntLiteral(
+                                    2,
+                                ),
+                            },
+                            ExprToken {
+                                range: Range {
+                                    start: 25,
+                                    end: 26,
+                                },
+                                kind: Operator(
+                                    "+",
+                                ),
+                            },
+                            ExprToken {
+                                range: Range {
+                                    start: 27,
+                                    end: 28,
+                                },
+                                kind: IntLiteral(
+                                    5,
+                                ),
+                            },
+                        ],
+                    ),
+                },
+            ],
+        },
+    },
+]

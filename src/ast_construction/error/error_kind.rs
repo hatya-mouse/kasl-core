@@ -21,6 +21,26 @@ pub enum ErrorKind {
     /// Struct field is defined in the top level though it should be defined in a struct.
     TopLevelStructField,
 
+    /// Title: ExprEndsWithDot
+    /// Payload: None
+    /// The expression ends with a dot.
+    ExprEndsWithDot,
+
+    /// Title: NonMemberTokenAfterDot
+    /// Payload: None
+    /// A token which is not a struct field or a function is after dot.
+    NonMemberTokenAfterDot,
+
+    /// Title: ExprBeginsWithDot
+    /// Payload: None
+    /// The expression begins with a dot.
+    ExprBeginsWithDot,
+
+    /// Title: InvalidLValue
+    /// Payload: None
+    /// The lvalue is expected, but it has an invalid token.
+    InvalidLValue,
+
     /// Title: VarNotFound
     /// Payload: The name of the variable that is not found
     /// Variable is not found.

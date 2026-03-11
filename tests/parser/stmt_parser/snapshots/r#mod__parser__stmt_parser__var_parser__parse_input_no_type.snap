@@ -1,0 +1,28 @@
+---
+source: tests/parser/stmt_parser/var_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 12,
+        },
+        kind: Input {
+            name: "in",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 11,
+                        end: 12,
+                    },
+                    kind: IntLiteral(
+                        0,
+                    ),
+                },
+            ],
+            attrs: [],
+        },
+    },
+]

@@ -59,4 +59,26 @@ impl ErrorCollector {
             Pl::StrPair(target_type, value_type),
         );
     }
+
+    pub fn expr_ends_with_dot(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::ExprEndsWithDot, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub fn non_member_token_after_dot(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::NonMemberTokenAfterDot,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+
+    pub fn expr_begins_with_dot(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::ExprBeginsWithDot, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub fn invalid_l_value(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::InvalidLValue, range, phase, Sv::Error, Pl::None);
+    }
 }

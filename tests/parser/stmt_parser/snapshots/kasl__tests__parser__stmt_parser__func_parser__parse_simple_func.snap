@@ -1,0 +1,19 @@
+---
+source: src/tests/parser/stmt_parser/func_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 14,
+        },
+        kind: FuncDecl {
+            is_static: false,
+            name: "main",
+            params: [],
+            return_type: None,
+            body: [],
+        },
+    },
+]

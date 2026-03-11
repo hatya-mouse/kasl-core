@@ -17,16 +17,54 @@
 use crate::ParserFuncCallArg;
 use crate::expr_engine::ExpressionBuilder;
 use crate::symbol_table::NoTypeFuncCallArg;
-use crate::{
-    Expr, ExprKind, ExprToken, ExprTokenKind, ParserMemberAccess, error::Ph,
-    symbol_table::MemberAccess,
-};
+use crate::{Expr, ExprKind, ExprToken, ExprTokenKind, error::Ph, symbol_table::MemberAccess};
 use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionBuilder<'_> {
     pub fn parse_lhs(&mut self, tokens: &mut Peekable<Iter<ExprToken>>) -> Option<Expr<()>> {
         let first = tokens.next()?;
-        self.parse_lhs_single(first, tokens)
+        let mut expr = self.parse_lhs_single(first, tokens)?;
+
+        // If the next token is dot, resolve it as a member access
+        while let Some(ExprTokenKind::Dot) = tokens.peek().map(|token| &token.kind) {
+            // Consume the dot token
+            // The next token is confirmed to be a dot so it can be safely unwrapped
+            let dot_token = tokens.next().unwrap();
+            // Get the next token
+            let Some(next_token) = tokens.next() else {
+                self.ec.expr_ends_with_dot(dot_token.range, Ph::ExprEngine);
+                return None;
+            };
+
+            let access = match &next_token.kind {
+                ExprTokenKind::Identifier(name) => MemberAccess::Access {
+                    name: name.clone(),
+                    offset: None,
+                },
+                ExprTokenKind::FuncCall { name, args } => MemberAccess::FuncCall {
+                    name: name.clone(),
+                    id: None,
+                    no_type_args: self.parse_func_args(args)?,
+                    args: None,
+                },
+                _ => {
+                    self.ec
+                        .non_member_token_after_dot(next_token.range, Ph::ExprEngine);
+                    return None;
+                }
+            };
+
+            expr = Expr::new(
+                ExprKind::Chain {
+                    lhs: Box::new(expr),
+                    access,
+                },
+                (),
+                next_token.range,
+            );
+        }
+
+        Some(expr)
     }
 
     fn parse_lhs_single(
@@ -87,30 +125,6 @@ impl ExpressionBuilder<'_> {
                 token.range,
             )),
 
-            ExprTokenKind::Chain { lhs, member } => {
-                let lhs_expr = self.parse_lhs_single(lhs, &mut [].iter().peekable())?;
-                let member_access = match member {
-                    ParserMemberAccess::Access(name) => MemberAccess::Access {
-                        name: name.clone(),
-                        offset: None,
-                    },
-                    ParserMemberAccess::FuncCall { name, args } => MemberAccess::FuncCall {
-                        name: name.clone(),
-                        id: None,
-                        no_type_args: self.parse_func_args(args)?,
-                        args: None,
-                    },
-                };
-                Some(Expr::new(
-                    ExprKind::Chain {
-                        lhs: Box::new(lhs_expr),
-                        access: member_access,
-                    },
-                    (),
-                    token.range,
-                ))
-            }
-
             ExprTokenKind::ResolvedExpr(expr) => Some(expr.clone()),
 
             ExprTokenKind::Parenthesized(_) => {
@@ -119,6 +133,11 @@ impl ExpressionBuilder<'_> {
                     Ph::GlobalDeclCollection,
                     "Parenthesized expression should have already been parsed by build() function.",
                 );
+                None
+            }
+
+            ExprTokenKind::Dot => {
+                self.ec.expr_begins_with_dot(token.range, Ph::ExprEngine);
                 None
             }
         }

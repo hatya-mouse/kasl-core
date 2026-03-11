@@ -131,7 +131,7 @@ pub enum ParserScopeStmtKind {
         def_val: Vec<ExprToken>,
     },
     Assign {
-        target: ExprToken,
+        target: Vec<ExprToken>,
         value: Vec<ExprToken>,
     },
     Expression {
@@ -201,19 +201,7 @@ pub enum ExprTokenKind {
         name: String,
         args: Vec<ParserFuncCallArg>,
     },
-    Chain {
-        lhs: Box<ExprToken>,
-        member: ParserMemberAccess,
-    },
+    Dot,
     Parenthesized(Vec<ExprToken>),
     ResolvedExpr(Expr<()>),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ParserMemberAccess {
-    Access(String),
-    FuncCall {
-        name: String,
-        args: Vec<ParserFuncCallArg>,
-    },
 }

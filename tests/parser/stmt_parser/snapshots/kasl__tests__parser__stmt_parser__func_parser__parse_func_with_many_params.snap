@@ -1,0 +1,88 @@
+---
+source: src/tests/parser/stmt_parser/func_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 82,
+        },
+        kind: FuncDecl {
+            is_static: false,
+            name: "main",
+            params: [
+                ParserFuncParam {
+                    label: Some(
+                        "label1",
+                    ),
+                    name: "name1",
+                    value_type: Some(
+                        SymbolPath {
+                            components: [
+                                SymbolPathComponent {
+                                    symbol: "Type",
+                                },
+                            ],
+                        },
+                    ),
+                    def_val: None,
+                    range: Range {
+                        start: 10,
+                        end: 28,
+                    },
+                },
+                ParserFuncParam {
+                    label: Some(
+                        "label2",
+                    ),
+                    name: "name2",
+                    value_type: Some(
+                        SymbolPath {
+                            components: [
+                                SymbolPathComponent {
+                                    symbol: "Type",
+                                },
+                            ],
+                        },
+                    ),
+                    def_val: None,
+                    range: Range {
+                        start: 30,
+                        end: 48,
+                    },
+                },
+                ParserFuncParam {
+                    label: Some(
+                        "label3",
+                    ),
+                    name: "name3",
+                    value_type: Some(
+                        SymbolPath {
+                            components: [
+                                SymbolPathComponent {
+                                    symbol: "Type",
+                                },
+                            ],
+                        },
+                    ),
+                    def_val: None,
+                    range: Range {
+                        start: 50,
+                        end: 68,
+                    },
+                },
+            ],
+            return_type: Some(
+                SymbolPath {
+                    components: [
+                        SymbolPathComponent {
+                            symbol: "Return",
+                        },
+                    ],
+                },
+            ),
+            body: [],
+        },
+    },
+]

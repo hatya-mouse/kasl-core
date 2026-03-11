@@ -1,0 +1,16 @@
+---
+source: tests/parser/stmt_parser/struct_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 14,
+        },
+        kind: StructDecl {
+            name: "Type",
+            body: [],
+        },
+    },
+]

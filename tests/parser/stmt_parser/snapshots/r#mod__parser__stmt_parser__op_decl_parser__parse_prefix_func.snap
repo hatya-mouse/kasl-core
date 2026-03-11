@@ -1,0 +1,46 @@
+---
+source: tests/parser/stmt_parser/op_decl_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 39,
+        },
+        kind: OperatorFunc {
+            op_type: Prefix,
+            symbol: "-",
+            params: [
+                ParserFuncParam {
+                    label: Some(
+                        "_",
+                    ),
+                    name: "operand",
+                    value_type: Some(
+                        SymbolPath {
+                            components: [
+                                SymbolPathComponent {
+                                    symbol: "Int",
+                                },
+                            ],
+                        },
+                    ),
+                    def_val: None,
+                    range: Range {
+                        start: 14,
+                        end: 28,
+                    },
+                },
+            ],
+            return_type: SymbolPath {
+                components: [
+                    SymbolPathComponent {
+                        symbol: "Int",
+                    },
+                ],
+            },
+            body: [],
+        },
+    },
+]

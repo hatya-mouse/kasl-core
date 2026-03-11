@@ -1,0 +1,35 @@
+---
+source: src/tests/parser/stmt_parser/var_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 20,
+        },
+        kind: StateVar {
+            name: "delay",
+            value_type: Some(
+                SymbolPath {
+                    components: [
+                        SymbolPathComponent {
+                            symbol: "Int",
+                        },
+                    ],
+                },
+            ),
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 19,
+                        end: 20,
+                    },
+                    kind: IntLiteral(
+                        0,
+                    ),
+                },
+            ],
+        },
+    },
+]
