@@ -353,7 +353,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule reserved()
         = ("input" / "output" / "var" / "let" / "state" / "static" / "func" / "return" / "if" / "else"
-            / "struct" / "operator" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
+            / "struct" / "operator" / "infix" / "prefix" / "postfix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']
 
