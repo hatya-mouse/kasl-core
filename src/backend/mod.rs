@@ -61,7 +61,7 @@ impl Backend {
         // Create a FuncTranslator and translate the function
         let return_block = builder.create_block();
         let mut translator = FuncTranslator::new(builder, &self.module, comp_state);
-        translator.translate_func(entry_point, return_block);
+        translator.translate(entry_point, return_block);
 
         // Add return instruction to the return block
         translator.builder.switch_to_block(return_block);

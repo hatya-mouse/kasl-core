@@ -51,7 +51,26 @@ impl<'a> FuncTranslator<'a> {
         }
     }
 
-    pub fn translate_func(&mut self, entry_point: &FunctionID, return_block: ir::Block) {
+    pub fn translate(&mut self, entry_point: &FunctionID, return_block: ir::Block) {
+        // Get the global scope
+        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        if let Some(scope) = self.comp_state.scope_registry.get_scope(&global_scope_id) {
+            // Loop over the variables in the scope
+            for var_id in &scope.variables {
+                if let Some(scope_var) = self.comp_state.scope_registry.get_var_by_id(var_id) {
+                    // Declare the variable
+                    let var = self.declare_var(*var_id, &scope_var.value_type);
+                    // Register the variable to the variables
+                    self.variables.insert(*var_id, var);
+                    // Define the variable
+                    if let Some(def_val) = &scope_var.def_val {
+                        let translated_val = self.translate_expr(def_val).unwrap();
+                        self.builder.def_var(var, translated_val);
+                    }
+                }
+            }
+        }
+
         // Get the entry point function node
         let Some(func_block) = self
             .comp_state

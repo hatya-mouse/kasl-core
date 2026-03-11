@@ -29,7 +29,7 @@ impl FuncTranslator<'_> {
 
         // Translate the expression and store the value
         // The variable is a local variable so it should be safe to unwrap the value
-        let value = self.translate_expr(local_var.expect_def_val());
+        let value = self.translate_expr(local_var.expect_def_val()).unwrap();
         self.builder.def_var(var, value);
     }
 
@@ -45,7 +45,7 @@ impl FuncTranslator<'_> {
 
         // Translate the expression and store the value
         // The variable is a local constant so it should be safe to unwrap the value
-        let value = self.translate_expr(local_const.expect_def_val());
+        let value = self.translate_expr(local_const.expect_def_val()).unwrap();
         self.builder.def_var(var, value);
     }
 }

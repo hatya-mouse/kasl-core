@@ -21,19 +21,6 @@ use crate::{Statement, backend::func_translator::FuncTranslator, symbol_table::B
 impl FuncTranslator<'_> {
     /// Translates the given block. This method does not create any new blocks.
     pub fn translate_block(&mut self, block: &Block, return_block: ir::Block) {
-        // Get the scope
-        if let Some(scope) = self.comp_state.scope_registry.get_scope(&block.scope_id) {
-            // Loop over the variables in the scope
-            for var_id in &scope.variables {
-                if let Some(scope_var) = self.comp_state.scope_registry.get_var_by_id(var_id) {
-                    // Declare the variable
-                    let var = self.declare_var(*var_id, &scope_var.value_type);
-                    // Register the variable to the variables
-                    self.variables.insert(*var_id, var);
-                }
-            }
-        }
-
         // Loop over the statements in the function and translate them
         for stmt in &block.body {
             self.translate_stmt(stmt, return_block);

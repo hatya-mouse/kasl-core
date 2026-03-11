@@ -26,11 +26,11 @@ use crate::{
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_expr(&mut self, expr: &Expr<ResolvedType>) -> ir::Value {
+    pub fn translate_expr(&mut self, expr: &Expr<ResolvedType>) -> Option<ir::Value> {
         match &expr.kind {
-            ExprKind::IntLiteral(val) => self.translate_int_literal(*val),
-            ExprKind::FloatLiteral(val) => self.translate_float_literal(*val),
-            ExprKind::BoolLiteral(val) => self.translate_bool_literal(*val),
+            ExprKind::IntLiteral(val) => Some(self.translate_int_literal(*val)),
+            ExprKind::FloatLiteral(val) => Some(self.translate_float_literal(*val)),
+            ExprKind::BoolLiteral(val) => Some(self.translate_bool_literal(*val)),
             ExprKind::InfixOp {
                 operator, lhs, rhs, ..
             } => self.translate_infix_op_expr(
@@ -44,7 +44,7 @@ impl FuncTranslator<'_> {
             ExprKind::PostfixOp {
                 operator, operand, ..
             } => self.translate_postfix_op_expr(&operator.unwrap(), operand.as_ref().unwrap()),
-            ExprKind::Identifier { id, .. } => self.translate_identifier(&id.unwrap()),
+            ExprKind::Identifier { id, .. } => Some(self.translate_identifier(&id.unwrap())),
             ExprKind::FuncCall { id, args, .. } => {
                 self.translate_func_call_expr(&id.unwrap(), args.as_ref().unwrap())
             }

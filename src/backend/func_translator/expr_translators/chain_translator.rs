@@ -28,23 +28,23 @@ impl FuncTranslator<'_> {
         lhs: &Expr<ResolvedType>,
         access: &MemberAccess,
         value_type: &ResolvedType,
-    ) -> ir::Value {
+    ) -> Option<ir::Value> {
         // Translate the expression
-        let translated_lhs = self.translate_expr(lhs);
+        let translated_lhs = self.translate_expr(lhs).unwrap();
         // Translate the type
         let translated_type = self.type_converter.convert(value_type);
 
         // Get the value depending on the access
         match access {
-            MemberAccess::Access { offset, .. } => self.builder.ins().load(
+            MemberAccess::Access { offset, .. } => Some(self.builder.ins().load(
                 translated_type,
                 MemFlags::new(),
                 translated_lhs,
                 offset.unwrap(),
-            ),
+            )),
             MemberAccess::FuncCall { id, args, .. } => {
                 let func = self.comp_state.func_ctx.get_func(&id.unwrap()).unwrap();
-                self.call_func(&func.block, args.as_ref().unwrap())
+                self.call_func(&func.block, args.as_ref().unwrap(), &func.return_type)
             }
         }
     }

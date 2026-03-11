@@ -24,7 +24,7 @@ impl FuncTranslator<'_> {
         value: &Option<Expr<ResolvedType>>,
         return_block: ir::Block,
     ) {
-        if let Some(return_val) = value.as_ref().map(|val| self.translate_expr(val)) {
+        if let Some(return_val) = value.as_ref().map(|val| self.translate_expr(val).unwrap()) {
             self.builder
                 .ins()
                 .jump(return_block, &[BlockArg::Value(return_val)]);

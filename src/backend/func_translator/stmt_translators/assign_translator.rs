@@ -25,7 +25,7 @@ use crate::{
 impl FuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr<ResolvedType>) {
         // Translate the RHS value
-        let rhs_value = self.translate_expr(value);
+        let rhs_value = self.translate_expr(value).unwrap();
 
         // Get the Variable and the ScopeVar
         let var = self.variables[&target.var_id];

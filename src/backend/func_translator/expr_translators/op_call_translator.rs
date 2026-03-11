@@ -24,29 +24,33 @@ impl FuncTranslator<'_> {
         op_id: &OperatorID,
         lhs: &FuncCallArg,
         rhs: &FuncCallArg,
-    ) -> ir::Value {
+    ) -> Option<ir::Value> {
         // Get the operator function block
-        let op_block = &self.comp_state.op_ctx.get_infix_op(op_id).unwrap().block;
-        self.call_func(op_block, &[lhs.clone(), rhs.clone()])
+        let op = &self.comp_state.op_ctx.get_infix_op(op_id).unwrap();
+        self.call_func(
+            &op.block,
+            &[lhs.clone(), rhs.clone()],
+            &Some(op.return_type),
+        )
     }
 
     pub fn translate_prefix_op_expr(
         &mut self,
         op_id: &OperatorID,
         operand: &FuncCallArg,
-    ) -> ir::Value {
+    ) -> Option<ir::Value> {
         // Get the operator function block
-        let op_block = &self.comp_state.op_ctx.get_infix_op(op_id).unwrap().block;
-        self.call_func(op_block, slice::from_ref(operand))
+        let op = &self.comp_state.op_ctx.get_prefix_op(op_id).unwrap();
+        self.call_func(&op.block, slice::from_ref(operand), &Some(op.return_type))
     }
 
     pub fn translate_postfix_op_expr(
         &mut self,
         op_id: &OperatorID,
         operand: &FuncCallArg,
-    ) -> ir::Value {
+    ) -> Option<ir::Value> {
         // Get the operator function block
-        let op_block = &self.comp_state.op_ctx.get_infix_op(op_id).unwrap().block;
-        self.call_func(op_block, slice::from_ref(operand))
+        let op = &self.comp_state.op_ctx.get_postfix_op(op_id).unwrap();
+        self.call_func(&op.block, slice::from_ref(operand), &Some(op.return_type))
     }
 }
