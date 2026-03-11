@@ -14,18 +14,17 @@
 // limitations under the License.
 //
 
-use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
-use cranelift::prelude::InstBuilder;
-use cranelift_codegen::ir::BlockArg;
+use crate::{
+    ExprToken, ScopeID, Statement, expr_engine::resolve_expr, statement_building::BlockStmtBuilder,
+};
 
-impl FuncTranslator<'_> {
-    pub fn translate_return(&mut self, value: &Option<Expr<ResolvedType>>) {
-        if let Some(return_val) = value.as_ref().map(|val| self.translate_expr(val)) {
-            self.builder
-                .ins()
-                .jump(self.return_block, &[BlockArg::Value(return_val)]);
-        } else {
-            self.builder.ins().jump(self.return_block, &[]);
-        }
+impl BlockStmtBuilder<'_> {
+    pub fn build_expr_stmt(
+        &mut self,
+        expr: &[ExprToken],
+        current_scope_id: ScopeID,
+    ) -> Option<Statement> {
+        let expr = resolve_expr(self.ec, self.comp_state, current_scope_id, expr)?;
+        Some(Statement::Expression { expr })
     }
 }

@@ -61,14 +61,14 @@ impl ScopeGraphAnalyzer<'_> {
 
     pub fn calculate_scope_layout(&mut self, scope_id: &ScopeID) -> i32 {
         let mut size = 0;
-        if let Some(scope) = self.scope_registry.get_scope(scope_id) {
+        if let Some(scope) = self.comp_state.scope_registry.get_scope(scope_id) {
             for var_id in &scope.variables {
-                let Some(var) = self.scope_registry.get_var_by_id(var_id) else {
+                let Some(var) = self.comp_state.scope_registry.get_var_by_id(var_id) else {
                     continue;
                 };
 
                 // Get the size of the variable type
-                let var_size = self.type_registry.get_type_size(&var.def_val.value_type);
+                let var_size = self.comp_state.type_registry.get_type_size(&var.value_type);
                 // Update the total size of the scope
                 size += var_size;
             }

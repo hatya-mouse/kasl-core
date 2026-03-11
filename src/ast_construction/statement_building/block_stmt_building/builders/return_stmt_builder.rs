@@ -16,17 +16,18 @@
 
 use crate::{
     ExprToken, Range, ScopeID, Statement, error::Ph, expr_engine::resolve_expr,
-    statement_building::FuncStmtBuilder,
+    statement_building::BlockStmtBuilder, type_registry::ResolvedType,
 };
 
-impl FuncStmtBuilder<'_> {
+impl BlockStmtBuilder<'_> {
     pub fn build_return_stmt(
         &mut self,
         value: Option<&Vec<ExprToken>>,
         current_scope_id: ScopeID,
         decl_range: Range,
+        expected_return_type: Option<ResolvedType>,
     ) -> Option<Statement> {
-        if let Some(expected_return_type) = self.expected_return_type {
+        if let Some(expected_return_type) = expected_return_type {
             if let Some(value) = value {
                 // Resolve the expression
                 let resolved_value =

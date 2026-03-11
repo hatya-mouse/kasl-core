@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};
+use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -22,7 +22,7 @@ pub struct PostfixOperator {
     pub symbol: String,
     pub operand: FuncParam,
     pub return_type: ResolvedType,
-    pub body: Option<Vec<Statement>>,
+    pub block: Block,
     pub range: Range,
 }
 

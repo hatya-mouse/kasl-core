@@ -15,12 +15,14 @@
 //
 
 mod infix_operator;
+mod op_body_map;
 mod postfix_operator;
 mod prefix_operator;
 
 pub use infix_operator::{
     InfixOperator, InfixOperatorProperties, InfixQuery, InfixQueryRef, OperatorAssociativity,
 };
+pub use op_body_map::OpBodyMap;
 pub use postfix_operator::{
     PostfixOperator, PostfixOperatorProperties, PostfixQuery, PostfixQueryRef,
 };
@@ -123,5 +125,33 @@ impl OperatorContext {
 
     pub fn get_postfix_op(&self, id: &OperatorID) -> Option<&PostfixOperator> {
         self.postfix_operators.get(id)
+    }
+
+    // -- OPERATOR FUNC MUTABLE GETTER FUNCTIONS --
+
+    pub fn get_infix_op_mut(&mut self, id: &OperatorID) -> Option<&mut InfixOperator> {
+        self.infix_operators.get_mut(id)
+    }
+
+    pub fn get_prefix_op_mut(&mut self, id: &OperatorID) -> Option<&mut PrefixOperator> {
+        self.prefix_operators.get_mut(id)
+    }
+
+    pub fn get_postfix_op_mut(&mut self, id: &OperatorID) -> Option<&mut PostfixOperator> {
+        self.postfix_operators.get_mut(id)
+    }
+
+    // -- ID GETTER --
+
+    pub fn all_infix_ids(&self) -> Vec<OperatorID> {
+        self.infix_ids.values().copied().collect()
+    }
+
+    pub fn all_prefix_ids(&self) -> Vec<OperatorID> {
+        self.prefix_ids.values().copied().collect()
+    }
+
+    pub fn all_postfix_ids(&self) -> Vec<OperatorID> {
+        self.postfix_ids.values().copied().collect()
     }
 }

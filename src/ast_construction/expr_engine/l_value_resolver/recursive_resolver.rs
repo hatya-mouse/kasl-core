@@ -37,13 +37,12 @@ impl LValueResolver<'_> {
 
         // Get the variable's type
         let var = self.scope_registry.get_var_by_id(var_id)?;
-        let value_type = var.def_val.value_type;
 
         // Create and return a LValue
         Some(LValue {
             var_id: *var_id,
             offset: 0,
-            value_type,
+            value_type: var.value_type,
             is_field: false,
         })
     }

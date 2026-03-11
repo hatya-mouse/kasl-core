@@ -20,7 +20,9 @@ mod stmt_process;
 pub use resolvers::FuncDeclInfo;
 
 use crate::{
-    CompilationState, NameSpace, ParserDeclStmt, error::ErrorCollector, symbol_table::FuncBodyMap,
+    CompilationState, NameSpace, ParserDeclStmt,
+    error::ErrorCollector,
+    symbol_table::{FuncBodyMap, OpBodyMap},
 };
 
 pub struct GlobalDeclCollector<'a> {
@@ -28,6 +30,7 @@ pub struct GlobalDeclCollector<'a> {
     decl_stmts: &'a [ParserDeclStmt],
     name_space: &'a mut NameSpace,
     func_body_map: &'a mut FuncBodyMap,
+    op_body_map: &'a mut OpBodyMap,
     comp_state: &'a mut CompilationState,
 }
 
@@ -37,6 +40,7 @@ impl<'a> GlobalDeclCollector<'a> {
         decl_stmts: &'a [ParserDeclStmt],
         name_space: &'a mut NameSpace,
         func_body_map: &'a mut FuncBodyMap,
+        op_body_map: &'a mut OpBodyMap,
         comp_state: &'a mut CompilationState,
     ) -> Self {
         Self {
@@ -44,6 +48,7 @@ impl<'a> GlobalDeclCollector<'a> {
             decl_stmts,
             name_space,
             func_body_map,
+            op_body_map,
             comp_state,
         }
     }

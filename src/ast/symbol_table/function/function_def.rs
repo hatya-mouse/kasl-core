@@ -23,7 +23,7 @@ pub struct Function {
     pub is_static: bool,
     pub params: Vec<FuncParam>,
     pub return_type: Option<ResolvedType>,
-    pub block: Option<Block>,
+    pub block: Block,
     pub range: Range,
 }
 
@@ -48,10 +48,6 @@ impl Function {
 
     pub fn max_num_of_params(&self) -> usize {
         self.params.len()
-    }
-
-    pub fn set_block(&mut self, block: Block) {
-        self.block = Some(block);
     }
 }
 

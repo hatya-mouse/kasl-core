@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    FuncParam, PrefixOperator, PrefixOperatorProperties, Range, error::Ph,
-    global_decl_collection::GlobalDeclCollector, type_registry::ResolvedType,
+    FuncParam, ParserScopeStmt, PrefixOperator, PrefixOperatorProperties, Range, error::Ph,
+    global_decl_collection::GlobalDeclCollector, symbol_table::Block, type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -31,6 +31,8 @@ impl GlobalDeclCollector<'_> {
         symbol: &str,
         params: Vec<FuncParam>,
         return_type: ResolvedType,
+        body: &[ParserScopeStmt],
+        block: Block,
         decl_range: Range,
     ) {
         if params.len() != 1 {
@@ -48,12 +50,15 @@ impl GlobalDeclCollector<'_> {
             symbol: symbol.to_string(),
             operand: params[0].clone(),
             return_type,
-            body: None,
+            block,
             range: decl_range,
         };
 
         // Register the operator
         let op_id = self.name_space.generate_operator_id();
         self.comp_state.op_ctx.register_prefix_func(op, op_id);
+
+        // Register the function body to the function body map
+        self.op_body_map.register(op_id, body.to_vec());
     }
 }

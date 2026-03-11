@@ -19,8 +19,8 @@ mod postfix_op;
 mod prefix_op;
 
 use crate::{
-    ParserFuncParam, ParserOperatorType, Range, SymbolPath, error::Ph,
-    global_decl_collection::GlobalDeclCollector,
+    ParserFuncParam, ParserOperatorType, ParserScopeStmt, Range, SymbolPath, error::Ph,
+    global_decl_collection::GlobalDeclCollector, symbol_table::Block,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -30,13 +30,23 @@ impl GlobalDeclCollector<'_> {
         symbol: &str,
         params: &[ParserFuncParam],
         return_type: &SymbolPath,
+        body: &[ParserScopeStmt],
         decl_range: Range,
     ) {
-        // Resolve function parameters
-        let Some(params) = self.resolve_func_params(params) else {
+        // Create a new scope and a block for the function
+        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        let op_scope_id = self
+            .comp_state
+            .scope_registry
+            .create_scope(Some(global_scope_id));
+        let op_block = Block::new(op_scope_id);
+
+        // Resolve the function parameters
+        let Some(params) = self.resolve_func_params(params, op_scope_id) else {
             return;
         };
-        // Resolve return type
+
+        // Resolve the return type
         let Some(return_type) = self.comp_state.type_registry.resolve_type_path(return_type) else {
             self.ec.type_not_found(
                 decl_range,
@@ -48,13 +58,13 @@ impl GlobalDeclCollector<'_> {
 
         match op_type {
             ParserOperatorType::Infix => {
-                self.register_infix_func(symbol, params, return_type, decl_range)
+                self.register_infix_func(symbol, params, return_type, body, op_block, decl_range)
             }
             ParserOperatorType::Prefix => {
-                self.register_prefix_func(symbol, params, return_type, decl_range)
+                self.register_prefix_func(symbol, params, return_type, body, op_block, decl_range)
             }
             ParserOperatorType::Postfix => {
-                self.register_postfix_func(symbol, params, return_type, decl_range)
+                self.register_postfix_func(symbol, params, return_type, body, op_block, decl_range)
             }
         }
     }

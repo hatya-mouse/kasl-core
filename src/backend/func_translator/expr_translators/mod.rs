@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+mod func_call_translator;
+mod infix_op_translator;
 mod literal_translator;
 
 use crate::{
@@ -27,6 +29,12 @@ impl FuncTranslator<'_> {
             ExprKind::IntLiteral(val) => self.translate_int_literal(*val),
             ExprKind::FloatLiteral(val) => self.translate_float_literal(*val),
             ExprKind::BoolLiteral(val) => self.translate_bool_literal(*val),
+            ExprKind::InfixOp {
+                symbol,
+                operator,
+                lhs,
+                rhs,
+            } => self.translate_infix_op_expr(*val),
         }
     }
 }

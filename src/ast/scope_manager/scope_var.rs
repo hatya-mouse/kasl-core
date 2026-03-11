@@ -19,9 +19,18 @@ use crate::{Expr, Range, type_registry::ResolvedType};
 #[derive(Debug, PartialEq, Clone)]
 pub struct ScopeVar {
     pub name: String,
-    pub def_val: Expr<ResolvedType>,
+    pub value_type: ResolvedType,
+    pub def_val: Option<Expr<ResolvedType>>,
     pub range: Range,
     pub var_kind: VariableKind,
+}
+
+impl ScopeVar {
+    pub fn expect_def_val(&self) -> &Expr<ResolvedType> {
+        self.def_val
+            .as_ref()
+            .expect("Compiler error: Variable kind requires a default value but it was missing.")
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -30,6 +39,7 @@ pub enum VariableKind {
     Output,
     State,
     GlobalConst,
+    FuncParam,
     LocalVar,
     LocalConst,
 }

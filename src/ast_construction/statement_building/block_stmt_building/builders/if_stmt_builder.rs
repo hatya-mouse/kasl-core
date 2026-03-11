@@ -18,27 +18,29 @@ use crate::{
     IfArm, ParserIfArm, ParserScopeStmt, ScopeID, Statement,
     error::Ph,
     expr_engine::resolve_expr,
-    statement_building::FuncStmtBuilder,
+    statement_building::BlockStmtBuilder,
     type_registry::{PrimitiveType, ResolvedType},
 };
 
-impl FuncStmtBuilder<'_> {
+impl BlockStmtBuilder<'_> {
     pub fn build_if_stmt(
         &mut self,
         main: &ParserIfArm,
         else_ifs: &[ParserIfArm],
         else_body: Option<&Vec<ParserScopeStmt>>,
         current_scope_id: ScopeID,
+        expected_return_type: Option<ResolvedType>,
     ) -> Option<Statement> {
         // Build the arms
-        let main_arm = self.build_if_arm(main, current_scope_id)?;
+        let main_arm = self.build_if_arm(main, current_scope_id, expected_return_type)?;
         let else_ifs = else_ifs
             .iter()
-            .filter_map(|arm| self.build_if_arm(arm, current_scope_id))
+            .filter_map(|arm| self.build_if_arm(arm, current_scope_id, expected_return_type))
             .collect();
         // Build the else block
         // None is allowed because the else block is optional
-        let else_block = else_body.map(|arm| self.build_scope_block(arm, current_scope_id));
+        let else_block = else_body
+            .map(|arm| self.build_scope_block(arm, current_scope_id, expected_return_type));
 
         // Return the constructed if statement
         Some(Statement::If {
@@ -48,7 +50,12 @@ impl FuncStmtBuilder<'_> {
         })
     }
 
-    pub fn build_if_arm(&mut self, arm: &ParserIfArm, current_scope_id: ScopeID) -> Option<IfArm> {
+    pub fn build_if_arm(
+        &mut self,
+        arm: &ParserIfArm,
+        current_scope_id: ScopeID,
+        expected_return_type: Option<ResolvedType>,
+    ) -> Option<IfArm> {
         // Resolve the condition expression and verify it has a bool type
         let condition = resolve_expr(self.ec, self.comp_state, current_scope_id, &arm.condition)?;
         if condition.value_type != ResolvedType::Primitive(PrimitiveType::Bool) {
@@ -63,7 +70,7 @@ impl FuncStmtBuilder<'_> {
         }
 
         // Create a block for the arm's body
-        let block = self.build_scope_block(&arm.body, current_scope_id);
+        let block = self.build_scope_block(&arm.body, current_scope_id, expected_return_type);
         Some(IfArm { condition, block })
     }
 }

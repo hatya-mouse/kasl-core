@@ -19,6 +19,7 @@ mod expr_translators;
 mod stmt_translators;
 mod type_converter;
 
+use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;
 
 use crate::{CompilationState, FunctionID, VariableID};
@@ -27,26 +28,31 @@ use cranelift_jit::JITModule;
 use std::collections::HashMap;
 
 pub struct FuncTranslator<'a> {
-    pub builder: FunctionBuilder<'a>,
+    pub builder: &'a mut FunctionBuilder<'a>,
     type_converter: TypeConverter,
+    module: &'a JITModule,
 
     comp_state: &'a CompilationState,
     variables: HashMap<VariableID, Variable>,
+    return_block: ir::Block,
 }
 
 impl<'a> FuncTranslator<'a> {
     pub fn new(
-        builder: FunctionBuilder<'a>,
+        builder: &'a mut FunctionBuilder<'a>,
         module: &'a JITModule,
         comp_state: &'a CompilationState,
+        return_block: ir::Block,
     ) -> Self {
         let type_converter = TypeConverter::new(module);
 
         Self {
             builder,
             type_converter,
+            module,
             comp_state,
             variables: HashMap::new(),
+            return_block,
         }
     }
 

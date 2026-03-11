@@ -19,10 +19,10 @@ use crate::{
     error::Ph,
     expr_engine::{LValueResolver, resolve_expr},
     scope_manager::VariableKind,
-    statement_building::FuncStmtBuilder,
+    statement_building::BlockStmtBuilder,
 };
 
-impl FuncStmtBuilder<'_> {
+impl BlockStmtBuilder<'_> {
     pub fn build_assign(
         &mut self,
         target: &ExprToken,

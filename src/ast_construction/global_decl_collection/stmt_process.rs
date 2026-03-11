@@ -63,7 +63,7 @@ impl<'a> GlobalDeclCollector<'a> {
                     return_type,
                     body,
                 };
-                self.resolve_global_func_decl(stmt.range, info)
+                self.resolve_global_func_decl(info, stmt.range)
             }
 
             ParserDeclStmtKind::InfixDefine { symbol, props } => {
@@ -81,8 +81,8 @@ impl<'a> GlobalDeclCollector<'a> {
                 symbol,
                 params,
                 return_type,
-                body: _,
-            } => self.resolve_operator_func(op_type, symbol, params, return_type, stmt.range),
+                body,
+            } => self.resolve_operator_func(op_type, symbol, params, return_type, body, stmt.range),
 
             ParserDeclStmtKind::StructField { name, .. } => {
                 self.ec

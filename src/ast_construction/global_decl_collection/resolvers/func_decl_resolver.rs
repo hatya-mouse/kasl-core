@@ -21,7 +21,7 @@ use crate::{
 };
 
 impl GlobalDeclCollector<'_> {
-    pub fn resolve_global_func_decl(&mut self, decl_range: Range, info: FuncDeclInfo<'_>) {
+    pub fn resolve_global_func_decl(&mut self, info: FuncDeclInfo<'_>, decl_range: Range) {
         // Check if is_static is not set
         if info.is_static {
             self.ec

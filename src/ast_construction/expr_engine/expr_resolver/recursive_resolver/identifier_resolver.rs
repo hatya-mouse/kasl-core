@@ -36,7 +36,7 @@ impl ExpressionResolver<'_> {
                 name,
                 id: Some(*var_id),
             },
-            var.def_val.value_type,
+            var.value_type,
             range,
         ))
     }

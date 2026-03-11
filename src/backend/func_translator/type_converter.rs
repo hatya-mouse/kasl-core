@@ -20,6 +20,7 @@ use cranelift_codegen::ir;
 use cranelift_jit::JITModule;
 use cranelift_module::Module;
 
+#[derive(Copy, Clone)]
 pub struct TypeConverter {
     pointer_type: ir::Type,
 }

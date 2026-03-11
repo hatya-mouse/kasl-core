@@ -19,7 +19,7 @@ use crate::{Expr, ScopeID, VariableID, symbol_table::LValue, type_registry::Reso
 #[derive(Debug, Clone, PartialEq)]
 pub struct Block {
     pub body: Vec<Statement>,
-    scope_id: ScopeID,
+    pub scope_id: ScopeID,
 }
 
 impl Block {

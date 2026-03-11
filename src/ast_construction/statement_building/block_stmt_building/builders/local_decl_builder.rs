@@ -16,10 +16,10 @@
 
 use crate::{
     ExprToken, Range, ScopeID, Statement, SymbolPath, scope_manager::VariableKind,
-    statement_building::FuncStmtBuilder,
+    statement_building::BlockStmtBuilder,
 };
 
-impl FuncStmtBuilder<'_> {
+impl BlockStmtBuilder<'_> {
     pub fn build_local_var(
         &mut self,
         name: &str,

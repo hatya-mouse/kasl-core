@@ -24,8 +24,8 @@ pub use function::{
     FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
 };
 pub use operator::{
-    InfixOperator, InfixOperatorProperties, InfixQueryRef, OperatorAssociativity, OperatorContext,
-    PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
+    InfixOperator, InfixOperatorProperties, InfixQueryRef, OpBodyMap, OperatorAssociativity,
+    OperatorContext, PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
     PrefixOperatorProperties, PrefixQueryRef,
 };
 pub use statement::{Block, IfArm, Statement};

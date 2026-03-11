@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};
+use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -23,7 +23,7 @@ pub struct InfixOperator {
     pub lhs: FuncParam,
     pub rhs: FuncParam,
     pub return_type: ResolvedType,
-    pub body: Option<Vec<Statement>>,
+    pub block: Block,
     pub range: Range,
 }
 

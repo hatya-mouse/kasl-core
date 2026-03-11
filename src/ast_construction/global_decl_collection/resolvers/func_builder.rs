@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    FuncParam, Function, ParserFuncParam, Range, SymbolPath, error::Ph, expr_engine::resolve_expr,
-    global_decl_collection::GlobalDeclCollector,
+    FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar, SymbolPath, error::Ph,
+    global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind, symbol_table::Block,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -29,8 +29,16 @@ impl GlobalDeclCollector<'_> {
         return_type: &Option<SymbolPath>,
         decl_range: Range,
     ) -> Option<Function> {
+        // Create a function block
+        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        let func_scope_id = self
+            .comp_state
+            .scope_registry
+            .create_scope(Some(global_scope_id));
+        let block = Block::new(func_scope_id);
+
         // Resolve the function parameters
-        let params = self.resolve_func_params(params)?;
+        let params = self.resolve_func_params(params, func_scope_id)?;
 
         // Resolve the return type
         let return_type = match return_type {
@@ -51,49 +59,64 @@ impl GlobalDeclCollector<'_> {
             is_static,
             params,
             return_type,
-            block: None,
+            block,
             range: decl_range,
         })
     }
 
-    pub fn resolve_func_params(&mut self, params: &[ParserFuncParam]) -> Option<Vec<FuncParam>> {
+    pub fn resolve_func_params(
+        &mut self,
+        params: &[ParserFuncParam],
+        func_scope_id: ScopeID,
+    ) -> Option<Vec<FuncParam>> {
         let mut resolved_params = Vec::new();
         // Resolve each parameter
         for param in params {
-            let resolved_param = self.resolve_func_param(param)?;
+            let resolved_param = self.resolve_func_param(param, func_scope_id)?;
             resolved_params.push(resolved_param);
         }
         Some(resolved_params)
     }
 
-    pub fn resolve_func_param(&mut self, param: &ParserFuncParam) -> Option<FuncParam> {
-        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+    pub fn resolve_func_param(
+        &mut self,
+        param: &ParserFuncParam,
+        func_scope_id: ScopeID,
+    ) -> Option<FuncParam> {
+        // Check if the name is already in use in this scope
+        if self
+            .comp_state
+            .scope_registry
+            .has_var(func_scope_id, &param.name)
+        {
+            self.ec
+                .duplicate_var_name(param.range, Ph::StatementCollection, &param.name);
+            return None;
+        }
 
         if let Some(def_val) = &param.def_val {
             // Resolve the default value expression
-            let resolved_def_val =
-                resolve_expr(self.ec, self.comp_state, global_scope_id, def_val)?;
+            let Some(resolved_def_val) =
+                self.resolve_def_val_global(&param.value_type, def_val, param.range)
+            else {
+                return None;
+            };
 
-            // If a type annotation is provided, check if it matches the resolved default value type
-            if let Some(annotation_type) = &param.value_type {
-                let resolved_annotation_type = self
-                    .comp_state
-                    .type_registry
-                    .resolve_type_path(annotation_type)?;
-                if resolved_annotation_type != resolved_def_val.value_type {
-                    self.ec.type_annotation_mismatch(
-                        param.range,
-                        Ph::GlobalDeclCollection,
-                        self.comp_state
-                            .type_registry
-                            .format_type(&resolved_annotation_type),
-                        self.comp_state
-                            .type_registry
-                            .format_type(&resolved_def_val.value_type),
-                    );
-                    return None;
-                }
-            }
+            // Register the variable in the function scope
+            let var = ScopeVar {
+                name: param.name.clone(),
+                value_type: resolved_def_val.value_type,
+                def_val: None,
+                range: param.range,
+                var_kind: VariableKind::FuncParam,
+            };
+            let variable_id = self.name_space.generate_variable_id();
+            self.comp_state.scope_registry.register_var(
+                var,
+                param.name.clone(),
+                variable_id,
+                func_scope_id,
+            );
 
             Some(FuncParam {
                 label: param.label.clone(),
@@ -108,6 +131,23 @@ impl GlobalDeclCollector<'_> {
                 .comp_state
                 .type_registry
                 .resolve_type_path(annotation_type)?;
+
+            // Register the variable in the function scope
+            let var = ScopeVar {
+                name: param.name.clone(),
+                value_type: resolved_annotation_type,
+                def_val: None,
+                range: param.range,
+                var_kind: VariableKind::FuncParam,
+            };
+            let variable_id = self.name_space.generate_variable_id();
+            self.comp_state.scope_registry.register_var(
+                var,
+                param.name.clone(),
+                variable_id,
+                func_scope_id,
+            );
+
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),

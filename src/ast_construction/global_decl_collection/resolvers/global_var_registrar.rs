@@ -86,7 +86,8 @@ impl GlobalDeclCollector<'_> {
         // Register the variable in the global scope
         let var = ScopeVar {
             name: name.to_string(),
-            def_val: resolved_def_val,
+            value_type: resolved_def_val.value_type,
+            def_val: Some(resolved_def_val),
             range: decl_range,
             var_kind,
         };

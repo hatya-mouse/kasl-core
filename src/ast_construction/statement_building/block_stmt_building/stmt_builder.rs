@@ -15,28 +15,20 @@
 //
 
 use crate::{
-    ParserScopeStmt, ParserScopeStmtKind, ScopeID, Statement, statement_building::FuncStmtBuilder,
+    ParserScopeStmt, ParserScopeStmtKind, ScopeID, Statement, statement_building::BlockStmtBuilder,
+    type_registry::ResolvedType,
 };
 
-impl FuncStmtBuilder<'_> {
-    pub fn build_func_body(&mut self) {
-        if let Some(body) = self.func_body_map.get_body(&self.func_id) {
-            // Generate a new Scope for the function
-            let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
-            let resolved_body = self.build_scope_block(body, global_scope_id);
-
-            // Store the resolved body in the function
-            let Some(func) = self.comp_state.func_ctx.get_func_mut(&self.func_id) else {
-                return;
-            };
-            func.set_block(resolved_body);
-        }
-    }
-
-    pub fn build_stmt(&mut self, stmt: &ParserScopeStmt, scope_id: ScopeID) -> Option<Statement> {
+impl BlockStmtBuilder<'_> {
+    pub fn build_stmt(
+        &mut self,
+        stmt: &ParserScopeStmt,
+        scope_id: ScopeID,
+        expected_return_type: Option<ResolvedType>,
+    ) -> Option<Statement> {
         match &stmt.kind {
             ParserScopeStmtKind::Block { statements } => {
-                self.build_block_stmt(statements, scope_id)
+                self.build_block_stmt(statements, scope_id, expected_return_type)
             }
             ParserScopeStmtKind::LocalVar {
                 name,
@@ -56,9 +48,15 @@ impl FuncStmtBuilder<'_> {
                 main,
                 else_ifs,
                 else_body,
-            } => self.build_if_stmt(main, else_ifs, else_body.as_ref(), scope_id),
+            } => self.build_if_stmt(
+                main,
+                else_ifs,
+                else_body.as_ref(),
+                scope_id,
+                expected_return_type,
+            ),
             ParserScopeStmtKind::Return { value } => {
-                self.build_return_stmt(value.as_ref(), scope_id, stmt.range)
+                self.build_return_stmt(value.as_ref(), scope_id, stmt.range, expected_return_type)
             }
         }
     }

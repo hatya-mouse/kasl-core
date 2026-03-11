@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    FuncParam, InfixOperator, InfixOperatorProperties, Range, error::Ph,
-    global_decl_collection::GlobalDeclCollector, type_registry::ResolvedType,
+    FuncParam, InfixOperator, InfixOperatorProperties, ParserScopeStmt, Range, error::Ph,
+    global_decl_collection::GlobalDeclCollector, symbol_table::Block, type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -31,6 +31,8 @@ impl GlobalDeclCollector<'_> {
         symbol: &str,
         params: Vec<FuncParam>,
         return_type: ResolvedType,
+        body: &[ParserScopeStmt],
+        block: Block,
         decl_range: Range,
     ) {
         if params.len() != 2 {
@@ -49,12 +51,15 @@ impl GlobalDeclCollector<'_> {
             lhs: params[0].clone(),
             rhs: params[1].clone(),
             return_type,
-            body: None,
+            block,
             range: decl_range,
         };
 
         // Register the operator
         let op_id = self.name_space.generate_operator_id();
         self.comp_state.op_ctx.register_infix_func(op, op_id);
+
+        // Register the function body to the function body map
+        self.op_body_map.register(op_id, body.to_vec());
     }
 }

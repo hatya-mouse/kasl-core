@@ -14,47 +14,45 @@
 // limitations under the License.
 //
 
+mod body_collector;
 mod builders;
 /// Builds a Block which contains ScopeID from a list of statements.
 mod scope_block_builder;
 mod stmt_builder;
 
 use crate::{
-    CompilationState, FunctionID, NameSpace, error::ErrorCollector, scope_manager::ScopeGraph,
-    symbol_table::FuncBodyMap, type_registry::ResolvedType,
+    CompilationState, NameSpace,
+    error::ErrorCollector,
+    scope_manager::ScopeGraph,
+    symbol_table::{FuncBodyMap, OpBodyMap},
 };
 
-pub struct FuncStmtBuilder<'a> {
+pub struct BlockStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
     name_space: &'a mut NameSpace,
     func_body_map: &'a FuncBodyMap,
+    op_body_map: &'a OpBodyMap,
     comp_state: &'a mut CompilationState,
 
     scope_graph: &'a mut ScopeGraph,
-    func_id: FunctionID,
-    expected_return_type: Option<ResolvedType>,
 }
 
-impl<'a> FuncStmtBuilder<'a> {
+impl<'a> BlockStmtBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         name_space: &'a mut NameSpace,
         func_body_map: &'a FuncBodyMap,
+        op_body_map: &'a OpBodyMap,
         comp_state: &'a mut CompilationState,
         scope_graph: &'a mut ScopeGraph,
-        func_id: FunctionID,
     ) -> Self {
-        let func = comp_state.func_ctx.get_func(&func_id);
-        let expected_return_type = func.and_then(|f| f.return_type);
-
         Self {
             ec,
             name_space,
             func_body_map,
+            op_body_map,
             comp_state,
             scope_graph,
-            func_id,
-            expected_return_type,
         }
     }
 }

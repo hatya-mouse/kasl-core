@@ -18,38 +18,33 @@ mod recursive_traversal;
 
 use std::collections::HashMap;
 
-use crate::{
-    ScopeID, ScopeRegistry, error::ErrorCollector, scope_manager::ScopeGraph,
-    type_registry::TypeRegistry,
-};
+use crate::{CompilationState, ScopeID, error::ErrorCollector, scope_manager::ScopeGraph};
 
 pub struct ScopeGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
+    comp_state: &'a CompilationState,
     scope_graph: &'a ScopeGraph,
-    scope_registry: &'a ScopeRegistry,
-    type_registry: &'a TypeRegistry,
 }
 
 impl<'a> ScopeGraphAnalyzer<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
+        comp_state: &'a CompilationState,
         scope_graph: &'a ScopeGraph,
-        scope_registry: &'a ScopeRegistry,
-        type_registry: &'a TypeRegistry,
     ) -> Self {
         Self {
             ec,
+            comp_state,
             scope_graph,
-            scope_registry,
-            type_registry,
         }
     }
 
     pub fn analyze_all(&mut self) {
         // Get the global scope ID
-        let global_scope_id = self.scope_registry.get_global_scope_id();
+        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
         // Initialize states for all scopes
         let mut states: HashMap<ScopeID, ScopeState> = self
+            .comp_state
             .scope_registry
             .all_scope_ids()
             .into_iter()

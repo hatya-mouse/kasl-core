@@ -14,13 +14,17 @@
 // limitations under the License.
 //
 
-use crate::{ParserScopeStmt, ScopeID, statement_building::FuncStmtBuilder, symbol_table::Block};
+use crate::{
+    ParserScopeStmt, ScopeID, statement_building::BlockStmtBuilder, symbol_table::Block,
+    type_registry::ResolvedType,
+};
 
-impl FuncStmtBuilder<'_> {
+impl BlockStmtBuilder<'_> {
     pub fn build_scope_block(
         &mut self,
         statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
+        expected_return_type: Option<ResolvedType>,
     ) -> Block {
         let mut body = Vec::new();
 
@@ -31,7 +35,8 @@ impl FuncStmtBuilder<'_> {
             .create_scope(Some(parent_scope_id));
         // Build each statement in the block scope
         for stmt in statements {
-            let Some(resolved_stmt) = self.build_stmt(stmt, block_scope_id) else {
+            let Some(resolved_stmt) = self.build_stmt(stmt, block_scope_id, expected_return_type)
+            else {
                 continue;
             };
             body.push(resolved_stmt);

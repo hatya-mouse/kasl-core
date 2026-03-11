@@ -14,17 +14,20 @@
 // limitations under the License.
 //
 
-use crate::{
-    ExprToken, ScopeID, Statement, expr_engine::resolve_expr, statement_building::FuncStmtBuilder,
-};
+use crate::{OperatorID, ParserScopeStmt};
+use std::collections::HashMap;
 
-impl FuncStmtBuilder<'_> {
-    pub fn build_expr_stmt(
-        &mut self,
-        expr: &[ExprToken],
-        current_scope_id: ScopeID,
-    ) -> Option<Statement> {
-        let expr = resolve_expr(self.ec, self.comp_state, current_scope_id, expr)?;
-        Some(Statement::Expression { expr })
+#[derive(Default)]
+pub struct OpBodyMap {
+    pub op_map: HashMap<OperatorID, Vec<ParserScopeStmt>>,
+}
+
+impl OpBodyMap {
+    pub fn register(&mut self, op_id: OperatorID, body: Vec<ParserScopeStmt>) {
+        self.op_map.insert(op_id, body);
+    }
+
+    pub fn get_body(&self, op_id: &OperatorID) -> Option<&Vec<ParserScopeStmt>> {
+        self.op_map.get(op_id)
     }
 }

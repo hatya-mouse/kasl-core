@@ -14,18 +14,9 @@
 // limitations under the License.
 //
 
-use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
-use cranelift::prelude::InstBuilder;
-use cranelift_codegen::ir::BlockArg;
+use crate::backend::func_translator::FuncTranslator;
+use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_return(&mut self, value: &Option<Expr<ResolvedType>>) {
-        if let Some(return_val) = value.as_ref().map(|val| self.translate_expr(val)) {
-            self.builder
-                .ins()
-                .jump(self.return_block, &[BlockArg::Value(return_val)]);
-        } else {
-            self.builder.ins().jump(self.return_block, &[]);
-        }
-    }
+    pub fn translate_infix_op_expr(&mut self) -> ir::Value {}
 }
