@@ -1,0 +1,46 @@
+---
+source: src/tests/parser/stmt_parser/struct_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 38,
+        },
+        kind: StructDecl {
+            name: "Type",
+            body: [
+                ParserDeclStmt {
+                    range: Range {
+                        start: 18,
+                        end: 36,
+                    },
+                    kind: StructField {
+                        name: "field",
+                        value_type: Some(
+                            SymbolPath {
+                                components: [
+                                    SymbolPathComponent {
+                                        symbol: "Int",
+                                    },
+                                ],
+                            },
+                        ),
+                        def_val: [
+                            ExprToken {
+                                range: Range {
+                                    start: 35,
+                                    end: 36,
+                                },
+                                kind: IntLiteral(
+                                    0,
+                                ),
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+    },
+]

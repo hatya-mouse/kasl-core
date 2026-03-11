@@ -14,14 +14,5 @@
 // limitations under the License.
 //
 
-pub const MAIN_FUNCTION_NAME: &str = "main";
-
-pub mod ast;
-pub mod ast_construction;
-pub mod backend;
-pub mod parser;
-mod tests;
-
-pub use ast::*;
-pub use ast_construction::*;
-pub use parser::*;
+mod expr_parser;
+mod stmt_parser;

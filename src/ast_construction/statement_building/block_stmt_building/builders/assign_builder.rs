@@ -25,7 +25,7 @@ use crate::{
 impl BlockStmtBuilder<'_> {
     pub fn build_assign(
         &mut self,
-        target: &ExprToken,
+        target: &[ExprToken],
         value: &[ExprToken],
         current_scope_id: ScopeID,
         stmt_range: Range,
@@ -39,7 +39,7 @@ impl BlockStmtBuilder<'_> {
         );
 
         // Error will be thrown by the LValueResolver so no need to check for None
-        let target_l_value = l_value_resolver.resolve_recursively(target)?;
+        let target_l_value = l_value_resolver.resolve_l_value(target)?;
 
         // Check if the LValue is a writable variable
         if let Some(target_var) = self
@@ -55,7 +55,7 @@ impl BlockStmtBuilder<'_> {
             )
         {
             self.ec
-                .immutable_assignment(target.range, Ph::StatementCollection, &target_var.name);
+                .immutable_assignment(stmt_range, Ph::StatementCollection, &target_var.name);
             return None;
         }
 

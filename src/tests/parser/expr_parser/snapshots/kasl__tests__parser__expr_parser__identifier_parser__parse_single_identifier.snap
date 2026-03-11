@@ -1,0 +1,27 @@
+---
+source: src/tests/parser/expr_parser/identifier_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 15,
+        },
+        kind: GlobalConst {
+            name: "value",
+            value_type: None,
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 12,
+                        end: 15,
+                    },
+                    kind: Identifier(
+                        "num",
+                    ),
+                },
+            ],
+        },
+    },
+]

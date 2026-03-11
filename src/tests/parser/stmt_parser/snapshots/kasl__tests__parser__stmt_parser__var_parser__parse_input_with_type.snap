@@ -1,0 +1,36 @@
+---
+source: src/tests/parser/stmt_parser/var_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 17,
+        },
+        kind: Input {
+            name: "in",
+            value_type: Some(
+                SymbolPath {
+                    components: [
+                        SymbolPathComponent {
+                            symbol: "Int",
+                        },
+                    ],
+                },
+            ),
+            def_val: [
+                ExprToken {
+                    range: Range {
+                        start: 16,
+                        end: 17,
+                    },
+                    kind: IntLiteral(
+                        0,
+                    ),
+                },
+            ],
+            attrs: [],
+        },
+    },
+]

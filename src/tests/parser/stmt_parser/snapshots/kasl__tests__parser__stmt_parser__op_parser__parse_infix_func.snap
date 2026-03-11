@@ -1,0 +1,66 @@
+---
+source: src/tests/parser/stmt_parser/op_parser.rs
+expression: parsed
+---
+[
+    ParserDeclStmt {
+        range: Range {
+            start: 0,
+            end: 46,
+        },
+        kind: OperatorFunc {
+            op_type: Infix,
+            symbol: "*",
+            params: [
+                ParserFuncParam {
+                    label: Some(
+                        "_",
+                    ),
+                    name: "lhs",
+                    value_type: Some(
+                        SymbolPath {
+                            components: [
+                                SymbolPathComponent {
+                                    symbol: "Int",
+                                },
+                            ],
+                        },
+                    ),
+                    def_val: None,
+                    range: Range {
+                        start: 13,
+                        end: 23,
+                    },
+                },
+                ParserFuncParam {
+                    label: Some(
+                        "_",
+                    ),
+                    name: "rhs",
+                    value_type: Some(
+                        SymbolPath {
+                            components: [
+                                SymbolPathComponent {
+                                    symbol: "Int",
+                                },
+                            ],
+                        },
+                    ),
+                    def_val: None,
+                    range: Range {
+                        start: 25,
+                        end: 35,
+                    },
+                },
+            ],
+            return_type: SymbolPath {
+                components: [
+                    SymbolPathComponent {
+                        symbol: "Int",
+                    },
+                ],
+            },
+            body: [],
+        },
+    },
+]

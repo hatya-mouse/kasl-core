@@ -14,14 +14,8 @@
 // limitations under the License.
 //
 
-pub const MAIN_FUNCTION_NAME: &str = "main";
+use crate::{ParserDeclStmt, kasl_parser};
 
-pub mod ast;
-pub mod ast_construction;
-pub mod backend;
-pub mod parser;
-mod tests;
-
-pub use ast::*;
-pub use ast_construction::*;
-pub use parser::*;
+pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
+    kasl_parser::parse(input).unwrap()
+}
