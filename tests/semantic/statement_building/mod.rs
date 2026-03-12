@@ -16,3 +16,4 @@
 
 mod assign_building;
 mod block_building;
+mod local_var_building;

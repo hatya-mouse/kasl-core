@@ -1,0 +1,21 @@
+---
+source: tests/semantic/statement_building/local_var_building.rs
+expression: error
+---
+- key:
+    kind: VarNotFound
+    payload:
+      Str: local
+  earliest_phase: ExprEngine
+  ranges:
+    - start: 0
+      end: 0
+  severity: Error
+- key:
+    kind: MissingArg
+    payload: None
+  earliest_phase: ExprEngine
+  ranges:
+    - start: 0
+      end: 0
+  severity: Error
