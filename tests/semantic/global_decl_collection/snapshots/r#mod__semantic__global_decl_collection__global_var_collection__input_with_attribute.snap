@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/global_decl_collection/global_var_collection.rs
-expression: comp_state.scope_registry
+expression: test_ctx.comp_state.scope_registry
 ---
 scopes:
   0:
@@ -13,12 +13,12 @@ variables:
   0:
     name: in
     value_type:
-      Primitive: Int
+      Primitive: Float
     def_val:
       kind:
-        IntLiteral: 0
+        FloatLiteral: 0
       value_type:
-        Primitive: Int
+        Primitive: Float
       range:
         start: 0
         end: 0

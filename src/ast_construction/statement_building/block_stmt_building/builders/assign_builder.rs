@@ -49,7 +49,7 @@ impl BlockStmtBuilder<'_> {
             && matches!(
                 target_var.var_kind,
                 VariableKind::Input { .. }
-                    | VariableKind::State
+                    | VariableKind::GlobalConst
                     | VariableKind::LocalConst
                     | VariableKind::FuncParam
             )

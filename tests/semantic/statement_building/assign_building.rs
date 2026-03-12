@@ -14,51 +14,35 @@
 // limitations under the License.
 //
 
-use crate::common::{TestContext, build_stmts, builders::identifier, collect_global_decls};
-use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::{
-    ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, ParserScopeStmt,
-    ParserScopeStmtKind, Range, symbol_path,
+use crate::common::{
+    TestContext, build_stmts,
+    builders::{
+        assign, func_decl, func_param, global_const, identifier, input, int_literal, local_const,
+        output,
+    },
+    collect_global_decls,
 };
+use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
+use kasl::symbol_path;
 
 #[test]
 fn test_simple_assignment() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::Output {
-                name: "out".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(5),
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::FuncDecl {
-                is_static: false,
-                name: "greet".to_string(),
-                params: vec![ParserFuncParam {
-                    label: None,
-                    name: "number".to_string(),
-                    value_type: Some(symbol_path!["Int".to_string()]),
-                    def_val: None,
-                    range: Range::zero(),
-                }],
-                return_type: None,
-                body: vec![ParserScopeStmt {
-                    kind: ParserScopeStmtKind::Assign {
-                        target: vec![identifier("out")],
-                        value: vec![identifier("number")],
-                    },
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
+        output("out", None, &[int_literal(5)]),
+        func_decl(
+            false,
+            "greet",
+            &[func_param(
+                None,
+                "number",
+                Some(symbol_path!["Int".to_string()]),
+                None,
+            )],
+            None,
+            &[assign(&[identifier("out")], &[identifier("number")])],
+        ),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
@@ -75,39 +59,19 @@ fn test_assign_to_different_type() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::Output {
-                name: "out".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(5),
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::FuncDecl {
-                is_static: false,
-                name: "greet".to_string(),
-                params: vec![ParserFuncParam {
-                    label: None,
-                    name: "this_is_float".to_string(),
-                    value_type: Some(symbol_path!["Float".to_string()]),
-                    def_val: None,
-                    range: Range::zero(),
-                }],
-                return_type: None,
-                body: vec![ParserScopeStmt {
-                    kind: ParserScopeStmtKind::Assign {
-                        target: vec![identifier("out")],
-                        value: vec![identifier("this_is_float")],
-                    },
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
+        output("out", None, &[int_literal(5)]),
+        func_decl(
+            false,
+            "greet",
+            &[func_param(
+                None,
+                "this_is_float",
+                Some(symbol_path!["Float".to_string()]),
+                None,
+            )],
+            None,
+            &[assign(&[identifier("out")], &[identifier("this_is_float")])],
+        ),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
@@ -115,45 +79,101 @@ fn test_assign_to_different_type() {
 }
 
 #[test]
-fn test_assign_to_immutable_var() {
+fn test_assign_to_input() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::Input {
-                name: "this_is_immutable_because_input".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(0),
-                    range: Range::zero(),
-                }],
-                attrs: vec![],
-            },
-            range: Range::zero(),
-        },
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::FuncDecl {
-                is_static: false,
-                name: "greet".to_string(),
-                params: vec![ParserFuncParam {
-                    label: None,
-                    name: "number".to_string(),
-                    value_type: Some(symbol_path!["Int".to_string()]),
-                    def_val: None,
-                    range: Range::zero(),
-                }],
-                return_type: None,
-                body: vec![ParserScopeStmt {
-                    kind: ParserScopeStmtKind::Assign {
-                        target: vec![identifier("this_is_immutable_because_input")],
-                        value: vec![identifier("number")],
-                    },
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
+        input(
+            "this_is_immutable_because_input",
+            None,
+            &[int_literal(0)],
+            &[],
+        ),
+        func_decl(
+            false,
+            "greet",
+            &[func_param(
+                None,
+                "number",
+                Some(symbol_path!["Int".to_string()]),
+                None,
+            )],
+            None,
+            &[assign(
+                &[identifier("this_is_immutable_because_input")],
+                &[identifier("number")],
+            )],
+        ),
     ];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    assert_debug_snapshot!(error);
+}
+
+#[test]
+fn test_assign_to_func_param() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "greet",
+        &[func_param(
+            None,
+            "param",
+            Some(symbol_path!["Int".to_string()]),
+            None,
+        )],
+        None,
+        &[assign(&[identifier("param")], &[int_literal(5)])],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    assert_debug_snapshot!(error);
+}
+
+#[test]
+fn test_assign_to_global_const() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![
+        global_const("const", None, &[int_literal(7)]),
+        func_decl(
+            false,
+            "greet",
+            &[func_param(
+                None,
+                "number",
+                Some(symbol_path!["Int".to_string()]),
+                None,
+            )],
+            None,
+            &[assign(&[identifier("const")], &[identifier("number")])],
+        ),
+    ];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    assert_debug_snapshot!(error);
+}
+
+#[test]
+fn test_assign_to_local_const() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "greet",
+        &[func_param(
+            None,
+            "number",
+            Some(symbol_path!["Int".to_string()]),
+            None,
+        )],
+        None,
+        &[
+            local_const("local", None, &[int_literal(5)]),
+            assign(&[identifier("local")], &[identifier("number")]),
+        ],
+    )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
     assert_debug_snapshot!(error);

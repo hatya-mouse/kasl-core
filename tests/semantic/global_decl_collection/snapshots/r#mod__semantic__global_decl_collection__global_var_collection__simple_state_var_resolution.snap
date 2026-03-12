@@ -1,17 +1,17 @@
 ---
 source: tests/semantic/global_decl_collection/global_var_collection.rs
-expression: comp_state.scope_registry
+expression: test_ctx.comp_state.scope_registry
 ---
 scopes:
   0:
     parent: ~
     name_to_id:
-      state: 0
+      state_var: 0
     variables:
       - 0
 variables:
   0:
-    name: state
+    name: state_var
     value_type:
       Primitive: Int
     def_val:

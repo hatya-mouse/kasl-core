@@ -14,28 +14,18 @@
 // limitations under the License.
 //
 
-use crate::common::{TestContext, collect_global_decls};
-use insta::{assert_yaml_snapshot, sorted_redaction};
-use kasl::{
-    ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, ParserInputAttribute, Range,
+use crate::common::{
+    TestContext,
+    builders::{float_literal, global_const, input, input_attr, int_literal, output, state_var},
+    collect_global_decls,
 };
+use insta::{assert_yaml_snapshot, sorted_redaction};
 
 #[test]
 fn test_simple_input_resolution() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::Input {
-            name: "in".to_string(),
-            value_type: None,
-            def_val: vec![ExprToken {
-                kind: ExprTokenKind::IntLiteral(0),
-                range: Range::zero(),
-            }],
-            attrs: vec![],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![input("in", None, &[int_literal(0)], &[])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
@@ -48,17 +38,7 @@ fn test_simple_input_resolution() {
 fn test_simple_output_resolution() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::Output {
-            name: "output".to_string(),
-            value_type: None,
-            def_val: vec![ExprToken {
-                kind: ExprTokenKind::IntLiteral(0),
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![output("output", None, &[int_literal(0)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
@@ -71,17 +51,7 @@ fn test_simple_output_resolution() {
 fn test_simple_state_var_resolution() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::StateVar {
-            name: "state".to_string(),
-            value_type: None,
-            def_val: vec![ExprToken {
-                kind: ExprTokenKind::IntLiteral(0),
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![state_var("state_var", None, &[int_literal(0)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
@@ -94,17 +64,7 @@ fn test_simple_state_var_resolution() {
 fn test_simple_let_resolution() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::GlobalConst {
-            name: "const".to_string(),
-            value_type: None,
-            def_val: vec![ExprToken {
-                kind: ExprTokenKind::IntLiteral(0),
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![global_const("const", None, &[int_literal(0)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
@@ -118,51 +78,10 @@ fn test_multiple_variables_resolution() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::Input {
-                name: "in".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(0),
-                    range: Range::zero(),
-                }],
-                attrs: vec![],
-            },
-            range: Range::zero(),
-        },
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::Output {
-                name: "out".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(0),
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::StateVar {
-                name: "delay".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(0),
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
-        ParserDeclStmt {
-            kind: ParserDeclStmtKind::GlobalConst {
-                name: "const".to_string(),
-                value_type: None,
-                def_val: vec![ExprToken {
-                    kind: ExprTokenKind::IntLiteral(0),
-                    range: Range::zero(),
-                }],
-            },
-            range: Range::zero(),
-        },
+        input("in", None, &[int_literal(0)], &[]),
+        output("out", None, &[int_literal(0)]),
+        state_var("delay", None, &[int_literal(0)]),
+        global_const("const", None, &[int_literal(0)]),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
@@ -176,31 +95,15 @@ fn test_multiple_variables_resolution() {
 fn test_input_with_attribute() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::Input {
-            name: "in".to_string(),
-            value_type: None,
-            def_val: vec![ExprToken {
-                kind: ExprTokenKind::IntLiteral(0),
-                range: Range::zero(),
-            }],
-            attrs: vec![ParserInputAttribute {
-                name: "slider".to_string(),
-                args: vec![
-                    vec![ExprToken {
-                        kind: ExprTokenKind::FloatLiteral(0.0),
-                        range: Range::zero(),
-                    }],
-                    vec![ExprToken {
-                        kind: ExprTokenKind::FloatLiteral(1.0),
-                        range: Range::zero(),
-                    }],
-                ],
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![input(
+        "in",
+        None,
+        &[float_literal(0.0)],
+        &[input_attr(
+            "slider",
+            &[&[float_literal(0.0)], &[float_literal(1.0)]],
+        )],
+    )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),

@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/statement_building/assign_building.rs
-expression: comp_state.func_ctx
+expression: test_ctx.comp_state.func_ctx
 ---
 funcs:
   0:

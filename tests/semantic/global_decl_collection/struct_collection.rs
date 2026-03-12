@@ -14,31 +14,24 @@
 // limitations under the License.
 //
 
-use crate::common::{TestContext, collect_global_decls};
+use crate::common::{
+    TestContext,
+    builders::{
+        bool_literal, float_literal, func_decl, int_literal, state_var, struct_decl, struct_field,
+    },
+    collect_global_decls,
+};
 use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::{ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, Range, symbol_path};
+use kasl::symbol_path;
 
 #[test]
 fn test_single_field_collection() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::StructDecl {
-            name: "Type".to_string(),
-            body: vec![ParserDeclStmt {
-                kind: ParserDeclStmtKind::StructField {
-                    name: "field".to_string(),
-                    value_type: None,
-                    def_val: vec![ExprToken {
-                        kind: ExprTokenKind::FloatLiteral(5.3),
-                        range: Range::zero(),
-                    }],
-                },
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![struct_decl(
+        "Type",
+        &[struct_field("field", None, &[float_literal(5.3)])],
+    )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.type_registry, {
         ".structs" => sorted_redaction(),
@@ -51,22 +44,10 @@ fn test_single_field_collection() {
 fn test_single_member_func_collection() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::StructDecl {
-            name: "Type".to_string(),
-            body: vec![ParserDeclStmt {
-                kind: ParserDeclStmtKind::FuncDecl {
-                    is_static: false,
-                    name: "new".to_string(),
-                    params: vec![],
-                    return_type: None,
-                    body: vec![],
-                },
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![struct_decl(
+        "Type",
+        &[func_decl(false, "new", &[], None, &[])],
+    )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
         ".funcs" => sorted_redaction(),
@@ -80,23 +61,10 @@ fn test_single_member_func_collection() {
 fn invalid_struct_decl_error() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::StructDecl {
-            name: "Type".to_string(),
-            body: vec![ParserDeclStmt {
-                kind: ParserDeclStmtKind::StateVar {
-                    name: "this_is_state".to_string(),
-                    value_type: None,
-                    def_val: vec![ExprToken {
-                        kind: ExprTokenKind::FloatLiteral(0.5),
-                        range: Range::zero(),
-                    }],
-                },
-                range: Range::zero(),
-            }],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![struct_decl(
+        "Type",
+        &[state_var("this_is_state", None, &[float_literal(0.5)])],
+    )];
     let error = collect_global_decls(&mut test_ctx, &parsed)
         .expect_err("This function should generate an error");
     assert_debug_snapshot!(error);
@@ -106,57 +74,27 @@ fn invalid_struct_decl_error() {
 fn test_complex_struct_collection() {
     let mut test_ctx = TestContext::default();
 
-    let parsed = vec![ParserDeclStmt {
-        kind: ParserDeclStmtKind::StructDecl {
-            name: "Type".to_string(),
-            body: vec![
-                ParserDeclStmt {
-                    kind: ParserDeclStmtKind::StructField {
-                        name: "float".to_string(),
-                        value_type: Some(symbol_path!["Float".to_string()]),
-                        def_val: vec![ExprToken {
-                            kind: ExprTokenKind::FloatLiteral(5.3),
-                            range: Range::zero(),
-                        }],
-                    },
-                    range: Range::zero(),
-                },
-                ParserDeclStmt {
-                    kind: ParserDeclStmtKind::StructField {
-                        name: "bool".to_string(),
-                        value_type: Some(symbol_path!["Bool".to_string()]),
-                        def_val: vec![ExprToken {
-                            kind: ExprTokenKind::BoolLiteral(false),
-                            range: Range::zero(),
-                        }],
-                    },
-                    range: Range::zero(),
-                },
-                ParserDeclStmt {
-                    kind: ParserDeclStmtKind::StructField {
-                        name: "int".to_string(),
-                        value_type: Some(symbol_path!["Int".to_string()]),
-                        def_val: vec![ExprToken {
-                            kind: ExprTokenKind::IntLiteral(5),
-                            range: Range::zero(),
-                        }],
-                    },
-                    range: Range::zero(),
-                },
-                ParserDeclStmt {
-                    kind: ParserDeclStmtKind::FuncDecl {
-                        is_static: false,
-                        name: "new".to_string(),
-                        params: vec![],
-                        return_type: None,
-                        body: vec![],
-                    },
-                    range: Range::zero(),
-                },
-            ],
-        },
-        range: Range::zero(),
-    }];
+    let parsed = vec![struct_decl(
+        "Type",
+        &[
+            struct_field(
+                "float",
+                Some(symbol_path!["Float".to_string()]),
+                &[float_literal(5.3)],
+            ),
+            struct_field(
+                "bool",
+                Some(symbol_path!["Bool".to_string()]),
+                &[bool_literal(false)],
+            ),
+            struct_field(
+                "int",
+                Some(symbol_path!["Int".to_string()]),
+                &[int_literal(5)],
+            ),
+            func_decl(false, "new", &[], None, &[]),
+        ],
+    )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.type_registry, {
         ".structs" => sorted_redaction(),

@@ -199,3 +199,11 @@ pub fn func_param(
         range: Range::zero(),
     }
 }
+
+pub fn input_attr(name: &str, args: &[&[ExprToken]]) -> ParserInputAttribute {
+    ParserInputAttribute {
+        name: name.to_string(),
+        args: args.to_vec().iter().map(|s| s.to_vec()).collect(),
+        range: Range::zero(),
+    }
+}
