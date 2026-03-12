@@ -32,23 +32,34 @@ impl GlobalDeclCollector<'_> {
         let resolved_def_val = resolve_expr(self.ec, self.comp_state, global_scope_id, def_val)?;
 
         // Resolve the type annotation if provided
-        let resolved_type_annotation = type_annotation
-            .as_ref()
-            .and_then(|path| self.comp_state.type_registry.resolve_type_path(path))?;
+        if let Some(path) = type_annotation {
+            let resolved_type_annotation = match self
+                .comp_state
+                .type_registry
+                .resolve_type_path(path)
+            {
+                Some(ty) => ty,
+                None => {
+                    self.ec
+                        .type_not_found(decl_range, Ph::GlobalDeclCollection, path.to_string());
+                    return None;
+                }
+            };
 
-        // If the type annotation provided by the user does not match the default value type throw an error
-        if resolved_def_val.value_type != resolved_type_annotation {
-            self.ec.type_annotation_mismatch(
-                decl_range,
-                Ph::GlobalDeclCollection,
-                self.comp_state
-                    .type_registry
-                    .format_type(&resolved_type_annotation),
-                self.comp_state
-                    .type_registry
-                    .format_type(&resolved_def_val.value_type),
-            );
-            return None;
+            // If the type annotation provided by the user does not match the default value type throw an error
+            if resolved_def_val.value_type != resolved_type_annotation {
+                self.ec.type_annotation_mismatch(
+                    decl_range,
+                    Ph::GlobalDeclCollection,
+                    self.comp_state
+                        .type_registry
+                        .format_type(&resolved_type_annotation),
+                    self.comp_state
+                        .type_registry
+                        .format_type(&resolved_def_val.value_type),
+                );
+                return None;
+            }
         }
 
         Some(resolved_def_val)
