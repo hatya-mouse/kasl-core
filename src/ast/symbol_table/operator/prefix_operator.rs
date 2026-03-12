@@ -17,7 +17,7 @@
 use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct PrefixOperator {
     pub symbol: String,
     pub operand: FuncParam,
@@ -26,13 +26,13 @@ pub struct PrefixOperator {
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq, serde::Serialize)]
 pub struct PrefixOperatorProperties {
     pub precedence: u32,
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash, serde::Serialize)]
 pub struct PrefixQuery {
     pub symbol: String,
     pub operand_type: ResolvedType,

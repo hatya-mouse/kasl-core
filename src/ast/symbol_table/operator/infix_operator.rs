@@ -17,7 +17,7 @@
 use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct InfixOperator {
     pub symbol: String,
     pub lhs: FuncParam,
@@ -27,21 +27,21 @@ pub struct InfixOperator {
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq, serde::Serialize)]
 pub struct InfixOperatorProperties {
     pub precedence: u32,
     pub associativity: OperatorAssociativity,
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq, serde::Serialize)]
 pub enum OperatorAssociativity {
     Left,
     Right,
     None,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash, serde::Serialize)]
 pub struct InfixQuery {
     pub symbol: String,
     pub lhs_type: ResolvedType,

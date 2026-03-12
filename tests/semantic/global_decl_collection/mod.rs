@@ -14,5 +14,4 @@
 // limitations under the License.
 //
 
-mod global_decl_collection;
-mod type_collection;
+mod func_collection;

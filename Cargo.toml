@@ -14,7 +14,7 @@ cranelift-codegen = "0.129.1"
 cranelift-jit = "0.129.1"
 cranelift-module = "0.129.1"
 cranelift-native = "0.129.1"
-hashbrown = "0.16.1"
+hashbrown = { version = "0.16.1", features = ["serde"] }
 peg = "0.8.5"
 serde = { version = "1.0.228", features = ["derive"] }
 

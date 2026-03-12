@@ -14,15 +14,27 @@
 // limitations under the License.
 //
 
-use crate::common::{collect_types, parse_expr};
+use crate::common::collect_types;
 use insta::{assert_yaml_snapshot, sorted_redaction};
+use kasl::{
+    CompilationState, NameSpace, ParserDeclStmt, ParserDeclStmtKind, Range, error::ErrorCollector,
+};
 
 #[test]
 fn collect_single_type() {
-    let code = "struct Type {}";
-    let parsed = parse_expr(code);
-    let result = collect_types(&parsed).unwrap();
-    assert_yaml_snapshot!(result, {
+    let mut ec = ErrorCollector::new();
+    let mut name_space = NameSpace::default();
+    let mut comp_state = CompilationState::default();
+
+    let parsed = vec![ParserDeclStmt {
+        kind: ParserDeclStmtKind::StructDecl {
+            name: "Type".to_string(),
+            body: vec![],
+        },
+        range: Range::zero(),
+    }];
+    collect_types(&mut ec, &mut name_space, &mut comp_state, &parsed).unwrap();
+    assert_yaml_snapshot!(comp_state.type_registry, {
         ".structs" => sorted_redaction(),
         ".path_to_id" => sorted_redaction()
     });
@@ -30,11 +42,28 @@ fn collect_single_type() {
 
 #[test]
 fn collect_multiple_types() {
-    let code = "struct Animal {}
-        struct Fish {}";
-    let parsed = parse_expr(code);
-    let result = collect_types(&parsed).unwrap();
-    assert_yaml_snapshot!(result, {
+    let mut ec = ErrorCollector::new();
+    let mut name_space = NameSpace::default();
+    let mut comp_state = CompilationState::default();
+
+    let parsed = vec![
+        ParserDeclStmt {
+            kind: ParserDeclStmtKind::StructDecl {
+                name: "Animal".to_string(),
+                body: vec![],
+            },
+            range: Range::zero(),
+        },
+        ParserDeclStmt {
+            kind: ParserDeclStmtKind::StructDecl {
+                name: "Fish".to_string(),
+                body: vec![],
+            },
+            range: Range::zero(),
+        },
+    ];
+    collect_types(&mut ec, &mut name_space, &mut comp_state, &parsed).unwrap();
+    assert_yaml_snapshot!(comp_state.type_registry, {
         ".structs" => sorted_redaction(),
         ".path_to_id" => sorted_redaction()
     });

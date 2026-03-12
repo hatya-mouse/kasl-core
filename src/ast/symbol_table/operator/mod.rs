@@ -31,7 +31,7 @@ pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties, PrefixQuery,
 use crate::OperatorID;
 use hashbrown::HashMap;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, serde::Serialize)]
 pub struct OperatorContext {
     infix_operator_properties: HashMap<String, InfixOperatorProperties>,
     infix_operators: HashMap<OperatorID, InfixOperator>,

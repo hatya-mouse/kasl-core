@@ -17,22 +17,43 @@
 use kasl::{
     CompilationState, NameSpace, ParserDeclStmt,
     error::{ErrorCollector, ErrorRecord},
+    global_decl_collection::GlobalDeclCollector,
     kasl_parser,
+    symbol_table::{FuncBodyMap, OpBodyMap},
     type_collection::TypeCollector,
-    type_registry::TypeRegistry,
 };
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
     kasl_parser::parse(input).unwrap()
 }
 
-pub fn collect_types(statements: &[ParserDeclStmt]) -> Result<TypeRegistry, Vec<ErrorRecord>> {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut comp_state = CompilationState::default();
-
-    let mut type_collector =
-        TypeCollector::new(&mut ec, statements, &mut name_space, &mut comp_state);
+pub fn collect_types(
+    ec: &mut ErrorCollector,
+    name_space: &mut NameSpace,
+    comp_state: &mut CompilationState,
+    statements: &[ParserDeclStmt],
+) -> Result<(), Vec<ErrorRecord>> {
+    let mut type_collector = TypeCollector::new(ec, statements, name_space, comp_state);
     type_collector.process();
-    ec.as_result().map(|_| comp_state.type_registry)
+    ec.as_result()
+}
+
+pub fn collect_global_decls(
+    ec: &mut ErrorCollector,
+    name_space: &mut NameSpace,
+    func_body_map: &mut FuncBodyMap,
+    op_body_map: &mut OpBodyMap,
+    comp_state: &mut CompilationState,
+    statements: &[ParserDeclStmt],
+) -> Result<(), Vec<ErrorRecord>> {
+    let mut global_decl_collector = GlobalDeclCollector::new(
+        ec,
+        statements,
+        name_space,
+        func_body_map,
+        op_body_map,
+        comp_state,
+    );
+    global_decl_collector.process();
+    ec.as_result()
 }

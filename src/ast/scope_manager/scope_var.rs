@@ -16,7 +16,7 @@
 
 use crate::{Expr, Range, type_registry::ResolvedType};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ScopeVar {
     pub name: String,
     pub value_type: ResolvedType,
@@ -33,7 +33,7 @@ impl ScopeVar {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum VariableKind {
     Input { attrs: Vec<InputAttribute> },
     Output,
@@ -44,7 +44,7 @@ pub enum VariableKind {
     LocalConst,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct InputAttribute {
     pub name: String,
     pub args: Vec<Expr<ResolvedType>>,

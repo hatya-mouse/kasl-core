@@ -28,7 +28,7 @@ use std::collections::HashMap;
 /// ScopeRegistry manages scopes and variables belonging to them.
 /// It only manages the top-level variables and local variables,
 /// and doesn't manage the struct fields.
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct ScopeRegistry {
     pub scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,
@@ -125,5 +125,5 @@ impl ScopeRegistry {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
 pub struct ScopeID(usize);

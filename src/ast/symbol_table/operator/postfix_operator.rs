@@ -17,7 +17,7 @@
 use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct PostfixOperator {
     pub symbol: String,
     pub operand: FuncParam,
@@ -26,13 +26,13 @@ pub struct PostfixOperator {
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq, serde::Serialize)]
 pub struct PostfixOperatorProperties {
     pub precedence: u32,
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash, serde::Serialize)]
 pub struct PostfixQuery {
     pub symbol: String,
     pub operand_type: ResolvedType,

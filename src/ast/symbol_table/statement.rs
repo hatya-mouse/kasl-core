@@ -16,7 +16,7 @@
 
 use crate::{Expr, ScopeID, VariableID, symbol_table::LValue, type_registry::ResolvedType};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Block {
     pub body: Vec<Statement>,
     pub scope_id: ScopeID,
@@ -39,7 +39,7 @@ impl Block {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub enum Statement {
     Block {
         block: Block,
@@ -67,7 +67,7 @@ pub enum Statement {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct IfArm {
     pub condition: Expr<ResolvedType>,
     pub block: Block,

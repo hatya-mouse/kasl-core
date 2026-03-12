@@ -18,7 +18,7 @@ use crate::{
     OperatorContext, ScopeRegistry, symbol_table::FunctionContext, type_registry::TypeRegistry,
 };
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, serde::Serialize)]
 pub struct CompilationState {
     pub func_ctx: FunctionContext,
     pub op_ctx: OperatorContext,

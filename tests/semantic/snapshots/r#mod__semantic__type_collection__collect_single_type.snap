@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/type_collection.rs
-expression: result
+expression: comp_state.type_registry
 ---
 structs:
   0:
@@ -14,7 +14,7 @@ structs:
     alignment: 1
     range:
       start: 0
-      end: 14
+      end: 0
 path_to_id:
   ? components:
       - symbol: Type

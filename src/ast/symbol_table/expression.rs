@@ -91,7 +91,7 @@ pub enum MemberAccess {
     },
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct LValue {
     pub var_id: VariableID,
     pub offset: i32,

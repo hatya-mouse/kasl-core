@@ -16,7 +16,7 @@
 
 use crate::{Expr, Range, VariableID, symbol_table::Block, type_registry::ResolvedType};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct Function {
     pub name: String,
     pub is_member: bool,
@@ -64,7 +64,7 @@ pub struct FuncCallArg {
     pub value: Expr<ResolvedType>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,

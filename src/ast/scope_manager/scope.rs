@@ -17,7 +17,7 @@
 use crate::{VariableID, scope_manager::ScopeID};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Scope {
     pub parent: Option<ScopeID>,
     name_to_id: HashMap<String, VariableID>,
