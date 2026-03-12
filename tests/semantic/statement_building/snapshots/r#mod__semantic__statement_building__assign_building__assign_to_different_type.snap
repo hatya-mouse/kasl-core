@@ -1,0 +1,23 @@
+---
+source: tests/semantic/statement_building/assign_building.rs
+expression: error
+---
+[
+    ErrorRecord {
+        key: ErrorKey {
+            kind: AssignTypeMismatch,
+            payload: StrPair(
+                "Int",
+                "Float",
+            ),
+        },
+        earliest_phase: StatementCollection,
+        ranges: {
+            Range {
+                start: 0,
+                end: 0,
+            },
+        },
+        severity: Error,
+    },
+]

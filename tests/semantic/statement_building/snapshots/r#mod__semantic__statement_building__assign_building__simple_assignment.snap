@@ -1,0 +1,47 @@
+---
+source: tests/semantic/statement_building/assign_building.rs
+expression: comp_state.func_ctx
+---
+funcs:
+  0:
+    name: greet
+    is_member: false
+    is_static: false
+    params:
+      - label: ~
+        name: number
+        var_id: 1
+        value_type:
+          Primitive: Int
+        def_val: ~
+        range:
+          start: 0
+          end: 0
+    return_type: ~
+    block:
+      body:
+        - Assign:
+            target:
+              var_id: 0
+              offset: 0
+              value_type:
+                Primitive: Int
+              is_field: false
+            value:
+              kind:
+                Identifier:
+                  name: number
+                  id: 1
+              value_type:
+                Primitive: Int
+              range:
+                start: 0
+                end: 0
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+static_functions: {}
+global_functions:
+  greet: 0

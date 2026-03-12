@@ -14,23 +14,13 @@
 // limitations under the License.
 //
 
-use crate::common::collect_global_decls;
+use crate::common::{TestContext, collect_global_decls};
 use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::{
-    CompilationState, ExprToken, ExprTokenKind, NameSpace, ParserDeclStmt, ParserDeclStmtKind,
-    Range,
-    error::ErrorCollector,
-    symbol_path,
-    symbol_table::{FuncBodyMap, OpBodyMap},
-};
+use kasl::{ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, Range, symbol_path};
 
 #[test]
-pub fn test_single_field_collection() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_single_field_collection() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::StructDecl {
@@ -49,16 +39,8 @@ pub fn test_single_field_collection() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.type_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.type_registry, {
         ".structs" => sorted_redaction(),
         ".path_to_id" => sorted_redaction(),
         ".**.indices" => sorted_redaction(),
@@ -66,12 +48,8 @@ pub fn test_single_field_collection() {
 }
 
 #[test]
-pub fn test_single_member_func_collection() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_single_member_func_collection() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::StructDecl {
@@ -89,16 +67,8 @@ pub fn test_single_member_func_collection() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.func_ctx, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -107,12 +77,8 @@ pub fn test_single_member_func_collection() {
 }
 
 #[test]
-pub fn invalid_struct_decl_error() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn invalid_struct_decl_error() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::StructDecl {
@@ -131,25 +97,14 @@ pub fn invalid_struct_decl_error() {
         },
         range: Range::zero(),
     }];
-    let error = collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .expect_err("This function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed)
+        .expect_err("This function should generate an error");
     assert_debug_snapshot!(error);
 }
 
 #[test]
-pub fn test_complex_struct_collection() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_complex_struct_collection() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::StructDecl {
@@ -202,16 +157,8 @@ pub fn test_complex_struct_collection() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.type_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.type_registry, {
         ".structs" => sorted_redaction(),
         ".path_to_id" => sorted_redaction(),
         ".**.indices" => sorted_redaction()

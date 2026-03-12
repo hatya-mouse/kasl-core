@@ -14,34 +14,57 @@
 // limitations under the License.
 //
 
+pub mod builders;
+
 use kasl::{
     CompilationState, NameSpace, ParserDeclStmt,
     error::{ErrorCollector, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
+    scope_manager::ScopeGraph,
+    statement_building::StatementBuilder,
     symbol_table::{FuncBodyMap, OpBodyMap},
 };
+
+#[derive(Default)]
+pub struct TestContext {
+    pub ec: ErrorCollector,
+    pub name_space: NameSpace,
+    pub func_body_map: FuncBodyMap,
+    pub op_body_map: OpBodyMap,
+    pub comp_state: CompilationState,
+    pub scope_graph: ScopeGraph,
+}
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
     kasl_parser::parse(input).unwrap()
 }
 
 pub fn collect_global_decls(
-    ec: &mut ErrorCollector,
-    name_space: &mut NameSpace,
-    func_body_map: &mut FuncBodyMap,
-    op_body_map: &mut OpBodyMap,
-    comp_state: &mut CompilationState,
+    test_ctx: &mut TestContext,
     statements: &[ParserDeclStmt],
 ) -> Result<(), Vec<ErrorRecord>> {
     let mut global_decl_collector = GlobalDeclCollector::new(
-        ec,
+        &mut test_ctx.ec,
         statements,
-        name_space,
-        func_body_map,
-        op_body_map,
-        comp_state,
+        &mut test_ctx.name_space,
+        &mut test_ctx.func_body_map,
+        &mut test_ctx.op_body_map,
+        &mut test_ctx.comp_state,
     );
     global_decl_collector.process();
-    ec.as_result()
+    test_ctx.ec.as_result()
+}
+
+pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
+    let mut stmt_builder = StatementBuilder::new(
+        &mut test_ctx.ec,
+        &mut test_ctx.name_space,
+        &test_ctx.func_body_map,
+        &test_ctx.op_body_map,
+        &mut test_ctx.comp_state,
+        &mut test_ctx.scope_graph,
+    );
+    stmt_builder.build_all();
+    test_ctx.ec.as_result()
 }

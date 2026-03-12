@@ -14,22 +14,15 @@
 // limitations under the License.
 //
 
-use crate::common::collect_global_decls;
+use crate::common::{TestContext, collect_global_decls};
 use insta::{assert_yaml_snapshot, sorted_redaction};
 use kasl::{
-    CompilationState, ExprToken, ExprTokenKind, NameSpace, ParserDeclStmt, ParserDeclStmtKind,
-    ParserInputAttribute, Range,
-    error::ErrorCollector,
-    symbol_table::{FuncBodyMap, OpBodyMap},
+    ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, ParserInputAttribute, Range,
 };
 
 #[test]
-pub fn test_simple_input_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_simple_input_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::Input {
@@ -43,16 +36,8 @@ pub fn test_simple_input_resolution() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.scope_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()
@@ -60,12 +45,8 @@ pub fn test_simple_input_resolution() {
 }
 
 #[test]
-pub fn test_simple_output_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_simple_output_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::Output {
@@ -78,16 +59,8 @@ pub fn test_simple_output_resolution() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.scope_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()
@@ -95,12 +68,8 @@ pub fn test_simple_output_resolution() {
 }
 
 #[test]
-pub fn test_simple_state_var_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_simple_state_var_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::StateVar {
@@ -113,16 +82,8 @@ pub fn test_simple_state_var_resolution() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.scope_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()
@@ -130,12 +91,8 @@ pub fn test_simple_state_var_resolution() {
 }
 
 #[test]
-pub fn test_simple_let_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_simple_let_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::GlobalConst {
@@ -148,16 +105,8 @@ pub fn test_simple_let_resolution() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.scope_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()
@@ -165,12 +114,8 @@ pub fn test_simple_let_resolution() {
 }
 
 #[test]
-pub fn test_multiple_variables_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_multiple_variables_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![
         ParserDeclStmt {
@@ -219,16 +164,8 @@ pub fn test_multiple_variables_resolution() {
             range: Range::zero(),
         },
     ];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.scope_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()
@@ -236,12 +173,8 @@ pub fn test_multiple_variables_resolution() {
 }
 
 #[test]
-pub fn test_input_with_attribute() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_input_with_attribute() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::Input {
@@ -268,16 +201,8 @@ pub fn test_input_with_attribute() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.scope_registry, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()

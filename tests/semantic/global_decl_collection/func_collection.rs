@@ -14,22 +14,13 @@
 // limitations under the License.
 //
 
-use crate::common::collect_global_decls;
+use crate::common::{TestContext, collect_global_decls};
 use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::{
-    CompilationState, NameSpace, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, Range,
-    error::ErrorCollector,
-    symbol_path,
-    symbol_table::{FuncBodyMap, OpBodyMap},
-};
+use kasl::{ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, Range, symbol_path};
 
 #[test]
-pub fn test_simple_func_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_simple_func_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::FuncDecl {
@@ -41,16 +32,8 @@ pub fn test_simple_func_resolution() {
         },
         range: Range::zero(),
     }];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.func_ctx, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -59,12 +42,8 @@ pub fn test_simple_func_resolution() {
 }
 
 #[test]
-pub fn test_multiple_func_resolution() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_multiple_func_resolution() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![
         ParserDeclStmt {
@@ -88,16 +67,8 @@ pub fn test_multiple_func_resolution() {
             range: Range::zero(),
         },
     ];
-    collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .unwrap();
-    assert_yaml_snapshot!(comp_state.func_ctx, {
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -106,12 +77,8 @@ pub fn test_multiple_func_resolution() {
 }
 
 #[test]
-pub fn test_invalid_func() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_invalid_func() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::FuncDecl {
@@ -123,25 +90,14 @@ pub fn test_invalid_func() {
         },
         range: Range::zero(),
     }];
-    let error = collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed)
+        .expect_err("The function should generate an error");
     assert_debug_snapshot!(error);
 }
 
 #[test]
-pub fn test_duplicate_func() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_duplicate_func() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![
         ParserDeclStmt {
@@ -165,25 +121,14 @@ pub fn test_duplicate_func() {
             range: Range::zero(),
         },
     ];
-    let error = collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed)
+        .expect_err("The function should generate an error");
     assert_debug_snapshot!(error);
 }
 
 #[test]
-pub fn test_global_static_func() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_global_static_func() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![ParserDeclStmt {
         kind: ParserDeclStmtKind::FuncDecl {
@@ -195,25 +140,14 @@ pub fn test_global_static_func() {
         },
         range: Range::zero(),
     }];
-    let error = collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed)
+        .expect_err("The function should generate an error");
     assert_debug_snapshot!(error);
 }
 
 #[test]
-pub fn test_duplicate_param_func() {
-    let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
-    let mut comp_state = CompilationState::default();
+fn test_duplicate_param_func() {
+    let mut test_ctx = TestContext::default();
 
     let parsed = vec![
         ParserDeclStmt {
@@ -249,14 +183,7 @@ pub fn test_duplicate_param_func() {
             range: Range::zero(),
         },
     ];
-    let error = collect_global_decls(
-        &mut ec,
-        &mut name_space,
-        &mut func_body_map,
-        &mut op_body_map,
-        &mut comp_state,
-        &parsed,
-    )
-    .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed)
+        .expect_err("The function should generate an error");
     assert_debug_snapshot!(error);
 }

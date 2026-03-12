@@ -14,5 +14,4 @@
 // limitations under the License.
 //
 
-mod global_decl_collection;
-mod statement_building;
+mod assign_building;

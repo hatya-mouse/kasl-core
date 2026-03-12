@@ -203,5 +203,6 @@ pub enum ExprTokenKind {
     },
     Dot,
     Parenthesized(Vec<ExprToken>),
+    /// An resoloved expression which is used only in the ExprEngine.
     ResolvedExpr(Expr<()>),
 }
