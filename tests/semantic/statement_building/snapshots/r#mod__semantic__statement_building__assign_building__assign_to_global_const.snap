@@ -1,0 +1,22 @@
+---
+source: tests/semantic/statement_building/assign_building.rs
+expression: error
+---
+[
+    ErrorRecord {
+        key: ErrorKey {
+            kind: ImmutableAssignment,
+            payload: Str(
+                "const",
+            ),
+        },
+        earliest_phase: StatementCollection,
+        ranges: {
+            Range {
+                start: 0,
+                end: 0,
+            },
+        },
+        severity: Error,
+    },
+]

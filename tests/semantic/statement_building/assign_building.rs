@@ -18,7 +18,7 @@ use crate::common::{
     TestContext, build_stmts,
     builders::{
         assign, func_decl, func_param, global_const, identifier, input, int_literal, local_const,
-        output,
+        local_var, output, state_var,
     },
     collect_global_decls,
 };
@@ -26,7 +26,7 @@ use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
 use kasl::symbol_path;
 
 #[test]
-fn test_simple_assignment() {
+fn test_assign_to_output() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![
@@ -44,6 +44,54 @@ fn test_simple_assignment() {
             &[assign(&[identifier("out")], &[identifier("number")])],
         ),
     ];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    build_stmts(&mut test_ctx).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
+        ".funcs" => sorted_redaction(),
+        ".member_functions" => sorted_redaction(),
+        ".static_functions" => sorted_redaction(),
+        ".global_functions" => sorted_redaction()
+    });
+}
+
+#[test]
+fn test_assign_to_state() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![
+        state_var("state_var", None, &[int_literal(5)]),
+        func_decl(
+            false,
+            "greet",
+            &[],
+            None,
+            &[assign(&[identifier("state_var")], &[int_literal(0)])],
+        ),
+    ];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    build_stmts(&mut test_ctx).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
+        ".funcs" => sorted_redaction(),
+        ".member_functions" => sorted_redaction(),
+        ".static_functions" => sorted_redaction(),
+        ".global_functions" => sorted_redaction()
+    });
+}
+
+#[test]
+fn test_assign_to_local_var() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "greet",
+        &[],
+        None,
+        &[
+            local_var("local_var", None, &[int_literal(5)]),
+            assign(&[identifier("local_var")], &[int_literal(1)]),
+        ],
+    )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
     assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
