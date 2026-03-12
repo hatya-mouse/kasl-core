@@ -15,3 +15,4 @@
 //
 
 mod assign_building;
+mod block_building;
