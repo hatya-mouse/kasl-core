@@ -63,7 +63,7 @@ fn test_return_int() {
 }
 
 #[test]
-fn test_return_after_if_else() {
+fn test_return_in_both_if_and_else() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![func_decl(
@@ -83,6 +83,79 @@ fn test_return_after_if_else() {
             ),
             &[],
             Some(&[return_stmt(Some(&[float_literal(3.0)]))]),
+        )],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    build_stmts(&mut test_ctx).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
+        ".funcs" => sorted_redaction(),
+        ".member_functions" => sorted_redaction(),
+        ".static_functions" => sorted_redaction(),
+        ".global_functions" => sorted_redaction()
+    });
+}
+
+#[test]
+fn test_return_after_if() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[func_param(
+            None,
+            "param",
+            Some(symbol_path!["Bool".to_string()]),
+            None,
+        )],
+        Some(symbol_path!["Float".to_string()]),
+        &[
+            if_stmt(if_arm(&[identifier("param")], &[]), &[], None),
+            return_stmt(Some(&[float_literal(5.0)])),
+        ],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    build_stmts(&mut test_ctx).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
+        ".funcs" => sorted_redaction(),
+        ".member_functions" => sorted_redaction(),
+        ".static_functions" => sorted_redaction(),
+        ".global_functions" => sorted_redaction()
+    });
+}
+
+#[test]
+fn test_return_in_if_else_if_else() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[
+            func_param(
+                None,
+                "if_param",
+                Some(symbol_path!["Bool".to_string()]),
+                None,
+            ),
+            func_param(
+                None,
+                "if_else_param",
+                Some(symbol_path!["Bool".to_string()]),
+                None,
+            ),
+        ],
+        Some(symbol_path!["Float".to_string()]),
+        &[if_stmt(
+            if_arm(
+                &[identifier("if_param")],
+                &[return_stmt(Some(&[float_literal(5.0)]))],
+            ),
+            &[if_arm(
+                &[identifier("if_else_param")],
+                &[return_stmt(Some(&[float_literal(3.0)]))],
+            )],
+            Some(&[return_stmt(Some(&[float_literal(1.0)]))]),
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
