@@ -8,7 +8,7 @@ funcs:
     is_member: false
     is_static: false
     params: []
-    return_type: ~
+    return_type: Void
     block:
       body:
         - LocalVar:

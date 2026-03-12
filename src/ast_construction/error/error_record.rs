@@ -20,7 +20,7 @@ use crate::{
 };
 use std::collections::HashSet;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct ErrorRecord {
     pub key: ErrorKey,
     pub earliest_phase: Phase,
@@ -45,7 +45,7 @@ impl ErrorRecord {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub struct ErrorKey {
     pub kind: ErrorKind,
     pub payload: Payload,
@@ -58,7 +58,7 @@ impl ErrorKey {
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, serde::Serialize)]
 pub enum Phase {
     Parse = 0,
     StructCollection = 1,
@@ -68,7 +68,7 @@ pub enum Phase {
     ScopeGraphAnalyzing = 5,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub enum Severity {
     CompilerBug,
     Error,

@@ -1,0 +1,50 @@
+---
+source: tests/semantic/statement_building/block_building.rs
+expression: test_ctx.comp_state.func_ctx
+---
+funcs:
+  0:
+    name: do_something
+    is_member: false
+    is_static: false
+    params: []
+    return_type: Void
+    block:
+      body: []
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+  1:
+    name: main
+    is_member: false
+    is_static: false
+    params: []
+    return_type: Void
+    block:
+      body:
+        - Block:
+            block:
+              body:
+                - Expression:
+                    expr:
+                      kind:
+                        FuncCall:
+                          name: do_something
+                          id: 0
+                          no_type_args: []
+                          args: []
+                      value_type: Void
+                      range:
+                        start: 0
+                        end: 0
+              scope_id: 3
+      scope_id: 2
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+static_functions: {}
+global_functions:
+  do_something: 0
+  main: 1

@@ -17,7 +17,7 @@ funcs:
         range:
           start: 0
           end: 0
-    return_type: ~
+    return_type: Void
     block:
       body:
         - Assign:

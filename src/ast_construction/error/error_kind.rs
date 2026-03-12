@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum ErrorKind {
     /// Title: TopLevelStructField
     /// Payload: The name of the struct field that is defined in the top level

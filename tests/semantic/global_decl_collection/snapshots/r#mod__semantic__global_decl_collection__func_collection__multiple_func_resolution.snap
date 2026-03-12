@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/global_decl_collection/func_collection.rs
-expression: comp_state.func_ctx
+expression: test_ctx.comp_state.func_ctx
 ---
 funcs:
   0:
@@ -8,7 +8,7 @@ funcs:
     is_member: false
     is_static: false
     params: []
-    return_type: ~
+    return_type: Void
     block:
       body: []
       scope_id: 1
@@ -20,7 +20,7 @@ funcs:
     is_member: false
     is_static: false
     params: []
-    return_type: ~
+    return_type: Void
     block:
       body: []
       scope_id: 2

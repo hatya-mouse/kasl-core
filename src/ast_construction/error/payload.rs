@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum Payload {
     None,
     Str(String),

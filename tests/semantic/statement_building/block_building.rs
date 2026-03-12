@@ -104,3 +104,41 @@ fn test_block_with_access_to_outside_var() {
         ".global_functions" => sorted_redaction()
     });
 }
+
+#[test]
+fn test_block_with_access_to_child_scope_var() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![
+        func_decl(
+            false,
+            "do_something",
+            &[func_param(
+                None,
+                "number",
+                Some(symbol_path!["Int".to_string()]),
+                None,
+            )],
+            None,
+            &[],
+        ),
+        func_decl(
+            false,
+            "main",
+            &[],
+            None,
+            &[
+                block(&[local_var("local", None, &[int_literal(0)])]),
+                expression(&[func_call(
+                    "do_something",
+                    &[func_call_arg(None, &[identifier("local")])],
+                )]),
+            ],
+        ),
+    ];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    assert_yaml_snapshot!(error, {
+        "." => sorted_redaction()
+    });
+}
