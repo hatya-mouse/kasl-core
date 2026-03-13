@@ -1,0 +1,47 @@
+---
+source: tests/semantic/statement_building/if_building.rs
+expression: test_ctx.comp_state.func_ctx
+---
+funcs:
+  0:
+    name: do_something
+    is_member: false
+    is_static: false
+    params:
+      - label: ~
+        name: condition
+        var_id: 0
+        value_type:
+          Primitive: Bool
+        def_val: ~
+        range:
+          start: 0
+          end: 0
+    return_type: Void
+    block:
+      body:
+        - If:
+            main:
+              condition:
+                kind:
+                  Identifier:
+                    name: condition
+                    id: 0
+                value_type:
+                  Primitive: Bool
+                range:
+                  start: 0
+                  end: 0
+              block:
+                body: []
+                scope_id: 2
+            else_ifs: []
+            else_block: ~
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+static_functions: {}
+global_functions:
+  do_something: 0
