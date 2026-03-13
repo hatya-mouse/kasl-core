@@ -19,6 +19,7 @@ use std::collections::HashMap;
 use crate::{CompilationState, StructID, error::ErrorCollector, type_registry::StructGraph};
 mod struct_traversal;
 
+#[derive(Debug)]
 pub struct StructGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
     comp_state: &'a CompilationState,

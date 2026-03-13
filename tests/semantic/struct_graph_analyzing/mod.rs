@@ -14,6 +14,4 @@
 // limitations under the License.
 //
 
-mod global_decl_collection;
-mod statement_building;
-mod struct_graph_analyzing;
+mod struct_cycle_detection;

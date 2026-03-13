@@ -23,6 +23,7 @@ use kasl::{
     kasl_parser,
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
+    struct_graph_analyzing::StructGraphAnalyzer,
     symbol_table::{FuncBodyMap, OpBodyMap},
     type_registry::StructGraph,
 };
@@ -55,6 +56,17 @@ pub fn collect_global_decls(
         &mut test_ctx.struct_graph,
     );
     global_decl_collector.process(statements);
+    test_ctx.ec.as_result()
+}
+
+pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
+    let mut struct_graph_analyzer = StructGraphAnalyzer::new(
+        &mut test_ctx.ec,
+        &test_ctx.comp_state,
+        &test_ctx.struct_graph,
+    );
+    struct_graph_analyzer.analyze_all();
+    println!("{:#?}", struct_graph_analyzer);
     test_ctx.ec.as_result()
 }
 

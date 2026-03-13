@@ -17,7 +17,7 @@
 use crate::StructID;
 use std::collections::{HashMap, HashSet};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct StructGraph {
     pub parent_to_field: HashMap<StructID, HashSet<StructID>>,
 }
