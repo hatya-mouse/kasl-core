@@ -30,7 +30,7 @@ impl BlockStmtBuilder<'_> {
         let block = self.build_scope_block(statements, parent_scope_id, expected_return_type);
 
         // Check if the child block has a return statement
-        let does_child_have_return = *self.scope_has_return.get(&block.scope_id).unwrap_or(&false);
+        let does_child_have_return = self.scope_guarantees_return(block.scope_id);
         self.scope_has_return
             .insert(parent_scope_id, does_child_have_return);
 
