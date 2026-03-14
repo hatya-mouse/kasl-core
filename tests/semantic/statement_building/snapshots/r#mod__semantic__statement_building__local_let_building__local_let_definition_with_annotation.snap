@@ -1,0 +1,40 @@
+---
+source: tests/semantic/statement_building/local_let_building.rs
+expression: test_ctx.comp_state.scope_registry
+---
+scopes:
+  0:
+    parent: ~
+    name_to_id: {}
+    variables: []
+    range:
+      start: 0
+      end: 0
+  1:
+    parent: 0
+    name_to_id:
+      local: 0
+    variables:
+      - 0
+    range:
+      start: 0
+      end: 0
+variables:
+  0:
+    name: local
+    value_type:
+      Primitive: Int
+    def_val:
+      kind:
+        IntLiteral: 0
+      value_type:
+        Primitive: Int
+      range:
+        start: 0
+        end: 0
+    range:
+      start: 0
+      end: 0
+    var_kind: LocalConst
+global_scope_id: 0
+next_id: 2

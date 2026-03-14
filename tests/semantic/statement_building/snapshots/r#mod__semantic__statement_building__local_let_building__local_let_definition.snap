@@ -1,0 +1,23 @@
+---
+source: tests/semantic/statement_building/local_let_building.rs
+expression: test_ctx.comp_state.func_ctx
+---
+funcs:
+  0:
+    name: main
+    is_member: false
+    is_static: false
+    params: []
+    return_type: Void
+    block:
+      body:
+        - LocalConst:
+            var_id: 0
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+static_functions: {}
+global_functions:
+  main: 0
