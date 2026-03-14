@@ -16,7 +16,10 @@
 
 mod func_translator;
 
-use crate::{CompilationState, FunctionID, backend::func_translator::FuncTranslator};
+use crate::{
+    CompilationState, FunctionID, backend::func_translator::FuncTranslator,
+    builtin::BuiltinRegistry,
+};
 use cranelift::prelude::{Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder};
 use cranelift_codegen::settings;
 use cranelift_jit::{JITBuilder, JITModule};
@@ -50,7 +53,12 @@ impl Default for Backend {
 }
 
 impl Backend {
-    pub fn translate(&mut self, comp_state: &CompilationState, entry_point: &FunctionID) {
+    pub fn translate(
+        &mut self,
+        comp_state: &CompilationState,
+        builtin_registry: &BuiltinRegistry,
+        entry_point: &FunctionID,
+    ) {
         // Create a function builder
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_ctx);
         // Create an entry block and and switch to the block
@@ -60,7 +68,8 @@ impl Backend {
 
         // Create a FuncTranslator and translate the function
         let return_block = builder.create_block();
-        let mut translator = FuncTranslator::new(builder, &self.module, comp_state);
+        let mut translator =
+            FuncTranslator::new(builder, &self.module, comp_state, builtin_registry);
         translator.translate(entry_point, return_block);
 
         // Add return instruction to the return block

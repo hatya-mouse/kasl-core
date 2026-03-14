@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID,
+    FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
     symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
@@ -87,7 +87,7 @@ pub enum ExprKind<T> {
     BuiltinFuncCall {
         name: String,
         id: BuiltinFuncID,
-        args: Option<Vec<FuncCallArg>>,
+        args: Vec<Expr<ResolvedType>>,
     },
 }
 

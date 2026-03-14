@@ -27,6 +27,7 @@ use std::collections::HashMap;
 
 pub struct BuiltinRegistry {
     functions: HashMap<BuiltinFuncID, BuiltinFunc>,
+    name_to_id: HashMap<String, BuiltinFuncID>,
     next_builtin_func_id: usize,
 }
 
@@ -47,6 +48,7 @@ impl BuiltinRegistry {
     fn new() -> Self {
         Self {
             functions: HashMap::new(),
+            name_to_id: HashMap::new(),
             next_builtin_func_id: 0,
         }
     }
@@ -75,5 +77,10 @@ impl BuiltinRegistry {
             translator,
         };
         self.functions.insert(func_id, func);
+        self.name_to_id.insert(name.to_string(), func_id);
+    }
+
+    pub fn get_func_by_id(&self, id: &BuiltinFuncID) -> Option<&BuiltinFunc> {
+        self.functions.get(id)
     }
 }

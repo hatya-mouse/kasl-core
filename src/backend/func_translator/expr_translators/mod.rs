@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+mod builtin_call_translator;
 mod chain_translator;
 mod func_call_translator;
 mod ident_translator;
@@ -52,7 +53,9 @@ impl FuncTranslator<'_> {
             ExprKind::StructInit { id, .. } => self.translate_struct_init(id),
             ExprKind::Chain { lhs, access } => self.translate_chain(lhs, access, &expr.value_type),
             ExprKind::StaticFuncCall { id, args, .. } => self.translate_func_call_expr(&id, &args),
-            ExprKind::BuiltinFuncCall { name, args } => None,
+            ExprKind::BuiltinFuncCall { id, args, .. } => {
+                self.translate_builtin_func_call(&id, &args)
+            }
         }
     }
 }
