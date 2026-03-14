@@ -52,6 +52,6 @@ funcs:
       start: 0
       end: 0
 member_functions: {}
-static_functions: {}
 global_functions:
   do_something: 0
+next_function_id: 1

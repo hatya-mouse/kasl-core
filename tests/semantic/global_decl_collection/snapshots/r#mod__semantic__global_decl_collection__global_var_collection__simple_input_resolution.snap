@@ -32,4 +32,5 @@ variables:
       Input:
         attrs: []
 global_scope_id: 0
-next_id: 1
+next_scope_id: 1
+next_variable_id: 1

@@ -8,7 +8,8 @@ funcs:
     is_member: false
     is_static: false
     params: []
-    return_type: Void
+    return_type:
+      Primitive: Void
     block:
       body:
         - LocalVar:
@@ -33,6 +34,6 @@ funcs:
       start: 0
       end: 0
 member_functions: {}
-static_functions: {}
 global_functions:
   greet: 0
+next_function_id: 1

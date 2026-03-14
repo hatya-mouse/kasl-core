@@ -24,7 +24,8 @@ funcs:
         range:
           start: 0
           end: 0
-    return_type: Void
+    return_type:
+      Primitive: Void
     block:
       body: []
       scope_id: 1
@@ -32,6 +33,6 @@ funcs:
       start: 0
       end: 0
 member_functions: {}
-static_functions: {}
 global_functions:
   greet: 0
+next_function_id: 1

@@ -37,4 +37,5 @@ variables:
       end: 0
     var_kind: LocalConst
 global_scope_id: 0
-next_id: 2
+next_scope_id: 2
+next_variable_id: 1

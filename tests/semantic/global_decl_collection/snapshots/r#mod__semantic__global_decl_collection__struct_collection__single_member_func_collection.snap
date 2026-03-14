@@ -8,7 +8,8 @@ funcs:
     is_member: true
     is_static: false
     params: []
-    return_type: Void
+    return_type:
+      Primitive: Void
     block:
       body: []
       scope_id: 1
@@ -18,5 +19,5 @@ funcs:
 member_functions:
   0:
     new: 0
-static_functions: {}
 global_functions: {}
+next_function_id: 1

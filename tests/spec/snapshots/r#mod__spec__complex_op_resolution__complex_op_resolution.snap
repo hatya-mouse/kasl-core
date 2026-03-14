@@ -1,0 +1,496 @@
+---
+source: tests/spec/complex_op_resolution.rs
+expression: test_ctx.comp_state.op_ctx
+---
+infix_operator_properties:
+  "&&":
+    precedence: 2
+    associativity: Left
+    range:
+      start: 171
+      end: 209
+  "*":
+    precedence: 6
+    associativity: Left
+    range:
+      start: 752
+      end: 790
+  +:
+    precedence: 5
+    associativity: Left
+    range:
+      start: 608
+      end: 646
+  "==":
+    precedence: 3
+    associativity: Left
+    range:
+      start: 319
+      end: 357
+  ">":
+    precedence: 4
+    associativity: Left
+    range:
+      start: 464
+      end: 502
+  "||":
+    precedence: 1
+    associativity: Left
+    range:
+      start: 24
+      end: 62
+infix_operators:
+  0:
+    symbol: "||"
+    lhs:
+      label: ~
+      name: lhs
+      var_id: 0
+      value_type:
+        Primitive: Bool
+      def_val: ~
+      range:
+        start: 80
+        end: 89
+    rhs:
+      label: ~
+      name: rhs
+      var_id: 1
+      value_type:
+        Primitive: Bool
+      def_val: ~
+      range:
+        start: 91
+        end: 100
+    return_type:
+      Primitive: Bool
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: or
+                  id: 30
+                  args:
+                    - kind:
+                        Identifier:
+                          name: lhs
+                          id: 0
+                      value_type:
+                        Primitive: Bool
+                      range:
+                        start: 134
+                        end: 137
+                    - kind:
+                        Identifier:
+                          name: rhs
+                          id: 1
+                      value_type:
+                        Primitive: Bool
+                      range:
+                        start: 139
+                        end: 142
+              value_type:
+                Primitive: Bool
+              range:
+                start: 131
+                end: 143
+      scope_id: 1
+    range:
+      start: 66
+      end: 145
+  1:
+    symbol: "&&"
+    lhs:
+      label: ~
+      name: lhs
+      var_id: 2
+      value_type:
+        Primitive: Bool
+      def_val: ~
+      range:
+        start: 227
+        end: 236
+    rhs:
+      label: ~
+      name: rhs
+      var_id: 3
+      value_type:
+        Primitive: Bool
+      def_val: ~
+      range:
+        start: 238
+        end: 247
+    return_type:
+      Primitive: Bool
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: and
+                  id: 29
+                  args:
+                    - kind:
+                        Identifier:
+                          name: lhs
+                          id: 2
+                      value_type:
+                        Primitive: Bool
+                      range:
+                        start: 282
+                        end: 285
+                    - kind:
+                        Identifier:
+                          name: rhs
+                          id: 3
+                      value_type:
+                        Primitive: Bool
+                      range:
+                        start: 287
+                        end: 290
+              value_type:
+                Primitive: Bool
+              range:
+                start: 278
+                end: 291
+      scope_id: 2
+    range:
+      start: 213
+      end: 293
+  2:
+    symbol: "=="
+    lhs:
+      label: ~
+      name: lhs
+      var_id: 4
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 375
+        end: 383
+    rhs:
+      label: ~
+      name: rhs
+      var_id: 5
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 385
+        end: 393
+    return_type:
+      Primitive: Bool
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: ieq
+                  id: 9
+                  args:
+                    - kind:
+                        Identifier:
+                          name: lhs
+                          id: 4
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 428
+                        end: 431
+                    - kind:
+                        Identifier:
+                          name: rhs
+                          id: 5
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 433
+                        end: 436
+              value_type:
+                Primitive: Bool
+              range:
+                start: 424
+                end: 437
+      scope_id: 3
+    range:
+      start: 361
+      end: 439
+  3:
+    symbol: ">"
+    lhs:
+      label: ~
+      name: lhs
+      var_id: 6
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 519
+        end: 527
+    rhs:
+      label: ~
+      name: rhs
+      var_id: 7
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 529
+        end: 537
+    return_type:
+      Primitive: Bool
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: igt
+                  id: 11
+                  args:
+                    - kind:
+                        Identifier:
+                          name: lhs
+                          id: 6
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 572
+                        end: 575
+                    - kind:
+                        Identifier:
+                          name: rhs
+                          id: 7
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 577
+                        end: 580
+              value_type:
+                Primitive: Bool
+              range:
+                start: 568
+                end: 581
+      scope_id: 4
+    range:
+      start: 506
+      end: 583
+  4:
+    symbol: +
+    lhs:
+      label: ~
+      name: lhs
+      var_id: 8
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 663
+        end: 671
+    rhs:
+      label: ~
+      name: rhs
+      var_id: 9
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 673
+        end: 681
+    return_type:
+      Primitive: Int
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: iadd
+                  id: 0
+                  args:
+                    - kind:
+                        Identifier:
+                          name: lhs
+                          id: 8
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 716
+                        end: 719
+                    - kind:
+                        Identifier:
+                          name: rhs
+                          id: 9
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 721
+                        end: 724
+              value_type:
+                Primitive: Int
+              range:
+                start: 711
+                end: 725
+      scope_id: 5
+    range:
+      start: 650
+      end: 727
+  5:
+    symbol: "*"
+    lhs:
+      label: ~
+      name: lhs
+      var_id: 10
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 807
+        end: 815
+    rhs:
+      label: ~
+      name: rhs
+      var_id: 11
+      value_type:
+        Primitive: Int
+      def_val: ~
+      range:
+        start: 817
+        end: 825
+    return_type:
+      Primitive: Int
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: iadd
+                  id: 0
+                  args:
+                    - kind:
+                        Identifier:
+                          name: lhs
+                          id: 10
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 860
+                        end: 863
+                    - kind:
+                        Identifier:
+                          name: rhs
+                          id: 11
+                      value_type:
+                        Primitive: Int
+                      range:
+                        start: 865
+                        end: 868
+              value_type:
+                Primitive: Int
+              range:
+                start: 855
+                end: 869
+      scope_id: 6
+    range:
+      start: 794
+      end: 871
+infix_ids:
+  ? symbol: "&&"
+    lhs_type:
+      Primitive: Bool
+    rhs_type:
+      Primitive: Bool
+  : 1
+  ? symbol: "*"
+    lhs_type:
+      Primitive: Int
+    rhs_type:
+      Primitive: Int
+  : 5
+  ? symbol: +
+    lhs_type:
+      Primitive: Int
+    rhs_type:
+      Primitive: Int
+  : 4
+  ? symbol: "=="
+    lhs_type:
+      Primitive: Int
+    rhs_type:
+      Primitive: Int
+  : 2
+  ? symbol: ">"
+    lhs_type:
+      Primitive: Int
+    rhs_type:
+      Primitive: Int
+  : 3
+  ? symbol: "||"
+    lhs_type:
+      Primitive: Bool
+    rhs_type:
+      Primitive: Bool
+  : 0
+prefix_operator_properties:
+  "!":
+    precedence: 7
+    range:
+      start: 897
+      end: 910
+prefix_operators:
+  6:
+    symbol: "!"
+    operand:
+      label: ~
+      name: operand
+      var_id: 12
+      value_type:
+        Primitive: Bool
+      def_val: ~
+      range:
+        start: 928
+        end: 941
+    return_type:
+      Primitive: Bool
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                BuiltinFuncCall:
+                  name: not
+                  id: 35
+                  args:
+                    - kind:
+                        Identifier:
+                          name: operand
+                          id: 12
+                      value_type:
+                        Primitive: Bool
+                      range:
+                        start: 976
+                        end: 983
+              value_type:
+                Primitive: Bool
+              range:
+                start: 972
+                end: 984
+      scope_id: 7
+    range:
+      start: 914
+      end: 986
+prefix_ids:
+  ? symbol: "!"
+    operand_type:
+      Primitive: Bool
+  : 6
+postfix_operator_properties: {}
+postfix_operators: {}
+postfix_ids: {}
+next_operator_id: 7

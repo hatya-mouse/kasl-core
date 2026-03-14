@@ -17,7 +17,7 @@
 use crate::{OperatorID, ParserScopeStmt};
 use std::collections::HashMap;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct OpBodyMap {
     pub op_map: HashMap<OperatorID, Vec<ParserScopeStmt>>,
 }

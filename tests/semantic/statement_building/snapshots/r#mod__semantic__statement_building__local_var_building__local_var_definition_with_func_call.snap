@@ -48,4 +48,5 @@ variables:
       end: 0
     var_kind: LocalVar
 global_scope_id: 0
-next_id: 3
+next_scope_id: 3
+next_variable_id: 1

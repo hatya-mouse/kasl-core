@@ -30,4 +30,5 @@ variables:
       end: 0
     var_kind: State
 global_scope_id: 0
-next_id: 1
+next_scope_id: 1
+next_variable_id: 1

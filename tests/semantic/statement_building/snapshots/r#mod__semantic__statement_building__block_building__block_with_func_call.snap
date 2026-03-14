@@ -8,7 +8,8 @@ funcs:
     is_member: false
     is_static: false
     params: []
-    return_type: Void
+    return_type:
+      Primitive: Void
     block:
       body: []
       scope_id: 1
@@ -20,7 +21,8 @@ funcs:
     is_member: false
     is_static: false
     params: []
-    return_type: Void
+    return_type:
+      Primitive: Void
     block:
       body:
         - Block:
@@ -34,7 +36,8 @@ funcs:
                           id: 0
                           no_type_args: []
                           args: []
-                      value_type: Void
+                      value_type:
+                        Primitive: Void
                       range:
                         start: 0
                         end: 0
@@ -44,7 +47,7 @@ funcs:
       start: 0
       end: 0
 member_functions: {}
-static_functions: {}
 global_functions:
   do_something: 0
   main: 1
+next_function_id: 2
