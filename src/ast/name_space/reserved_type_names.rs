@@ -15,5 +15,5 @@
 //
 
 pub fn is_reserved_type_name(name: &str) -> bool {
-    ["Int", "Float", "Bool", "Void", "Builtin"].contains(&name)
+    matches!(name, "Int" | "Float" | "Bool" | "Void" | "Builtin")
 }
