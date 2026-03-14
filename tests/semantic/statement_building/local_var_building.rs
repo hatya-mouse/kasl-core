@@ -17,8 +17,8 @@
 use crate::common::{
     TestContext, assert_error, build_stmts,
     builders::{
-        expression, func_call, func_call_arg, func_decl, func_param, identifier, int_literal,
-        local_var, return_stmt,
+        expression, func_call, func_call_arg, func_decl, func_param, global_const, identifier,
+        int_literal, local_var, return_stmt,
     },
     collect_global_decls,
 };
@@ -137,4 +137,23 @@ fn test_access_to_var_before_definition() {
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::VarNotFound);
+}
+
+#[test]
+fn test_local_var_shadowing() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![
+        global_const("int_value", None, &[int_literal(0)]),
+        func_decl(
+            false,
+            "main",
+            &[],
+            None,
+            &[local_var("int_value", None, &[int_literal(0)])],
+        ),
+    ];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).unwrap_err();
+    assert_error(&error, EK::DuplicateVarName);
 }
