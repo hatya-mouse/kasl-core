@@ -24,7 +24,6 @@ use kasl::{
     scope_graph_analyzing::ScopeGraphAnalyzer,
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
-    struct_graph_analyzing::StructGraphAnalyzer,
     symbol_table::{FuncBodyMap, OpBodyMap},
     type_registry::StructGraph,
 };
