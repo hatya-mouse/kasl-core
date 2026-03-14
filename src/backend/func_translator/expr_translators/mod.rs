@@ -16,9 +16,10 @@
 
 mod chain_translator;
 mod func_call_translator;
-mod id_translator;
+mod ident_translator;
 mod literal_translator;
 mod op_call_translator;
+mod struct_init_translator;
 
 use crate::{
     Expr, ExprKind, backend::func_translator::FuncTranslator, type_registry::ResolvedType,
@@ -48,6 +49,7 @@ impl FuncTranslator<'_> {
             ExprKind::FuncCall { id, args, .. } => {
                 self.translate_func_call_expr(&id.unwrap(), args.as_ref().unwrap())
             }
+            ExprKind::StructInit { id } => self.translate_expr_init(&id.unwrap()),
             ExprKind::Chain { lhs, access } => self.translate_chain(lhs, access, &expr.value_type),
         }
     }
