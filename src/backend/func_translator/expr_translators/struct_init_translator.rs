@@ -40,7 +40,10 @@ impl FuncTranslator<'_> {
                 .stack_store(translated_def_val, slot, *offset);
         }
         // Return the address to the struct
-        let addr = self.builder.ins().stack_addr(ir::types::I64, slot, 0);
+        let addr = self
+            .builder
+            .ins()
+            .stack_addr(self.type_converter.pointer_type(), slot, 0);
         Some(addr)
     }
 }

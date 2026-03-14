@@ -40,4 +40,8 @@ impl TypeConverter {
             ResolvedType::Void => types::INVALID,
         }
     }
+
+    pub fn pointer_type(&self) -> ir::Type {
+        self.pointer_type
+    }
 }
