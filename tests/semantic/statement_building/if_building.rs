@@ -15,12 +15,12 @@
 //
 
 use crate::common::{
-    TestContext, build_stmts,
+    TestContext, assert_error, build_stmts,
     builders::{func_decl, func_param, identifier, if_arm, if_stmt},
     collect_global_decls,
 };
 use insta::{assert_yaml_snapshot, sorted_redaction};
-use kasl::symbol_path;
+use kasl::{error::EK, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -48,4 +48,27 @@ fn test_basic_if() {
         ".static_functions" => sorted_redaction(),
         ".global_functions" => sorted_redaction()
     });
+}
+
+// --- ERROR CASES ---
+
+#[test]
+fn test_invalid_condition_type() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[func_param(
+            None,
+            "condition",
+            Some(symbol_path!["Float".to_string()]),
+            None,
+        )],
+        None,
+        &[if_stmt(if_arm(&[identifier("condition")], &[]), &[], None)],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).unwrap_err();
+    assert_error(&error, EK::NonBoolTypeForCondition);
 }
