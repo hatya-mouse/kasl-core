@@ -76,7 +76,6 @@ impl ScopeGraphAnalyzer<'_> {
         // Set if the current scope guarantees return
         self.scope_graph
             .set_has_return(*current_scope, guarantees_return);
-        println!("{:?}, {}", current_scope, guarantees_return);
 
         // Add the current scope size and the maximum child size to get the maximum scope size in bytes
         let total_size = max_child_size + current_scope_size;

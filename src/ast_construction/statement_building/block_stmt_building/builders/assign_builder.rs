@@ -60,7 +60,13 @@ impl BlockStmtBuilder<'_> {
         }
 
         // Resolve the expression
-        let resolved_value = resolve_expr(self.ec, self.comp_state, current_scope_id, value)?;
+        let resolved_value = resolve_expr(
+            self.ec,
+            self.comp_state,
+            self.scope_graph,
+            current_scope_id,
+            value,
+        )?;
 
         // Check if the target and value types match
         if target_l_value.value_type != resolved_value.value_type {

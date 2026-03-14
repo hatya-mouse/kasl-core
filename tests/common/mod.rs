@@ -53,6 +53,7 @@ pub fn collect_global_decls(
         &mut test_ctx.func_body_map,
         &mut test_ctx.op_body_map,
         &mut test_ctx.comp_state,
+        &mut test_ctx.scope_graph,
         &mut test_ctx.struct_graph,
     );
     global_decl_collector.process(statements);
@@ -66,7 +67,6 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
         &mut test_ctx.scope_graph,
     );
     scope_graph_analyzer.analyze_all();
-    println!("{:#?}", &test_ctx.scope_graph);
     test_ctx.ec.as_result()
 }
 

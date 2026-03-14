@@ -14,4 +14,5 @@
 // limitations under the License.
 //
 
+mod recursion_check;
 mod return_check;

@@ -59,7 +59,13 @@ impl BlockStmtBuilder<'_> {
         expected_return_type: ResolvedType,
     ) -> Option<IfArm> {
         // Resolve the condition expression and verify it has a bool type
-        let condition = resolve_expr(self.ec, self.comp_state, current_scope_id, &arm.condition)?;
+        let condition = resolve_expr(
+            self.ec,
+            self.comp_state,
+            self.scope_graph,
+            current_scope_id,
+            &arm.condition,
+        )?;
         if condition.value_type != ResolvedType::Primitive(PrimitiveType::Bool) {
             self.ec.non_bool_type_for_condition(
                 arm.range,

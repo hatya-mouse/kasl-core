@@ -16,11 +16,12 @@
 
 mod recursive_resolver;
 
-use crate::{CompilationState, ScopeID, error::ErrorCollector};
+use crate::{CompilationState, ScopeID, error::ErrorCollector, scope_manager::ScopeGraph};
 
 pub struct ExpressionResolver<'a> {
     ec: &'a mut ErrorCollector,
     comp_state: &'a CompilationState,
+    scope_graph: &'a mut ScopeGraph,
     current_scope: ScopeID,
 }
 
@@ -28,11 +29,13 @@ impl<'a> ExpressionResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         comp_state: &'a CompilationState,
+        scope_graph: &'a mut ScopeGraph,
         current_scope: ScopeID,
     ) -> Self {
         Self {
             ec,
             comp_state,
+            scope_graph,
             current_scope,
         }
     }

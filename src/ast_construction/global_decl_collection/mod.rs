@@ -22,6 +22,7 @@ pub use resolvers::FuncDeclInfo;
 use crate::{
     CompilationState, NameSpace, ParserDeclStmt,
     error::ErrorCollector,
+    scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, OpBodyMap},
     type_registry::StructGraph,
 };
@@ -33,6 +34,7 @@ pub struct GlobalDeclCollector<'a> {
     op_body_map: &'a mut OpBodyMap,
     comp_state: &'a mut CompilationState,
 
+    scope_graph: &'a mut ScopeGraph,
     struct_graph: &'a mut StructGraph,
 }
 
@@ -43,6 +45,7 @@ impl<'a> GlobalDeclCollector<'a> {
         func_body_map: &'a mut FuncBodyMap,
         op_body_map: &'a mut OpBodyMap,
         comp_state: &'a mut CompilationState,
+        scope_graph: &'a mut ScopeGraph,
         struct_graph: &'a mut StructGraph,
     ) -> Self {
         Self {
@@ -51,6 +54,7 @@ impl<'a> GlobalDeclCollector<'a> {
             func_body_map,
             op_body_map,
             comp_state,
+            scope_graph,
             struct_graph,
         }
     }

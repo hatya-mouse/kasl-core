@@ -32,6 +32,7 @@ impl ExpressionResolver<'_> {
         // Resolve the types of the operands recursively
         let lhs = self.resolve_recursively(lhs)?;
         let rhs = self.resolve_recursively(rhs)?;
+
         // Get a reference to the actual operator
         let op_id = self.comp_state.op_ctx.get_infix_id(InfixQueryRef {
             symbol: &symbol,
@@ -39,6 +40,12 @@ impl ExpressionResolver<'_> {
             rhs_type: &rhs.value_type,
         })?;
         let op = self.comp_state.op_ctx.get_infix_op(&op_id)?;
+
+        // Add an operator call edge to the scope graph
+        // This is used to detect recursion
+        self.scope_graph
+            .add_edge(self.current_scope, op.block.scope_id);
+
         // Construct arguments
         let lhs_arg = FuncCallArg {
             var_id: op.lhs.var_id,
@@ -48,8 +55,10 @@ impl ExpressionResolver<'_> {
             var_id: op.rhs.var_id,
             value: rhs.clone(),
         };
+
         // Get the return type of the operator
         let return_type = op.return_type;
+
         Some(Expr::new(
             ExprKind::InfixOp {
                 symbol,
@@ -72,19 +81,28 @@ impl ExpressionResolver<'_> {
     ) -> Option<Expr<ResolvedType>> {
         // Resolve the type of the operand
         let operand = self.resolve_recursively(operand)?;
+
         // Get a reference to the actual operator
         let op_id = self.comp_state.op_ctx.get_prefix_id(PrefixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
         let op = self.comp_state.op_ctx.get_prefix_op(&op_id)?;
+
+        // Add an operator call edge to the scope graph
+        // This is used to detect recursion
+        self.scope_graph
+            .add_edge(self.current_scope, op.block.scope_id);
+
         // Construct arguments
         let operand_arg = FuncCallArg {
             var_id: op.operand.var_id,
             value: operand.clone(),
         };
+
         // Get the return type of the operator
         let return_type = op.return_type;
+
         Some(Expr::new(
             ExprKind::PrefixOp {
                 symbol,
@@ -105,19 +123,28 @@ impl ExpressionResolver<'_> {
     ) -> Option<Expr<ResolvedType>> {
         // Resolve the type of the operand
         let operand = self.resolve_recursively(operand)?;
+
         // Get a reference to the actual operator
         let op_id = self.comp_state.op_ctx.get_postfix_id(PostfixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
         let op = self.comp_state.op_ctx.get_postfix_op(&op_id)?;
+
+        // Add an operator call edge to the scope graph
+        // This is used to detect recursion
+        self.scope_graph
+            .add_edge(self.current_scope, op.block.scope_id);
+
         // Construct arguments
         let operand_arg = FuncCallArg {
             var_id: op.operand.var_id,
             value: operand.clone(),
         };
+
         // Get the return type of the operator
         let return_type = op.return_type;
+
         Some(Expr::new(
             ExprKind::PostfixOp {
                 symbol,

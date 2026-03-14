@@ -31,6 +31,11 @@ impl ExpressionResolver<'_> {
             let func = self.comp_state.func_ctx.get_func(&func_id)?;
             let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
 
+            // Add a function call edge to the scope graph
+            // This is used to detect recursion
+            self.scope_graph
+                .add_edge(self.current_scope, func.block.scope_id);
+
             Some(Expr::new(
                 ExprKind::FuncCall {
                     name,

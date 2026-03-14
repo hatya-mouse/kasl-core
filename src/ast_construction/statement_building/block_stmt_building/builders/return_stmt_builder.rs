@@ -41,7 +41,13 @@ impl BlockStmtBuilder<'_> {
             }
         } else if let Some(value) = value {
             // Resolve the expression
-            let resolved_value = resolve_expr(self.ec, self.comp_state, current_scope_id, value)?;
+            let resolved_value = resolve_expr(
+                self.ec,
+                self.comp_state,
+                self.scope_graph,
+                current_scope_id,
+                value,
+            )?;
 
             // Check if the return type matches the expected return type
             // If the self.expected_return_type is None, resolved_value should be None as well

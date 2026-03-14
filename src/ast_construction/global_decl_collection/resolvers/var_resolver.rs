@@ -90,7 +90,13 @@ impl GlobalDeclCollector<'_> {
             let mut resolved_args = Vec::new();
             for arg in &attr.args {
                 // Resolve the expression of the argument
-                let resolved_arg = resolve_expr(self.ec, self.comp_state, global_scope_id, arg)?;
+                let resolved_arg = resolve_expr(
+                    self.ec,
+                    self.comp_state,
+                    self.scope_graph,
+                    global_scope_id,
+                    arg,
+                )?;
                 resolved_args.push(resolved_arg);
             }
 

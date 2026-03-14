@@ -132,6 +132,7 @@ impl BlockStmtBuilder<'_> {
     fn add_func_scope_edge(&mut self, func_scope: ScopeID, requires_return: bool) {
         // Register the function to the scope graph
         let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        // Add an edge from the global scope to the function
         self.scope_graph.add_edge(global_scope_id, func_scope);
         // Mark the function scope as requires return
         self.scope_graph

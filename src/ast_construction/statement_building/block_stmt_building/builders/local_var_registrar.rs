@@ -28,7 +28,13 @@ impl BlockStmtBuilder<'_> {
         current_scope_id: ScopeID,
         stmt_range: Range,
     ) -> Option<Expr<ResolvedType>> {
-        let resolved_def_val = resolve_expr(self.ec, self.comp_state, current_scope_id, def_val)?;
+        let resolved_def_val = resolve_expr(
+            self.ec,
+            self.comp_state,
+            self.scope_graph,
+            current_scope_id,
+            def_val,
+        )?;
 
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {

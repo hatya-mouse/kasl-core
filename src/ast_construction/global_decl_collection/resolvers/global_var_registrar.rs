@@ -29,7 +29,13 @@ impl GlobalDeclCollector<'_> {
     ) -> Option<Expr<ResolvedType>> {
         // Resolve the default value expression
         let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
-        let resolved_def_val = resolve_expr(self.ec, self.comp_state, global_scope_id, def_val)?;
+        let resolved_def_val = resolve_expr(
+            self.ec,
+            self.comp_state,
+            self.scope_graph,
+            global_scope_id,
+            def_val,
+        )?;
 
         // Resolve the type annotation if provided
         if let Some(path) = type_annotation {

@@ -42,6 +42,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
         &mut func_body_map,
         &mut op_body_map,
         &mut comp_state,
+        &mut scope_graph,
         &mut struct_graph,
     );
     global_decl_collector.process(&statements);
