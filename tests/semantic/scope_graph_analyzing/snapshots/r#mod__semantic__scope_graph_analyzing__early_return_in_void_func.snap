@@ -1,0 +1,51 @@
+---
+source: tests/semantic/scope_graph_analyzing/mod.rs
+expression: test_ctx.comp_state.func_ctx
+---
+funcs:
+  0:
+    name: do_something
+    is_member: false
+    is_static: false
+    params:
+      - label: ~
+        name: param
+        var_id: 0
+        value_type:
+          Primitive: Bool
+        def_val: ~
+        range:
+          start: 0
+          end: 0
+    return_type: Void
+    block:
+      body:
+        - If:
+            main:
+              condition:
+                kind:
+                  Identifier:
+                    name: param
+                    id: 0
+                value_type:
+                  Primitive: Bool
+                range:
+                  start: 0
+                  end: 0
+              block:
+                body:
+                  - Return:
+                      value: ~
+                scope_id: 2
+            else_ifs: []
+            else_block:
+              body: []
+              scope_id: 3
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+static_functions: {}
+global_functions:
+  do_something: 0
