@@ -51,8 +51,12 @@ impl ExpressionResolver<'_> {
     ) -> Option<(MemberAccess, ResolvedType)> {
         match lhs_type {
             // If the LHS is a primitive type, the member access is invalid
-            ResolvedType::Primitive(_) => {
-                self.ec.member_access_on_primitive(range, Ph::ExprEngine);
+            ResolvedType::Primitive(primitive_type) => {
+                self.ec.member_access_on_primitive(
+                    range,
+                    Ph::ExprEngine,
+                    primitive_type.to_string(),
+                );
                 None
             }
 
@@ -120,8 +124,6 @@ impl ExpressionResolver<'_> {
                     ))
                 }
             },
-
-            ResolvedType::Void => None,
         }
     }
 }

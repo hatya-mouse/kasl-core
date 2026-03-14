@@ -20,13 +20,13 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn member_access_on_primitive(&mut self, range: Range, phase: Phase) {
+    pub fn member_access_on_primitive(&mut self, range: Range, phase: Phase, type_name: String) {
         self.emit(
             EK::MemberAccessOnPrimitive,
             range,
             phase,
             Sv::Error,
-            Pl::None,
+            Pl::Str(type_name),
         );
     }
 
@@ -65,6 +65,16 @@ impl ErrorCollector {
     pub fn duplicate_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
         self.emit(
             EK::DuplicateStructName,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(struct_name.to_string()),
+        );
+    }
+
+    pub fn reserved_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
+        self.emit(
+            EK::ReservedStructName,
             range,
             phase,
             Sv::Error,

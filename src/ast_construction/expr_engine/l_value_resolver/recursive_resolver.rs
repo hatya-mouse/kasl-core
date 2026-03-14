@@ -50,10 +50,16 @@ impl LValueResolver<'_> {
             };
 
             // Get the StructDecl
-            let ResolvedType::Struct(struct_id) = lvalue.value_type else {
-                self.ec
-                    .member_access_on_primitive(identifier_token.range, Ph::ExprEngine);
-                return None;
+            let struct_id = match lvalue.value_type {
+                ResolvedType::Primitive(primitive_type) => {
+                    self.ec.member_access_on_primitive(
+                        identifier_token.range,
+                        Ph::ExprEngine,
+                        primitive_type.to_string(),
+                    );
+                    return None;
+                }
+                ResolvedType::Struct(struct_id) => struct_id,
             };
             let struct_decl = self.type_registry.get_struct(&struct_id)?;
 

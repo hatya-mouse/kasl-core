@@ -15,9 +15,12 @@
 //
 
 use crate::{
-    FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar, SymbolPath, error::Ph,
-    global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind, symbol_table::Block,
-    type_registry::ResolvedType,
+    FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar, SymbolPath,
+    error::Ph,
+    global_decl_collection::GlobalDeclCollector,
+    scope_manager::VariableKind,
+    symbol_table::Block,
+    type_registry::{PrimitiveType, ResolvedType},
 };
 
 impl GlobalDeclCollector<'_> {
@@ -51,7 +54,7 @@ impl GlobalDeclCollector<'_> {
                     return None;
                 }
             },
-            None => ResolvedType::Void,
+            None => ResolvedType::Primitive(PrimitiveType::Void),
         };
 
         Some(Function {

@@ -166,6 +166,11 @@ pub enum ErrorKind {
     /// A struct with the same name already exists in the current scope, or its parent scopes.
     DuplicateStructName,
 
+    /// Title: ReservedStructName
+    /// Payload: The name of the struct
+    /// The name of the struct is reserved by the language.
+    ReservedStructName,
+
     /// Title: DuplicateFuncName
     /// Payload: The name of the function
     /// A function with the same name already exists in the current scope, or its parent scopes.

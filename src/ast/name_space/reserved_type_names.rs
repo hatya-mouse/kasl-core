@@ -14,11 +14,6 @@
 // limitations under the License.
 //
 
-pub mod common;
-
-#[cfg(test)]
-mod parser;
-#[cfg(test)]
-mod semantic;
-#[cfg(test)]
-mod spec;
+pub fn is_reserved_type_name(name: &str) -> bool {
+    ["Int", "Float", "Bool", "Void", "Builtin"].contains(&name)
+}

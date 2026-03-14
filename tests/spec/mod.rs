@@ -14,11 +14,4 @@
 // limitations under the License.
 //
 
-pub mod common;
-
-#[cfg(test)]
-mod parser;
-#[cfg(test)]
-mod semantic;
-#[cfg(test)]
-mod spec;
+mod complex_op_resolution;

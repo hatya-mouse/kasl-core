@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use cranelift::prelude::{Type, types};
 use std::{fmt::Display, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
@@ -22,6 +21,7 @@ pub enum PrimitiveType {
     Int,
     Float,
     Bool,
+    Void,
 }
 
 impl Display for PrimitiveType {
@@ -30,24 +30,18 @@ impl Display for PrimitiveType {
             PrimitiveType::Int => write!(f, "Int"),
             PrimitiveType::Float => write!(f, "Float"),
             PrimitiveType::Bool => write!(f, "Bool"),
+            PrimitiveType::Void => write!(f, "Void"),
         }
     }
 }
 
 impl PrimitiveType {
-    pub fn as_ir_type(&self) -> Type {
-        match self {
-            PrimitiveType::Int => types::I32,
-            PrimitiveType::Float => types::F32,
-            PrimitiveType::Bool => types::I8,
-        }
-    }
-
     pub fn size(&self) -> u32 {
         match self {
             PrimitiveType::Bool => 1,
             PrimitiveType::Int => 4,
             PrimitiveType::Float => 4,
+            PrimitiveType::Void => 0,
         }
     }
 
@@ -56,6 +50,7 @@ impl PrimitiveType {
             PrimitiveType::Bool => 1,
             PrimitiveType::Int => 4,
             PrimitiveType::Float => 4,
+            PrimitiveType::Void => 1,
         }
     }
 }

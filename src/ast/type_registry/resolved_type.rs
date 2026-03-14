@@ -21,7 +21,6 @@ use std::fmt::Display;
 pub enum ResolvedType {
     Primitive(PrimitiveType),
     Struct(StructID),
-    Void,
 }
 
 impl PartialEq<ResolvedType> for &ResolvedType {
@@ -29,7 +28,6 @@ impl PartialEq<ResolvedType> for &ResolvedType {
         match (self, other) {
             (ResolvedType::Primitive(ty1), ResolvedType::Primitive(ty2)) => ty1 == ty2,
             (ResolvedType::Struct(id1), ResolvedType::Struct(id2)) => id1 == id2,
-            (ResolvedType::Void, ResolvedType::Void) => true,
             _ => false,
         }
     }
@@ -40,13 +38,12 @@ impl Display for ResolvedType {
         match self {
             ResolvedType::Primitive(ty) => write!(f, "{}", ty),
             ResolvedType::Struct(id) => write!(f, "struct({})", id),
-            ResolvedType::Void => write!(f, "Void"),
         }
     }
 }
 
 impl ResolvedType {
     pub fn is_void(&self) -> bool {
-        self == ResolvedType::Void
+        self == ResolvedType::Primitive(PrimitiveType::Void)
     }
 }
