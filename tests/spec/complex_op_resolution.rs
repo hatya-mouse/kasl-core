@@ -84,6 +84,8 @@ operator prefix ! {
 func prefix !(operand: Bool) -> Bool {
     return Builtin.not(operand)
 }
+
+let test_expr = 1 + 2 * 3 == 7 && !true || 5 > 2
 "#;
     let parsed = parse_expr(code);
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
@@ -101,5 +103,11 @@ func prefix !(operand: Bool) -> Bool {
         ".postfix_operator_properties" => sorted_redaction(),
         ".postfix_operators" => sorted_redaction(),
         ".postfix_ids" => sorted_redaction(),
+    });
+
+    assert_yaml_snapshot!(test_ctx.comp_state.scope_registry, {
+        ".scopes" => sorted_redaction(),
+        ".variables" => sorted_redaction(),
+        ".**.name_to_id" => sorted_redaction()
     });
 }

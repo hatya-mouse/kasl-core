@@ -370,8 +370,8 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: iadd
-                  id: 0
+                  name: imul
+                  id: 2
                   args:
                     - kind:
                         Identifier:
