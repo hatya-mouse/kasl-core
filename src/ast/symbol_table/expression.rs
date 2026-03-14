@@ -86,6 +86,7 @@ pub enum ExprKind<T> {
     },
     BuiltinFuncCall {
         name: String,
+        id: BuiltinFuncID,
         args: Option<Vec<FuncCallArg>>,
     },
 }

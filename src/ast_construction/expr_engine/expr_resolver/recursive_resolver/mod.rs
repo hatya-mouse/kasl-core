@@ -61,11 +61,11 @@ impl ExpressionResolver<'_> {
 
             ExprKind::Chain { lhs, access } => self.resolve_chain(*lhs, access, expr.range),
 
-            ExprKind::StructInit { .. } => {
+            _ => {
                 self.ec.comp_bug(
                     expr.range,
                     Ph::ExprEngine,
-                    "Received expression with StructInt",
+                    "Received expression which should not exist at this point",
                 );
                 None
             }

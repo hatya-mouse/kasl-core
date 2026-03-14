@@ -14,14 +14,22 @@
 // limitations under the License.
 //
 
-pub const MAIN_FUNCTION_NAME: &str = "main";
+use crate::{
+    FuncParam, Range, VariableID,
+    type_registry::{PrimitiveType, ResolvedType},
+};
 
-pub mod ast;
-pub mod ast_construction;
-pub mod backend;
-pub mod builtin;
-pub mod parser;
-
-pub use ast::*;
-pub use ast_construction::*;
-pub use parser::*;
+pub(in crate::builtin) fn func_param(
+    label: Option<&str>,
+    name: &str,
+    value_type: PrimitiveType,
+) -> FuncParam {
+    FuncParam {
+        label: label.map(str::to_string),
+        name: name.to_string(),
+        var_id: VariableID::default(),
+        value_type: ResolvedType::Primitive(value_type),
+        def_val: None,
+        range: Range::zero(),
+    }
+}
