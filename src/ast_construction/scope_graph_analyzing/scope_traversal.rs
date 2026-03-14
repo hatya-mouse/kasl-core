@@ -26,7 +26,7 @@ impl ScopeGraphAnalyzer<'_> {
         &mut self,
         current_scope: &ScopeID,
         states: &mut HashMap<ScopeID, ScopeState>,
-        total_sizes: &mut HashMap<ScopeID, i32>,
+        total_sizes: &mut HashMap<ScopeID, u32>,
     ) {
         // Update the state to Visiting
         states.insert(*current_scope, ScopeState::Visiting);
@@ -35,7 +35,7 @@ impl ScopeGraphAnalyzer<'_> {
         let current_scope_size = self.calculate_scope_layout(current_scope);
 
         // Analyze the scope recursively
-        let mut max_child_size: i32 = 0;
+        let mut max_child_size: u32 = 0;
         if let Some(child_scopes) = self.scope_graph.get_callees(current_scope) {
             for child_scope in child_scopes {
                 if states.get(child_scope) == Some(&ScopeState::Visiting) {
@@ -59,7 +59,7 @@ impl ScopeGraphAnalyzer<'_> {
         total_sizes.insert(*current_scope, total_size);
     }
 
-    pub fn calculate_scope_layout(&mut self, scope_id: &ScopeID) -> i32 {
+    pub fn calculate_scope_layout(&mut self, scope_id: &ScopeID) -> u32 {
         let mut size = 0;
         if let Some(scope) = self.comp_state.scope_registry.get_scope(scope_id) {
             for var_id in &scope.variables {

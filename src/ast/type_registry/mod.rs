@@ -53,7 +53,7 @@ impl TypeRegistry {
         self.path_to_id.get(type_path).copied()
     }
 
-    pub fn get_type_size(&self, type_id: &ResolvedType) -> i32 {
+    pub fn get_type_size(&self, type_id: &ResolvedType) -> u32 {
         match type_id {
             ResolvedType::Primitive(ty) => ty.size(),
             ResolvedType::Struct(id) => self.structs[id].total_size,
@@ -61,7 +61,7 @@ impl TypeRegistry {
         }
     }
 
-    pub fn get_type_alignment(&self, type_id: &ResolvedType) -> i32 {
+    pub fn get_type_alignment(&self, type_id: &ResolvedType) -> u8 {
         match type_id {
             ResolvedType::Primitive(ty) => ty.alignment(),
             ResolvedType::Struct(id) => self.structs[id].alignment,

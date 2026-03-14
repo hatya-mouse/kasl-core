@@ -34,9 +34,9 @@ pub struct StructDecl {
     /// The map of field names to their offsets in bytes.
     pub field_offsets: Vec<i32>,
     /// The total size of the struct in bytes.
-    pub total_size: i32,
+    pub total_size: u32,
     /// The alignment of the struct in bytes.
-    pub alignment: i32,
+    pub alignment: u8,
 
     /// The range of the struct declaration in the source code.
     pub range: Range,
@@ -76,8 +76,8 @@ impl StructDecl {
     }
 
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
-        let mut offset: i32 = 0;
-        let mut max_alignment: i32 = 1;
+        let mut offset = 0i32;
+        let mut max_alignment = 1u8;
 
         for field in &mut self.fields {
             // Get the size and alignment of the field's type
@@ -88,13 +88,13 @@ impl StructDecl {
                 max_alignment = alignment;
             }
             // Align the offset to the field's alignment
-            offset = (offset + (alignment - 1)) & !(alignment - 1);
+            offset = (offset + (alignment - 1) as i32) & !(alignment - 1) as i32;
             // Push the offset to the field_offsets vector
             self.field_offsets.push(offset);
-            offset += size;
+            offset += size as i32;
         }
 
-        self.total_size = offset;
+        self.total_size = offset as u32;
         self.alignment = max_alignment;
     }
 }

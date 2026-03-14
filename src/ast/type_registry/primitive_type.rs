@@ -43,7 +43,7 @@ impl PrimitiveType {
         }
     }
 
-    pub fn size(&self) -> i32 {
+    pub fn size(&self) -> u32 {
         match self {
             PrimitiveType::Bool => 1,
             PrimitiveType::Int => 4,
@@ -51,7 +51,7 @@ impl PrimitiveType {
         }
     }
 
-    pub fn alignment(&self) -> i32 {
+    pub fn alignment(&self) -> u8 {
         match self {
             PrimitiveType::Bool => 1,
             PrimitiveType::Int => 4,

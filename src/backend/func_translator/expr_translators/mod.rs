@@ -49,7 +49,7 @@ impl FuncTranslator<'_> {
             ExprKind::FuncCall { id, args, .. } => {
                 self.translate_func_call_expr(&id.unwrap(), args.as_ref().unwrap())
             }
-            ExprKind::StructInit { id } => self.translate_expr_init(&id.unwrap()),
+            ExprKind::StructInit { id, .. } => self.translate_struct_init(&id),
             ExprKind::Chain { lhs, access } => self.translate_chain(lhs, access, &expr.value_type),
         }
     }
