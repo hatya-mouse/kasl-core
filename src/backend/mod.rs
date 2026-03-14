@@ -20,10 +20,12 @@ use crate::{
     CompilationState, FunctionID, backend::func_translator::FuncTranslator,
     builtin::BuiltinRegistry,
 };
-use cranelift::prelude::{Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder};
+use cranelift::prelude::{
+    AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,
+};
 use cranelift_codegen::settings;
 use cranelift_jit::{JITBuilder, JITModule};
-use cranelift_module::Module;
+use cranelift_module::{Linkage, Module};
 
 pub struct Backend {
     builder_ctx: FunctionBuilderContext,
@@ -53,12 +55,41 @@ impl Default for Backend {
 }
 
 impl Backend {
+    pub fn compile(
+        &mut self,
+        comp_state: &CompilationState,
+        builtin_registry: &BuiltinRegistry,
+        entry_point: &FunctionID,
+    ) -> Result<*const u8, String> {
+        self.translate(comp_state, builtin_registry, entry_point);
+
+        let id = self
+            .module
+            .declare_function("main", Linkage::Export, &self.ctx.func.signature)
+            .map_err(|e| e.to_string())?;
+        self.module
+            .define_function(id, &mut self.ctx)
+            .map_err(|e| e.to_string())?;
+
+        self.module.clear_context(&mut self.ctx);
+        self.module.finalize_definitions().unwrap();
+
+        let code = self.module.get_finalized_function(id);
+        Ok(code)
+    }
+
     pub fn translate(
         &mut self,
         comp_state: &CompilationState,
         builtin_registry: &BuiltinRegistry,
         entry_point: &FunctionID,
     ) {
+        self.ctx
+            .func
+            .signature
+            .returns
+            .push(AbiParam::new(types::I32));
+
         // Create a function builder
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_ctx);
         // Create an entry block and and switch to the block
@@ -70,12 +101,18 @@ impl Backend {
         let return_block = builder.create_block();
         let mut translator =
             FuncTranslator::new(builder, &self.module, comp_state, builtin_registry);
+        translator
+            .builder
+            .append_block_param(return_block, types::I32);
+
         translator.translate(entry_point, return_block);
 
         // Add return instruction to the return block
         translator.builder.switch_to_block(return_block);
         translator.builder.seal_block(return_block);
-        translator.builder.ins().return_(&[]);
+
+        let return_values: Vec<_> = translator.builder.block_params(return_block).to_vec();
+        translator.builder.ins().return_(&return_values);
 
         // Finalize the function
         translator.builder.finalize();

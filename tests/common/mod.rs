@@ -16,8 +16,11 @@
 
 pub mod builders;
 
+use std::mem;
+
 use kasl::{
     CompilationState, ParserDeclStmt,
+    backend::Backend,
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorKind, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
@@ -93,6 +96,31 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
     );
     scope_graph_analyzer.analyze_all();
     test_ctx.ec.as_result()
+}
+
+pub fn execute_program(test_ctx: &mut TestContext) -> i32 {
+    let mut backend = Backend::default();
+    let main_func_id = test_ctx
+        .comp_state
+        .func_ctx
+        .get_global_func_by_name("main")
+        .unwrap();
+    let code = backend
+        .compile(
+            &test_ctx.comp_state,
+            &test_ctx.builtin_registry,
+            &main_func_id,
+        )
+        .unwrap();
+
+    unsafe { run_code::<i32>(code) }
+}
+
+unsafe fn run_code<O>(code_ptr: *const u8) -> O {
+    unsafe {
+        let code_fn: fn() -> O = mem::transmute(code_ptr);
+        code_fn()
+    }
 }
 
 pub fn assert_error(error: &[ErrorRecord], expected: ErrorKind) {
