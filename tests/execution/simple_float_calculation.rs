@@ -20,7 +20,7 @@ use crate::common::{
 };
 
 #[test]
-fn complex_op_calculation() {
+fn simple_float_calculation() {
     let mut test_ctx = TestContext::default();
 
     let code = r#"operator infix * {
