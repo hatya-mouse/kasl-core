@@ -23,3 +23,11 @@ pub use import_path::ImportPath;
 pub use reserved_type_names::is_reserved_type_name;
 pub use symbol_id::{FunctionID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
+
+use crate::ProgramContext;
+
+#[derive(Debug, Default)]
+pub struct NameSpace {
+    pub name: String,
+    pub prog_ctx: ProgramContext,
+}

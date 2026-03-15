@@ -17,20 +17,24 @@
 mod resolvers;
 mod stmt_process;
 
+use std::{collections::HashSet, path::PathBuf};
+
 pub use resolvers::FuncDeclInfo;
 
 use crate::{
     CompilationState, ParserDeclStmt, ProgramContext, builtin::BuiltinRegistry,
-    error::ErrorCollector, scope_manager::ScopeGraph,
+    compilation_data::CompilerConfig, error::ErrorCollector, scope_manager::ScopeGraph,
 };
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,
     comp_state: &'a mut CompilationState,
+    comp_config: &'a CompilerConfig,
     builtin_registry: &'a BuiltinRegistry,
-
     scope_graph: &'a mut ScopeGraph,
+
+    imported_paths: &'a mut HashSet<PathBuf>,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -38,15 +42,19 @@ impl<'a> GlobalDeclCollector<'a> {
         ec: &'a mut ErrorCollector,
         prog_ctx: &'a mut ProgramContext,
         comp_state: &'a mut CompilationState,
+        comp_config: &'a CompilerConfig,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
+        imported_paths: &'a mut HashSet<PathBuf>,
     ) -> Self {
         Self {
             ec,
             prog_ctx,
             comp_state,
+            comp_config,
             builtin_registry,
             scope_graph,
+            imported_paths,
         }
     }
 

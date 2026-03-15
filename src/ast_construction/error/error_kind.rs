@@ -261,6 +261,16 @@ pub enum ErrorKind {
     /// The type of the argument passed to an builtin function is wrong.
     BuiltinArgTypeMismatch,
 
+    /// Title: ImportNotFound
+    /// Payload: The path of the import
+    /// An import path is not found.
+    ImportNotFound,
+
+    /// Title: CyclicDependency
+    /// Payload: The path of the import
+    /// A import makes a cyclic dependency.
+    CyclicDependency,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

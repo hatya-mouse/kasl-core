@@ -15,22 +15,16 @@
 //
 
 use crate::{
-    OperatorContext, ScopeRegistry,
-    symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
-    type_registry::{StructGraph, TypeRegistry},
+    Range,
+    error::{EK, ErrorCollector, Phase, Pl, Sv},
 };
 
-#[derive(Debug, Default, serde::Serialize)]
-pub struct ProgramContext {
-    pub func_ctx: FunctionContext,
-    pub op_ctx: OperatorContext,
-    pub scope_registry: ScopeRegistry,
-    pub type_registry: TypeRegistry,
-}
+impl ErrorCollector {
+    pub fn import_not_found(&mut self, range: Range, phase: Phase, path: String) {
+        self.emit(EK::ImportNotFound, range, phase, Sv::Error, Pl::Str(path));
+    }
 
-#[derive(Debug, Default)]
-pub struct CompilationState {
-    pub func_body_map: FuncBodyMap,
-    pub op_body_map: OpBodyMap,
-    pub struct_graph: StructGraph,
+    pub fn cyclic_dependency(&mut self, range: Range, phase: Phase, path: String) {
+        self.emit(EK::CyclicDependency, range, phase, Sv::Error, Pl::Str(path));
+    }
 }
