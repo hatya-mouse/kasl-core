@@ -89,7 +89,7 @@ input in_val: Int = 0
 output out_val: Int = 0
 
 func main() {
-    out_val = in_val * 100
+    out_val = in_val * 102
 }
 "#;
     let parsed = parse_expr(code);
@@ -107,5 +107,5 @@ func main() {
     let out_ptr = &mut out_val as *mut i32;
 
     execute_program(&mut test_ctx, &blueprint, &[in_ptr], &[out_ptr], &[]);
-    println!("RESULT: {}", out_val);
+    assert_eq!(out_val, 4284)
 }
