@@ -28,7 +28,7 @@ use crate::{
 };
 use cranelift::prelude::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
-use std::{any::Any, collections::HashMap};
+use std::collections::HashMap;
 
 pub struct FuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
