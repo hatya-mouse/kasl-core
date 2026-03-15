@@ -43,7 +43,7 @@ impl BlockStmtBuilder<'_> {
             // Resolve the expression
             let resolved_value = resolve_expr(
                 self.ec,
-                self.prog_ctx,
+                self.namespace,
                 self.scope_graph,
                 self.builtin_registry,
                 current_scope_id,
@@ -56,10 +56,10 @@ impl BlockStmtBuilder<'_> {
                 self.ec.return_type_mismatch(
                     decl_range,
                     Ph::StatementCollection,
-                    self.prog_ctx
+                    self.namespace
                         .type_registry
                         .format_type(&expected_return_type),
-                    self.prog_ctx
+                    self.namespace
                         .type_registry
                         .format_type(&resolved_value.value_type),
                 );
@@ -73,7 +73,7 @@ impl BlockStmtBuilder<'_> {
             self.ec.return_without_value_for_return_func(
                 decl_range,
                 Ph::StatementCollection,
-                self.prog_ctx
+                self.namespace
                     .type_registry
                     .format_type(&expected_return_type),
             );

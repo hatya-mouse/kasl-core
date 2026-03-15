@@ -27,7 +27,7 @@ impl FuncTranslator<'_> {
         args: &[FuncCallArg],
     ) -> Option<ir::Value> {
         // Get the function block
-        let func = &self.prog_ctx.func_ctx.get_func(func_id).unwrap();
+        let func = &self.namespace.func_ctx.get_func(func_id).unwrap();
         self.call_func(&func.block, args, &func.return_type)
     }
 

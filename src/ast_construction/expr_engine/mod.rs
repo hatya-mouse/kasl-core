@@ -23,26 +23,26 @@ pub use expr_resolver::ExpressionResolver;
 pub use l_value_resolver::LValueResolver;
 
 use crate::{
-    Expr, ExprToken, ProgramContext, ScopeID, builtin::BuiltinRegistry, error::ErrorCollector,
+    Expr, ExprToken, NameSpace, ScopeID, builtin::BuiltinRegistry, error::ErrorCollector,
     scope_manager::ScopeGraph, type_registry::ResolvedType,
 };
 
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
-    prog_ctx: &ProgramContext,
+    namespace: &NameSpace,
     scope_graph: &mut ScopeGraph,
     builtin_registry: &BuiltinRegistry,
     current_scope_id: ScopeID,
     raw_tokens: &[ExprToken],
 ) -> Option<Expr<ResolvedType>> {
     // Build the expression tree
-    let mut expr_builder = ExpressionBuilder::new(ec, &prog_ctx.op_ctx);
+    let mut expr_builder = ExpressionBuilder::new(ec, &namespace.op_ctx);
     let expr = expr_builder.build(raw_tokens)?;
 
     // Resolve the type of the expression
     let mut resolver = ExpressionResolver::new(
         ec,
-        prog_ctx,
+        namespace,
         scope_graph,
         builtin_registry,
         current_scope_id,

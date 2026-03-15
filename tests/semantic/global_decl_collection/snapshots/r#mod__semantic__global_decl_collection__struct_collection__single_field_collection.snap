@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/global_decl_collection/struct_collection.rs
-expression: test_ctx.prog_ctx.type_registry
+expression: test_ctx.namespace.type_registry
 ---
 structs:
   0:

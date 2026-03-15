@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/scope_graph_analyzing/return_check.rs
-expression: test_ctx.prog_ctx.func_ctx
+expression: test_ctx.namespace.func_ctx
 ---
 funcs:
   0:

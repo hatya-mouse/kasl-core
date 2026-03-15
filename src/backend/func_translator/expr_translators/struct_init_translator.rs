@@ -21,7 +21,7 @@ use cranelift_codegen::ir;
 impl FuncTranslator<'_> {
     pub fn translate_struct_init(&mut self, struct_id: &StructID) -> Option<ir::Value> {
         // Store the value in the stack slot
-        let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id)?;
+        let struct_decl = self.namespace.type_registry.get_struct(struct_id)?;
 
         // Create a stack slot
         let slot_data = StackSlotData::new(

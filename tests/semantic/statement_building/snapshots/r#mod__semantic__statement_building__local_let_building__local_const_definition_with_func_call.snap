@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/statement_building/local_let_building.rs
-expression: test_ctx.prog_ctx.scope_registry
+expression: test_ctx.namespace.scope_registry
 ---
 scopes:
   0:

@@ -17,7 +17,7 @@
 mod func_translator;
 
 use crate::{
-    FunctionID, ProgramContext, backend::func_translator::FuncTranslator, builtin::BuiltinRegistry,
+    FunctionID, NameSpace, backend::func_translator::FuncTranslator, builtin::BuiltinRegistry,
     scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{
@@ -57,12 +57,12 @@ impl Default for Backend {
 impl Backend {
     pub fn compile(
         &mut self,
-        prog_ctx: &ProgramContext,
+        namespace: &NameSpace,
         builtin_registry: &BuiltinRegistry,
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) -> Result<*const u8, String> {
-        self.translate(prog_ctx, builtin_registry, blueprint, entry_point);
+        self.translate(namespace, builtin_registry, blueprint, entry_point);
 
         let id = self
             .module
@@ -81,7 +81,7 @@ impl Backend {
 
     pub fn translate(
         &mut self,
-        prog_ctx: &ProgramContext,
+        namespace: &NameSpace,
         builtin_registry: &BuiltinRegistry,
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
@@ -108,7 +108,8 @@ impl Backend {
         let return_block = builder.create_block();
 
         // Create a FuncTranslator and translate the function
-        let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
+        let mut translator =
+            FuncTranslator::new(builder, &self.module, namespace, builtin_registry);
         translator.translate(entry_point, blueprint, entry_block, return_block);
 
         // Add jump instruction

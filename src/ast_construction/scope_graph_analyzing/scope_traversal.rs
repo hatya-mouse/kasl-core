@@ -66,7 +66,7 @@ impl ScopeGraphAnalyzer<'_> {
         // If the current scope requires return but doesn't guarantee return, throw an error
         if self.scope_graph.requires_return(current_scope) && !guarantees_return {
             let scope_range = self
-                .prog_ctx
+                .namespace
                 .scope_registry
                 .get_scope(current_scope)
                 .map(|scope| scope.range)
@@ -88,14 +88,14 @@ impl ScopeGraphAnalyzer<'_> {
 
     pub fn calculate_scope_layout(&mut self, scope_id: &ScopeID) -> usize {
         let mut size = 0;
-        if let Some(scope) = self.prog_ctx.scope_registry.get_scope(scope_id) {
+        if let Some(scope) = self.namespace.scope_registry.get_scope(scope_id) {
             for var_id in &scope.variables {
-                let Some(var) = self.prog_ctx.scope_registry.get_var_by_id(var_id) else {
+                let Some(var) = self.namespace.scope_registry.get_var_by_id(var_id) else {
                     continue;
                 };
 
                 // Get the size of the variable type
-                let var_size = self.prog_ctx.type_registry.get_type_size(&var.value_type);
+                let var_size = self.namespace.type_registry.get_type_size(&var.value_type);
                 // Update the total size of the scope
                 size += var_size;
             }

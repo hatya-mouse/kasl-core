@@ -1,6 +1,6 @@
 ---
 source: tests/spec/complex_op_resolution.rs
-expression: test_ctx.prog_ctx.op_ctx
+expression: test_ctx.namespace.op_ctx
 ---
 infix_operator_properties:
   "&&":

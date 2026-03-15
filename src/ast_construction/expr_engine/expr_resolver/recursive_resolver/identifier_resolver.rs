@@ -22,14 +22,14 @@ impl ExpressionResolver<'_> {
     pub fn resolve_identifier(&mut self, name: String, range: Range) -> Option<Expr<ResolvedType>> {
         // Get the variable ID from the scope registry
         let Some(var_id) = self
-            .prog_ctx
+            .namespace
             .scope_registry
             .lookup_var(self.current_scope, &name)
         else {
             self.ec.var_not_found(range, Ph::ExprEngine, &name);
             return None;
         };
-        let var = self.prog_ctx.scope_registry.get_var_by_id(var_id)?;
+        let var = self.namespace.scope_registry.get_var_by_id(var_id)?;
 
         Some(Expr::new(
             ExprKind::Identifier {

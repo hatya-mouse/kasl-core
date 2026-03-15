@@ -32,7 +32,7 @@ impl<'a> GlobalDeclCollector<'a> {
     ) {
         let struct_path = symbol_path![name.to_string()];
         // Check if the struct with the same name already exists
-        if self.prog_ctx.type_registry.has_struct(&struct_path) {
+        if self.namespace.type_registry.has_struct(&struct_path) {
             self.ec
                 .duplicate_struct_name(decl_range, Ph::StructCollection, name);
         } else if is_reserved_type_name(name) {
@@ -40,15 +40,15 @@ impl<'a> GlobalDeclCollector<'a> {
                 .reserved_struct_name(decl_range, Ph::StructCollection, name);
         }
 
-        let struct_id = self.prog_ctx.type_registry.generate_struct_id();
+        let struct_id = self.namespace.type_registry.generate_struct_id();
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
         // Calculate the struct layout
-        struct_decl.compute_layout(&self.prog_ctx.type_registry);
+        struct_decl.compute_layout(&self.namespace.type_registry);
 
         // Register the struct in the type registry with a generated ID
-        self.prog_ctx
+        self.namespace
             .type_registry
             .register_struct(struct_decl, struct_path, struct_id);
     }
@@ -119,7 +119,7 @@ impl<'a> GlobalDeclCollector<'a> {
         // Add the field to the struct graph if the value has a struct type
         // The graph will be used in the scope graph analyzing phase to check if there aren't any struct cycles
         if let ResolvedType::Struct(field_struct_id) = def_val.value_type {
-            self.comp_state
+            self.comp_data
                 .struct_graph
                 .add_edge(struct_id, field_struct_id);
         }
@@ -155,10 +155,13 @@ impl<'a> GlobalDeclCollector<'a> {
         };
 
         // Register the function
-        let func_id = self.prog_ctx.func_ctx.register_member_func(func, struct_id);
+        let func_id = self
+            .namespace
+            .func_ctx
+            .register_member_func(func, struct_id);
 
         // Register the function body to the func body map
-        self.comp_state
+        self.comp_data
             .func_body_map
             .register(func_id, info.body.to_vec());
     }

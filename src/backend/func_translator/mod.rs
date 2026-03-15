@@ -24,7 +24,7 @@ use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;
 
 use crate::{
-    FunctionID, ProgramContext, VariableID, builtin::BuiltinRegistry, scope_manager::IOBlueprint,
+    FunctionID, NameSpace, VariableID, builtin::BuiltinRegistry, scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
@@ -34,7 +34,7 @@ pub struct FuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
     type_converter: TypeConverter,
 
-    prog_ctx: &'a ProgramContext,
+    namespace: &'a NameSpace,
     builtin_registry: &'a BuiltinRegistry,
     variables: HashMap<VariableID, Variable>,
 }
@@ -43,7 +43,7 @@ impl<'a> FuncTranslator<'a> {
     pub fn new(
         builder: FunctionBuilder<'a>,
         module: &'a JITModule,
-        prog_ctx: &'a ProgramContext,
+        namespace: &'a NameSpace,
         builtin_registry: &'a BuiltinRegistry,
     ) -> Self {
         let type_converter = TypeConverter::new(module);
@@ -51,7 +51,7 @@ impl<'a> FuncTranslator<'a> {
         Self {
             builder,
             type_converter,
-            prog_ctx,
+            namespace,
             builtin_registry,
             variables: HashMap::new(),
         }
@@ -80,7 +80,7 @@ impl<'a> FuncTranslator<'a> {
 
         // Get the entry point function node
         let Some(func_block) = self
-            .prog_ctx
+            .namespace
             .func_ctx
             .get_func(entry_point)
             .map(|func| &func.block)

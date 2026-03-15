@@ -21,7 +21,7 @@ use crate::{
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_prefix_define(&mut self, symbol: &str, props: &PrefixOperatorProperties) {
-        self.prog_ctx
+        self.namespace
             .op_ctx
             .register_prefix_properties(symbol.to_string(), props.clone());
     }
@@ -55,9 +55,9 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Register the operator
-        let op_id = self.prog_ctx.op_ctx.register_prefix_func(op);
+        let op_id = self.namespace.op_ctx.register_prefix_func(op);
 
         // Register the function body to the function body map
-        self.comp_state.op_body_map.register(op_id, body.to_vec());
+        self.comp_data.op_body_map.register(op_id, body.to_vec());
     }
 }

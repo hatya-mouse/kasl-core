@@ -18,33 +18,33 @@ mod scope_traversal;
 
 use std::collections::HashMap;
 
-use crate::{ProgramContext, ScopeID, error::ErrorCollector, scope_manager::ScopeGraph};
+use crate::{NameSpace, ScopeID, error::ErrorCollector, scope_manager::ScopeGraph};
 
 pub struct ScopeGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
-    prog_ctx: &'a ProgramContext,
+    namespace: &'a NameSpace,
     scope_graph: &'a mut ScopeGraph,
 }
 
 impl<'a> ScopeGraphAnalyzer<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        prog_ctx: &'a ProgramContext,
+        namespace: &'a NameSpace,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
-            prog_ctx,
+            namespace,
             scope_graph,
         }
     }
 
     pub fn analyze_all(&mut self) {
         // Get the global scope ID
-        let global_scope_id = self.prog_ctx.scope_registry.get_global_scope_id();
+        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
         // Initialize states for all scopes
         let mut states: HashMap<ScopeID, ScopeState> = self
-            .prog_ctx
+            .namespace
             .scope_registry
             .all_scope_ids()
             .into_iter()

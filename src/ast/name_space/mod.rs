@@ -24,31 +24,61 @@ pub use reserved_type_names::is_reserved_type_name;
 pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
-use crate::ProgramContext;
+use crate::{
+    OperatorContext, ScopeRegistry, symbol_table::FunctionContext, type_registry::TypeRegistry,
+};
 use std::collections::HashMap;
 
 #[derive(Debug, Default)]
 pub struct NameSpaceRegistry {
-    pub name_to_id: HashMap<String, NameSpaceID>,
     pub namespaces: HashMap<NameSpaceID, NameSpace>,
+    pub path_to_id: HashMap<Vec<String>, NameSpaceID>,
+    root_namespace_id: NameSpaceID,
     next_namespace_id: usize,
 }
 
 impl NameSpaceRegistry {
+    pub fn new() -> Self {
+        let mut registry = Self::default();
+        // Register the root namespace
+        registry.root_namespace_id = registry.generate_namespace_id();
+        registry
+            .namespaces
+            .insert(registry.root_namespace_id, NameSpace::default());
+        registry
+    }
+
+    pub fn get_root_namespace_id(&self) -> NameSpaceID {
+        self.root_namespace_id
+    }
+
+    pub fn get_namespace_by_id(&self, id: NameSpaceID) -> Option<&NameSpace> {
+        self.namespaces.get(&id)
+    }
+
+    pub fn register_namespace(&mut self, import_path: &ImportPath, namespace: NameSpace) {
+        let namespace_id = self.generate_namespace_id();
+        self.namespaces.insert(namespace_id, namespace);
+        self.path_to_id
+            .insert(import_path.path.clone(), namespace_id);
+    }
+
     pub fn generate_namespace_id(&mut self) -> NameSpaceID {
         let id = NameSpaceID::new(self.next_namespace_id);
         self.next_namespace_id += 1;
         id
     }
 
-    pub fn add_registry(&mut self, name: String, namespace: NameSpace) {
-        let id = self.generate_namespace_id();
-        self.name_to_id.insert(name, id);
-        self.namespaces.insert(id, namespace);
+    pub fn get_id_by_path(&self, path: &[String]) -> Option<NameSpaceID> {
+        self.path_to_id.get(path).copied()
     }
 }
 
 #[derive(Debug, Default)]
 pub struct NameSpace {
-    pub prog_ctx: ProgramContext,
+    pub func_ctx: FunctionContext,
+    pub op_ctx: OperatorContext,
+    pub scope_registry: ScopeRegistry,
+    pub type_registry: TypeRegistry,
+    pub namespace_registry: NameSpaceRegistry,
 }

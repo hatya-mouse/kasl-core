@@ -19,7 +19,7 @@ use crate::{VariableID, backend::func_translator::FuncTranslator};
 impl FuncTranslator<'_> {
     pub fn translate_local_var(&mut self, var_id: &VariableID) {
         // Get the variable
-        let local_var = self.prog_ctx.scope_registry.get_var_by_id(var_id).unwrap();
+        let local_var = self.namespace.scope_registry.get_var_by_id(var_id).unwrap();
         // Get the Variable
         let var = self.variables[var_id];
 
@@ -31,7 +31,7 @@ impl FuncTranslator<'_> {
 
     pub fn translate_local_const(&mut self, var_id: &VariableID) {
         // Get the ScopeVar
-        let local_const = self.prog_ctx.scope_registry.get_var_by_id(var_id).unwrap();
+        let local_const = self.namespace.scope_registry.get_var_by_id(var_id).unwrap();
         // Get the Variable
         let var = self.variables[var_id];
 

@@ -34,12 +34,12 @@ impl ExpressionResolver<'_> {
         let rhs = self.resolve_recursively(rhs)?;
 
         // Get a reference to the actual operator
-        let op_id = self.prog_ctx.op_ctx.get_infix_id(InfixQueryRef {
+        let op_id = self.namespace.op_ctx.get_infix_id(InfixQueryRef {
             symbol: &symbol,
             lhs_type: &lhs.value_type,
             rhs_type: &rhs.value_type,
         })?;
-        let op = self.prog_ctx.op_ctx.get_infix_op(&op_id)?;
+        let op = self.namespace.op_ctx.get_infix_op(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -85,11 +85,11 @@ impl ExpressionResolver<'_> {
         let operand = self.resolve_recursively(operand)?;
 
         // Get a reference to the actual operator
-        let op_id = self.prog_ctx.op_ctx.get_prefix_id(PrefixQueryRef {
+        let op_id = self.namespace.op_ctx.get_prefix_id(PrefixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
-        let op = self.prog_ctx.op_ctx.get_prefix_op(&op_id)?;
+        let op = self.namespace.op_ctx.get_prefix_op(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -128,11 +128,11 @@ impl ExpressionResolver<'_> {
         let operand = self.resolve_recursively(operand)?;
 
         // Get a reference to the actual operator
-        let op_id = self.prog_ctx.op_ctx.get_postfix_id(PostfixQueryRef {
+        let op_id = self.namespace.op_ctx.get_postfix_id(PostfixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
-        let op = self.prog_ctx.op_ctx.get_postfix_op(&op_id)?;
+        let op = self.namespace.op_ctx.get_postfix_op(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion

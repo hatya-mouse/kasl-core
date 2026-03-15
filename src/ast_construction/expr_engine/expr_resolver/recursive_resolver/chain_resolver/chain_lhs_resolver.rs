@@ -25,7 +25,7 @@ impl ExpressionResolver<'_> {
             if name == "Builtin" {
                 return Some(ResolvedChainLHS::Builtin);
             } else if let Some(resolved_type) = self
-                .prog_ctx
+                .namespace
                 .type_registry
                 .resolve_type_path(&symbol_path![name])
             {

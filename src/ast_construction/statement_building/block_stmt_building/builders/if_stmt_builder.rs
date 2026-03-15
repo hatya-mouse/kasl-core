@@ -61,7 +61,7 @@ impl BlockStmtBuilder<'_> {
         // Resolve the condition expression and verify it has a bool type
         let condition = resolve_expr(
             self.ec,
-            self.prog_ctx,
+            self.namespace,
             self.scope_graph,
             self.builtin_registry,
             current_scope_id,
@@ -71,7 +71,7 @@ impl BlockStmtBuilder<'_> {
             self.ec.non_bool_type_for_condition(
                 arm.range,
                 Ph::StatementCollection,
-                self.prog_ctx
+                self.namespace
                     .type_registry
                     .format_type(&condition.value_type),
             );

@@ -17,44 +17,45 @@
 mod resolvers;
 mod stmt_process;
 
-use std::{collections::HashSet, path::PathBuf};
-
 pub use resolvers::FuncDeclInfo;
 
 use crate::{
-    CompilationState, ParserDeclStmt, ProgramContext, builtin::BuiltinRegistry,
-    compilation_data::CompilerConfig, error::ErrorCollector, scope_manager::ScopeGraph,
+    CompilationData, NameSpace, ParserDeclStmt,
+    builtin::BuiltinRegistry,
+    compilation_data::{CompilerConfig, ConstructorState},
+    error::ErrorCollector,
+    scope_manager::ScopeGraph,
 };
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
-    prog_ctx: &'a mut ProgramContext,
-    comp_state: &'a mut CompilationState,
+    namespace: &'a mut NameSpace,
+    comp_data: &'a mut CompilationData,
     comp_config: &'a CompilerConfig,
     builtin_registry: &'a BuiltinRegistry,
     scope_graph: &'a mut ScopeGraph,
 
-    imported_paths: &'a mut HashSet<PathBuf>,
+    constructor_state: &'a ConstructorState,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        prog_ctx: &'a mut ProgramContext,
-        comp_state: &'a mut CompilationState,
+        namespace: &'a mut NameSpace,
+        comp_data: &'a mut CompilationData,
         comp_config: &'a CompilerConfig,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
-        imported_paths: &'a mut HashSet<PathBuf>,
+        constructor_state: &'a ConstructorState,
     ) -> Self {
         Self {
             ec,
-            prog_ctx,
-            comp_state,
+            namespace,
+            comp_data,
             comp_config,
             builtin_registry,
             scope_graph,
-            imported_paths,
+            constructor_state,
         }
     }
 

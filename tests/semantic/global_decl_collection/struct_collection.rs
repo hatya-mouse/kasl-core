@@ -35,7 +35,7 @@ fn test_single_field_collection() {
         &[struct_field("field", None, &[float_literal(5.3)])],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.type_registry, {
+    assert_yaml_snapshot!(test_ctx.namespace.type_registry, {
         ".structs" => sorted_redaction(),
         ".path_to_id" => sorted_redaction(),
         ".**.indices" => sorted_redaction(),
@@ -51,7 +51,7 @@ fn test_single_member_func_collection() {
         &[func_decl(false, "new", &[], None, &[])],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -85,7 +85,7 @@ fn test_complex_struct_collection() {
         ],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.type_registry, {
+    assert_yaml_snapshot!(test_ctx.namespace.type_registry, {
         ".structs" => sorted_redaction(),
         ".path_to_id" => sorted_redaction(),
         ".**.indices" => sorted_redaction()

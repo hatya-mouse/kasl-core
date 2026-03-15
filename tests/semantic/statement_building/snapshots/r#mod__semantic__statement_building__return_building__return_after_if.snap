@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/statement_building/return_building.rs
-expression: test_ctx.prog_ctx.func_ctx
+expression: test_ctx.namespace.func_ctx
 ---
 funcs:
   0:

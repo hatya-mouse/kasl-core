@@ -33,18 +33,18 @@ impl ExpressionResolver<'_> {
     ) -> Option<Expr<ResolvedType>> {
         // Get the function ID by name
         let Some(func_id) = self
-            .prog_ctx
+            .namespace
             .func_ctx
             .get_member_func_by_name(struct_id, &name)
         else {
-            let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id)?;
+            let struct_decl = self.namespace.type_registry.get_struct(struct_id)?;
             self.ec
                 .member_func_not_found(range, Ph::ExprEngine, struct_decl.name.clone(), name);
             return None;
         };
 
         // Get the function by ID
-        let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
+        let func = self.namespace.func_ctx.get_func(&func_id)?;
 
         // Throw an error if the function is static
         if func.is_static {

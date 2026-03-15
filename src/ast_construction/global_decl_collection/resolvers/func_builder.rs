@@ -34,9 +34,9 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) -> Option<Function> {
         // Create a function block
-        let global_scope_id = self.prog_ctx.scope_registry.get_global_scope_id();
+        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
         let func_scope_id = self
-            .prog_ctx
+            .namespace
             .scope_registry
             .create_scope(Some(global_scope_id), decl_range);
         let block = Block::new(func_scope_id);
@@ -46,7 +46,7 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the return type
         let return_type = match return_type {
-            Some(path) => match self.prog_ctx.type_registry.resolve_type_path(path) {
+            Some(path) => match self.namespace.type_registry.resolve_type_path(path) {
                 Some(resolved) => resolved,
                 None => {
                     self.ec
@@ -89,7 +89,7 @@ impl GlobalDeclCollector<'_> {
     ) -> Option<FuncParam> {
         // Check if the name is already in use in this scope
         if self
-            .prog_ctx
+            .namespace
             .scope_registry
             .has_var(func_scope_id, &param.name)
         {
@@ -112,7 +112,7 @@ impl GlobalDeclCollector<'_> {
                 var_kind: VariableKind::FuncParam,
             };
             let var_id =
-                self.prog_ctx
+                self.namespace
                     .scope_registry
                     .register_var(var, param.name.clone(), func_scope_id);
 
@@ -127,7 +127,7 @@ impl GlobalDeclCollector<'_> {
         } else if let Some(annotation_type) = &param.value_type {
             // If no default value is provided, use the annotation type
             let resolved_annotation_type = self
-                .prog_ctx
+                .namespace
                 .type_registry
                 .resolve_type_path(annotation_type)?;
 
@@ -140,7 +140,7 @@ impl GlobalDeclCollector<'_> {
                 var_kind: VariableKind::FuncParam,
             };
             let var_id =
-                self.prog_ctx
+                self.namespace
                     .scope_registry
                     .register_var(var, param.name.clone(), func_scope_id);
 

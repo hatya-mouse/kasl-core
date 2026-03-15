@@ -28,7 +28,7 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Get the struct declaration
-        let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id)?;
+        let struct_decl = self.namespace.type_registry.get_struct(struct_id)?;
 
         // Get the index of the field by its name
         let Some(field_index) = struct_decl.get_field_index(&name) else {

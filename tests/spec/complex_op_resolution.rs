@@ -93,7 +93,7 @@ let test_expr = 1 + 2 * 3 == 7 && !true || 5 > 2
     build_stmts(&mut test_ctx).unwrap();
     analyze_scopes(&mut test_ctx).unwrap();
 
-    assert_yaml_snapshot!(test_ctx.prog_ctx.op_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.op_ctx, {
         ".infix_operator_properties" => sorted_redaction(),
         ".infix_operators" => sorted_redaction(),
         ".infix_ids" => sorted_redaction(),
@@ -105,7 +105,7 @@ let test_expr = 1 + 2 * 3 == 7 && !true || 5 > 2
         ".postfix_ids" => sorted_redaction(),
     });
 
-    assert_yaml_snapshot!(test_ctx.prog_ctx.scope_registry, {
+    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()

@@ -40,7 +40,7 @@ fn test_local_var_definition() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -65,7 +65,7 @@ fn test_local_var_definition_with_annotation() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.scope_registry, {
+    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()
@@ -94,7 +94,7 @@ fn test_local_var_definition_with_func_call() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.scope_registry, {
+    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
         ".scopes" => sorted_redaction(),
         ".variables" => sorted_redaction(),
         ".**.name_to_id" => sorted_redaction()

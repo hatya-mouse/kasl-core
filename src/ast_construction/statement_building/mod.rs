@@ -19,14 +19,14 @@ mod block_stmt_building;
 pub use block_stmt_building::BlockStmtBuilder;
 
 use crate::{
-    CompilationState, ProgramContext, builtin::BuiltinRegistry, error::ErrorCollector,
+    CompilationData, NameSpace, builtin::BuiltinRegistry, error::ErrorCollector,
     scope_manager::ScopeGraph,
 };
 
 pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
-    prog_ctx: &'a mut ProgramContext,
-    comp_state: &'a CompilationState,
+    namespace: &'a mut NameSpace,
+    comp_data: &'a CompilationData,
     builtin_registry: &'a BuiltinRegistry,
 
     scope_graph: &'a mut ScopeGraph,
@@ -35,15 +35,15 @@ pub struct StatementBuilder<'a> {
 impl<'a> StatementBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        prog_ctx: &'a mut ProgramContext,
-        comp_state: &'a CompilationState,
+        namespace: &'a mut NameSpace,
+        comp_data: &'a CompilationData,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
-            prog_ctx,
-            comp_state,
+            namespace,
+            comp_data,
             builtin_registry,
             scope_graph,
         }
@@ -51,16 +51,16 @@ impl<'a> StatementBuilder<'a> {
 
     pub fn build_all(&mut self) {
         // Get all the IDs
-        let func_ids = self.prog_ctx.func_ctx.func_ids();
-        let infix_ids = self.prog_ctx.op_ctx.all_infix_ids();
-        let prefix_ids = self.prog_ctx.op_ctx.all_prefix_ids();
-        let postfix_ids = self.prog_ctx.op_ctx.all_postfix_ids();
+        let func_ids = self.namespace.func_ctx.func_ids();
+        let infix_ids = self.namespace.op_ctx.all_infix_ids();
+        let prefix_ids = self.namespace.op_ctx.all_prefix_ids();
+        let postfix_ids = self.namespace.op_ctx.all_postfix_ids();
 
         // Create a block statement builder
         let mut func_stmt_builder = BlockStmtBuilder::new(
             self.ec,
-            self.prog_ctx,
-            self.comp_state,
+            self.namespace,
+            self.comp_data,
             self.builtin_registry,
             self.scope_graph,
         );

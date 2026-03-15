@@ -15,11 +15,8 @@
 //
 
 use crate::{
-    Range,
-    constructor::ProgramConstructor,
-    error::Ph,
-    global_decl_collection::GlobalDeclCollector,
-    name_space::{ImportPath, NameSpace},
+    Range, error::Ph, global_decl_collection::GlobalDeclCollector, name_space::ImportPath,
+    namespace_constructor::NameSpaceConstructor,
 };
 use std::{fs::File, io::Read, path::PathBuf};
 
@@ -35,7 +32,7 @@ impl GlobalDeclCollector<'_> {
         };
 
         // If the path is already in the set of imported paths, skip it and throw an error
-        if self.imported_paths.contains(&full_path) {
+        if self.constructor_state.imported_paths.contains(&full_path) {
             self.ec.cyclic_dependency(
                 decl_range,
                 Ph::GlobalDeclCollection,
@@ -45,27 +42,23 @@ impl GlobalDeclCollector<'_> {
         }
 
         // Add the imported path to the set of paths to search for imports
-        self.imported_paths.insert(full_path);
+        let mut imported_paths = self.constructor_state.imported_paths.clone();
+        imported_paths.insert(full_path);
 
         // Create a constructor and pass the program to it
-        let mut constructor = ProgramConstructor::default();
-        constructor.add_search_paths(&self.comp_config.search_paths);
-        constructor.set_imported_paths(self.imported_paths);
+        let mut constructor = NameSpaceConstructor::new(self.comp_config.clone(), imported_paths);
+        constructor.set_code(&program);
 
         // Construct the program
-        constructor.set_code(&program);
         constructor.collect_global_decls();
         constructor.analyze_struct_graph();
         constructor.build_statements();
         constructor.analyze_scope_graph();
 
-        // Create a new namespace
-        let namespace = NameSpace {
-            prog_ctx: constructor.prog_ctx,
-        };
-        self.prog_ctx
+        // Register the namespace with the import path
+        self.namespace
             .namespace_registry
-            .add_registry(import_path.to_string(), namespace);
+            .register_namespace(import_path, constructor.namespace);
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {
@@ -74,7 +67,7 @@ impl GlobalDeclCollector<'_> {
             let full_path = base_path.join(import_path.to_path()).with_extension("kasl");
 
             if full_path.is_file() {
-                // Get the file
+                // Open the file
                 let mut file = match File::open(&full_path) {
                     Err(why) => panic!("couldn't open {}: {}", full_path.display(), why),
                     Ok(file) => file,

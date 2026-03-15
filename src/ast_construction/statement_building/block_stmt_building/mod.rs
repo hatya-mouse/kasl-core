@@ -21,14 +21,14 @@ mod scope_block_builder;
 mod stmt_builder;
 
 use crate::{
-    CompilationState, ProgramContext, builtin::BuiltinRegistry, error::ErrorCollector,
+    CompilationData, NameSpace, builtin::BuiltinRegistry, error::ErrorCollector,
     scope_manager::ScopeGraph,
 };
 
 pub struct BlockStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
-    prog_ctx: &'a mut ProgramContext,
-    comp_state: &'a CompilationState,
+    namespace: &'a mut NameSpace,
+    comp_data: &'a CompilationData,
     builtin_registry: &'a BuiltinRegistry,
 
     scope_graph: &'a mut ScopeGraph,
@@ -37,15 +37,15 @@ pub struct BlockStmtBuilder<'a> {
 impl<'a> BlockStmtBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        prog_ctx: &'a mut ProgramContext,
-        comp_state: &'a CompilationState,
+        namespace: &'a mut NameSpace,
+        comp_data: &'a CompilationData,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
-            prog_ctx,
-            comp_state,
+            namespace,
+            comp_data,
             builtin_registry,
             scope_graph,
         }

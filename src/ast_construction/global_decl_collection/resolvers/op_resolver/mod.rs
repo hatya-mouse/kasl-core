@@ -34,9 +34,9 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) {
         // Create a new scope and a block for the function
-        let global_scope_id = self.prog_ctx.scope_registry.get_global_scope_id();
+        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
         let op_scope_id = self
-            .prog_ctx
+            .namespace
             .scope_registry
             .create_scope(Some(global_scope_id), decl_range);
         let op_block = Block::new(op_scope_id);
@@ -47,7 +47,7 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Resolve the return type
-        let Some(return_type) = self.prog_ctx.type_registry.resolve_type_path(return_type) else {
+        let Some(return_type) = self.namespace.type_registry.resolve_type_path(return_type) else {
             self.ec.type_not_found(
                 decl_range,
                 Ph::GlobalDeclCollection,

@@ -26,7 +26,7 @@ impl FuncTranslator<'_> {
         rhs: &FuncCallArg,
     ) -> Option<ir::Value> {
         // Get the operator function block
-        let op = &self.prog_ctx.op_ctx.get_infix_op(op_id).unwrap();
+        let op = &self.namespace.op_ctx.get_infix_op(op_id).unwrap();
         self.call_func(&op.block, &[lhs.clone(), rhs.clone()], &op.return_type)
     }
 
@@ -36,7 +36,7 @@ impl FuncTranslator<'_> {
         operand: &FuncCallArg,
     ) -> Option<ir::Value> {
         // Get the operator function block
-        let op = &self.prog_ctx.op_ctx.get_prefix_op(op_id).unwrap();
+        let op = &self.namespace.op_ctx.get_prefix_op(op_id).unwrap();
         self.call_func(&op.block, slice::from_ref(operand), &op.return_type)
     }
 
@@ -46,7 +46,7 @@ impl FuncTranslator<'_> {
         operand: &FuncCallArg,
     ) -> Option<ir::Value> {
         // Get the operator function block
-        let op = &self.prog_ctx.op_ctx.get_postfix_op(op_id).unwrap();
+        let op = &self.namespace.op_ctx.get_postfix_op(op_id).unwrap();
         self.call_func(&op.block, slice::from_ref(operand), &op.return_type)
     }
 }

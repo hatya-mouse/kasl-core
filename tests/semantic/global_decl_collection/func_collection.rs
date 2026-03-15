@@ -30,7 +30,7 @@ fn test_simple_func_resolution() {
 
     let parsed = vec![func_decl(false, "greet", &[], None, &[])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -47,7 +47,7 @@ fn test_multiple_func_resolution() {
         func_decl(false, "two", &[], None, &[]),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -67,7 +67,7 @@ fn test_func_with_param() {
         &[],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),

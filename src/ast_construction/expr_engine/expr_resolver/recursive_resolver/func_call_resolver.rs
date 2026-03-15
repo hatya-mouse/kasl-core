@@ -26,9 +26,9 @@ impl ExpressionResolver<'_> {
         no_type_args: Vec<NoTypeFuncCallArg>,
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
-        if let Some(func_id) = self.prog_ctx.func_ctx.get_global_func_by_name(&name) {
+        if let Some(func_id) = self.namespace.func_ctx.get_global_func_by_name(&name) {
             // Get a reference to the function
-            let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
+            let func = self.namespace.func_ctx.get_func(&func_id)?;
             let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
 
             // Add a function call edge to the scope graph
@@ -47,7 +47,7 @@ impl ExpressionResolver<'_> {
                 range,
             ))
         } else if let Some(struct_id) = self
-            .prog_ctx
+            .namespace
             .type_registry
             .get_struct_id_by_path(&symbol_path![name.clone()])
         {

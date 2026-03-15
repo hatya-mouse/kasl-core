@@ -33,7 +33,7 @@ fn test_return_on_no_return_func() {
     let parsed = vec![func_decl(false, "main", &[], None, &[return_stmt(None)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -54,7 +54,7 @@ fn test_return_int() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -87,7 +87,7 @@ fn test_return_in_both_if_and_else() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -116,7 +116,7 @@ fn test_return_after_if() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),
@@ -160,7 +160,7 @@ fn test_return_in_if_else_if_else() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),

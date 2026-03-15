@@ -39,7 +39,7 @@ fn test_func_call_stmt() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.prog_ctx.func_ctx, {
+    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
         ".funcs" => sorted_redaction(),
         ".member_functions" => sorted_redaction(),
         ".static_functions" => sorted_redaction(),

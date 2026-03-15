@@ -43,7 +43,7 @@ impl FuncTranslator<'_> {
                 offset.unwrap(),
             )),
             MemberAccess::FuncCall { id, args, .. } => {
-                let func = self.prog_ctx.func_ctx.get_func(&id.unwrap()).unwrap();
+                let func = self.namespace.func_ctx.get_func(&id.unwrap()).unwrap();
                 self.call_func(&func.block, args.as_ref().unwrap(), &func.return_type)
             }
         }

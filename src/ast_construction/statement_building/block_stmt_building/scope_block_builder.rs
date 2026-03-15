@@ -46,7 +46,7 @@ impl BlockStmtBuilder<'_> {
     ) -> Block {
         // Create a new scope for the block
         let block_scope_id = self
-            .prog_ctx
+            .namespace
             .scope_registry
             .create_scope(Some(parent_scope_id), decl_range);
 

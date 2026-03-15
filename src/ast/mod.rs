@@ -21,11 +21,11 @@ pub mod scope_manager;
 pub mod symbol_table;
 pub mod type_registry;
 
-pub use compilation_data::{CompilationState, ProgramContext};
+pub use compilation_data::CompilationData;
 pub use data::Range;
 pub use name_space::{
-    FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent,
-    VariableID,
+    FunctionID, NameSpace, NameSpaceID, OperatorID, ParserStmtID, StructID, SymbolPath,
+    SymbolPathComponent, VariableID,
 };
 pub use scope_manager::{InputAttribute, Scope, ScopeID, ScopeRegistry, ScopeVar};
 pub use symbol_table::{

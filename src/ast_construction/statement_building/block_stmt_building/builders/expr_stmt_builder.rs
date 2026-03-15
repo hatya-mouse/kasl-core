@@ -26,7 +26,7 @@ impl BlockStmtBuilder<'_> {
     ) -> Option<Statement> {
         let expr = resolve_expr(
             self.ec,
-            self.prog_ctx,
+            self.namespace,
             self.scope_graph,
             self.builtin_registry,
             current_scope_id,
