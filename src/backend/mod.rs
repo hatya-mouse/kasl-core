@@ -64,6 +64,8 @@ impl Backend {
     ) -> Result<*const u8, String> {
         self.translate(comp_state, builtin_registry, blueprint, entry_point);
 
+        println!("{}", self.ctx.func);
+
         let id = self
             .module
             .declare_function("main", Linkage::Export, &self.ctx.func.signature)
@@ -111,6 +113,9 @@ impl Backend {
         let mut translator =
             FuncTranslator::new(builder, &self.module, comp_state, builtin_registry);
         translator.translate(entry_point, blueprint, entry_block, return_block);
+
+        // Add jump instruction
+        translator.builder.ins().jump(return_block, &[]);
 
         // Add return instruction to the return block
         translator.builder.switch_to_block(return_block);
