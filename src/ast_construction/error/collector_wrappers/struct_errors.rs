@@ -20,7 +20,12 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn member_access_on_primitive(&mut self, range: Range, phase: Phase, type_name: String) {
+    pub(crate) fn member_access_on_primitive(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        type_name: String,
+    ) {
         self.emit(
             EK::MemberAccessOnPrimitive,
             range,
@@ -30,7 +35,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn member_field_not_found(
+    pub(crate) fn member_field_not_found(
         &mut self,
         range: Range,
         phase: Phase,
@@ -46,23 +51,23 @@ impl ErrorCollector {
         );
     }
 
-    pub fn member_func_not_found(
+    pub(crate) fn member_func_not_found(
         &mut self,
         range: Range,
         phase: Phase,
-        struct_name: String,
-        func_name: String,
+        struct_name: &str,
+        func_name: &str,
     ) {
         self.emit(
             EK::MemberFuncNotFound,
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(struct_name, func_name),
+            Pl::StrPair(struct_name.clone(), func_name.clone()),
         );
     }
 
-    pub fn duplicate_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
+    pub(crate) fn duplicate_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
         self.emit(
             EK::DuplicateStructName,
             range,
@@ -72,7 +77,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn reserved_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
+    pub(crate) fn reserved_struct_name(&mut self, range: Range, phase: Phase, struct_name: &str) {
         self.emit(
             EK::ReservedStructName,
             range,
@@ -82,7 +87,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn struct_cycle(&mut self, range: Range, phase: Phase, struct_name: &str) {
+    pub(crate) fn struct_cycle(&mut self, range: Range, phase: Phase, struct_name: &str) {
         self.emit(
             EK::StructCycle,
             range,
@@ -92,7 +97,7 @@ impl ErrorCollector {
         )
     }
 
-    pub fn arg_for_struct_init(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn arg_for_struct_init(&mut self, range: Range, phase: Phase) {
         self.emit(EK::ArgForStructInit, range, phase, Sv::Error, Pl::None);
     }
 }

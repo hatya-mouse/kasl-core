@@ -20,7 +20,10 @@ use crate::{ExprToken, ExprTokenKind, error::Ph};
 use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionBuilder<'_> {
-    pub fn parse_lhs(&mut self, tokens: &mut Peekable<Iter<ExprToken>>) -> Option<UnresolvedExpr> {
+    pub fn parse_lhs_chain(
+        &mut self,
+        tokens: &mut Peekable<Iter<ExprToken>>,
+    ) -> Option<UnresolvedExpr> {
         let first = tokens.next()?;
         let mut expr = self.parse_lhs_single(first, tokens)?;
 

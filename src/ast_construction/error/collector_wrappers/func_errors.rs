@@ -20,7 +20,12 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn global_func_cannot_be_static(&mut self, range: Range, phase: Phase, func_name: &str) {
+    pub(crate) fn global_func_cannot_be_static(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        func_name: &str,
+    ) {
         self.emit(
             EK::GlobalFuncCannotBeStatic,
             range,
@@ -30,7 +35,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn func_not_found(&mut self, range: Range, phase: Phase, func_name: &str) {
+    pub(crate) fn func_not_found(&mut self, range: Range, phase: Phase, func_name: &str) {
         self.emit(
             EK::FuncNotFound,
             range,
@@ -40,7 +45,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn no_return_func_in_expr(&mut self, range: Range, phase: Phase, func_name: &str) {
+    pub(crate) fn no_return_func_in_expr(&mut self, range: Range, phase: Phase, func_name: &str) {
         self.emit(
             EK::NoReturnFuncInExpr,
             range,
@@ -50,7 +55,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn arg_order_incorrect(&mut self, range: Range, phase: Phase, param_label: &str) {
+    pub(crate) fn arg_order_incorrect(&mut self, range: Range, phase: Phase, param_label: &str) {
         self.emit(
             EK::ArgOrderIncorrect,
             range,
@@ -60,7 +65,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn duplicate_arg(&mut self, range: Range, phase: Phase, param_label: &str) {
+    pub(crate) fn duplicate_arg(&mut self, range: Range, phase: Phase, param_label: &str) {
         self.emit(
             EK::DuplicateArg,
             range,
@@ -70,19 +75,19 @@ impl ErrorCollector {
         );
     }
 
-    pub fn extra_arg(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn extra_arg(&mut self, range: Range, phase: Phase) {
         self.emit(EK::ExtraArg, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn missing_arg(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn missing_arg(&mut self, range: Range, phase: Phase) {
         self.emit(EK::MissingArg, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn missing_arg_label(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn missing_arg_label(&mut self, range: Range, phase: Phase) {
         self.emit(EK::MissingArgLabel, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn arg_type_mismatch(&mut self, range: Range, phase: Phase, arg_name: &str) {
+    pub(crate) fn arg_type_mismatch(&mut self, range: Range, phase: Phase, arg_name: &str) {
         self.emit(
             EK::ArgTypeMismatch,
             range,
@@ -92,7 +97,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn duplicate_func_name(&mut self, range: Range, phase: Phase, func_name: &str) {
+    pub(crate) fn duplicate_func_name(&mut self, range: Range, phase: Phase, func_name: &str) {
         self.emit(
             EK::DuplicateFuncName,
             range,
@@ -102,15 +107,20 @@ impl ErrorCollector {
         );
     }
 
-    pub fn recursive_call(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn recursive_call(&mut self, range: Range, phase: Phase) {
         self.emit(EK::RecursiveCall, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn missing_return(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn missing_return(&mut self, range: Range, phase: Phase) {
         self.emit(EK::MissingReturn, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn static_func_call_on_instance(&mut self, range: Range, phase: Phase, func_name: &str) {
+    pub(crate) fn static_func_call_on_instance(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        func_name: &str,
+    ) {
         self.emit(
             EK::StaticFuncCallOnInstance,
             range,
@@ -120,7 +130,12 @@ impl ErrorCollector {
         );
     }
 
-    pub fn static_call_of_instance_func(&mut self, range: Range, phase: Phase, func_name: &str) {
+    pub(crate) fn static_call_of_instance_func(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        func_name: &str,
+    ) {
         self.emit(
             EK::StaticCallOfInstanceFunc,
             range,
@@ -130,7 +145,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn builtin_func_not_found(&mut self, range: Range, phase: Phase, func_name: String) {
+    pub(crate) fn builtin_func_not_found(&mut self, range: Range, phase: Phase, func_name: String) {
         self.emit(
             EK::BuiltinFuncNotFound,
             range,
@@ -140,7 +155,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn builtin_arg_type_mismatch(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn builtin_arg_type_mismatch(&mut self, range: Range, phase: Phase) {
         self.emit(
             EK::BuiltinArgTypeMismatch,
             range,

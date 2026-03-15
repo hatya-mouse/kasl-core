@@ -16,7 +16,7 @@
 
 use crate::{
     InfixOperatorProperties, PostfixOperatorProperties, PrefixOperatorProperties, Range,
-    SymbolPath, name_space::ImportPath, symbol_table::UnresolvedExpr,
+    SymbolPath, namespace_registry::ImportPath, symbol_table::UnresolvedExpr,
 };
 use std::fmt::Display;
 

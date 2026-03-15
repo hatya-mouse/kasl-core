@@ -15,16 +15,24 @@
 //
 
 use crate::{
-    Range,
-    error::{EK, ErrorCollector, Phase, Pl, Sv},
+    NameSpaceID, OperatorContext, ScopeRegistry, namespace_registry::NameSpaceRegistry,
+    symbol_table::FunctionContext, type_registry::TypeRegistry,
 };
+use std::collections::HashMap;
 
-impl ErrorCollector {
-    pub(crate) fn import_not_found(&mut self, range: Range, phase: Phase, path: String) {
-        self.emit(EK::ImportNotFound, range, phase, Sv::Error, Pl::Str(path));
-    }
+#[derive(Debug, Default)]
+pub struct NameSpace {
+    pub namespace_id: NameSpaceID,
+    pub name_to_id: HashMap<String, NameSpaceID>,
 
-    pub(crate) fn cyclic_dependency(&mut self, range: Range, phase: Phase, path: String) {
-        self.emit(EK::CyclicDependency, range, phase, Sv::Error, Pl::Str(path));
+    pub func_ctx: FunctionContext,
+    pub op_ctx: OperatorContext,
+    pub scope_registry: ScopeRegistry,
+    pub type_registry: TypeRegistry,
+}
+
+impl NameSpace {
+    pub fn get_id_by_name(&self, name: &str) -> Option<NameSpaceID> {
+        self.name_to_id.get(name).copied()
     }
 }

@@ -20,7 +20,7 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn invalid_struct_stmt(&mut self, range: Range, phase: Phase, stmt_kind: String) {
+    pub(crate) fn invalid_struct_stmt(&mut self, range: Range, phase: Phase, stmt_kind: String) {
         self.emit(
             EK::InvalidStructStmt,
             range,
@@ -30,7 +30,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn top_level_struct_field(&mut self, range: Range, phase: Phase, field_name: &str) {
+    pub(crate) fn top_level_struct_field(&mut self, range: Range, phase: Phase, field_name: &str) {
         self.emit(
             EK::TopLevelStructField,
             range,
@@ -40,11 +40,11 @@ impl ErrorCollector {
         );
     }
 
-    pub fn func_call_in_l_value(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn func_call_in_l_value(&mut self, range: Range, phase: Phase) {
         self.emit(EK::FuncCallInLValue, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn assign_type_mismatch(
+    pub(crate) fn assign_type_mismatch(
         &mut self,
         range: Range,
         phase: Phase,
@@ -60,11 +60,11 @@ impl ErrorCollector {
         );
     }
 
-    pub fn expr_ends_with_dot(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn expr_ends_with_dot(&mut self, range: Range, phase: Phase) {
         self.emit(EK::ExprEndsWithDot, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn non_member_token_after_dot(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn non_member_token_after_dot(&mut self, range: Range, phase: Phase) {
         self.emit(
             EK::NonMemberTokenAfterDot,
             range,
@@ -74,11 +74,15 @@ impl ErrorCollector {
         );
     }
 
-    pub fn expr_begins_with_dot(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn expr_begins_with_dot(&mut self, range: Range, phase: Phase) {
         self.emit(EK::ExprBeginsWithDot, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn invalid_l_value(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn invalid_l_value(&mut self, range: Range, phase: Phase) {
         self.emit(EK::InvalidLValue, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub(crate) fn expr_ends_with_type(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::ExprEndsWithType, range, phase, Sv::Error, Pl::None);
     }
 }

@@ -18,7 +18,7 @@ use crate::{
     ExprToken, ParserDeclStmt, ParserDeclStmtKind, Range, StructID, SymbolPath,
     error::Ph,
     global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    name_space::is_reserved_type_name,
+    namespace_registry::is_reserved_type_name,
     symbol_path,
     type_registry::{ResolvedType, StructDecl, StructField},
 };

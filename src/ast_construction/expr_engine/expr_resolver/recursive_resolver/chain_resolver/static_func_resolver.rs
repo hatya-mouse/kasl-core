@@ -25,7 +25,7 @@ impl ExpressionResolver<'_> {
         base_type: &ResolvedType,
         access: MemberAccess,
         range: Range,
-    ) -> Option<Expr<ResolvedType>> {
+    ) -> Option<Expr> {
         // Get the id of the struct
         let ResolvedType::Struct(struct_id) = base_type else {
             self.ec

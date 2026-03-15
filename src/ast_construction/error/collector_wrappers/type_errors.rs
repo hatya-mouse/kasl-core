@@ -20,7 +20,7 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn type_not_found(&mut self, range: Range, phase: Phase, type_name: String) {
+    pub(crate) fn type_not_found(&mut self, range: Range, phase: Phase, type_name: String) {
         self.emit(
             EK::TypeNotFound,
             range,
@@ -30,7 +30,12 @@ impl ErrorCollector {
         );
     }
 
-    pub fn non_bool_type_for_condition(&mut self, range: Range, phase: Phase, got_type: String) {
+    pub(crate) fn non_bool_type_for_condition(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        got_type: String,
+    ) {
         self.emit(
             EK::NonBoolTypeForCondition,
             range,
@@ -40,7 +45,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn return_type_mismatch(
+    pub(crate) fn return_type_mismatch(
         &mut self,
         range: Range,
         phase: Phase,
@@ -56,7 +61,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn return_value_for_no_return_func(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn return_value_for_no_return_func(&mut self, range: Range, phase: Phase) {
         self.emit(
             EK::ReturnValueForNoReturnFunc,
             range,
@@ -66,7 +71,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn return_without_value_for_return_func(
+    pub(crate) fn return_without_value_for_return_func(
         &mut self,
         range: Range,
         phase: Phase,

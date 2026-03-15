@@ -15,22 +15,24 @@
 //
 
 mod import_path;
+mod namespace;
 mod reserved_type_names;
 mod symbol_id;
 mod symbol_path;
 
 pub use import_path::ImportPath;
+pub use namespace::NameSpace;
 pub use reserved_type_names::is_reserved_type_name;
 pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
-use crate::NameSpace;
 use std::collections::HashMap;
 
+/// Stores a id-namespace pair of all namespaces in compilation.
+/// Should only exist one instance per compilation.
 #[derive(Debug, Default)]
 pub struct NameSpaceRegistry {
     pub namespaces: HashMap<NameSpaceID, NameSpace>,
-    pub name_to_id: HashMap<String, NameSpaceID>,
     root_namespace_id: NameSpaceID,
     next_namespace_id: usize,
 }
@@ -54,19 +56,26 @@ impl NameSpaceRegistry {
         self.namespaces.get(&id)
     }
 
-    pub fn register_namespace(&mut self, name: String, namespace: NameSpace) {
+    pub fn register_namespace(
+        &mut self,
+        name: String,
+        namespace: NameSpace,
+        parent: Option<NameSpaceID>,
+    ) {
         let namespace_id = self.generate_namespace_id();
         self.namespaces.insert(namespace_id, namespace);
-        self.name_to_id.insert(name, namespace_id);
+        if let Some(parent) = parent {
+            self.namespaces
+                .get_mut(&parent)
+                .unwrap()
+                .name_to_id
+                .insert(name, namespace_id);
+        }
     }
 
     pub fn generate_namespace_id(&mut self) -> NameSpaceID {
         let id = NameSpaceID::new(self.next_namespace_id);
         self.next_namespace_id += 1;
         id
-    }
-
-    pub fn get_id_by_name(&self, name: &str) -> Option<NameSpaceID> {
-        self.name_to_id.get(name).copied()
     }
 }

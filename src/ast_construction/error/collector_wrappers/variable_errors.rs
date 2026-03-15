@@ -20,7 +20,7 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn no_type_annotation_or_def_val(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn no_type_annotation_or_def_val(&mut self, range: Range, phase: Phase) {
         self.emit(
             EK::NoTypeAnnotationOrDefVal,
             range,
@@ -30,7 +30,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn var_not_found(&mut self, range: Range, phase: Phase, var_name: &str) {
+    pub(crate) fn var_not_found(&mut self, range: Range, phase: Phase, var_name: &str) {
         self.emit(
             EK::VarNotFound,
             range,
@@ -40,7 +40,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn type_annotation_mismatch(
+    pub(crate) fn type_annotation_mismatch(
         &mut self,
         range: Range,
         phase: Phase,
@@ -56,7 +56,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn duplicate_var_name(&mut self, range: Range, phase: Phase, var_name: &str) {
+    pub(crate) fn duplicate_var_name(&mut self, range: Range, phase: Phase, var_name: &str) {
         self.emit(
             EK::DuplicateVarName,
             range,
@@ -66,7 +66,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn immutable_assignment(&mut self, range: Range, phase: Phase, var_name: &str) {
+    pub(crate) fn immutable_assignment(&mut self, range: Range, phase: Phase, var_name: &str) {
         self.emit(
             EK::ImmutableAssignment,
             range,
@@ -76,11 +76,11 @@ impl ErrorCollector {
         );
     }
 
-    pub fn static_var_access(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn static_var_access(&mut self, range: Range, phase: Phase) {
         self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
     }
 
-    pub fn builtin_var_access(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn builtin_var_access(&mut self, range: Range, phase: Phase) {
         self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
     }
 }

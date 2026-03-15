@@ -29,7 +29,7 @@ impl ExpressionBuilder<'_> {
         min_prec: u32,
     ) -> Option<UnresolvedExpr> {
         // Get the left-hand side expression
-        let mut lhs = self.parse_lhs(tokens)?;
+        let mut lhs = self.parse_lhs_chain(tokens)?;
 
         while let Some(op_token) = tokens.peek() {
             // Get the range of the operator token

@@ -24,7 +24,7 @@ impl ErrorCollector {
     /// Automatically emits a CompilerBug error with the provided range, phase, and dev message,
     /// combined with the location of the caller.
     #[track_caller]
-    pub fn comp_bug(&mut self, range: Range, phase: Phase, dev_msg: &str) {
+    pub(crate) fn comp_bug(&mut self, range: Range, phase: Phase, dev_msg: &str) {
         // Get the location of the caller
         let loc = Location::caller();
         // Format the location string

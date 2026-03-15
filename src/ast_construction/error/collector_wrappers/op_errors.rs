@@ -20,7 +20,7 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub fn prefix_op_not_found(&mut self, range: Range, phase: Phase, symbol: &str) {
+    pub(crate) fn prefix_op_not_found(&mut self, range: Range, phase: Phase, symbol: &str) {
         self.emit(
             EK::PrefixOpNotFound,
             range,
@@ -30,7 +30,12 @@ impl ErrorCollector {
         );
     }
 
-    pub fn infix_or_postfix_op_not_found(&mut self, range: Range, phase: Phase, symbol: &str) {
+    pub(crate) fn infix_or_postfix_op_not_found(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        symbol: &str,
+    ) {
         self.emit(
             EK::InfixOrPostfixOpNotFound,
             range,
@@ -40,7 +45,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn op_not_associative(&mut self, range: Range, phase: Phase, symbol: &str) {
+    pub(crate) fn op_not_associative(&mut self, range: Range, phase: Phase, symbol: &str) {
         self.emit(
             EK::OpNotAssociative,
             range,
@@ -50,7 +55,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn wrong_param_count_for_infix(
+    pub(crate) fn wrong_param_count_for_infix(
         &mut self,
         range: Range,
         phase: Phase,
@@ -66,7 +71,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn wrong_param_count_for_prefix(
+    pub(crate) fn wrong_param_count_for_prefix(
         &mut self,
         range: Range,
         phase: Phase,
@@ -82,7 +87,7 @@ impl ErrorCollector {
         );
     }
 
-    pub fn wrong_param_count_for_postfix(
+    pub(crate) fn wrong_param_count_for_postfix(
         &mut self,
         range: Range,
         phase: Phase,

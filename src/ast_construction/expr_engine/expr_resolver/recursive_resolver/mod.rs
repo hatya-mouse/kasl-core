@@ -21,45 +21,38 @@ mod literal_resolver;
 mod operator_resolver;
 
 use crate::{
-    Expr, ExprKind, error::Ph, expr_engine::ExpressionResolver, type_registry::ResolvedType,
+    Expr, ExprKind,
+    error::Ph,
+    expr_engine::ExpressionResolver,
+    symbol_table::{UnresolvedExpr, UnresolvedExprKind},
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_recursively(&mut self, expr: Expr<()>) -> Option<Expr<ResolvedType>> {
+    pub fn resolve_recursively(&mut self, expr: UnresolvedExpr) -> Option<Expr> {
         match expr.kind {
-            ExprKind::IntLiteral(value) => self.resolve_int_literal(value, expr.range),
-            ExprKind::FloatLiteral(value) => self.resolve_float_literal(value, expr.range),
-            ExprKind::BoolLiteral(value) => self.resolve_bool_literal(value, expr.range),
+            UnresolvedExprKind::IntLiteral(value) => self.resolve_int_literal(value, expr.range),
+            UnresolvedExprKind::FloatLiteral(value) => {
+                self.resolve_float_literal(value, expr.range)
+            }
+            UnresolvedExprKind::BoolLiteral(value) => self.resolve_bool_literal(value, expr.range),
 
-            ExprKind::InfixOp {
+            UnresolvedExprKind::InfixOp {
                 symbol,
                 lhs_expr,
                 rhs_expr,
-                ..
             } => self.resolve_infix_op(symbol, *lhs_expr, *rhs_expr, expr.range),
 
-            ExprKind::PrefixOp {
-                symbol,
-                operand_expr,
-                ..
-            } => self.resolve_prefix_op(symbol, *operand_expr, expr.range),
+            UnresolvedExprKind::PrefixOp { symbol, operand } => {
+                self.resolve_prefix_op(symbol, *operand_expr, expr.range)
+            }
 
-            ExprKind::PostfixOp {
-                symbol,
-                operand_expr,
-                ..
-            } => self.resolve_postfix_op(symbol, *operand_expr, expr.range),
+            UnresolvedExprKind::PostfixOp { symbol, operand } => {
+                self.resolve_postfix_op(symbol, *operand_expr, expr.range)
+            }
 
-            ExprKind::Identifier { name, id: _ } => self.resolve_identifier(name, expr.range),
-
-            ExprKind::FuncCall {
-                name,
-                id: _,
-                no_type_args,
-                args: _,
-            } => self.resolve_func_call(name, no_type_args, expr.range),
-
-            ExprKind::Chain { lhs, access } => self.resolve_chain(*lhs, access, expr.range),
+            UnresolvedExprKind::Chain { lhs, elements } => {
+                self.resolve_chain(*lhs, elements, expr.range)
+            }
 
             _ => {
                 self.ec.comp_bug(

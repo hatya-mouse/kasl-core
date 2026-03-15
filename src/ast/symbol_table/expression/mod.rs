@@ -20,7 +20,7 @@ pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExpr
 
 use crate::{
     FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
-    symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
+    type_registry::ResolvedType,
 };
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
@@ -59,23 +59,25 @@ pub enum ExprKind {
         operand: Box<FuncCallArg>,
     },
     Identifier {
-        name: String,
         id: VariableID,
     },
-    FuncCall {
+    StructField {
+        lhs: Box<Expr>,
+        offset: i32,
+    },
+    StructInit {
+        id: StructID,
+    },
+    StaticFuncCall {
         id: FunctionID,
         args: Vec<FuncCallArg>,
     },
-    StructInit {
-        name: String,
-        id: StructID,
-    },
-    Chain {
+    InstanceFuncCall {
         lhs: Box<Expr>,
-        access: MemberAccess,
+        id: FunctionID,
+        args: Vec<FuncCallArg>,
     },
-    StaticFuncCall {
-        name: String,
+    FuncCall {
         id: FunctionID,
         args: Vec<FuncCallArg>,
     },
@@ -83,20 +85,6 @@ pub enum ExprKind {
         name: String,
         id: BuiltinFuncID,
         args: Vec<Expr>,
-    },
-}
-
-#[derive(Debug, PartialEq, Clone, serde::Serialize)]
-pub enum MemberAccess {
-    Access {
-        name: String,
-        offset: Option<i32>,
-    },
-    FuncCall {
-        name: String,
-        id: Option<FunctionID>,
-        no_type_args: Vec<NoTypeFuncCallArg>,
-        args: Option<Vec<FuncCallArg>>,
     },
 }
 

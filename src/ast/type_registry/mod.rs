@@ -35,7 +35,7 @@ use std::{
 #[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
     pub structs: HashMap<StructID, StructDecl>,
-    pub path_to_id: HashMap<SymbolPath, StructID>,
+    pub name_to_id: HashMap<String, StructID>,
     next_struct_id: usize,
 }
 
@@ -46,18 +46,16 @@ impl TypeRegistry {
         id
     }
 
-    pub fn resolve_type_path(&self, type_path: &SymbolPath) -> Option<ResolvedType> {
-        if type_path.len() == 1
-            && let Ok(primitive_type) = PrimitiveType::from_str(&type_path.last().unwrap().symbol)
-        {
+    pub fn resolve_type_path(&self, type_name: &String) -> Option<ResolvedType> {
+        if let Ok(primitive_type) = PrimitiveType::from_str(&type_name) {
             return Some(ResolvedType::Primitive(primitive_type));
         }
-        let id = self.get_struct_id_by_path(type_path)?;
+        let id = self.get_struct_id_by_name(type_name)?;
         Some(ResolvedType::Struct(id))
     }
 
-    pub fn get_struct_id_by_path(&self, type_path: &SymbolPath) -> Option<StructID> {
-        self.path_to_id.get(type_path).copied()
+    pub fn get_struct_id_by_name(&self, type_name: &String) -> Option<StructID> {
+        self.name_to_id.get(type_name).copied()
     }
 
     pub fn get_type_size(&self, type_id: &ResolvedType) -> usize {
@@ -74,17 +72,17 @@ impl TypeRegistry {
         }
     }
 
-    pub fn register_struct(&mut self, struct_decl: StructDecl, path: SymbolPath, id: StructID) {
+    pub fn register_struct(&mut self, struct_decl: StructDecl, name: String, id: StructID) {
         self.structs.insert(id, struct_decl);
-        self.path_to_id.insert(path, id);
+        self.name_to_id.insert(name, id);
     }
 
     pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
         self.structs.get(id)
     }
 
-    pub fn has_struct(&self, path: &SymbolPath) -> bool {
-        self.path_to_id.contains_key(path)
+    pub fn has_struct(&self, type_name: &String) -> bool {
+        self.name_to_id.contains_key(type_name)
     }
 
     pub fn format_type(&self, ty: &ResolvedType) -> String {

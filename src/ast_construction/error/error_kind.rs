@@ -268,8 +268,13 @@ pub enum ErrorKind {
 
     /// Title: CyclicDependency
     /// Payload: The path of the import
-    /// A import makes a cyclic dependency.
+    /// An import makes a cyclic dependency.
     CyclicDependency,
+
+    /// Title: ExprEndsWithType
+    /// Payload: None
+    /// An expression ends with a type.
+    ExprEndsWithType,
 
     /// Title: CompilerBug
     /// Payload: Error message

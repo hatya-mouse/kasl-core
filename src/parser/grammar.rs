@@ -18,7 +18,8 @@ use crate::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
     ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
     ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, PostfixOperatorProperties,
-    PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent, name_space::ImportPath,
+    PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
+    namespace_registry::ImportPath,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {

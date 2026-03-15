@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    Range, error::Ph, global_decl_collection::GlobalDeclCollector, name_space::ImportPath,
-    namespace_constructor::NameSpaceConstructor,
+    Range, error::Ph, global_decl_collection::GlobalDeclCollector,
+    namespace_constructor::NameSpaceConstructor, namespace_registry::ImportPath,
 };
 use std::{fs::File, io::Read, path::PathBuf};
 
