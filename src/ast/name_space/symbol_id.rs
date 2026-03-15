@@ -89,3 +89,19 @@ impl Display for OperatorID {
         write!(f, "{}", self.0)
     }
 }
+
+/// An ID used to identify a namespace.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
+pub struct NameSpaceID(usize);
+
+impl NameSpaceID {
+    pub fn new(val: usize) -> Self {
+        Self(val)
+    }
+}
+
+impl Display for NameSpaceID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}

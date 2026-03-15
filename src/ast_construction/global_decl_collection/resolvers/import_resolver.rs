@@ -61,10 +61,11 @@ impl GlobalDeclCollector<'_> {
 
         // Create a new namespace
         let namespace = NameSpace {
-            name: import_path.to_string(),
             prog_ctx: constructor.prog_ctx,
         };
-        self.prog_ctx.name_spaces.push(namespace);
+        self.prog_ctx
+            .namespace_registry
+            .add_registry(import_path.to_string(), namespace);
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {

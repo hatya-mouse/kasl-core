@@ -16,7 +16,7 @@
 
 use crate::{
     OperatorContext, ScopeRegistry,
-    name_space::NameSpace,
+    name_space::NameSpaceRegistry,
     symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
     type_registry::{StructGraph, TypeRegistry},
 };
@@ -28,7 +28,7 @@ pub struct ProgramContext {
     pub op_ctx: OperatorContext,
     pub scope_registry: ScopeRegistry,
     pub type_registry: TypeRegistry,
-    pub name_spaces: Vec<NameSpace>,
+    pub namespace_registry: NameSpaceRegistry,
 }
 
 #[derive(Debug, Default)]

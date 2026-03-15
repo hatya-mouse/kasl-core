@@ -21,13 +21,34 @@ mod symbol_path;
 
 pub use import_path::ImportPath;
 pub use reserved_type_names::is_reserved_type_name;
-pub use symbol_id::{FunctionID, OperatorID, ParserStmtID, StructID, VariableID};
+pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
 use crate::ProgramContext;
+use std::collections::HashMap;
+
+#[derive(Debug, Default)]
+pub struct NameSpaceRegistry {
+    pub name_to_id: HashMap<String, NameSpaceID>,
+    pub namespaces: HashMap<NameSpaceID, NameSpace>,
+    next_namespace_id: usize,
+}
+
+impl NameSpaceRegistry {
+    pub fn generate_namespace_id(&mut self) -> NameSpaceID {
+        let id = NameSpaceID::new(self.next_namespace_id);
+        self.next_namespace_id += 1;
+        id
+    }
+
+    pub fn add_registry(&mut self, name: String, namespace: NameSpace) {
+        let id = self.generate_namespace_id();
+        self.name_to_id.insert(name, id);
+        self.namespaces.insert(id, namespace);
+    }
+}
 
 #[derive(Debug, Default)]
 pub struct NameSpace {
-    pub name: String,
     pub prog_ctx: ProgramContext,
 }
