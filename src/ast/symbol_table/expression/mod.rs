@@ -14,20 +14,24 @@
 // limitations under the License.
 //
 
+mod unresolved_expr;
+
+pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
+
 use crate::{
     FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
     symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
-pub struct Expr<T> {
-    pub kind: ExprKind<T>,
-    pub value_type: T,
+pub struct Expr {
+    pub kind: ExprKind,
+    pub value_type: ResolvedType,
     pub range: Range,
 }
 
-impl<T> Expr<T> {
-    pub fn new(kind: ExprKind<T>, value_type: T, range: Range) -> Self {
+impl Expr {
+    pub fn new(kind: ExprKind, value_type: ResolvedType, range: Range) -> Self {
         Self {
             kind,
             value_type,
@@ -37,46 +41,37 @@ impl<T> Expr<T> {
 }
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
-pub enum ExprKind<T> {
+pub enum ExprKind {
     IntLiteral(i32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     InfixOp {
-        symbol: String,
-        operator: Option<OperatorID>,
-        lhs_expr: Box<Expr<T>>,
-        lhs: Option<Box<FuncCallArg>>,
-        rhs_expr: Box<Expr<T>>,
-        rhs: Option<Box<FuncCallArg>>,
+        operator: OperatorID,
+        lhs: Box<FuncCallArg>,
+        rhs: Box<FuncCallArg>,
     },
     PrefixOp {
-        symbol: String,
-        operator: Option<OperatorID>,
-        operand_expr: Box<Expr<T>>,
-        operand: Option<Box<FuncCallArg>>,
+        operator: OperatorID,
+        operand: Box<FuncCallArg>,
     },
     PostfixOp {
-        symbol: String,
-        operator: Option<OperatorID>,
-        operand_expr: Box<Expr<T>>,
-        operand: Option<Box<FuncCallArg>>,
+        operator: OperatorID,
+        operand: Box<FuncCallArg>,
     },
     Identifier {
         name: String,
-        id: Option<VariableID>,
+        id: VariableID,
     },
     FuncCall {
-        name: String,
-        id: Option<FunctionID>,
-        no_type_args: Vec<NoTypeFuncCallArg>,
-        args: Option<Vec<FuncCallArg>>,
+        id: FunctionID,
+        args: Vec<FuncCallArg>,
     },
     StructInit {
         name: String,
         id: StructID,
     },
     Chain {
-        lhs: Box<Expr<T>>,
+        lhs: Box<Expr>,
         access: MemberAccess,
     },
     StaticFuncCall {
@@ -87,7 +82,7 @@ pub enum ExprKind<T> {
     BuiltinFuncCall {
         name: String,
         id: BuiltinFuncID,
-        args: Vec<Expr<ResolvedType>>,
+        args: Vec<Expr>,
     },
 }
 
@@ -111,10 +106,4 @@ pub struct LValue {
     pub offset: i32,
     pub value_type: ResolvedType,
     pub is_field: bool,
-}
-
-pub enum ResolvedChainLHS {
-    Expr(Expr<ResolvedType>),
-    Type(ResolvedType),
-    Builtin,
 }

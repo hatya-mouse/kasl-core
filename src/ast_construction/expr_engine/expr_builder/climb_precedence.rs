@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    Expr, ExprKind, ExprToken, ExprTokenKind, OperatorAssociativity, error::Ph,
+    ExprToken, ExprTokenKind, OperatorAssociativity,
+    error::Ph,
     expr_engine::ExpressionBuilder,
+    symbol_table::{UnresolvedExpr, UnresolvedExprKind},
 };
 use std::{iter::Peekable, slice::Iter};
 
@@ -25,7 +27,7 @@ impl ExpressionBuilder<'_> {
         &mut self,
         tokens: &mut Peekable<Iter<ExprToken>>,
         min_prec: u32,
-    ) -> Option<Expr<()>> {
+    ) -> Option<UnresolvedExpr> {
         // Get the left-hand side expression
         let mut lhs = self.parse_lhs(tokens)?;
 
@@ -44,14 +46,11 @@ impl ExpressionBuilder<'_> {
                     break;
                 }
 
-                lhs = Expr::new(
-                    ExprKind::PostfixOp {
+                lhs = UnresolvedExpr::new(
+                    UnresolvedExprKind::PostfixOp {
                         symbol: op_symbol,
-                        operator: None,
-                        operand_expr: Box::new(lhs),
-                        operand: None,
+                        operand: Box::new(lhs),
                     },
-                    (),
                     op_range,
                 );
                 tokens.next();
@@ -95,16 +94,12 @@ impl ExpressionBuilder<'_> {
                 tokens.next();
 
                 let rhs = self.climb_precedence(tokens, next_prec)?;
-                lhs = Expr::new(
-                    ExprKind::InfixOp {
+                lhs = UnresolvedExpr::new(
+                    UnresolvedExprKind::InfixOp {
                         symbol: op_symbol,
-                        operator: None,
                         lhs_expr: Box::new(lhs),
-                        lhs: None,
                         rhs_expr: Box::new(rhs),
-                        rhs: None,
                     },
-                    (),
                     op_range,
                 );
             }

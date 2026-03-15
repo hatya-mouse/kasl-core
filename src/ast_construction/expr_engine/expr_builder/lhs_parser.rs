@@ -16,62 +16,18 @@
 
 use crate::ParserFuncCallArg;
 use crate::expr_engine::ExpressionBuilder;
-use crate::symbol_table::NoTypeFuncCallArg;
-use crate::{Expr, ExprKind, ExprToken, ExprTokenKind, error::Ph, symbol_table::MemberAccess};
+use crate::symbol_table::{
+    NoTypeFuncCallArg, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
+};
+use crate::{ExprToken, ExprTokenKind, error::Ph};
 use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionBuilder<'_> {
-    pub fn parse_lhs(&mut self, tokens: &mut Peekable<Iter<ExprToken>>) -> Option<Expr<()>> {
-        let first = tokens.next()?;
-        let mut expr = self.parse_lhs_single(first, tokens)?;
-
-        // If the next token is dot, resolve it as a member access
-        while let Some(ExprTokenKind::Dot) = tokens.peek().map(|token| &token.kind) {
-            // Consume the dot token
-            // The next token is confirmed to be a dot so it can be safely unwrapped
-            let dot_token = tokens.next().unwrap();
-            // Get the next token
-            let Some(next_token) = tokens.next() else {
-                self.ec.expr_ends_with_dot(dot_token.range, Ph::ExprEngine);
-                return None;
-            };
-
-            let access = match &next_token.kind {
-                ExprTokenKind::Identifier(name) => MemberAccess::Access {
-                    name: name.clone(),
-                    offset: None,
-                },
-                ExprTokenKind::FuncCall { name, args } => MemberAccess::FuncCall {
-                    name: name.clone(),
-                    id: None,
-                    no_type_args: self.parse_func_args(args)?,
-                    args: None,
-                },
-                _ => {
-                    self.ec
-                        .non_member_token_after_dot(next_token.range, Ph::ExprEngine);
-                    return None;
-                }
-            };
-
-            expr = Expr::new(
-                ExprKind::Chain {
-                    lhs: Box::new(expr),
-                    access,
-                },
-                (),
-                next_token.range,
-            );
-        }
-
-        Some(expr)
-    }
-
-    fn parse_lhs_single(
+    pub fn parse_lhs_single(
         &mut self,
         token: &ExprToken,
         rest: &mut Peekable<Iter<ExprToken>>,
-    ) -> Option<Expr<()>> {
+    ) -> Option<UnresolvedExpr> {
         match &token.kind {
             ExprTokenKind::Operator(symbol) => {
                 let prefix_prec = match self.op_ctx.get_prefix_props(symbol) {
@@ -83,49 +39,48 @@ impl ExpressionBuilder<'_> {
                     }
                 };
                 let operand = self.climb_precedence(rest, prefix_prec)?;
-                Some(Expr::new(
-                    ExprKind::PrefixOp {
+                Some(UnresolvedExpr::new(
+                    UnresolvedExprKind::PrefixOp {
                         symbol: symbol.clone(),
-                        operator: None,
-                        operand_expr: Box::new(operand),
-                        operand: None,
+                        operand: Box::new(operand),
                     },
-                    (),
                     token.range,
                 ))
             }
 
-            ExprTokenKind::IntLiteral(value) => {
-                Some(Expr::new(ExprKind::IntLiteral(*value), (), token.range))
-            }
-            ExprTokenKind::FloatLiteral(value) => {
-                Some(Expr::new(ExprKind::FloatLiteral(*value), (), token.range))
-            }
-            ExprTokenKind::BoolLiteral(value) => {
-                Some(Expr::new(ExprKind::BoolLiteral(*value), (), token.range))
-            }
-
-            ExprTokenKind::Identifier(name) => Some(Expr::new(
-                ExprKind::Identifier {
-                    name: name.clone(),
-                    id: None,
-                },
-                (),
+            ExprTokenKind::IntLiteral(value) => Some(UnresolvedExpr::new(
+                UnresolvedExprKind::IntLiteral(*value),
+                token.range,
+            )),
+            ExprTokenKind::FloatLiteral(value) => Some(UnresolvedExpr::new(
+                UnresolvedExprKind::FloatLiteral(*value),
+                token.range,
+            )),
+            ExprTokenKind::BoolLiteral(value) => Some(UnresolvedExpr::new(
+                UnresolvedExprKind::BoolLiteral(*value),
                 token.range,
             )),
 
-            ExprTokenKind::FuncCall { name, args } => Some(Expr::new(
-                ExprKind::FuncCall {
-                    name: name.clone(),
-                    id: None,
-                    no_type_args: self.parse_func_args(args)?,
-                    args: None,
+            ExprTokenKind::Identifier(name) => Some(UnresolvedExpr::new(
+                UnresolvedExprKind::Chain {
+                    lhs: None,
+                    elements: vec![UnresolvedChainElement::Identifier { name: name.clone() }],
                 },
-                (),
                 token.range,
             )),
 
-            ExprTokenKind::ResolvedExpr(expr) => Some(expr.clone()),
+            ExprTokenKind::FuncCall { name, args } => Some(UnresolvedExpr::new(
+                UnresolvedExprKind::Chain {
+                    lhs: None,
+                    elements: vec![UnresolvedChainElement::FuncCall {
+                        name: name.clone(),
+                        args: self.parse_func_args(args)?,
+                    }],
+                },
+                token.range,
+            )),
+
+            ExprTokenKind::UnresolvedExpr(expr) => Some(expr.clone()),
 
             ExprTokenKind::Parenthesized(_) => {
                 self.ec.comp_bug(
@@ -143,7 +98,10 @@ impl ExpressionBuilder<'_> {
         }
     }
 
-    fn parse_func_args(&mut self, args: &[ParserFuncCallArg]) -> Option<Vec<NoTypeFuncCallArg>> {
+    pub fn parse_func_args(
+        &mut self,
+        args: &[ParserFuncCallArg],
+    ) -> Option<Vec<NoTypeFuncCallArg>> {
         let mut parsed_args = Vec::new();
         for arg in args {
             let arg_expr = self.build(&arg.value)?;

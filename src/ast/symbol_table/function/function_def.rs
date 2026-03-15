@@ -54,14 +54,14 @@ impl Function {
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct NoTypeFuncCallArg {
     pub label: Option<String>,
-    pub value: Expr<()>,
+    pub value: UnresolvedExpr,
     pub range: Range,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct FuncCallArg {
     pub var_id: VariableID,
-    pub value: Expr<ResolvedType>,
+    pub value: Expr,
     pub range: Range,
 }
 
@@ -71,6 +71,6 @@ pub struct FuncParam {
     pub name: String,
     pub var_id: VariableID,
     pub value_type: ResolvedType,
-    pub def_val: Option<Expr<ResolvedType>>,
+    pub def_val: Expr<ResolvedType>,
     pub range: Range,
 }

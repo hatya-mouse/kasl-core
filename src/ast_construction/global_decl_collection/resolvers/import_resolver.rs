@@ -56,9 +56,10 @@ impl GlobalDeclCollector<'_> {
         constructor.analyze_scope_graph();
 
         // Register the namespace with the import path
-        self.namespace
-            .namespace_registry
-            .register_namespace(import_path, constructor.namespace);
+        self.namespace.namespace_registry.register_namespace(
+            import_path.path.last().cloned().unwrap(),
+            constructor.namespace,
+        );
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {

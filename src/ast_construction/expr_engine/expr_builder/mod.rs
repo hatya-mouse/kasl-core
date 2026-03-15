@@ -15,9 +15,14 @@
 //
 
 mod climb_precedence;
+mod lhs_chain_parser;
 mod lhs_parser;
 
-use crate::{Expr, ExprToken, ExprTokenKind, error::ErrorCollector, symbol_table::OperatorContext};
+use crate::{
+    ExprToken, ExprTokenKind,
+    error::ErrorCollector,
+    symbol_table::{OperatorContext, UnresolvedExpr},
+};
 
 pub struct ExpressionBuilder<'a> {
     ec: &'a mut ErrorCollector,
@@ -29,14 +34,14 @@ impl<'a> ExpressionBuilder<'a> {
         Self { ec, op_ctx }
     }
 
-    pub fn build(&mut self, tokens: &[ExprToken]) -> Option<Expr<()>> {
+    pub fn build(&mut self, tokens: &[ExprToken]) -> Option<UnresolvedExpr> {
         // First, build the parenthesized tokens by calling `build` recursively
         let mut processed_tokens: Vec<ExprToken> = Vec::new();
         for token in tokens {
             match &token.kind {
                 ExprTokenKind::Parenthesized(inner) => {
                     processed_tokens.push(ExprToken {
-                        kind: ExprTokenKind::ResolvedExpr(self.build(inner)?),
+                        kind: ExprTokenKind::UnresolvedExpr(self.build(inner)?),
                         range: token.range,
                     });
                 }

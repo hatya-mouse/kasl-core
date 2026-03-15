@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    Expr, InfixOperatorProperties, PostfixOperatorProperties, PrefixOperatorProperties, Range,
-    SymbolPath, name_space::ImportPath,
+    InfixOperatorProperties, PostfixOperatorProperties, PrefixOperatorProperties, Range,
+    SymbolPath, name_space::ImportPath, symbol_table::UnresolvedExpr,
 };
 use std::fmt::Display;
 
@@ -208,6 +208,6 @@ pub enum ExprTokenKind {
     },
     Dot,
     Parenthesized(Vec<ExprToken>),
-    /// An resoloved expression which is used only in the ExprEngine.
-    ResolvedExpr(Expr<()>),
+    /// An unresolved expression which is used only in the ExprEngine.
+    UnresolvedExpr(UnresolvedExpr),
 }

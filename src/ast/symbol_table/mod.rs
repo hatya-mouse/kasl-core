@@ -19,7 +19,10 @@ mod function;
 mod operator;
 mod statement;
 
-pub use expression::{Expr, ExprKind, LValue, MemberAccess, ResolvedChainLHS};
+pub use expression::{
+    Expr, ExprKind, LValue, MemberAccess, UnresolvedChainElement, UnresolvedExpr,
+    UnresolvedExprKind,
+};
 pub use function::{
     FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
 };
