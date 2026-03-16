@@ -15,62 +15,11 @@
 //
 
 use crate::{
-    Expr, ExprKind, FuncCallArg, FuncParam, Range, error::Ph, expr_engine::ExpressionResolver,
-    symbol_path, symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
+    FuncCallArg, FuncParam, Range, error::Ph, expr_engine::ExpressionResolver,
+    symbol_table::NoTypeFuncCallArg,
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_func_call(
-        &mut self,
-        name: String,
-        no_type_args: Vec<NoTypeFuncCallArg>,
-        range: Range,
-    ) -> Option<Expr<ResolvedType>> {
-        if let Some(func_id) = self.namespace.func_ctx.get_global_func_by_name(&name) {
-            // Get a reference to the function
-            let func = self.namespace.func_ctx.get_func(&func_id)?;
-            let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
-
-            // Add a function call edge to the scope graph
-            // This is used to detect recursion
-            self.scope_graph
-                .add_edge(self.current_scope, func.block.scope_id);
-
-            Some(Expr::new(
-                ExprKind::FuncCall {
-                    name,
-                    id: Some(func_id),
-                    no_type_args,
-                    args: Some(args),
-                },
-                func.return_type,
-                range,
-            ))
-        } else if let Some(struct_id) = self
-            .namespace
-            .type_registry
-            .get_struct_id_by_path(&symbol_path![name.clone()])
-        {
-            // If the function does not exist, check if the type with the same name exists
-            // Ensure that the function doesn't have any arguments
-            if !no_type_args.is_empty() {
-                self.ec.arg_for_struct_init(range, Ph::ExprEngine);
-            }
-
-            Some(Expr::new(
-                ExprKind::StructInit {
-                    name,
-                    id: struct_id,
-                },
-                ResolvedType::Struct(struct_id),
-                range,
-            ))
-        } else {
-            self.ec.func_not_found(range, Ph::ExprEngine, &name);
-            None
-        }
-    }
-
     pub fn resolve_func_call_args(
         &mut self,
         func_params: &[FuncParam],
@@ -136,18 +85,13 @@ impl ExpressionResolver<'_> {
         for (slot, param) in slots.iter().zip(func_params.iter()) {
             match slot {
                 Some(arg) => resolved_args.push(arg.clone()),
-                None => match param.def_val {
-                    // If the parameter has a default value, use it
-                    Some(ref def_val) => resolved_args.push(FuncCallArg {
+                None => {
+                    resolved_args.push(FuncCallArg {
                         var_id: param.var_id,
-                        value: def_val.clone(),
+                        value: param.def_val,
                         range: Range::zero(),
-                    }),
-                    None => {
-                        self.ec.missing_arg(func_call_range, Ph::ExprEngine);
-                        return None;
-                    }
-                },
+                    });
+                }
             }
         }
 

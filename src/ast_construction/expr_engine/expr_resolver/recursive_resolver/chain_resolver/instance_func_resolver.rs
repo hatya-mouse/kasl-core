@@ -15,12 +15,22 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver,
-    namespace_registry::NameSpaceStructGetter, type_registry::ResolvedType,
+    Expr, ExprKind, Range,
+    error::Ph,
+    expr_engine::ExpressionResolver,
+    namespace_registry::{NameSpaceFuncGetter, NameSpaceStructGetter},
+    symbol_table::NoTypeFuncCallArg,
+    type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_field_access(&mut self, lhs: Expr, name: &str, range: Range) -> Option<Expr> {
+    pub fn resolve_instance_func_call(
+        &mut self,
+        lhs: Expr,
+        name: &str,
+        no_type_args: &Vec<NoTypeFuncCallArg>,
+        range: Range,
+    ) -> Option<Expr> {
         // Get the field from the type of the lhs expression
         match lhs.value_type {
             ResolvedType::Primitive(_) => {
@@ -32,24 +42,29 @@ impl ExpressionResolver<'_> {
                 return None;
             }
             ResolvedType::Struct(struct_id) => {
-                let struct_decl = self.namespace_registry.get_struct(&struct_id)?;
-                // Get the field from the struct declaration
-                let Some(field_index) = struct_decl.get_field_index(name) else {
+                // Get the function
+                let Some(member_func_id) = self
+                    .namespace_registry
+                    .get_member_func_id(&struct_id, &name)
+                else {
+                    let struct_decl = self.namespace_registry.get_struct(&struct_id)?;
                     self.ec
-                        .member_field_not_found(range, Ph::ExprEngine, &struct_decl.name, name);
+                        .member_func_not_found(range, Ph::ExprEngine, &struct_decl.name, name);
                     return None;
                 };
+                let member_func = self.namespace_registry.get_func(&member_func_id)?;
+                // Resolve the arguments
+                let args =
+                    self.resolve_func_call_args(&member_func.params, &no_type_args, range)?;
 
-                // Get the offset of the field
-                let field_type = struct_decl.fields[field_index].value_type.clone();
-                let field_offset = struct_decl.field_offsets[field_index];
                 // Return the struct field expression
                 return Some(Expr::new(
-                    ExprKind::StructField {
+                    ExprKind::InstanceFuncCall {
                         lhs: Box::new(lhs),
-                        offset: field_offset,
+                        id: member_func_id,
+                        args,
                     },
-                    field_type,
+                    member_func.return_type,
                     range,
                 ));
             }

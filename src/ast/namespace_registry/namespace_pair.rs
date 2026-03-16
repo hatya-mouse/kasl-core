@@ -14,20 +14,20 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod statement;
+use crate::NameSpaceID;
 
-pub use expression::{
-    Expr, ExprKind, LValue, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
-};
-pub use function::{
-    FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
-};
-pub use operator::{
-    InfixOperator, InfixOperatorProperties, InfixQueryRef, OpBodyMap, OperatorAssociativity,
-    OperatorContext, PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
-    PrefixOperatorProperties, PrefixQueryRef,
-};
-pub use statement::{Block, IfArm, Statement};
+/// An set of NameSpaceID and other symbol ID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
+pub struct NameSpacePair<T> {
+    pub namespace_id: NameSpaceID,
+    pub symbol_id: T,
+}
+
+impl<T> NameSpacePair<T> {
+    pub fn new(namespace_id: NameSpaceID, symbol_id: T) -> Self {
+        Self {
+            namespace_id,
+            symbol_id,
+        }
+    }
+}

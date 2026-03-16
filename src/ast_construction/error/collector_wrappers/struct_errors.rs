@@ -39,15 +39,15 @@ impl ErrorCollector {
         &mut self,
         range: Range,
         phase: Phase,
-        struct_name: String,
-        field_name: String,
+        struct_name: &str,
+        field_name: &str,
     ) {
         self.emit(
             EK::MemberFieldNotFound,
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(struct_name, field_name),
+            Pl::StrPair(struct_name.to_string(), field_name.to_string()),
         );
     }
 
@@ -63,7 +63,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(struct_name.clone(), func_name.clone()),
+            Pl::StrPair(struct_name.to_string(), func_name.to_string()),
         );
     }
 

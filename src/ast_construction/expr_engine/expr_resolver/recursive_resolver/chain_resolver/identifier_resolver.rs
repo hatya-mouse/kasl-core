@@ -15,28 +15,31 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver, type_registry::ResolvedType,
+    Expr, ExprKind, Range, ScopeID,
+    error::Ph,
+    expr_engine::ExpressionResolver,
+    namespace_registry::{NameSpacePair, NameSpaceVarGetter},
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_identifier(&mut self, name: String, range: Range) -> Option<Expr<ResolvedType>> {
-        // Get the variable ID from the scope registry
-        let Some(var_id) = self
-            .namespace
-            .scope_registry
-            .lookup_var(self.current_scope, &name)
-        else {
-            self.ec.var_not_found(range, Ph::ExprEngine, &name);
+    pub fn resolve_identifier(
+        &mut self,
+        target_scope: NameSpacePair<ScopeID>,
+        name: &str,
+        range: Range,
+    ) -> Option<Expr> {
+        // Look up the variable in the target scope
+        let Some(var_id) = self.namespace_registry.get_var_id(&target_scope, name) else {
+            self.ec.var_not_found(range, Ph::ExprEngine, name);
             return None;
         };
-        let var = self.namespace.scope_registry.get_var_by_id(var_id)?;
+
+        // Get a reference to the variable
+        let scope_var = self.namespace_registry.get_var(&var_id)?;
 
         Some(Expr::new(
-            ExprKind::Identifier {
-                name,
-                id: Some(*var_id),
-            },
-            var.value_type,
+            ExprKind::Identifier { id: var_id },
+            scope_var.value_type,
             range,
         ))
     }

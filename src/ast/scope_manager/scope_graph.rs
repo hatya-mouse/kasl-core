@@ -14,42 +14,45 @@
 // limitations under the License.
 //
 
-use crate::ScopeID;
+use crate::{ScopeID, namespace_registry::NameSpacePair};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Default, Debug)]
 pub struct ScopeGraph {
-    pub caller_to_callee: HashMap<ScopeID, HashSet<ScopeID>>,
+    pub caller_to_callee: HashMap<NameSpacePair<ScopeID>, HashSet<NameSpacePair<ScopeID>>>,
     /// Whether the scope guarantees return statement.
-    scope_has_return: HashMap<ScopeID, bool>,
-    scope_requires_return: HashMap<ScopeID, bool>,
+    scope_has_return: HashMap<NameSpacePair<ScopeID>, bool>,
+    scope_requires_return: HashMap<NameSpacePair<ScopeID>, bool>,
 }
 
 impl ScopeGraph {
-    pub fn add_edge(&mut self, caller: ScopeID, callee: ScopeID) {
+    pub fn add_edge(&mut self, caller: NameSpacePair<ScopeID>, callee: NameSpacePair<ScopeID>) {
         self.caller_to_callee
             .entry(caller)
             .or_default()
             .insert(callee);
     }
 
-    pub fn get_callees(&self, caller: &ScopeID) -> Option<&HashSet<ScopeID>> {
+    pub fn get_callees(
+        &self,
+        caller: &NameSpacePair<ScopeID>,
+    ) -> Option<&HashSet<NameSpacePair<ScopeID>>> {
         self.caller_to_callee.get(caller)
     }
 
-    pub fn guarantees_return(&self, id: &ScopeID) -> bool {
+    pub fn guarantees_return(&self, id: &NameSpacePair<ScopeID>) -> bool {
         *self.scope_has_return.get(id).unwrap_or(&false)
     }
 
-    pub fn requires_return(&self, id: &ScopeID) -> bool {
+    pub fn requires_return(&self, id: &NameSpacePair<ScopeID>) -> bool {
         *self.scope_requires_return.get(id).unwrap_or(&false)
     }
 
-    pub fn set_has_return(&mut self, id: ScopeID, has_return: bool) {
+    pub fn set_has_return(&mut self, id: NameSpacePair<ScopeID>, has_return: bool) {
         self.scope_has_return.insert(id, has_return);
     }
 
-    pub fn set_requires_return(&mut self, id: ScopeID, requires_return: bool) {
+    pub fn set_requires_return(&mut self, id: NameSpacePair<ScopeID>, requires_return: bool) {
         self.scope_requires_return.insert(id, requires_return);
     }
 }

@@ -20,13 +20,13 @@ use crate::{Expr, Range, type_registry::ResolvedType};
 pub struct ScopeVar {
     pub name: String,
     pub value_type: ResolvedType,
-    pub def_val: Option<Expr<ResolvedType>>,
+    pub def_val: Option<Expr>,
     pub range: Range,
     pub var_kind: VariableKind,
 }
 
 impl ScopeVar {
-    pub fn expect_def_val(&self) -> &Expr<ResolvedType> {
+    pub fn expect_def_val(&self) -> &Expr {
         self.def_val
             .as_ref()
             .expect("Compiler error: Variable kind requires a default value but it was missing.")
@@ -47,6 +47,6 @@ pub enum VariableKind {
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct InputAttribute {
     pub name: String,
-    pub args: Vec<Expr<ResolvedType>>,
+    pub args: Vec<Expr>,
     pub range: Range,
 }

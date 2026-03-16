@@ -14,13 +14,15 @@
 // limitations under the License.
 //
 
+mod l_value;
 mod unresolved_expr;
 
+pub use l_value::LValue;
 pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 
 use crate::{
     FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
-    type_registry::ResolvedType,
+    namespace_registry::NameSpacePair, type_registry::ResolvedType,
 };
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
@@ -59,39 +61,30 @@ pub enum ExprKind {
         operand: Box<FuncCallArg>,
     },
     Identifier {
-        id: VariableID,
+        id: NameSpacePair<VariableID>,
     },
     StructField {
         lhs: Box<Expr>,
         offset: i32,
     },
     StructInit {
-        id: StructID,
+        id: NameSpacePair<StructID>,
     },
     StaticFuncCall {
-        id: FunctionID,
+        id: NameSpacePair<FunctionID>,
         args: Vec<FuncCallArg>,
     },
     InstanceFuncCall {
         lhs: Box<Expr>,
-        id: FunctionID,
+        id: NameSpacePair<FunctionID>,
         args: Vec<FuncCallArg>,
     },
     FuncCall {
-        id: FunctionID,
+        id: NameSpacePair<FunctionID>,
         args: Vec<FuncCallArg>,
     },
     BuiltinFuncCall {
-        name: String,
         id: BuiltinFuncID,
         args: Vec<Expr>,
     },
-}
-
-#[derive(Debug, PartialEq, Clone, serde::Serialize)]
-pub struct LValue {
-    pub var_id: VariableID,
-    pub offset: i32,
-    pub value_type: ResolvedType,
-    pub is_field: bool,
 }

@@ -17,29 +17,28 @@
 use crate::{
     Expr, ExprKind, FuncCallArg, Range,
     expr_engine::ExpressionResolver,
-    symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef},
-    type_registry::ResolvedType,
+    symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef, UnresolvedExpr},
 };
 
 impl ExpressionResolver<'_> {
     pub fn resolve_infix_op(
         &mut self,
         symbol: String,
-        lhs: Expr<()>,
-        rhs: Expr<()>,
+        lhs: UnresolvedExpr,
+        rhs: UnresolvedExpr,
         range: Range,
-    ) -> Option<Expr<ResolvedType>> {
+    ) -> Option<Expr> {
         // Resolve the types of the operands recursively
         let lhs = self.resolve_recursively(lhs)?;
         let rhs = self.resolve_recursively(rhs)?;
 
         // Get a reference to the actual operator
-        let op_id = self.namespace.op_ctx.get_infix_id(InfixQueryRef {
+        let op_id = self.op_ctx.get_infix_id(InfixQueryRef {
             symbol: &symbol,
             lhs_type: &lhs.value_type,
             rhs_type: &rhs.value_type,
         })?;
-        let op = self.namespace.op_ctx.get_infix_op(&op_id)?;
+        let op = self.op_ctx.get_infix_op(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -63,12 +62,9 @@ impl ExpressionResolver<'_> {
 
         Some(Expr::new(
             ExprKind::InfixOp {
-                symbol,
-                operator: Some(op_id),
-                lhs_expr: Box::new(lhs),
-                lhs: Some(Box::new(lhs_arg)),
-                rhs_expr: Box::new(rhs),
-                rhs: Some(Box::new(rhs_arg)),
+                operator: op_id,
+                lhs: Box::new(lhs_arg),
+                rhs: Box::new(rhs_arg),
             },
             return_type,
             range,
@@ -78,18 +74,18 @@ impl ExpressionResolver<'_> {
     pub fn resolve_prefix_op(
         &mut self,
         symbol: String,
-        operand: Expr<()>,
+        operand: UnresolvedExpr,
         range: Range,
-    ) -> Option<Expr<ResolvedType>> {
+    ) -> Option<Expr> {
         // Resolve the type of the operand
         let operand = self.resolve_recursively(operand)?;
 
         // Get a reference to the actual operator
-        let op_id = self.namespace.op_ctx.get_prefix_id(PrefixQueryRef {
+        let op_id = self.op_ctx.get_prefix_id(PrefixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
-        let op = self.namespace.op_ctx.get_prefix_op(&op_id)?;
+        let op = self.op_ctx.get_prefix_op(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -108,10 +104,8 @@ impl ExpressionResolver<'_> {
 
         Some(Expr::new(
             ExprKind::PrefixOp {
-                symbol,
-                operator: Some(op_id),
-                operand_expr: Box::new(operand),
-                operand: Some(Box::new(operand_arg)),
+                operator: op_id,
+                operand: Box::new(operand_arg),
             },
             return_type,
             range,
@@ -121,18 +115,18 @@ impl ExpressionResolver<'_> {
     pub fn resolve_postfix_op(
         &mut self,
         symbol: String,
-        operand: Expr<()>,
+        operand: UnresolvedExpr,
         range: Range,
-    ) -> Option<Expr<ResolvedType>> {
+    ) -> Option<Expr> {
         // Resolve the type of the operand
         let operand = self.resolve_recursively(operand)?;
 
         // Get a reference to the actual operator
-        let op_id = self.namespace.op_ctx.get_postfix_id(PostfixQueryRef {
+        let op_id = self.op_ctx.get_postfix_id(PostfixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
-        let op = self.namespace.op_ctx.get_postfix_op(&op_id)?;
+        let op = self.op_ctx.get_postfix_op(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -151,10 +145,8 @@ impl ExpressionResolver<'_> {
 
         Some(Expr::new(
             ExprKind::PostfixOp {
-                symbol,
-                operator: Some(op_id),
-                operand_expr: Box::new(operand),
-                operand: Some(Box::new(operand_arg)),
+                operator: op_id,
+                operand: Box::new(operand_arg),
             },
             return_type,
             range,

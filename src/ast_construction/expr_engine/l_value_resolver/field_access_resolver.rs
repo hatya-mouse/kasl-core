@@ -15,19 +15,24 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver,
-    namespace_registry::NameSpaceStructGetter, type_registry::ResolvedType,
+    Range, error::Ph, expr_engine::LValueResolver, namespace_registry::NameSpaceStructGetter,
+    symbol_table::LValue, type_registry::ResolvedType,
 };
 
-impl ExpressionResolver<'_> {
-    pub fn resolve_field_access(&mut self, lhs: Expr, name: &str, range: Range) -> Option<Expr> {
-        // Get the field from the type of the lhs expression
-        match lhs.value_type {
+impl LValueResolver<'_> {
+    pub fn resolve_field_access(
+        &mut self,
+        last_l_value: LValue,
+        name: &str,
+        range: Range,
+    ) -> Option<LValue> {
+        // Get the field from the type of the last l value
+        match last_l_value.value_type {
             ResolvedType::Primitive(_) => {
                 self.ec.member_access_on_primitive(
                     range,
                     Ph::ExprEngine,
-                    lhs.value_type.to_string(),
+                    last_l_value.value_type.to_string(),
                 );
                 return None;
             }
@@ -43,15 +48,13 @@ impl ExpressionResolver<'_> {
                 // Get the offset of the field
                 let field_type = struct_decl.fields[field_index].value_type.clone();
                 let field_offset = struct_decl.field_offsets[field_index];
-                // Return the struct field expression
-                return Some(Expr::new(
-                    ExprKind::StructField {
-                        lhs: Box::new(lhs),
-                        offset: field_offset,
-                    },
-                    field_type,
-                    range,
-                ));
+                // Return the resolved l value
+                Some(LValue {
+                    var_id: last_l_value.var_id,
+                    offset: last_l_value.offset + field_offset,
+                    value_type: field_type,
+                    is_field: true,
+                })
             }
         }
     }

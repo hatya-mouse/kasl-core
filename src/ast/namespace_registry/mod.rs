@@ -16,13 +16,17 @@
 
 mod import_path;
 mod namespace;
+mod namespace_pair;
 mod reserved_type_names;
+mod symbol_getter;
 mod symbol_id;
 mod symbol_path;
 
 pub use import_path::ImportPath;
 pub use namespace::NameSpace;
+pub use namespace_pair::NameSpacePair;
 pub use reserved_type_names::is_reserved_type_name;
+pub use symbol_getter::{NameSpaceFuncGetter, NameSpaceStructGetter, NameSpaceVarGetter};
 pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
@@ -52,8 +56,8 @@ impl NameSpaceRegistry {
         self.root_namespace_id
     }
 
-    pub fn get_namespace_by_id(&self, id: NameSpaceID) -> Option<&NameSpace> {
-        self.namespaces.get(&id)
+    pub fn get_namespace_by_id(&self, id: &NameSpaceID) -> Option<&NameSpace> {
+        self.namespaces.get(id)
     }
 
     pub fn register_namespace(
@@ -68,7 +72,7 @@ impl NameSpaceRegistry {
             self.namespaces
                 .get_mut(&parent)
                 .unwrap()
-                .name_to_id
+                .child_namespaces
                 .insert(name, namespace_id);
         }
     }

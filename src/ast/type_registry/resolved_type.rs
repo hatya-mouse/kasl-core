@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{StructID, type_registry::PrimitiveType};
+use crate::{StructID, namespace_registry::NameSpacePair, type_registry::PrimitiveType};
 use std::fmt::Display;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum ResolvedType {
     Primitive(PrimitiveType),
-    Struct(StructID),
+    Struct(NameSpacePair<StructID>),
 }
 
 impl PartialEq<ResolvedType> for &ResolvedType {
@@ -37,7 +37,7 @@ impl Display for ResolvedType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ResolvedType::Primitive(ty) => write!(f, "{}", ty),
-            ResolvedType::Struct(id) => write!(f, "struct({})", id),
+            ResolvedType::Struct(id) => write!(f, "struct({})", id.symbol_id),
         }
     }
 }

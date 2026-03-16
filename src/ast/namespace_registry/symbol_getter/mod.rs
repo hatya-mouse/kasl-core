@@ -14,20 +14,10 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod statement;
+mod func_getter;
+mod struct_getter;
+mod var_getter;
 
-pub use expression::{
-    Expr, ExprKind, LValue, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
-};
-pub use function::{
-    FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
-};
-pub use operator::{
-    InfixOperator, InfixOperatorProperties, InfixQueryRef, OpBodyMap, OperatorAssociativity,
-    OperatorContext, PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
-    PrefixOperatorProperties, PrefixQueryRef,
-};
-pub use statement::{Block, IfArm, Statement};
+pub use func_getter::NameSpaceFuncGetter;
+pub use struct_getter::NameSpaceStructGetter;
+pub use var_getter::NameSpaceVarGetter;

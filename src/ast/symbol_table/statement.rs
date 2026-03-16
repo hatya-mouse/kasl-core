@@ -14,16 +14,16 @@
 // limitations under the License.
 //
 
-use crate::{Expr, ScopeID, VariableID, symbol_table::LValue, type_registry::ResolvedType};
+use crate::{Expr, ScopeID, VariableID, namespace_registry::NameSpacePair, symbol_table::LValue};
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Block {
     pub body: Vec<Statement>,
-    pub scope_id: ScopeID,
+    pub scope_id: NameSpacePair<ScopeID>,
 }
 
 impl Block {
-    pub fn new(scope_id: ScopeID) -> Self {
+    pub fn new(scope_id: NameSpacePair<ScopeID>) -> Self {
         Self {
             body: Vec::new(),
             scope_id,
@@ -34,7 +34,7 @@ impl Block {
         self.body = stmts;
     }
 
-    pub fn get_scope_id(&self) -> ScopeID {
+    pub fn get_scope_id(&self) -> NameSpacePair<ScopeID> {
         self.scope_id
     }
 }
@@ -52,10 +52,10 @@ pub enum Statement {
     },
     Assign {
         target: LValue,
-        value: Expr<ResolvedType>,
+        value: Expr,
     },
     Expression {
-        expr: Expr<ResolvedType>,
+        expr: Expr,
     },
     If {
         main: IfArm,
@@ -63,18 +63,18 @@ pub enum Statement {
         else_block: Option<Block>,
     },
     Return {
-        value: Option<Expr<ResolvedType>>,
+        value: Option<Expr>,
     },
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct IfArm {
-    pub condition: Expr<ResolvedType>,
+    pub condition: Expr,
     pub block: Block,
 }
 
 impl IfArm {
-    pub fn new(condition: Expr<ResolvedType>, block: Block) -> Self {
+    pub fn new(condition: Expr, block: Block) -> Self {
         Self { condition, block }
     }
 }

@@ -14,20 +14,12 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod statement;
+use crate::{VariableID, namespace_registry::NameSpacePair, type_registry::ResolvedType};
 
-pub use expression::{
-    Expr, ExprKind, LValue, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
-};
-pub use function::{
-    FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
-};
-pub use operator::{
-    InfixOperator, InfixOperatorProperties, InfixQueryRef, OpBodyMap, OperatorAssociativity,
-    OperatorContext, PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
-    PrefixOperatorProperties, PrefixQueryRef,
-};
-pub use statement::{Block, IfArm, Statement};
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
+pub struct LValue {
+    pub var_id: NameSpacePair<VariableID>,
+    pub offset: i32,
+    pub value_type: ResolvedType,
+    pub is_field: bool,
+}

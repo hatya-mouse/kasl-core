@@ -46,15 +46,7 @@ impl TypeRegistry {
         id
     }
 
-    pub fn resolve_type_path(&self, type_name: &String) -> Option<ResolvedType> {
-        if let Ok(primitive_type) = PrimitiveType::from_str(&type_name) {
-            return Some(ResolvedType::Primitive(primitive_type));
-        }
-        let id = self.get_struct_id_by_name(type_name)?;
-        Some(ResolvedType::Struct(id))
-    }
-
-    pub fn get_struct_id_by_name(&self, type_name: &String) -> Option<StructID> {
+    pub fn get_struct_id_by_name(&self, type_name: &str) -> Option<StructID> {
         self.name_to_id.get(type_name).copied()
     }
 

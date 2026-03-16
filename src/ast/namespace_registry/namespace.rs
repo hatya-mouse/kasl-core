@@ -15,24 +15,22 @@
 //
 
 use crate::{
-    NameSpaceID, OperatorContext, ScopeRegistry, namespace_registry::NameSpaceRegistry,
-    symbol_table::FunctionContext, type_registry::TypeRegistry,
+    NameSpaceID, ScopeRegistry, symbol_table::FunctionContext, type_registry::TypeRegistry,
 };
 use std::collections::HashMap;
 
 #[derive(Debug, Default)]
 pub struct NameSpace {
-    pub namespace_id: NameSpaceID,
-    pub name_to_id: HashMap<String, NameSpaceID>,
+    pub id: NameSpaceID,
+    pub child_namespaces: HashMap<String, NameSpaceID>,
 
     pub func_ctx: FunctionContext,
-    pub op_ctx: OperatorContext,
     pub scope_registry: ScopeRegistry,
     pub type_registry: TypeRegistry,
 }
 
 impl NameSpace {
     pub fn get_id_by_name(&self, name: &str) -> Option<NameSpaceID> {
-        self.name_to_id.get(name).copied()
+        self.child_namespaces.get(name).copied()
     }
 }

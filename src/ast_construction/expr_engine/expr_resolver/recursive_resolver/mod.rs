@@ -15,14 +15,11 @@
 //
 
 mod chain_resolver;
-mod func_call_resolver;
-mod identifier_resolver;
 mod literal_resolver;
 mod operator_resolver;
 
 use crate::{
-    Expr, ExprKind,
-    error::Ph,
+    Expr,
     expr_engine::ExpressionResolver,
     symbol_table::{UnresolvedExpr, UnresolvedExprKind},
 };
@@ -43,24 +40,15 @@ impl ExpressionResolver<'_> {
             } => self.resolve_infix_op(symbol, *lhs_expr, *rhs_expr, expr.range),
 
             UnresolvedExprKind::PrefixOp { symbol, operand } => {
-                self.resolve_prefix_op(symbol, *operand_expr, expr.range)
+                self.resolve_prefix_op(symbol, *operand, expr.range)
             }
 
             UnresolvedExprKind::PostfixOp { symbol, operand } => {
-                self.resolve_postfix_op(symbol, *operand_expr, expr.range)
+                self.resolve_postfix_op(symbol, *operand, expr.range)
             }
 
             UnresolvedExprKind::Chain { lhs, elements } => {
-                self.resolve_chain(*lhs, elements, expr.range)
-            }
-
-            _ => {
-                self.ec.comp_bug(
-                    expr.range,
-                    Ph::ExprEngine,
-                    "Received expression which should not exist at this point",
-                );
-                None
+                self.resolve_chain(lhs.map(|lhs| *lhs), elements, expr.range)
             }
         }
     }

@@ -14,19 +14,21 @@
 // limitations under the License.
 //
 
-mod builtin_resolver;
-mod chain_lhs_resolver;
+mod builtin_func_resolver;
 mod field_access_resolver;
-mod member_access_resolver;
-mod member_func_resolver;
+mod func_args_resolver;
+mod func_call_resolver;
+mod identifier_resolver;
+mod instance_func_resolver;
 mod static_func_resolver;
 
 use std::{iter::Peekable, slice::Iter};
 
 use crate::{
-    Expr, ExprKind, NameSpaceID, Range,
+    Expr, Range, ScopeID,
     error::Ph,
     expr_engine::ExpressionResolver,
+    namespace_registry::{NameSpacePair, NameSpaceStructGetter},
     symbol_table::{UnresolvedChainElement, UnresolvedExpr},
 };
 
@@ -42,116 +44,108 @@ impl ExpressionResolver<'_> {
 
         let mut elements_iter = elements.iter().peekable();
 
-        // Resolve the namespace ID from the chain elements
-        let namespace_id = if let Some(lhs) = lhs {
-            self.namespace.namespace_id
-        } else {
-            self.resolve_namespace(&mut elements_iter)
-        };
-
-        // The namespace is resolved
-        let namespace = self
-            .namespace_registry
-            .get_namespace_by_id(namespace_id)
-            .unwrap();
-
         let mut expr = None;
-        // Check if the next element is a type
-        if let Some(UnresolvedChainElement::Identifier { name }) = elements_iter.peek() {
-            if let Some(struct_id) = namespace.type_registry.get_struct_id_by_name(name) {
-                // Consume the element
-                elements_iter.next();
+        let mut target_scope = self.current_scope;
 
-                // Assume that the next element is a static function
-                let Some(next_element) = elements_iter.next() else {
-                    self.ec.expr_ends_with_type(range, Ph::ExprEngine);
-                    return None;
-                };
-                match next_element {
-                    UnresolvedChainElement::Identifier { .. } => {
-                        self.ec.static_var_access(range, Ph::ExprEngine);
+        if let Some(lhs) = lhs {
+            // Resolve the lhs
+            let resolved_lhs = self.resolve_recursively(lhs)?;
+            expr = Some(resolved_lhs);
+        } else {
+            target_scope = self.resolve_namespace_scope(&mut elements_iter);
+
+            if let Some(UnresolvedChainElement::Identifier { name }) = elements_iter.peek() {
+                // Check if the next element is a type
+                if let Some(struct_id) = self
+                    .namespace_registry
+                    .get_struct_id(&target_scope.namespace_id, name)
+                {
+                    // Consume the type name element
+                    elements_iter.next();
+
+                    // Assume that the next element is a static function
+                    let Some(next_element) = elements_iter.next() else {
+                        self.ec.expr_ends_with_type(range, Ph::ExprEngine);
                         return None;
-                    }
-                    UnresolvedChainElement::FuncCall {
-                        name,
-                        args: no_type_args,
-                    } => {
-                        // Get the function ID by name
-                        let Some(func_id) = self
-                            .namespace
-                            .func_ctx
-                            .get_member_func_by_name(&struct_id, &name)
-                        else {
-                            let struct_decl =
-                                self.namespace.type_registry.get_struct(&struct_id)?;
-                            self.ec.member_func_not_found(
-                                range,
-                                Ph::ExprEngine,
-                                &struct_decl.name,
-                                name,
-                            );
-                            return None;
-                        };
+                    };
 
-                        // Get the function by ID
-                        let func = self.namespace.func_ctx.get_func(&func_id)?;
-
-                        // Throw an error if the function is static
-                        if func.is_static {
-                            self.ec
-                                .static_func_call_on_instance(range, Ph::ExprEngine, &func.name);
-                            return None;
-                        }
-
-                        // Resolve the arguments
-                        let args =
-                            self.resolve_func_call_args(&func.params, &no_type_args, range)?;
-
-                        // Construct the expression
-                        expr = Some(Expr::new(
-                            ExprKind::StaticFuncCall { id: func_id, args },
-                            func.return_type,
-                            range,
-                        ));
-                    }
+                    // Resolve the static function call
+                    expr = Some(self.resolve_static_func_call(struct_id, next_element, range)?);
+                } else if name == "Builtin" {
+                    // It's safe to unwrap because it has already been peeked
+                    let element = elements_iter.next().unwrap();
+                    // Resolve the builtin function call
+                    expr = Some(self.resolve_builtin_func_call(element, range)?);
                 }
             }
         }
 
+        // Resolve member access and function calls
         while let Some(element) = elements_iter.next() {
             match element {
-                UnresolvedChainElement::Identifier { name } => {}
-                UnresolvedChainElement::FuncCall { name, args } => {}
+                UnresolvedChainElement::Identifier { name } => {
+                    if let Some(last_expr) = expr {
+                        expr = Some(self.resolve_field_access(last_expr, name, range)?)
+                    } else {
+                        expr = Some(self.resolve_identifier(target_scope, name, range)?)
+                    }
+                }
+                UnresolvedChainElement::FuncCall {
+                    name,
+                    args: no_type_args,
+                } => {
+                    if let Some(last_expr) = expr {
+                        expr = Some(self.resolve_instance_func_call(
+                            last_expr,
+                            name,
+                            no_type_args,
+                            range,
+                        )?)
+                    } else {
+                        expr = Some(self.resolve_func_call(
+                            target_scope.namespace_id,
+                            name,
+                            no_type_args,
+                            range,
+                        )?)
+                    }
+                }
             }
         }
 
         None // DUMMY
     }
 
-    pub fn resolve_namespace(
+    pub fn resolve_namespace_scope(
         &mut self,
         elements: &mut Peekable<Iter<UnresolvedChainElement>>,
-    ) -> NameSpaceID {
-        let mut current_id = self.namespace.namespace_id;
+    ) -> NameSpacePair<ScopeID> {
+        let mut current_scope = self.current_scope;
         // Loop over the elements in the chain and get the namespace ID from the first tokens
         while let Some(element) = elements.peek() {
             match element {
                 UnresolvedChainElement::Identifier { name } => {
                     let current_namespace = self
                         .namespace_registry
-                        .get_namespace_by_id(current_id)
+                        .get_namespace_by_id(&current_scope.namespace_id)
                         .unwrap();
-                    if let Some(namespace_id) = current_namespace.get_id_by_name(name) {
+                    if let Some(namespace_id) = current_namespace.get_id_by_name(name)
+                        && let Some(namespace) =
+                            self.namespace_registry.get_namespace_by_id(&namespace_id)
+                    {
                         // Consume the identifier
                         elements.next();
-                        current_id = namespace_id;
+                        current_scope.namespace_id = namespace_id;
+                        // Get the global scope of the namespace
+                        let global_scope = namespace.scope_registry.get_global_scope_id();
+                        current_scope.symbol_id = global_scope;
                     } else {
-                        return current_id;
+                        return current_scope;
                     }
                 }
-                _ => return current_id,
+                _ => return current_scope,
             }
         }
-        current_id
+        current_scope
     }
 }

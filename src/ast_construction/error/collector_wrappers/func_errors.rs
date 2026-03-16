@@ -145,13 +145,13 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn builtin_func_not_found(&mut self, range: Range, phase: Phase, func_name: String) {
+    pub(crate) fn builtin_func_not_found(&mut self, range: Range, phase: Phase, func_name: &str) {
         self.emit(
             EK::BuiltinFuncNotFound,
             range,
             phase,
             Sv::Error,
-            Pl::Str(func_name),
+            Pl::Str(func_name.to_string()),
         );
     }
 

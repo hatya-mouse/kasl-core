@@ -14,28 +14,32 @@
 // limitations under the License.
 //
 
+mod field_access_resolver;
+mod identifier_resolver;
+mod namespace_resolver;
 mod recursive_resolver;
 
-use crate::{ScopeID, ScopeRegistry, error::ErrorCollector, type_registry::TypeRegistry};
+use crate::{
+    ScopeID,
+    error::ErrorCollector,
+    namespace_registry::{NameSpacePair, NameSpaceRegistry},
+};
 
 pub struct LValueResolver<'a> {
     ec: &'a mut ErrorCollector,
-    scope_registry: &'a ScopeRegistry,
-    type_registry: &'a TypeRegistry,
-    current_scope: ScopeID,
+    namespace_registry: &'a NameSpaceRegistry,
+    current_scope: NameSpacePair<ScopeID>,
 }
 
 impl<'a> LValueResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        scope_registry: &'a ScopeRegistry,
-        type_registry: &'a TypeRegistry,
-        current_scope: ScopeID,
+        namespace_registry: &'a NameSpaceRegistry,
+        current_scope: NameSpacePair<ScopeID>,
     ) -> Self {
         Self {
             ec,
-            scope_registry,
-            type_registry,
+            namespace_registry,
             current_scope,
         }
     }

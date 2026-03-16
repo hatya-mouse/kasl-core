@@ -15,23 +15,22 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, StructID,
+    Expr, ExprKind, Range,
     error::Ph,
     expr_engine::ExpressionResolver,
-    namespace_registry::{NameSpaceFuncGetter, NameSpacePair, NameSpaceStructGetter},
-    symbol_table::UnresolvedChainElement,
+    symbol_table::{NoTypeFuncCallArg, UnresolvedChainElement},
+    type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_static_func_call(
+    pub fn resolve_builtin_func_call(
         &mut self,
-        struct_id: NameSpacePair<StructID>,
         element: &UnresolvedChainElement,
         range: Range,
     ) -> Option<Expr> {
         match element {
             UnresolvedChainElement::Identifier { .. } => {
-                self.ec.static_var_access(range, Ph::ExprEngine);
+                self.ec.builtin_var_access(range, Ph::ExprEngine);
                 return None;
             }
             UnresolvedChainElement::FuncCall {
@@ -39,34 +38,43 @@ impl ExpressionResolver<'_> {
                 args: no_type_args,
             } => {
                 // Get the function ID by name
-                let Some(func_id) = self.namespace_registry.get_member_func_id(&struct_id, name)
-                else {
-                    let struct_decl = self.namespace_registry.get_struct(&struct_id)?;
-                    self.ec
-                        .member_func_not_found(range, Ph::ExprEngine, &struct_decl.name, name);
+                let Some(func_id) = self.builtin_registry.get_id_by_name(name) else {
+                    self.ec.builtin_func_not_found(range, Ph::ExprEngine, name);
                     return None;
                 };
 
                 // Get the function by ID
-                let func = self.namespace_registry.get_func(&func_id)?;
-
-                // Throw an error if the function is not static
-                if !func.is_static {
-                    self.ec
-                        .static_call_of_instance_func(range, Ph::ExprEngine, &func.name);
-                    return None;
-                }
+                let func = self.builtin_registry.get_func_by_id(func_id)?;
 
                 // Resolve the arguments
-                let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
+                let args = self.resolve_builtin_args(&func.params, no_type_args, range)?;
 
                 // Construct the expression
                 Some(Expr::new(
-                    ExprKind::StaticFuncCall { id: func_id, args },
+                    ExprKind::BuiltinFuncCall { id: *func_id, args },
                     func.return_type,
                     range,
                 ))
             }
         }
+    }
+
+    fn resolve_builtin_args(
+        &mut self,
+        expected_params: &[ResolvedType],
+        no_type_args: &[NoTypeFuncCallArg],
+        range: Range,
+    ) -> Option<Vec<Expr>> {
+        let mut args = Vec::new();
+        for (expected_type, no_type_arg) in expected_params.iter().zip(no_type_args) {
+            let resolved_arg = self.resolve_recursively(no_type_arg.value)?;
+            // Check if the type of the argument matches the expected type
+            if &resolved_arg.value_type != expected_type {
+                self.ec.builtin_arg_type_mismatch(range, Ph::ExprEngine);
+            }
+
+            args.push(resolved_arg);
+        }
+        Some(args)
     }
 }
