@@ -15,10 +15,19 @@
 //
 
 use crate::{
-    symbol_table::{FuncBodyMap, OpBodyMap},
-    type_registry::StructGraph,
+    OperatorContext, ScopeRegistry,
+    symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
+    type_registry::{StructGraph, TypeRegistry},
 };
 use std::{collections::HashSet, path::PathBuf};
+
+#[derive(Debug, Default)]
+pub struct ProgramContext {
+    pub func_ctx: FunctionContext,
+    pub op_ctx: OperatorContext,
+    pub scope_registry: ScopeRegistry,
+    pub type_registry: TypeRegistry,
+}
 
 #[derive(Debug, Default)]
 pub struct CompilationData {

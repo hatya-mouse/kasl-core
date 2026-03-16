@@ -15,26 +15,26 @@
 //
 
 use crate::{
-    NameSpace,
+    compilation_data::ProgramContext,
     scope_manager::{IOBlueprint, VariableKind},
 };
 
 pub struct BlueprintBuilder<'a> {
-    namespace: &'a NameSpace,
+    prog_ctx: &'a ProgramContext,
 }
 
 impl<'a> BlueprintBuilder<'a> {
-    pub fn new(namespace: &'a NameSpace) -> Self {
-        Self { namespace }
+    pub fn new(prog_ctx: &'a ProgramContext) -> Self {
+        Self { prog_ctx }
     }
 
     pub fn build(&self) -> IOBlueprint {
         let mut blueprint = IOBlueprint::default();
-        let global_scope = self.namespace.scope_registry.get_global_scope();
+        let global_scope = self.prog_ctx.scope_registry.get_global_scope();
 
         // Loop over each variables in the global scope
         for var_id in &global_scope.variables {
-            let Some(scope_var) = self.namespace.scope_registry.get_var_by_id(var_id) else {
+            let Some(scope_var) = self.prog_ctx.scope_registry.get_var_by_id(var_id) else {
                 continue;
             };
 
@@ -42,21 +42,21 @@ impl<'a> BlueprintBuilder<'a> {
             match &scope_var.var_kind {
                 VariableKind::Input { .. } => {
                     let input_size = self
-                        .namespace
+                        .prog_ctx
                         .type_registry
                         .get_type_size(&scope_var.value_type);
                     blueprint.add_input(input_size, scope_var.value_type, *var_id);
                 }
                 VariableKind::Output => {
                     let output_size = self
-                        .namespace
+                        .prog_ctx
                         .type_registry
                         .get_type_size(&scope_var.value_type);
                     blueprint.add_output(output_size, scope_var.value_type, *var_id);
                 }
                 VariableKind::State => {
                     let state_size = self
-                        .namespace
+                        .prog_ctx
                         .type_registry
                         .get_type_size(&scope_var.value_type);
                     blueprint.add_state(state_size, scope_var.value_type, *var_id);
