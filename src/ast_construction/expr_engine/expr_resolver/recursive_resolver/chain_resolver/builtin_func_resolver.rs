@@ -67,7 +67,7 @@ impl ExpressionResolver<'_> {
     ) -> Option<Vec<Expr>> {
         let mut args = Vec::new();
         for (expected_type, no_type_arg) in expected_params.iter().zip(no_type_args) {
-            let resolved_arg = self.resolve_recursively(no_type_arg.value)?;
+            let resolved_arg = self.resolve_recursively(no_type_arg.value.clone())?;
             // Check if the type of the argument matches the expected type
             if &resolved_arg.value_type != expected_type {
                 self.ec.builtin_arg_type_mismatch(range, Ph::ExprEngine);

@@ -14,16 +14,16 @@
 // limitations under the License.
 //
 
-use crate::{Expr, ScopeID, VariableID, namespace_registry::NameSpacePair, symbol_table::LValue};
+use crate::{Expr, ScopeID, VariableID, symbol_table::LValue};
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Block {
     pub body: Vec<Statement>,
-    pub scope_id: NameSpacePair<ScopeID>,
+    pub scope_id: ScopeID,
 }
 
 impl Block {
-    pub fn new(scope_id: NameSpacePair<ScopeID>) -> Self {
+    pub fn new(scope_id: ScopeID) -> Self {
         Self {
             body: Vec::new(),
             scope_id,
@@ -34,7 +34,7 @@ impl Block {
         self.body = stmts;
     }
 
-    pub fn get_scope_id(&self) -> NameSpacePair<ScopeID> {
+    pub fn get_scope_id(&self) -> ScopeID {
         self.scope_id
     }
 }

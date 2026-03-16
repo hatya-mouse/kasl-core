@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{VariableID, namespace_registry::NameSpacePair, type_registry::ResolvedType};
+use crate::{VariableID, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct LValue {
-    pub var_id: NameSpacePair<VariableID>,
+    pub var_id: VariableID,
     pub offset: i32,
     pub value_type: ResolvedType,
     pub is_field: bool,

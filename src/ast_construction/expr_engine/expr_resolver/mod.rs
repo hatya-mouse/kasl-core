@@ -17,38 +17,35 @@
 mod recursive_resolver;
 
 use crate::{
-    OperatorContext, ScopeID,
-    builtin::BuiltinRegistry,
-    error::ErrorCollector,
-    namespace_registry::{NameSpacePair, NameSpaceRegistry},
-    scope_manager::ScopeGraph,
+    NameSpaceID, ScopeID, builtin::BuiltinRegistry, compilation_data::ProgramContext,
+    error::ErrorCollector, scope_manager::ScopeGraph,
 };
 
 pub struct ExpressionResolver<'a> {
     ec: &'a mut ErrorCollector,
-    namespace_registry: &'a NameSpaceRegistry,
+    prog_ctx: &'a ProgramContext,
     scope_graph: &'a mut ScopeGraph,
     builtin_registry: &'a BuiltinRegistry,
-    op_ctx: &'a OperatorContext,
-    current_scope: NameSpacePair<ScopeID>,
+    current_scope: ScopeID,
+    current_namespace: NameSpaceID,
 }
 
 impl<'a> ExpressionResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        namespace_registry: &'a NameSpaceRegistry,
+        prog_ctx: &'a ProgramContext,
         scope_graph: &'a mut ScopeGraph,
         builtin_registry: &'a BuiltinRegistry,
-        op_ctx: &'a OperatorContext,
-        current_scope: NameSpacePair<ScopeID>,
+        current_scope: ScopeID,
+        current_namespace: NameSpaceID,
     ) -> Self {
         Self {
             ec,
+            prog_ctx,
             scope_graph,
             builtin_registry,
-            namespace_registry,
-            op_ctx,
             current_scope,
+            current_namespace,
         }
     }
 }

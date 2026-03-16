@@ -15,8 +15,7 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver,
-    namespace_registry::NameSpaceStructGetter, type_registry::ResolvedType,
+    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver, type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
@@ -32,7 +31,7 @@ impl ExpressionResolver<'_> {
                 return None;
             }
             ResolvedType::Struct(struct_id) => {
-                let struct_decl = self.namespace_registry.get_struct(&struct_id)?;
+                let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
                 // Get the field from the struct declaration
                 let Some(field_index) = struct_decl.get_field_index(name) else {
                     self.ec

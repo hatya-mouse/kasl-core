@@ -22,7 +22,7 @@ pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExpr
 
 use crate::{
     FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
-    namespace_registry::NameSpacePair, type_registry::ResolvedType,
+    type_registry::ResolvedType,
 };
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
@@ -61,26 +61,26 @@ pub enum ExprKind {
         operand: Box<FuncCallArg>,
     },
     Identifier {
-        id: NameSpacePair<VariableID>,
+        id: VariableID,
     },
     StructField {
         lhs: Box<Expr>,
         offset: i32,
     },
     StructInit {
-        id: NameSpacePair<StructID>,
+        id: StructID,
     },
     StaticFuncCall {
-        id: NameSpacePair<FunctionID>,
+        id: FunctionID,
         args: Vec<FuncCallArg>,
     },
     InstanceFuncCall {
         lhs: Box<Expr>,
-        id: NameSpacePair<FunctionID>,
+        id: FunctionID,
         args: Vec<FuncCallArg>,
     },
     FuncCall {
-        id: NameSpacePair<FunctionID>,
+        id: FunctionID,
         args: Vec<FuncCallArg>,
     },
     BuiltinFuncCall {

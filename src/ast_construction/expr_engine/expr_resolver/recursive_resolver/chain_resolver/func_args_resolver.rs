@@ -85,13 +85,17 @@ impl ExpressionResolver<'_> {
         for (slot, param) in slots.iter().zip(func_params.iter()) {
             match slot {
                 Some(arg) => resolved_args.push(arg.clone()),
-                None => {
-                    resolved_args.push(FuncCallArg {
+                None => match &param.def_val {
+                    Some(def_val) => resolved_args.push(FuncCallArg {
                         var_id: param.var_id,
-                        value: param.def_val,
+                        value: def_val.clone(),
                         range: Range::zero(),
-                    });
-                }
+                    }),
+                    None => {
+                        self.ec.missing_arg(func_call_range, Ph::ExprEngine);
+                        return None;
+                    }
+                },
             }
         }
 

@@ -15,12 +15,8 @@
 //
 
 use crate::{
-    Expr, ExprKind, NameSpaceID, Range,
-    error::Ph,
-    expr_engine::ExpressionResolver,
-    namespace_registry::{NameSpaceFuncGetter, NameSpaceStructGetter},
-    symbol_table::NoTypeFuncCallArg,
-    type_registry::ResolvedType,
+    Expr, ExprKind, NameSpaceID, Range, error::Ph, expr_engine::ExpressionResolver,
+    symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
@@ -31,9 +27,13 @@ impl ExpressionResolver<'_> {
         no_type_args: &Vec<NoTypeFuncCallArg>,
         range: Range,
     ) -> Option<Expr> {
-        if let Some(func_id) = self.namespace_registry.get_func_id(&namespace_id, &name) {
+        if let Some(func_id) = self
+            .prog_ctx
+            .func_ctx
+            .get_global_func_id(namespace_id, name)
+        {
             // Get a reference to the function
-            let func = self.namespace_registry.get_func(&func_id)?;
+            let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
             let args = self.resolve_func_call_args(&func.params, no_type_args, range)?;
 
             // Add a function call edge to the scope graph
@@ -46,7 +46,10 @@ impl ExpressionResolver<'_> {
                 func.return_type,
                 range,
             ))
-        } else if let Some(struct_id) = self.namespace_registry.get_struct_id(&namespace_id, &name)
+        } else if let Some(struct_id) = self
+            .prog_ctx
+            .type_registry
+            .get_struct_id(namespace_id, name)
         {
             // If the function does not exist, check if the type with the same name exists
             // Ensure that the function doesn't have any arguments

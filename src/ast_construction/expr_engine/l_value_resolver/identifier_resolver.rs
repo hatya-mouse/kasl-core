@@ -14,29 +14,23 @@
 // limitations under the License.
 //
 
-use crate::{
-    Range, ScopeID,
-    error::Ph,
-    expr_engine::LValueResolver,
-    namespace_registry::{NameSpacePair, NameSpaceVarGetter},
-    symbol_table::LValue,
-};
+use crate::{Range, ScopeID, error::Ph, expr_engine::LValueResolver, symbol_table::LValue};
 
 impl LValueResolver<'_> {
     pub fn resolve_identifier(
         &mut self,
-        target_scope: NameSpacePair<ScopeID>,
+        target_scope: ScopeID,
         name: &str,
         range: Range,
     ) -> Option<LValue> {
         // Look up the variable ID in the current scope
-        let Some(var_id) = self.namespace_registry.get_var_id(&target_scope, name) else {
+        let Some(var_id) = self.prog_ctx.scope_registry.get_var_id(target_scope, name) else {
             self.ec.var_not_found(range, Ph::ExprEngine, name);
             return None;
         };
 
         // Get the variable's type
-        let var = self.namespace_registry.get_var(&var_id)?;
+        let var = self.prog_ctx.scope_registry.get_var(&var_id)?;
 
         // Create and return a LValue
         Some(LValue {

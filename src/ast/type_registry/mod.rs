@@ -26,13 +26,13 @@ pub use struct_decl::StructDecl;
 pub use struct_field::StructField;
 pub use struct_graph::StructGraph;
 
-use crate::{NameSpaceID, StructID, namespace_registry::NameSpacePair};
+use crate::{NameSpaceID, StructID};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
-    pub structs: HashMap<NameSpacePair<StructID>, StructDecl>,
-    pub name_to_id: HashMap<String, NameSpacePair<StructID>>,
+    pub structs: HashMap<StructID, StructDecl>,
+    pub name_to_id: HashMap<(NameSpaceID, String), StructID>,
     next_struct_id: usize,
 }
 
@@ -43,8 +43,10 @@ impl TypeRegistry {
         id
     }
 
-    pub fn get_struct_id_by_name(&self, type_name: &str) -> Option<NameSpacePair<StructID>> {
-        self.name_to_id.get(type_name).copied()
+    pub fn get_struct_id(&self, namespace_id: NameSpaceID, type_name: &str) -> Option<StructID> {
+        self.name_to_id
+            .get(&(namespace_id, type_name.to_string()))
+            .copied()
     }
 
     pub fn get_type_size(&self, type_id: &ResolvedType) -> usize {
@@ -68,17 +70,12 @@ impl TypeRegistry {
         name: String,
         struct_id: StructID,
     ) {
-        let id = NameSpacePair::new(namespace_id, struct_id);
-        self.structs.insert(id, struct_decl);
-        self.name_to_id.insert(name, id);
+        self.structs.insert(struct_id, struct_decl);
+        self.name_to_id.insert((namespace_id, name), struct_id);
     }
 
-    pub fn get_struct(&self, id: &NameSpacePair<StructID>) -> Option<&StructDecl> {
+    pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
         self.structs.get(id)
-    }
-
-    pub fn has_struct(&self, type_name: &String) -> bool {
-        self.name_to_id.contains_key(type_name)
     }
 
     pub fn format_type(&self, ty: &ResolvedType) -> String {
@@ -91,7 +88,7 @@ impl TypeRegistry {
         }
     }
 
-    pub fn get_all_structs(&self) -> HashSet<NameSpacePair<StructID>> {
+    pub fn get_all_structs(&self) -> HashSet<StructID> {
         self.structs.keys().copied().collect()
     }
 }

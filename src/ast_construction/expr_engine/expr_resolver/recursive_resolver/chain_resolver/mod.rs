@@ -25,10 +25,9 @@ mod static_func_resolver;
 use std::{iter::Peekable, slice::Iter};
 
 use crate::{
-    Expr, Range, ScopeID,
+    Expr, NameSpaceID, Range, ScopeID,
     error::Ph,
     expr_engine::ExpressionResolver,
-    namespace_registry::{NameSpacePair, NameSpaceStructGetter},
     symbol_table::{UnresolvedChainElement, UnresolvedExpr},
 };
 
@@ -46,19 +45,21 @@ impl ExpressionResolver<'_> {
 
         let mut expr = None;
         let mut target_scope = self.current_scope;
+        let mut target_namespace = self.current_namespace;
 
         if let Some(lhs) = lhs {
             // Resolve the lhs
             let resolved_lhs = self.resolve_recursively(lhs)?;
             expr = Some(resolved_lhs);
         } else {
-            target_scope = self.resolve_namespace_scope(&mut elements_iter);
+            (target_scope, target_namespace) = self.resolve_namespace_scope(&mut elements_iter);
 
             if let Some(UnresolvedChainElement::Identifier { name }) = elements_iter.peek() {
                 // Check if the next element is a type
                 if let Some(struct_id) = self
-                    .namespace_registry
-                    .get_struct_id(&target_scope.namespace_id, name)
+                    .prog_ctx
+                    .type_registry
+                    .get_struct_id(target_namespace, name)
                 {
                     // Consume the type name element
                     elements_iter.next();
@@ -103,7 +104,7 @@ impl ExpressionResolver<'_> {
                         )?)
                     } else {
                         expr = Some(self.resolve_func_call(
-                            target_scope.namespace_id,
+                            target_namespace,
                             name,
                             no_type_args,
                             range,
@@ -113,39 +114,41 @@ impl ExpressionResolver<'_> {
             }
         }
 
-        None // DUMMY
+        expr
     }
 
     pub fn resolve_namespace_scope(
         &mut self,
         elements: &mut Peekable<Iter<UnresolvedChainElement>>,
-    ) -> NameSpacePair<ScopeID> {
+    ) -> (ScopeID, NameSpaceID) {
         let mut current_scope = self.current_scope;
+        let mut current_namespace = self.current_namespace;
         // Loop over the elements in the chain and get the namespace ID from the first tokens
         while let Some(element) = elements.peek() {
             match element {
                 UnresolvedChainElement::Identifier { name } => {
-                    let current_namespace = self
+                    let namespace_ref = self
+                        .prog_ctx
                         .namespace_registry
-                        .get_namespace_by_id(&current_scope.namespace_id)
+                        .get_namespace_by_id(&current_namespace)
                         .unwrap();
-                    if let Some(namespace_id) = current_namespace.get_id_by_name(name)
-                        && let Some(namespace) =
-                            self.namespace_registry.get_namespace_by_id(&namespace_id)
-                    {
+                    if let Some(namespace_id) = namespace_ref.get_id_by_name(name) {
                         // Consume the identifier
                         elements.next();
-                        current_scope.namespace_id = namespace_id;
+                        current_namespace = namespace_id;
                         // Get the global scope of the namespace
-                        let global_scope = namespace.scope_registry.get_global_scope_id();
-                        current_scope.symbol_id = global_scope;
+                        let global_scope = self
+                            .prog_ctx
+                            .scope_registry
+                            .get_global_scope_id(&current_namespace);
+                        current_scope = global_scope;
                     } else {
-                        return current_scope;
+                        return (current_scope, current_namespace);
                     }
                 }
-                _ => return current_scope,
+                _ => return (current_scope, current_namespace),
             }
         }
-        current_scope
+        (current_scope, current_namespace)
     }
 }

@@ -15,17 +15,14 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, StructID,
-    error::Ph,
-    expr_engine::ExpressionResolver,
-    namespace_registry::{NameSpaceFuncGetter, NameSpacePair, NameSpaceStructGetter},
+    Expr, ExprKind, Range, StructID, error::Ph, expr_engine::ExpressionResolver,
     symbol_table::UnresolvedChainElement,
 };
 
 impl ExpressionResolver<'_> {
     pub fn resolve_static_func_call(
         &mut self,
-        struct_id: NameSpacePair<StructID>,
+        struct_id: StructID,
         element: &UnresolvedChainElement,
         range: Range,
     ) -> Option<Expr> {
@@ -39,16 +36,16 @@ impl ExpressionResolver<'_> {
                 args: no_type_args,
             } => {
                 // Get the function ID by name
-                let Some(func_id) = self.namespace_registry.get_member_func_id(&struct_id, name)
+                let Some(func_id) = self.prog_ctx.func_ctx.get_member_func_id(&struct_id, name)
                 else {
-                    let struct_decl = self.namespace_registry.get_struct(&struct_id)?;
+                    let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
                     self.ec
                         .member_func_not_found(range, Ph::ExprEngine, &struct_decl.name, name);
                     return None;
                 };
 
                 // Get the function by ID
-                let func = self.namespace_registry.get_func(&func_id)?;
+                let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
 
                 // Throw an error if the function is not static
                 if !func.is_static {

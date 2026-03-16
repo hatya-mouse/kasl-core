@@ -15,12 +15,8 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range,
-    error::Ph,
-    expr_engine::ExpressionResolver,
-    namespace_registry::{NameSpaceFuncGetter, NameSpaceStructGetter},
-    symbol_table::NoTypeFuncCallArg,
-    type_registry::ResolvedType,
+    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver,
+    symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
@@ -43,16 +39,15 @@ impl ExpressionResolver<'_> {
             }
             ResolvedType::Struct(struct_id) => {
                 // Get the function
-                let Some(member_func_id) = self
-                    .namespace_registry
-                    .get_member_func_id(&struct_id, &name)
+                let Some(member_func_id) =
+                    self.prog_ctx.func_ctx.get_member_func_id(&struct_id, &name)
                 else {
-                    let struct_decl = self.namespace_registry.get_struct(&struct_id)?;
+                    let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
                     self.ec
                         .member_func_not_found(range, Ph::ExprEngine, &struct_decl.name, name);
                     return None;
                 };
-                let member_func = self.namespace_registry.get_func(&member_func_id)?;
+                let member_func = self.prog_ctx.func_ctx.get_func(&member_func_id)?;
                 // Resolve the arguments
                 let args =
                     self.resolve_func_call_args(&member_func.params, &no_type_args, range)?;

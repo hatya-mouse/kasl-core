@@ -24,53 +24,30 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::{Range, VariableID};
-use std::{
-    collections::{HashMap, HashSet},
-    fmt::Display,
-};
+use crate::{NameSpaceID, VariableID};
+use std::{collections::HashMap, fmt::Display};
 
 /// ScopeRegistry manages scopes and variables belonging to them.
 /// It only manages the top-level variables and local variables,
 /// and doesn't manage the struct fields.
-#[derive(Debug, serde::Serialize)]
+#[derive(Default, Debug, serde::Serialize)]
 pub struct ScopeRegistry {
     pub scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,
-    global_scope_id: ScopeID,
+    global_scope_ids: HashMap<NameSpaceID, ScopeID>,
     next_scope_id: usize,
     next_variable_id: usize,
 }
 
-impl Default for ScopeRegistry {
-    fn default() -> Self {
-        let mut manager = Self {
-            scopes: HashMap::new(),
-            variables: HashMap::new(),
-            global_scope_id: ScopeID(0),
-            next_scope_id: 0,
-            next_variable_id: 0,
-        };
-        // Create the global scope
-        manager.global_scope_id = manager.create_scope(None, Range::zero());
-        manager
-    }
-}
-
 impl ScopeRegistry {
-    /// Returns the ID of the global scope.
-    pub fn get_global_scope_id(&self) -> ScopeID {
-        self.global_scope_id
+    /// Adds a new global scope for the given namespace ID.
+    pub fn add_global_scope(&mut self, namespace_id: NameSpaceID, scope_id: ScopeID) {
+        self.global_scope_ids.insert(namespace_id, scope_id);
     }
 
-    /// Returns a mutable reference to the global scope.
-    pub fn get_global_scope(&self) -> &Scope {
-        self.scopes.get(&self.global_scope_id).unwrap()
-    }
-
-    /// Returns a reference to the scope with the given `ScopeID`.
-    pub fn get_scope(&self, scope_id: &ScopeID) -> Option<&Scope> {
-        self.scopes.get(scope_id)
+    /// Gets the global scope ID for the given namespace ID.
+    pub fn get_global_scope_id(&self, namespace_id: &NameSpaceID) -> ScopeID {
+        self.global_scope_ids[namespace_id]
     }
 
     /// Generates a new `ScopeID` for a new scope.
@@ -80,64 +57,28 @@ impl ScopeRegistry {
         id
     }
 
-    /// Generates a new `VariableID` for a new variable.
-    pub fn generate_var_id(&mut self) -> VariableID {
-        let id = VariableID::new(self.next_variable_id);
-        self.next_variable_id += 1;
-        id
+    /// Adds a new namespace with the given namespace ID.
+    pub fn add_namespace(&mut self, namespace_id: NameSpaceID) {
+        let global_id = self.generate_scope_id();
+        self.global_scope_ids.insert(namespace_id, global_id);
     }
 
-    /// Creates a new scope with the given parent scope.
-    pub fn create_scope(&mut self, parent: Option<ScopeID>, range: Range) -> ScopeID {
-        let id = self.generate_scope_id();
-        let scope = Scope::new(parent, range);
-        self.scopes.insert(id, scope);
-        id
-    }
-
-    /// Looks up a variable by name in the current scope and its parents.
-    pub fn lookup_var(&self, current_scope: ScopeID, name: &str) -> Option<&VariableID> {
-        let mut target = Some(current_scope);
+    /// Gets the `VariableID` of the variable in the given scope or its parent scopes with the given name.
+    pub fn get_var_id(&self, scope_id: ScopeID, name: &str) -> Option<VariableID> {
+        let mut target = Some(scope_id);
         while let Some(scope_id) = target {
             let scope = &self.scopes[&scope_id];
-            if let Some(symbol_id) = scope.get_id_by_name(name) {
-                return Some(symbol_id);
+            if let Some(var_id) = scope.get_id_by_name(name) {
+                return Some(*var_id);
             }
             target = scope.parent;
         }
         None
     }
 
-    /// Returns whether a variable with the given name exists in the current scope or its parents.
-    pub fn has_var(&self, current_scope: ScopeID, name: &str) -> bool {
-        let mut target = Some(current_scope);
-        while let Some(scope_id) = target {
-            let scope = &self.scopes[&scope_id];
-            if scope.has_var(name) {
-                return true;
-            }
-            target = scope.parent;
-        }
-        false
-    }
-
-    /// Returns a reference to the variable by ID.
-    pub fn get_var_by_id(&self, id: &VariableID) -> Option<&ScopeVar> {
-        self.variables.get(id)
-    }
-
-    /// Registers a variable in the scope registry.
-    pub fn register_var(&mut self, var: ScopeVar, name: String, scope: ScopeID) -> VariableID {
-        let variable_id = self.generate_var_id();
-        let target_scope = self.scopes.get_mut(&scope).unwrap();
-        target_scope.register_var(name, variable_id);
-        self.variables.insert(variable_id, var);
-        variable_id
-    }
-
-    /// Returns the vector of all scope IDs.
-    pub fn all_scope_ids(&self) -> HashSet<ScopeID> {
-        self.scopes.keys().copied().collect()
+    /// Gets a reference to the variable with the given `VariableID`.
+    pub fn get_var(&self, var_id: &VariableID) -> Option<&ScopeVar> {
+        self.variables.get(var_id)
     }
 }
 

@@ -14,36 +14,32 @@
 // limitations under the License.
 //
 
-use crate::{
-    ExprToken, ExprTokenKind, ScopeID, expr_engine::LValueResolver,
-    namespace_registry::NameSpacePair,
-};
+use crate::{ExprToken, ExprTokenKind, ScopeID, expr_engine::LValueResolver};
 use std::{iter::Peekable, slice::Iter};
 
 impl LValueResolver<'_> {
-    pub fn resolve_namespace_scope(
-        &mut self,
-        tokens: &mut Peekable<Iter<ExprToken>>,
-    ) -> NameSpacePair<ScopeID> {
+    pub fn resolve_namespace_scope(&mut self, tokens: &mut Peekable<Iter<ExprToken>>) -> ScopeID {
         let mut current_scope = self.current_scope;
+        let mut current_namespace = self.current_namespace;
         // Loop over the elements in the chain and get the namespace ID from the first tokens
         while let Some(token) = tokens.peek() {
             match &token.kind {
                 ExprTokenKind::Identifier(name) => {
-                    let current_namespace = self
+                    let namespace_ref = self
+                        .prog_ctx
                         .namespace_registry
-                        .get_namespace_by_id(&current_scope.namespace_id)
+                        .get_namespace_by_id(&current_namespace)
                         .unwrap();
-                    if let Some(namespace_id) = current_namespace.get_id_by_name(name)
-                        && let Some(namespace) =
-                            self.namespace_registry.get_namespace_by_id(&namespace_id)
-                    {
+                    if let Some(namespace_id) = namespace_ref.get_id_by_name(name) {
                         // Consume the identifier
                         tokens.next();
-                        current_scope.namespace_id = namespace_id;
+                        current_namespace = namespace_id;
                         // Get the global scope of the namespace
-                        let global_scope = namespace.scope_registry.get_global_scope_id();
-                        current_scope.symbol_id = global_scope;
+                        let global_scope = self
+                            .prog_ctx
+                            .scope_registry
+                            .get_global_scope_id(&namespace_id);
+                        current_scope = global_scope;
                     } else {
                         return current_scope;
                     }

@@ -19,28 +19,27 @@ mod identifier_resolver;
 mod namespace_resolver;
 mod recursive_resolver;
 
-use crate::{
-    ScopeID,
-    error::ErrorCollector,
-    namespace_registry::{NameSpacePair, NameSpaceRegistry},
-};
+use crate::{NameSpaceID, ScopeID, compilation_data::ProgramContext, error::ErrorCollector};
 
 pub struct LValueResolver<'a> {
     ec: &'a mut ErrorCollector,
-    namespace_registry: &'a NameSpaceRegistry,
-    current_scope: NameSpacePair<ScopeID>,
+    prog_ctx: &'a ProgramContext,
+    current_scope: ScopeID,
+    current_namespace: NameSpaceID,
 }
 
 impl<'a> LValueResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        namespace_registry: &'a NameSpaceRegistry,
-        current_scope: NameSpacePair<ScopeID>,
+        prog_ctx: &'a ProgramContext,
+        current_scope: ScopeID,
+        current_namespace: NameSpaceID,
     ) -> Self {
         Self {
             ec,
-            namespace_registry,
+            prog_ctx,
             current_scope,
+            current_namespace,
         }
     }
 }
