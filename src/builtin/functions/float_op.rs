@@ -48,6 +48,26 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         Box::new(|builder, args| builder.ins().fdiv(args[0], args[1])),
     );
 
+    registry.register_func(
+        "fmax",
+        &[PrimitiveType::Float, PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| {
+            let is_lhs_greater = builder.ins().fcmp(FloatCC::GreaterThan, args[0], args[1]);
+            builder.ins().select(is_lhs_greater, args[0], args[1])
+        }),
+    );
+
+    registry.register_func(
+        "fmin",
+        &[PrimitiveType::Float, PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| {
+            let is_lhs_lesser = builder.ins().fcmp(FloatCC::LessThan, args[0], args[1]);
+            builder.ins().select(is_lhs_lesser, args[0], args[1])
+        }),
+    );
+
     // --- UNARY OPERATIONS ---
 
     registry.register_func(
