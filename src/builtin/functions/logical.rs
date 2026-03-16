@@ -69,6 +69,4 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         PrimitiveType::Bool,
         Box::new(|builder, args| builder.ins().bnot(args[0])),
     );
-
-    // --- SELECT ---
 }
