@@ -19,6 +19,7 @@ use cranelift::prelude::InstBuilder;
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---
+
     registry.register_func(
         "and",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
