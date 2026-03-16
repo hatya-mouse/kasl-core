@@ -34,9 +34,12 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) {
         // Create a new scope and a block for the function
-        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
+        let global_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope_id(&self.current_namespace);
         let op_scope_id = self
-            .namespace
+            .prog_ctx
             .scope_registry
             .create_scope(Some(global_scope_id), decl_range);
         let op_block = Block::new(op_scope_id);
@@ -47,7 +50,15 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Resolve the return type
-        let Some(return_type) = self.namespace.type_registry.resolve_type_path(return_type) else {
+        let (namespace_id, type_name) = self
+            .prog_ctx
+            .namespace_registry
+            .resolve_namespace_from_path(return_type.clone());
+        let Some(return_type) = self
+            .prog_ctx
+            .type_registry
+            .resolve_type(namespace_id, &type_name.to_string())
+        else {
             self.ec.type_not_found(
                 decl_range,
                 Ph::GlobalDeclCollection,

@@ -29,7 +29,7 @@ pub use postfix_operator::{
 pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties, PrefixQuery, PrefixQueryRef};
 
 use crate::OperatorID;
-use hashbrown::HashMap;
+use hashbrown::{HashMap, hash_map::Entry};
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct OperatorContext {
@@ -57,7 +57,7 @@ impl OperatorContext {
 
     // --- REGISTER FUNCTIONS ---
 
-    pub fn register_infix_func(&mut self, infix: InfixOperator) -> OperatorID {
+    pub fn register_infix_func(&mut self, infix: InfixOperator) -> Result<OperatorID, ()> {
         let id = self.generate_operator_id();
         // Construct an infix query
         let query = InfixQuery {
@@ -65,60 +65,93 @@ impl OperatorContext {
             lhs_type: infix.lhs.value_type,
             rhs_type: infix.rhs.value_type,
         };
-        self.infix_ids.insert(query, id);
-        // Insert the operator to the operators map
-        self.infix_operators.insert(id, infix);
-        id
+        match self.infix_ids.entry(query) {
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(id);
+                // Insert the operator to the operators map
+                self.infix_operators.insert(id, infix);
+                Ok(id)
+            }
+            Entry::Occupied(_) => Err(()),
+        }
     }
 
     pub fn register_infix_properties(
         &mut self,
         symbol: String,
         properties: InfixOperatorProperties,
-    ) {
-        self.infix_operator_properties.insert(symbol, properties);
+    ) -> Result<(), ()> {
+        match self.infix_operator_properties.entry(symbol) {
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(properties);
+                Ok(())
+            }
+            Entry::Occupied(_) => Err(()),
+        }
     }
 
-    pub fn register_prefix_func(&mut self, prefix: PrefixOperator) -> OperatorID {
+    pub fn register_prefix_func(&mut self, prefix: PrefixOperator) -> Result<OperatorID, ()> {
         let id = self.generate_operator_id();
         // Construct a prefix query
         let query = PrefixQuery {
             symbol: prefix.symbol.clone(),
             operand_type: prefix.operand.value_type,
         };
-        self.prefix_ids.insert(query, id);
-        // Insert the operator to the operators map
-        self.prefix_operators.insert(id, prefix);
-        id
+        match self.prefix_ids.entry(query) {
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(id);
+                // Insert the operator to the operators map
+                self.prefix_operators.insert(id, prefix);
+                Ok(id)
+            }
+            Entry::Occupied(_) => Err(()),
+        }
     }
 
     pub fn register_prefix_properties(
         &mut self,
         symbol: String,
         properties: PrefixOperatorProperties,
-    ) {
-        self.prefix_operator_properties.insert(symbol, properties);
+    ) -> Result<(), ()> {
+        match self.prefix_operator_properties.entry(symbol) {
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(properties);
+                Ok(())
+            }
+            Entry::Occupied(_) => Err(()),
+        }
     }
 
-    pub fn register_postfix_func(&mut self, postfix: PostfixOperator) -> OperatorID {
+    pub fn register_postfix_func(&mut self, postfix: PostfixOperator) -> Result<OperatorID, ()> {
         let id = self.generate_operator_id();
         // Construct a postfix query
         let query = PostfixQuery {
             symbol: postfix.symbol.clone(),
             operand_type: postfix.operand.value_type,
         };
-        self.postfix_ids.insert(query, id);
-        // Insert the operator to the operators map
-        self.postfix_operators.insert(id, postfix);
-        id
+        match self.postfix_ids.entry(query) {
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(id);
+                // Insert the operator to the operators map
+                self.postfix_operators.insert(id, postfix);
+                Ok(id)
+            }
+            Entry::Occupied(_) => Err(()),
+        }
     }
 
     pub fn register_postfix_properties(
         &mut self,
         symbol: String,
         properties: PostfixOperatorProperties,
-    ) {
-        self.postfix_operator_properties.insert(symbol, properties);
+    ) -> Result<(), ()> {
+        match self.postfix_operator_properties.entry(symbol) {
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(properties);
+                Ok(())
+            }
+            Entry::Occupied(_) => Err(()),
+        }
     }
 
     // --- PROPERTIES GETTER FUNCTIONS ---

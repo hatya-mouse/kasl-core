@@ -178,8 +178,38 @@ pub enum ErrorKind {
 
     /// Title: DuplicateFuncName
     /// Payload: The name of the function
-    /// A function with the same name already exists in the current scope, or its parent scopes.
+    /// A function with the same name already exists.
     DuplicateFuncName,
+
+    /// Title: DuplicateInfixDefine
+    /// Payload: The symbol of the operator definition
+    /// An infix operator with the same symbol already exists.
+    DuplicateInfixDefine,
+
+    /// Title: DuplicatePrefixDefine
+    /// Payload: The symbol of the operator definition
+    /// An prefix operator with the same symbol already exists.
+    DuplicatePrefixDefine,
+
+    /// Title: DuplicatePostfixDefine
+    /// Payload: The symbol of the operator definition
+    /// An postfix operator with the same symbol already exists.
+    DuplicatePostfixDefine,
+
+    /// Title: DuplicateInfixFunc
+    /// Payload: The symbol of the operator definition
+    /// An operator function with the same symbol and the operand type is defined.
+    DuplicateInfixFunc,
+
+    /// Title: DuplicatePrefixFunc
+    /// Payload: The symbol of the operator definition
+    /// An operator function with the same symbol and the operand type is defined.
+    DuplicatePrefixFunc,
+
+    /// Title: DuplicatePostfixFunc
+    /// Payload: The symbol of the operator definition
+    /// An operator function with the same symbol and the operand type is defined.
+    DuplicatePostfixFunc,
 
     /// Title: FuncCallInLValue
     /// Payload: None

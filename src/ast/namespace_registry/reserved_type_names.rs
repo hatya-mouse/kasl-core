@@ -14,6 +14,6 @@
 // limitations under the License.
 //
 
-pub fn is_reserved_type_name(name: &str) -> bool {
+pub fn is_reserved_name(name: &str) -> bool {
     matches!(name, "Int" | "Float" | "Bool" | "Void" | "Builtin")
 }

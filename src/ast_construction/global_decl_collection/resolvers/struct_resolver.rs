@@ -18,8 +18,6 @@ use crate::{
     ExprToken, ParserDeclStmt, ParserDeclStmtKind, Range, StructID, SymbolPath,
     error::Ph,
     global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    namespace_registry::is_reserved_type_name,
-    symbol_path,
     type_registry::{ResolvedType, StructDecl, StructField},
 };
 
@@ -30,27 +28,30 @@ impl<'a> GlobalDeclCollector<'a> {
         body: &'a [ParserDeclStmt],
         decl_range: Range,
     ) {
-        let struct_path = symbol_path![name.to_string()];
         // Check if the struct with the same name already exists
-        if self.namespace.type_registry.has_struct(&struct_path) {
+        if self
+            .prog_ctx
+            .namespace_registry
+            .is_name_used(&self.current_namespace, name)
+        {
             self.ec
                 .duplicate_struct_name(decl_range, Ph::StructCollection, name);
-        } else if is_reserved_type_name(name) {
-            self.ec
-                .reserved_struct_name(decl_range, Ph::StructCollection, name);
         }
 
-        let struct_id = self.namespace.type_registry.generate_struct_id();
+        let struct_id = self.prog_ctx.type_registry.generate_struct_id();
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
         // Calculate the struct layout
-        struct_decl.compute_layout(&self.namespace.type_registry);
+        struct_decl.compute_layout(&self.prog_ctx.type_registry);
 
         // Register the struct in the type registry with a generated ID
-        self.namespace
-            .type_registry
-            .register_struct(struct_decl, struct_path, struct_id);
+        self.prog_ctx.type_registry.register_struct(
+            self.current_namespace,
+            struct_decl,
+            name.to_string(),
+            struct_id,
+        );
     }
 
     fn resolve_struct_body(
@@ -155,10 +156,7 @@ impl<'a> GlobalDeclCollector<'a> {
         };
 
         // Register the function
-        let func_id = self
-            .namespace
-            .func_ctx
-            .register_member_func(func, struct_id);
+        let func_id = self.prog_ctx.func_ctx.register_member_func(func, struct_id);
 
         // Register the function body to the func body map
         self.comp_data

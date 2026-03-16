@@ -24,7 +24,7 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::{NameSpaceID, VariableID};
+use crate::{NameSpaceID, Range, VariableID};
 use std::{collections::HashMap, fmt::Display};
 
 /// ScopeRegistry manages scopes and variables belonging to them.
@@ -40,14 +40,20 @@ pub struct ScopeRegistry {
 }
 
 impl ScopeRegistry {
-    /// Adds a new global scope for the given namespace ID.
-    pub fn add_global_scope(&mut self, namespace_id: NameSpaceID, scope_id: ScopeID) {
-        self.global_scope_ids.insert(namespace_id, scope_id);
+    // --- SCOPE CREATION ---
+
+    /// Creates a new global scope for the given namespace ID.
+    pub fn create_global_scope(&mut self, namespace_id: NameSpaceID) {
+        let global_scope_id = self.create_scope(None, Range::zero());
+        self.global_scope_ids.insert(namespace_id, global_scope_id);
     }
 
-    /// Gets the global scope ID for the given namespace ID.
-    pub fn get_global_scope_id(&self, namespace_id: &NameSpaceID) -> ScopeID {
-        self.global_scope_ids[namespace_id]
+    /// Creates a new scope with the given parent scope ID and the range.
+    pub fn create_scope(&mut self, parent_scope_id: Option<ScopeID>, range: Range) -> ScopeID {
+        let scope_id = self.generate_scope_id();
+        let scope = Scope::new(parent_scope_id, range);
+        self.scopes.insert(scope_id, scope);
+        scope_id
     }
 
     /// Generates a new `ScopeID` for a new scope.
@@ -57,10 +63,24 @@ impl ScopeRegistry {
         id
     }
 
-    /// Adds a new namespace with the given namespace ID.
-    pub fn add_namespace(&mut self, namespace_id: NameSpaceID) {
-        let global_id = self.generate_scope_id();
-        self.global_scope_ids.insert(namespace_id, global_id);
+    /// Generates a new `VariableID` for a new variable.
+    pub fn generate_var_id(&mut self) -> VariableID {
+        let id = VariableID::new(self.next_variable_id);
+        self.next_variable_id += 1;
+        id
+    }
+
+    // --- GETTER FUNCTIONS ---
+
+    /// Gets the global scope ID for the given namespace ID.
+    pub fn get_global_scope_id(&self, namespace_id: &NameSpaceID) -> ScopeID {
+        self.global_scope_ids[namespace_id]
+    }
+
+    /// Gets a reference to the global scope for the given namespace ID.
+    pub fn get_global_scope(&self, namespace_id: &NameSpaceID) -> &Scope {
+        let scope_id = self.get_global_scope_id(namespace_id);
+        &self.scopes[&scope_id]
     }
 
     /// Gets the `VariableID` of the variable in the given scope or its parent scopes with the given name.
@@ -79,6 +99,19 @@ impl ScopeRegistry {
     /// Gets a reference to the variable with the given `VariableID`.
     pub fn get_var(&self, var_id: &VariableID) -> Option<&ScopeVar> {
         self.variables.get(var_id)
+    }
+
+    // --- REGISTRATION ---
+
+    /// Registers a new variable in the given scope with the given name and returns its `VariableID`.
+    pub fn register_var(&mut self, var: ScopeVar, name: String, scope_id: &ScopeID) -> VariableID {
+        let var_id = self.generate_var_id();
+        self.variables.insert(var_id, var);
+        self.scopes
+            .get_mut(scope_id)
+            .unwrap()
+            .register_var(name, var_id);
+        var_id
     }
 }
 

@@ -56,9 +56,10 @@ impl GlobalDeclCollector<'_> {
         constructor.analyze_scope_graph();
 
         // Register the namespace with the import path
-        self.namespace.namespace_registry.register_namespace(
+        self.prog_ctx.namespace_registry.register_namespace(
             import_path.path.last().cloned().unwrap(),
             constructor.namespace,
+            Some(self.current_namespace),
         );
     }
 

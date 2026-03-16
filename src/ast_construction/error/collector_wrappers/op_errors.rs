@@ -102,4 +102,64 @@ impl ErrorCollector {
             Pl::StrAndNum(op_symbol.to_string(), param_count),
         );
     }
+
+    pub(crate) fn duplicate_infix_define(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+        self.emit(
+            EK::DuplicateInfixDefine,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(op_symbol.to_string()),
+        );
+    }
+
+    pub(crate) fn duplicate_prefix_define(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+        self.emit(
+            EK::DuplicatePrefixDefine,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(op_symbol.to_string()),
+        );
+    }
+
+    pub(crate) fn duplicate_postfix_define(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+        self.emit(
+            EK::DuplicatePostfixDefine,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(op_symbol.to_string()),
+        );
+    }
+
+    pub(crate) fn duplicate_infix_func(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+        self.emit(
+            EK::DuplicateInfixFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(op_symbol.to_string()),
+        );
+    }
+
+    pub(crate) fn duplicate_prefix_func(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+        self.emit(
+            EK::DuplicatePrefixFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(op_symbol.to_string()),
+        );
+    }
+
+    pub(crate) fn duplicate_postfix_func(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+        self.emit(
+            EK::DuplicatePostfixFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(op_symbol.to_string()),
+        );
+    }
 }

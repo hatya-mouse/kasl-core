@@ -34,9 +34,12 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) -> Option<Function> {
         // Create a function block
-        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
+        let global_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope_id(&self.current_namespace);
         let func_scope_id = self
-            .namespace
+            .prog_ctx
             .scope_registry
             .create_scope(Some(global_scope_id), decl_range);
         let block = Block::new(func_scope_id);
@@ -46,14 +49,27 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the return type
         let return_type = match return_type {
-            Some(path) => match self.namespace.type_registry.resolve_type_path(path) {
-                Some(resolved) => resolved,
-                None => {
-                    self.ec
-                        .type_not_found(decl_range, Ph::GlobalDeclCollection, path.to_string());
-                    return None;
+            Some(path) => {
+                let (namespace_id, type_name) = self
+                    .prog_ctx
+                    .namespace_registry
+                    .resolve_namespace_from_path(path.clone());
+                match self
+                    .prog_ctx
+                    .type_registry
+                    .resolve_type(namespace_id, &type_name.to_string())
+                {
+                    Some(resolved) => resolved,
+                    None => {
+                        self.ec.type_not_found(
+                            decl_range,
+                            Ph::GlobalDeclCollection,
+                            path.to_string(),
+                        );
+                        return None;
+                    }
                 }
-            },
+            }
             None => ResolvedType::Primitive(PrimitiveType::Void),
         };
 
@@ -89,9 +105,9 @@ impl GlobalDeclCollector<'_> {
     ) -> Option<FuncParam> {
         // Check if the name is already in use in this scope
         if self
-            .namespace
-            .scope_registry
-            .has_var(func_scope_id, &param.name)
+            .prog_ctx
+            .namespace_registry
+            .is_name_used(&self.current_namespace, &param.name)
         {
             self.ec
                 .duplicate_var_name(param.range, Ph::StatementCollection, &param.name);
@@ -112,9 +128,9 @@ impl GlobalDeclCollector<'_> {
                 var_kind: VariableKind::FuncParam,
             };
             let var_id =
-                self.namespace
+                self.prog_ctx
                     .scope_registry
-                    .register_var(var, param.name.clone(), func_scope_id);
+                    .register_var(var, param.name.clone(), &func_scope_id);
 
             Some(FuncParam {
                 label: param.label.clone(),
@@ -126,10 +142,14 @@ impl GlobalDeclCollector<'_> {
             })
         } else if let Some(annotation_type) = &param.value_type {
             // If no default value is provided, use the annotation type
+            let (namespace_id, type_name) = self
+                .prog_ctx
+                .namespace_registry
+                .resolve_namespace_from_path(annotation_type.clone());
             let resolved_annotation_type = self
-                .namespace
+                .prog_ctx
                 .type_registry
-                .resolve_type_path(annotation_type)?;
+                .resolve_type(namespace_id, &type_name.to_string())?;
 
             // Register the variable in the function scope
             let var = ScopeVar {
@@ -140,9 +160,9 @@ impl GlobalDeclCollector<'_> {
                 var_kind: VariableKind::FuncParam,
             };
             let var_id =
-                self.namespace
+                self.prog_ctx
                     .scope_registry
-                    .register_var(var, param.name.clone(), func_scope_id);
+                    .register_var(var, param.name.clone(), &func_scope_id);
 
             Some(FuncParam {
                 label: param.label.clone(),

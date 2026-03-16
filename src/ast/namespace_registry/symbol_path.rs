@@ -88,6 +88,23 @@ impl Display for SymbolPath {
     }
 }
 
+impl IntoIterator for SymbolPath {
+    type Item = SymbolPathComponent;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.components.into_iter()
+    }
+}
+
+impl FromIterator<SymbolPathComponent> for SymbolPath {
+    fn from_iter<I: IntoIterator<Item = SymbolPathComponent>>(iter: I) -> Self {
+        Self {
+            components: iter.into_iter().collect(),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Hash, serde::Serialize)]
 pub struct SymbolPathComponent {
     pub symbol: String,

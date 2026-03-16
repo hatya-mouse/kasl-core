@@ -83,7 +83,10 @@ impl GlobalDeclCollector<'_> {
 
     fn resolve_attrs(&mut self, attrs: &[ParserInputAttribute]) -> Option<Vec<InputAttribute>> {
         let mut resolved_attrs = Vec::new();
-        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
+        let global_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope_id(&self.current_namespace);
 
         // Resolve each attribute's arguments and construct InputAttribute
         for attr in attrs {
@@ -92,10 +95,11 @@ impl GlobalDeclCollector<'_> {
                 // Resolve the expression of the argument
                 let resolved_arg = resolve_expr(
                     self.ec,
-                    self.namespace,
+                    self.prog_ctx,
                     self.scope_graph,
                     self.builtin_registry,
                     global_scope_id,
+                    self.current_namespace,
                     arg,
                 )?;
                 resolved_args.push(resolved_arg);

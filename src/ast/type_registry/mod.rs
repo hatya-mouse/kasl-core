@@ -27,7 +27,7 @@ pub use struct_field::StructField;
 pub use struct_graph::StructGraph;
 
 use crate::{NameSpaceID, StructID};
-use std::collections::{HashMap, HashSet};
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
@@ -43,11 +43,30 @@ impl TypeRegistry {
         id
     }
 
+    // --- TYPE RESOLUTION ---
+
+    pub fn resolve_type(&self, namespace_id: NameSpaceID, type_name: &str) -> Option<ResolvedType> {
+        match PrimitiveType::from_str(type_name) {
+            Ok(primitive) => Some(ResolvedType::Primitive(primitive)),
+            Err(_) => self
+                .get_struct_id(namespace_id, type_name)
+                .map(|id| ResolvedType::Struct(id)),
+        }
+    }
+
+    // --- GETTER FUNCTIONS ---
+
     pub fn get_struct_id(&self, namespace_id: NameSpaceID, type_name: &str) -> Option<StructID> {
         self.name_to_id
             .get(&(namespace_id, type_name.to_string()))
             .copied()
     }
+
+    pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
+        self.structs.get(id)
+    }
+
+    // --- TYPE SIZE AND ALIGNMENT ---
 
     pub fn get_type_size(&self, type_id: &ResolvedType) -> usize {
         match type_id {
@@ -63,6 +82,8 @@ impl TypeRegistry {
         }
     }
 
+    // --- REGISTRATION ---
+
     pub fn register_struct(
         &mut self,
         namespace_id: NameSpaceID,
@@ -74,9 +95,7 @@ impl TypeRegistry {
         self.name_to_id.insert((namespace_id, name), struct_id);
     }
 
-    pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
-        self.structs.get(id)
-    }
+    // --- FORMATTING ---
 
     pub fn format_type(&self, ty: &ResolvedType) -> String {
         match ty {
@@ -86,9 +105,5 @@ impl TypeRegistry {
                 .map(|s| s.name.clone())
                 .unwrap_or(format!("struct(ID: {})", id)),
         }
-    }
-
-    pub fn get_all_structs(&self) -> HashSet<StructID> {
-        self.structs.keys().copied().collect()
     }
 }

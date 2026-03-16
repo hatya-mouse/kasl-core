@@ -20,42 +20,45 @@ mod stmt_process;
 pub use resolvers::FuncDeclInfo;
 
 use crate::{
-    CompilationData, NameSpace, ParserDeclStmt,
+    CompilationData, NameSpaceID, ParserDeclStmt,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerConfig, ConstructorState},
+    compilation_data::{CompilerConfig, ConstructorState, ProgramContext},
     error::ErrorCollector,
     scope_manager::ScopeGraph,
 };
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
-    namespace: &'a mut NameSpace,
+    prog_ctx: &'a mut ProgramContext,
     comp_data: &'a mut CompilationData,
     comp_config: &'a CompilerConfig,
     builtin_registry: &'a BuiltinRegistry,
     scope_graph: &'a mut ScopeGraph,
 
     constructor_state: &'a ConstructorState,
+    current_namespace: NameSpaceID,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        namespace: &'a mut NameSpace,
+        prog_ctx: &'a mut ProgramContext,
         comp_data: &'a mut CompilationData,
         comp_config: &'a CompilerConfig,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
         constructor_state: &'a ConstructorState,
+        current_namespace: NameSpaceID,
     ) -> Self {
         Self {
             ec,
-            namespace,
+            prog_ctx,
             comp_data,
             comp_config,
             builtin_registry,
             scope_graph,
             constructor_state,
+            current_namespace,
         }
     }
 

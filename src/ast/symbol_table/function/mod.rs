@@ -38,6 +38,27 @@ impl FunctionContext {
         id
     }
 
+    // --- GETTER FUNCTIONS ---
+
+    pub fn get_global_func_id(&self, namespace_id: NameSpaceID, name: &str) -> Option<FunctionID> {
+        self.global_functions
+            .get(&(namespace_id, name.to_string()))
+            .copied()
+    }
+
+    pub fn get_member_func_id(&self, struct_id: &StructID, name: &str) -> Option<FunctionID> {
+        self.member_functions
+            .get(struct_id)
+            .and_then(|funcs| funcs.get(name))
+            .copied()
+    }
+
+    pub fn get_func(&self, func_id: &FunctionID) -> Option<&Function> {
+        self.funcs.get(func_id)
+    }
+
+    // --- REGISTRATION ---
+
     /// Registers a member function in the given struct in the namespace.
     pub fn register_member_func(&mut self, func: Function, struct_id: StructID) -> FunctionID {
         let func_id = self.generate_function_id();
@@ -62,22 +83,5 @@ impl FunctionContext {
             .insert((namespace_id, func.name.clone()), func_id);
         self.funcs.insert(func_id, func);
         func_id
-    }
-
-    pub fn get_global_func_id(&self, namespace_id: NameSpaceID, name: &str) -> Option<FunctionID> {
-        self.global_functions
-            .get(&(namespace_id, name.to_string()))
-            .copied()
-    }
-
-    pub fn get_member_func_id(&self, struct_id: &StructID, name: &str) -> Option<FunctionID> {
-        self.member_functions
-            .get(struct_id)
-            .and_then(|funcs| funcs.get(name))
-            .copied()
-    }
-
-    pub fn get_func(&self, func_id: &FunctionID) -> Option<&Function> {
-        self.funcs.get(func_id)
     }
 }

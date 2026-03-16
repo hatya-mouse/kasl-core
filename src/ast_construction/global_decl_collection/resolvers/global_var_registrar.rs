@@ -17,7 +17,6 @@
 use crate::{
     Expr, ExprToken, Range, ScopeVar, SymbolPath, error::Ph, expr_engine::resolve_expr,
     global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind,
-    type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -26,24 +25,32 @@ impl GlobalDeclCollector<'_> {
         type_annotation: &Option<SymbolPath>,
         def_val: &[ExprToken],
         decl_range: Range,
-    ) -> Option<Expr<ResolvedType>> {
+    ) -> Option<Expr> {
         // Resolve the default value expression
-        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
+        let global_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope_id(&self.current_namespace);
         let resolved_def_val = resolve_expr(
             self.ec,
-            self.namespace,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
             global_scope_id,
+            self.current_namespace,
             def_val,
         )?;
 
         // Resolve the type annotation if provided
         if let Some(path) = type_annotation {
+            let (namespace_id, type_name) = self
+                .prog_ctx
+                .namespace_registry
+                .resolve_namespace_from_path(path.clone());
             let resolved_type_annotation = match self
-                .namespace
+                .prog_ctx
                 .type_registry
-                .resolve_type_path(path)
+                .resolve_type(namespace_id, &type_name.to_string())
             {
                 Some(ty) => ty,
                 None => {
@@ -58,10 +65,10 @@ impl GlobalDeclCollector<'_> {
                 self.ec.type_annotation_mismatch(
                     decl_range,
                     Ph::GlobalDeclCollection,
-                    self.namespace
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_type_annotation),
-                    self.namespace
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_def_val.value_type),
                 );
@@ -80,6 +87,17 @@ impl GlobalDeclCollector<'_> {
         var_kind: VariableKind,
         decl_range: Range,
     ) {
+        // Check if the name is already in use in this scope
+        if self
+            .prog_ctx
+            .namespace_registry
+            .is_name_used(&self.current_namespace, name)
+        {
+            self.ec
+                .duplicate_var_name(decl_range, Ph::StatementCollection, name);
+            return;
+        }
+
         // Resolve the default value expression
         let Some(resolved_def_val) =
             self.resolve_def_val_global(type_annotation, def_val, decl_range)
@@ -88,14 +106,10 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Get the global scope ID
-        let global_scope_id = self.namespace.scope_registry.get_global_scope_id();
-
-        // Check if the name is already in use in this scope
-        if self.namespace.scope_registry.has_var(global_scope_id, name) {
-            self.ec
-                .duplicate_var_name(decl_range, Ph::StatementCollection, name);
-            return;
-        }
+        let global_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope_id(&self.current_namespace);
 
         // Register the variable in the global scope
         let var = ScopeVar {
@@ -105,8 +119,8 @@ impl GlobalDeclCollector<'_> {
             range: decl_range,
             var_kind,
         };
-        self.namespace
+        self.prog_ctx
             .scope_registry
-            .register_var(var, name.to_string(), global_scope_id);
+            .register_var(var, name.to_string(), &global_scope_id);
     }
 }

@@ -30,11 +30,15 @@ impl<'a> BlueprintBuilder<'a> {
 
     pub fn build(&self) -> IOBlueprint {
         let mut blueprint = IOBlueprint::default();
-        let global_scope = self.prog_ctx.scope_registry.get_global_scope();
+        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        let global_scope = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope(&root_namespace_id);
 
         // Loop over each variables in the global scope
         for var_id in &global_scope.variables {
-            let Some(scope_var) = self.prog_ctx.scope_registry.get_var_by_id(var_id) else {
+            let Some(scope_var) = self.prog_ctx.scope_registry.get_var(var_id) else {
                 continue;
             };
 

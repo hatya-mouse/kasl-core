@@ -21,9 +21,15 @@ use crate::{
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_postfix_define(&mut self, symbol: &str, props: &PostfixOperatorProperties) {
-        self.namespace
+        if self
+            .prog_ctx
             .op_ctx
-            .register_postfix_properties(symbol.to_string(), props.clone());
+            .register_postfix_properties(symbol.to_string(), props.clone())
+            == Err(())
+        {
+            self.ec
+                .duplicate_postfix_define(props.range, Ph::GlobalDeclCollection, symbol);
+        }
     }
 
     pub fn register_postfix_func(
@@ -55,7 +61,11 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Register the operator
-        let op_id = self.namespace.op_ctx.register_postfix_func(op);
+        let Ok(op_id) = self.prog_ctx.op_ctx.register_postfix_func(op) else {
+            self.ec
+                .duplicate_postfix_func(decl_range, Ph::GlobalDeclCollection, symbol);
+            return;
+        };
 
         // Register the function body to the function body map
         self.comp_data.op_body_map.register(op_id, body.to_vec());
