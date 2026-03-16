@@ -66,6 +66,10 @@ impl TypeRegistry {
         self.structs.get(id)
     }
 
+    pub fn get_all_structs(&self) -> Vec<StructID> {
+        self.structs.keys().copied().collect()
+    }
+
     // --- TYPE SIZE AND ALIGNMENT ---
 
     pub fn get_type_size(&self, type_id: &ResolvedType) -> usize {

@@ -34,7 +34,7 @@ impl StructGraphAnalyzer<'_> {
         if let Some(struct_fields) = self.struct_graph.get_fields(struct_id) {
             for field in struct_fields {
                 if states.get(field) == Some(&StructState::Visiting) {
-                    if let Some(struct_decl) = self.namespace.type_registry.get_struct(field) {
+                    if let Some(struct_decl) = self.prog_ctx.type_registry.get_struct(field) {
                         self.ec.struct_cycle(
                             struct_decl.range,
                             Ph::StructGraphAnalyzing,
