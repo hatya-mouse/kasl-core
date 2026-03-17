@@ -303,10 +303,10 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
-            literal()
-            / func_call()
+            operator_token()
+            / literal()
             / identifier_token()
-            / operator_token()
+            / func_call()
             / parenthesized_token()
             / dot_token()
         ) end:position!() {
