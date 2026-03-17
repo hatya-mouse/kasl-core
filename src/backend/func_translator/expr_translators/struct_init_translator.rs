@@ -31,10 +31,10 @@ impl FuncTranslator<'_> {
         );
         let slot = self.builder.func.create_sized_stack_slot(slot_data);
         // Store the fields to the slot
-        dbg!(struct_decl);
+        dbg!("{:#?}", struct_decl);
         for (field, offset) in struct_decl.fields.iter().zip(&struct_decl.field_offsets) {
             let translated_def_val = self.translate_expr(&field.def_val);
-            dbg!(translated_def_val);
+            dbg!("{:#?}", translated_def_val);
             self.builder
                 .ins()
                 .stack_store(translated_def_val, slot, *offset);
