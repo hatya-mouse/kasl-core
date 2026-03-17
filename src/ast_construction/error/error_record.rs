@@ -67,6 +67,7 @@ pub enum Phase {
     StatementCollection = 4,
     ExprEngine = 5,
     ScopeGraphAnalyzing = 6,
+    Backend = 7,
 }
 
 #[derive(Clone, Debug, serde::Serialize)]

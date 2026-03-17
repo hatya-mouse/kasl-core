@@ -15,12 +15,12 @@
 //
 
 use crate::{
-    CompilationData, ParserDeclStmt,
+    CompilationData, ParserDeclStmt, Range,
     backend::Backend,
     blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
     compilation_data::{CompilerState, ProgramContext},
-    error::{ErrorCollector, ErrorRecord},
+    error::{EK, ErrorCollector, ErrorKey, ErrorRecord, Ph, Pl, Sv},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
     scope_graph_analyzing::ScopeGraphAnalyzer,
@@ -40,6 +40,7 @@ pub struct KaslCompiler {
     builtin_registry: BuiltinRegistry,
 
     parser_decl_stmts: Vec<ParserDeclStmt>,
+    compiled: *const u8,
 }
 
 impl KaslCompiler {
@@ -91,16 +92,7 @@ impl KaslCompiler {
         let blueprint_builder = BlueprintBuilder::new(&self.prog_ctx);
         let blueprint = blueprint_builder.build();
 
-        self.ec.as_result().map(|_| blueprint)
-    }
-
-    pub fn run(
-        &mut self,
-        blueprint: &IOBlueprint,
-        inputs: &[*mut ()],
-        outputs: &[*mut ()],
-        states: &[*mut ()],
-    ) -> Result<(), String> {
+        // 6. Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
         let main_func_id = self
@@ -108,15 +100,38 @@ impl KaslCompiler {
             .func_ctx
             .get_global_func_id(root_namespace_id, "main")
             .unwrap();
-        let code = backend.compile(
-            &self.prog_ctx,
-            &self.builtin_registry,
-            blueprint,
-            &main_func_id,
-        )?;
+        self.compiled = backend
+            .compile(
+                &self.prog_ctx,
+                &self.builtin_registry,
+                &blueprint,
+                &main_func_id,
+            )
+            .map_err(|e| {
+                vec![ErrorRecord::new(
+                    ErrorKey::new(EK::CompilerBug, Pl::Str(e)),
+                    Range::zero(),
+                    Ph::Backend,
+                    Sv::Error,
+                )]
+            })?;
 
+        self.ec.as_result().map(|_| blueprint)
+    }
+
+    pub fn run(
+        &mut self,
+        inputs: &[*mut ()],
+        outputs: &[*mut ()],
+        states: &[*mut ()],
+    ) -> Result<(), String> {
         unsafe {
-            KaslCompiler::run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
+            KaslCompiler::run_code(
+                self.compiled,
+                inputs.as_ptr(),
+                outputs.as_ptr(),
+                states.as_ptr(),
+            );
         }
 
         Ok(())
