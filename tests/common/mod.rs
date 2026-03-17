@@ -22,7 +22,7 @@ use kasl::{
     backend::Backend,
     blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerConfig, ConstructorState, ProgramContext},
+    compilation_data::{CompilerState, ProgramContext},
     error::{ErrorCollector, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
@@ -38,9 +38,7 @@ pub struct TestContext {
     pub prog_ctx: ProgramContext,
     pub comp_data: CompilationData,
     pub builtin_registry: BuiltinRegistry,
-
-    pub comp_config: CompilerConfig,
-    pub constructor_state: ConstructorState,
+    pub comp_state: CompilerState,
 }
 
 impl Default for TestContext {
@@ -50,9 +48,7 @@ impl Default for TestContext {
             prog_ctx: ProgramContext::default(),
             comp_data: CompilationData::default(),
             builtin_registry: BuiltinRegistry::default(),
-
-            comp_config: CompilerConfig::default(),
-            constructor_state: ConstructorState::default(),
+            comp_state: CompilerState::default(),
         };
         let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
         test_ctx
@@ -76,9 +72,8 @@ pub fn collect_global_decls(
         &mut test_ctx.ec,
         &mut test_ctx.prog_ctx,
         &mut test_ctx.comp_data,
-        &test_ctx.comp_config,
+        &test_ctx.comp_state,
         &test_ctx.builtin_registry,
-        &test_ctx.constructor_state,
         root_namespace_id,
     );
     global_decl_collector.process(statements);
@@ -99,9 +94,8 @@ pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut stmt_builder = StatementBuilder::new(
         &mut test_ctx.ec,
         &mut test_ctx.prog_ctx,
-        &test_ctx.comp_data,
+        &mut test_ctx.comp_data,
         &test_ctx.builtin_registry,
-        &mut test_ctx.scope_graph,
     );
     stmt_builder.build_all();
     test_ctx.ec.as_result()
@@ -111,7 +105,7 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
     let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(
         &mut test_ctx.ec,
         &test_ctx.prog_ctx,
-        &mut test_ctx.scope_graph,
+        &mut test_ctx.comp_data.scope_graph,
     );
     scope_graph_analyzer.analyze_all();
     test_ctx.ec.as_result()

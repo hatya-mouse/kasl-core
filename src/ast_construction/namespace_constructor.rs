@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-use std::path::PathBuf;
-
 use crate::{
     CompilationData, NameSpaceID, ParserDeclStmt,
     builtin::BuiltinRegistry,
@@ -73,11 +71,11 @@ impl<'a> NameSpaceConstructor<'a> {
 
     pub fn collect_global_decls(&mut self) {
         let mut global_decl_collector = GlobalDeclCollector::new(
-            &mut self.ec,
+            self.ec,
             self.prog_ctx,
-            &mut self.comp_data,
+            self.comp_data,
             &self.comp_state,
-            &self.builtin_registry,
+            self.builtin_registry,
             self.namespace_id,
         );
         global_decl_collector.process(&self.decl_stmts);

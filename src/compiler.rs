@@ -14,14 +14,22 @@
 // limitations under the License.
 //
 
-use std::path::PathBuf;
-
 use crate::{
-    CompilationData,
+    CompilationData, ParserDeclStmt,
+    backend::Backend,
+    blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
     compilation_data::{CompilerState, ProgramContext},
-    error::ErrorCollector,
+    error::{ErrorCollector, ErrorRecord},
+    global_decl_collection::GlobalDeclCollector,
+    kasl_parser,
+    scope_graph_analyzing::ScopeGraphAnalyzer,
+    scope_manager::IOBlueprint,
+    statement_building::StatementBuilder,
+    struct_graph_analyzing::StructGraphAnalyzer,
 };
+use peg::{error::ParseError, str::LineCol};
+use std::{mem, path::PathBuf};
 
 #[derive(Default)]
 pub struct KaslCompiler {
@@ -30,10 +38,100 @@ pub struct KaslCompiler {
     comp_data: CompilationData,
     comp_state: CompilerState,
     builtin_registry: BuiltinRegistry,
+
+    parser_decl_stmts: Vec<ParserDeclStmt>,
 }
 
 impl KaslCompiler {
     pub fn add_search_path(&mut self, path: PathBuf) {
         self.comp_state.child_search_paths.push(path);
+    }
+
+    pub fn parse(&mut self, code: &str) -> Result<(), ParseError<LineCol>> {
+        self.parser_decl_stmts = kasl_parser::parse(code)?;
+        Ok(())
+    }
+
+    pub fn build(&mut self) -> Result<IOBlueprint, Vec<ErrorRecord>> {
+        // 1. Collect global declarations
+        let root_namespace = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        let mut global_decl_collector = GlobalDeclCollector::new(
+            &mut self.ec,
+            &mut self.prog_ctx,
+            &mut self.comp_data,
+            &self.comp_state,
+            &self.builtin_registry,
+            root_namespace,
+        );
+        global_decl_collector.process(&self.parser_decl_stmts);
+
+        // 2. Analyze struct graph
+        let mut struct_analyzer =
+            StructGraphAnalyzer::new(&mut self.ec, &self.prog_ctx, &self.comp_data.struct_graph);
+        struct_analyzer.analyze_all();
+
+        // 3. Build statements
+        let mut stmt_builder = StatementBuilder::new(
+            &mut self.ec,
+            &mut self.prog_ctx,
+            &mut self.comp_data,
+            &self.builtin_registry,
+        );
+        stmt_builder.build_all();
+
+        // 4. Analyze scope graph
+        let mut scope_analyzer = ScopeGraphAnalyzer::new(
+            &mut self.ec,
+            &self.prog_ctx,
+            &mut self.comp_data.scope_graph,
+        );
+        scope_analyzer.analyze_all();
+
+        // 5. Build an IOBlueprint
+        let blueprint_builder = BlueprintBuilder::new(&self.prog_ctx);
+        let blueprint = blueprint_builder.build();
+
+        self.ec.as_result().map(|_| blueprint)
+    }
+
+    pub fn run(
+        &mut self,
+        blueprint: &IOBlueprint,
+        inputs: &[*mut ()],
+        outputs: &[*mut ()],
+        states: &[*mut ()],
+    ) {
+        let mut backend = Backend::default();
+        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        let main_func_id = self
+            .prog_ctx
+            .func_ctx
+            .get_global_func_id(root_namespace_id, "main")
+            .unwrap();
+        let code = backend
+            .compile(
+                &self.prog_ctx,
+                &self.builtin_registry,
+                blueprint,
+                &main_func_id,
+            )
+            .unwrap();
+
+        unsafe {
+            KaslCompiler::run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
+        }
+    }
+
+    unsafe fn run_code(
+        code_ptr: *const u8,
+        input: *const *mut (),
+        output: *const *mut (),
+        state: *const *mut (),
+    ) {
+        unsafe {
+            let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) =
+                mem::transmute(code_ptr);
+            code_fn(input, output, state)
+        }
     }
 }
