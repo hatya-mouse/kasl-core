@@ -20,8 +20,6 @@ use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
-        println!("translate_struct_init: {:?}", struct_id);
-
         // Store the value in the stack slot
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
 
@@ -33,10 +31,9 @@ impl FuncTranslator<'_> {
         );
         let slot = self.builder.func.create_sized_stack_slot(slot_data);
         // Store the fields to the slot
-        println!("{:#?}", struct_decl);
         for (field, offset) in struct_decl.fields.iter().zip(&struct_decl.field_offsets) {
             let translated_def_val = self.translate_expr(&field.def_val);
-            println!("{:#?}", translated_def_val);
+            dbg!("{:#?}", translated_def_val);
             self.builder
                 .ins()
                 .stack_store(translated_def_val, slot, *offset);
