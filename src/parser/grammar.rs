@@ -164,17 +164,21 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule if_statement() -> ParserScopeStmt
         = start:position!() main:if_arm()
         else_ifs:(__? "else" _ ifCond:if_arm() { ifCond })*
-        else_start:position!() __? "else" __? "{"
-        __? else_body:scope_stmts()? __?
-        "}" else_end:position!()
+        else_arm:(
+            else_start:position!() __? "else" __? "{"
+            __? else_body:scope_stmts() __?
+            "}" else_end:position!() {
+                (else_body, Range::n(else_start, else_end))
+            }
+        )?
         end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::If {
                     main,
                     else_ifs,
-                    else_body,
-                    else_range: Range::n(else_start, else_end)
+                    else_range: else_arm.as_ref().map(|a| a.1),
+                    else_body: else_arm.map(|a| a.0),
                 }
             }
         }

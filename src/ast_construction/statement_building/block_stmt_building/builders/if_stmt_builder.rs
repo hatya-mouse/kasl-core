@@ -28,7 +28,7 @@ impl BlockStmtBuilder<'_> {
         main: &ParserIfArm,
         else_ifs: &[ParserIfArm],
         else_body: Option<&Vec<ParserScopeStmt>>,
-        else_range: Range,
+        else_range: Option<Range>,
     ) -> Option<Statement> {
         // Build the arms
         let main_arm = self.build_if_arm(main)?;
@@ -38,8 +38,8 @@ impl BlockStmtBuilder<'_> {
             .collect::<Option<Vec<_>>>()?;
         // Build the else block
         // None is allowed because the else block is optional
-        let else_block =
-            else_body.map(|arm| self.build_scope_block(arm, self.scope_id, else_range));
+        let else_block = else_body
+            .map(|arm| self.build_scope_block(arm, self.scope_id, else_range.unwrap_or_default()));
 
         // Return the constructed if statement
         Some(Statement::If {
