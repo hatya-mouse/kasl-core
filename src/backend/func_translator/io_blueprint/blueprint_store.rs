@@ -72,6 +72,11 @@ impl FuncTranslator<'_> {
         let val = self.builder.use_var(*var);
 
         // Store the value
+        let val = if self.builder.func.dfg.value_type(val) == types::I8 {
+            self.builder.ins().uextend(types::I32, val)
+        } else {
+            val
+        };
         self.builder
             .ins()
             .store(MemFlags::new(), val, output_ptr, 0);
