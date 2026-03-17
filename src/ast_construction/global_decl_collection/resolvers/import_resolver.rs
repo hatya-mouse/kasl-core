@@ -73,6 +73,9 @@ impl GlobalDeclCollector<'_> {
             import_path.path.last().cloned().unwrap(),
             Some(self.current_namespace),
         );
+        self.prog_ctx
+            .scope_registry
+            .create_global_scope(namespace_id);
 
         // Create a constructor and pass the program to it
         let mut constructor = NameSpaceConstructor::new(

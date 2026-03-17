@@ -34,7 +34,7 @@ use std::collections::HashMap;
 /// Should only exist one instance per compilation.
 #[derive(Debug)]
 pub struct NameSpaceRegistry {
-    pub namespaces: HashMap<NameSpaceID, NameSpace>,
+    namespaces: HashMap<NameSpaceID, NameSpace>,
     root_namespace_id: NameSpaceID,
     next_namespace_id: usize,
 }
