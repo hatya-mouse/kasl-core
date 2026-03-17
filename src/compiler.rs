@@ -34,7 +34,7 @@ use std::{mem, path::PathBuf};
 #[derive(Default)]
 pub struct KaslCompiler {
     ec: ErrorCollector,
-    pub prog_ctx: ProgramContext,
+    prog_ctx: ProgramContext,
     comp_data: CompilationData,
     comp_state: CompilerState,
     builtin_registry: BuiltinRegistry,
