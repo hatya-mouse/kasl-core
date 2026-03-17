@@ -27,11 +27,11 @@ use crate::{Expr, ExprKind, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_expr(&mut self, expr: &Expr) -> Option<ir::Value> {
+    pub fn translate_expr(&mut self, expr: &Expr) -> ir::Value {
         match &expr.kind {
-            ExprKind::IntLiteral(val) => Some(self.translate_int_literal(*val)),
-            ExprKind::FloatLiteral(val) => Some(self.translate_float_literal(*val)),
-            ExprKind::BoolLiteral(val) => Some(self.translate_bool_literal(*val)),
+            ExprKind::IntLiteral(val) => self.translate_int_literal(*val),
+            ExprKind::FloatLiteral(val) => self.translate_float_literal(*val),
+            ExprKind::BoolLiteral(val) => self.translate_bool_literal(*val),
             ExprKind::InfixOp {
                 operator, lhs, rhs, ..
             } => self.translate_infix_op_expr(operator, lhs, rhs),
@@ -41,9 +41,9 @@ impl FuncTranslator<'_> {
             ExprKind::PostfixOp {
                 operator, operand, ..
             } => self.translate_postfix_op_expr(operator, operand),
-            ExprKind::Identifier { id, .. } => Some(self.translate_identifier(id)),
+            ExprKind::Identifier { id, .. } => self.translate_identifier(id),
             ExprKind::StructField { lhs, offset } => {
-                Some(self.translate_struct_field_expr(lhs, &expr.value_type, *offset))
+                self.translate_struct_field_expr(lhs, &expr.value_type, *offset)
             }
             ExprKind::StructInit { id, .. } => self.translate_struct_init(id),
             ExprKind::StaticFuncCall { id, args, .. } => self.translate_func_call_expr(id, args),

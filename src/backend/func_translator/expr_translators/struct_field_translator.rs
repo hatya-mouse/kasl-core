@@ -27,7 +27,7 @@ impl FuncTranslator<'_> {
         offset: i32,
     ) -> ir::Value {
         // Translate the expression
-        let translated_lhs = self.translate_expr(lhs).unwrap();
+        let translated_lhs = self.translate_expr(lhs);
         // Translate the type
         let translated_type = self.type_converter.convert(value_type);
 

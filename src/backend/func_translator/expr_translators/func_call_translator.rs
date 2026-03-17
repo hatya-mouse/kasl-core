@@ -25,10 +25,11 @@ impl FuncTranslator<'_> {
         &mut self,
         func_id: &FunctionID,
         args: &[FuncCallArg],
-    ) -> Option<ir::Value> {
+    ) -> ir::Value {
         // Get the function block
         let func = &self.prog_ctx.func_ctx.get_func(func_id).unwrap();
         self.call_func(&func.block, args, &func.return_type)
+            .unwrap()
     }
 
     pub fn call_func(
@@ -40,7 +41,7 @@ impl FuncTranslator<'_> {
         // Define the argument as variables
         for arg in args {
             let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
-            let translated_val = self.translate_expr(&arg.value).unwrap();
+            let translated_val = self.translate_expr(&arg.value);
             self.builder.def_var(arg_var, translated_val);
         }
 

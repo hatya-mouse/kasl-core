@@ -24,29 +24,32 @@ impl FuncTranslator<'_> {
         op_id: &OperatorID,
         lhs: &FuncCallArg,
         rhs: &FuncCallArg,
-    ) -> Option<ir::Value> {
+    ) -> ir::Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_infix_func(op_id).unwrap();
         self.call_func(&op.block, &[lhs.clone(), rhs.clone()], &op.return_type)
+            .unwrap()
     }
 
     pub fn translate_prefix_op_expr(
         &mut self,
         op_id: &OperatorID,
         operand: &FuncCallArg,
-    ) -> Option<ir::Value> {
+    ) -> ir::Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_prefix_func(op_id).unwrap();
         self.call_func(&op.block, slice::from_ref(operand), &op.return_type)
+            .unwrap()
     }
 
     pub fn translate_postfix_op_expr(
         &mut self,
         op_id: &OperatorID,
         operand: &FuncCallArg,
-    ) -> Option<ir::Value> {
+    ) -> ir::Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_postfix_func(op_id).unwrap();
         self.call_func(&op.block, slice::from_ref(operand), &op.return_type)
+            .unwrap()
     }
 }

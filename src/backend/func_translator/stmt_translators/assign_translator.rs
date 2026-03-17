@@ -22,7 +22,7 @@ use crate::{Expr, backend::func_translator::FuncTranslator, symbol_table::LValue
 impl FuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {
         // Translate the RHS value
-        let rhs_value = self.translate_expr(value).unwrap();
+        let rhs_value = self.translate_expr(value);
 
         // Get the Variable and the ScopeVar
         let var = self.variables[&target.var_id];

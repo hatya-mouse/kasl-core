@@ -22,11 +22,11 @@ impl FuncTranslator<'_> {
         &mut self,
         func_id: &BuiltinFuncID,
         args: &[Expr],
-    ) -> Option<ir::Value> {
+    ) -> ir::Value {
         // Translate the expressions
         let mut translated_args = Vec::new();
         for arg in args {
-            let translated_val = self.translate_expr(arg).unwrap();
+            let translated_val = self.translate_expr(arg);
             translated_args.push(translated_val);
         }
 
@@ -34,6 +34,6 @@ impl FuncTranslator<'_> {
         let func = &self.builtin_registry.get_func_by_id(func_id).unwrap();
 
         // Translate the function
-        Some((func.translator)(&mut self.builder, &translated_args))
+        (func.translator)(&mut self.builder, &translated_args)
     }
 }

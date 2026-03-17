@@ -67,7 +67,7 @@ impl FuncTranslator<'_> {
         let else_block = self.builder.create_block();
 
         // Translate the condition and conditionally branch.
-        let cond = self.translate_expr(&if_arm.condition).unwrap();
+        let cond = self.translate_expr(&if_arm.condition);
         self.builder
             .ins()
             .brif(cond, then_block, &[], else_block, &[]);
