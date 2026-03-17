@@ -26,20 +26,54 @@ impl LValueResolver<'_> {
         let target_scope = self.resolve_namespace_scope(&mut token_iter);
 
         // Resolve the identifier
-        let mut l_value: Option<LValue> = None;
-        for token in token_iter {
-            if let ExprTokenKind::Identifier(name) = &token.kind {
-                if let Some(last_l_value) = l_value {
-                    l_value = self.resolve_field_access(last_l_value, name, token.range);
-                } else {
-                    l_value = self.resolve_identifier(target_scope, name, token.range);
+        let first_token = match token_iter.next() {
+            Some(token) => token,
+            None => {
+                // If the expression does not have any tokens, it is invalid
+                self.ec.invalid_l_value(tokens[0].range, Ph::ExprEngine);
+                return None;
+            }
+        };
+
+        let mut l_value = if let ExprTokenKind::Identifier(name) = &first_token.kind {
+            match self.resolve_identifier(target_scope, name, first_token.range) {
+                Some(lv) => lv,
+                None => {
+                    self.ec.invalid_l_value(first_token.range, Ph::ExprEngine);
+                    return None;
                 }
+            }
+        } else {
+            self.ec.invalid_l_value(first_token.range, Ph::ExprEngine);
+            return None;
+        };
+
+        while let Some(token) = token_iter.next() {
+            if token.kind != ExprTokenKind::Dot {
+                self.ec.invalid_l_value(token.range, Ph::ExprEngine);
+                break;
+            }
+
+            let Some(next_token) = token_iter.next() else {
+                self.ec.expr_ends_with_dot(token.range, Ph::ExprEngine);
+                break;
+            };
+
+            if let ExprTokenKind::Identifier(name) = &next_token.kind {
+                l_value = match self.resolve_field_access(l_value, name, next_token.range) {
+                    Some(lv) => lv,
+                    None => {
+                        self.ec.invalid_l_value(next_token.range, Ph::ExprEngine);
+                        return None;
+                    }
+                };
             } else {
                 // If the token is not an identifier, throw an error and return None
-                self.ec.invalid_l_value(token.range, Ph::ExprEngine);
+                self.ec.invalid_l_value(next_token.range, Ph::ExprEngine);
                 return None;
             }
         }
-        l_value
+
+        Some(l_value)
     }
 }
