@@ -50,7 +50,6 @@ impl KaslCompiler {
 
     pub fn parse(&mut self, code: &str) -> Result<(), ParseError<LineCol>> {
         self.parser_decl_stmts = kasl_parser::parse(code)?;
-        println!("{:#?}", self.parser_decl_stmts);
         Ok(())
     }
 
