@@ -182,7 +182,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     );
 
     registry.register_func(
-        "fge",
+        "fle",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
         Box::new(|builder, args| {
