@@ -28,6 +28,8 @@ use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub fn translate_expr(&mut self, expr: &Expr) -> ir::Value {
+        dbg!("{:#?}", expr);
+
         match &expr.kind {
             ExprKind::IntLiteral(val) => self.translate_int_literal(*val),
             ExprKind::FloatLiteral(val) => self.translate_float_literal(*val),
