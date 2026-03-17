@@ -47,6 +47,7 @@ impl LValueResolver<'_> {
 
                 // Get the offset of the field
                 let field_type = struct_decl.fields[field_index].value_type;
+                println!("type: {:?}", field_type);
                 let field_offset = struct_decl.field_offsets[field_index];
                 // Return the resolved l value
                 Some(LValue {
