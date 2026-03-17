@@ -20,6 +20,8 @@ use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
+        println!("translate_struct_init: {:?}", struct_id);
+
         // Store the value in the stack slot
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
 
