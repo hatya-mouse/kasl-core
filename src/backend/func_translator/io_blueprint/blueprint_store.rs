@@ -73,7 +73,7 @@ impl FuncTranslator<'_> {
         let val = self.builder.use_var(*var);
 
         // Store the value
-        self.store_value(&item.value_type, val, ptr, offset);
+        self.store_value(&item.value_type, val, ptr, 0);
     }
 
     fn store_value(
