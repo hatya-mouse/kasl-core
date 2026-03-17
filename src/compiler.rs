@@ -92,6 +92,8 @@ impl KaslCompiler {
         let blueprint_builder = BlueprintBuilder::new(&self.prog_ctx);
         let blueprint = blueprint_builder.build();
 
+        println!("Function Context: {:#?}", self.prog_ctx.func_ctx);
+
         // 6. Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
