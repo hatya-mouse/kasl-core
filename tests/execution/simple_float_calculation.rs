@@ -54,5 +54,5 @@ func main() {
     let out_ptr = &mut out_val as *mut f32 as *mut ();
 
     execute_program(&mut test_ctx, &blueprint, &[in_ptr], &[out_ptr], &[]);
-    assert_eq!(out_val, 3.215f32 * 123f32)
+    assert_eq!(out_val, 3.215f32 * 123f32);
 }

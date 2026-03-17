@@ -54,5 +54,5 @@ func main() {
     let out_ptr = &mut out_val as *mut i32 as *mut ();
 
     execute_program(&mut test_ctx, &blueprint, &[in_ptr], &[out_ptr], &[]);
-    assert_eq!(out_val, 4284)
+    assert_eq!(out_val, 4284);
 }
