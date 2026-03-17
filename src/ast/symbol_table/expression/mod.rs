@@ -65,7 +65,7 @@ pub enum ExprKind {
     },
     StructField {
         lhs: Box<Expr>,
-        offset: i32,
+        index: usize,
     },
     StructInit {
         id: StructID,
