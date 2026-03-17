@@ -31,9 +31,14 @@ impl FuncTranslator<'_> {
         // Translate the type
         let translated_type = self.type_converter.convert(value_type);
 
-        // Get the value depending on the access
-        self.builder
-            .ins()
-            .load(translated_type, MemFlags::new(), translated_lhs, offset)
+        // Get the value depending on the type
+        match value_type {
+            ResolvedType::Primitive(_) => {
+                self.builder
+                    .ins()
+                    .load(translated_type, MemFlags::new(), translated_lhs, offset)
+            }
+            ResolvedType::Struct(_) => self.builder.ins().iadd_imm(translated_lhs, offset as i64),
+        }
     }
 }
