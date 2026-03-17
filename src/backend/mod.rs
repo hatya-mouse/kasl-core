@@ -64,6 +64,8 @@ impl Backend {
     ) -> Result<*const u8, String> {
         self.translate(prog_ctx, builtin_registry, blueprint, entry_point);
 
+        println!("{}", self.ctx.func);
+
         let id = self
             .module
             .declare_function("main", Linkage::Export, &self.ctx.func.signature)
