@@ -64,6 +64,7 @@ impl BlockStmtBuilder<'_> {
 
         // Check if the target and value types match
         if target_l_value.value_type != resolved_value.value_type {
+            println!("target: {:?}, value: {:?}", target_l_value, resolved_value);
             self.ec.assign_type_mismatch(
                 stmt_range,
                 Ph::StatementCollection,
