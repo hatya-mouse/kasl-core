@@ -18,7 +18,7 @@ use crate::{
     backend::func_translator::FuncTranslator,
     scope_manager::{BlueprintItem, IOBlueprint},
 };
-use cranelift::prelude::{InstBuilder, MemFlags, types};
+use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
@@ -72,11 +72,6 @@ impl FuncTranslator<'_> {
         let val = self.builder.use_var(*var);
 
         // Store the value
-        let val = if self.builder.func.dfg.value_type(val) == types::I8 {
-            self.builder.ins().uextend(types::I32, val)
-        } else {
-            val
-        };
         self.builder
             .ins()
             .store(MemFlags::new(), val, output_ptr, 0);
