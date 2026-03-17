@@ -41,11 +41,12 @@ impl ExpressionResolver<'_> {
 
                 // Get the offset of the field
                 let field_type = struct_decl.fields[field_index].value_type;
+                let field_offset = struct_decl.field_offsets[field_index];
                 // Return the struct field expression
                 Some(Expr::new(
                     ExprKind::StructField {
                         lhs: Box::new(lhs),
-                        index: field_index,
+                        offset: field_offset,
                     },
                     field_type,
                     range,
