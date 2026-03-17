@@ -57,10 +57,11 @@ impl FuncTranslator<'_> {
         }
 
         // Translate the block
-        self.translate_block(block, func_return_block);
-        // if !has_return {
-        //     self.builder.ins().jump(func_return_block, &[]);
-        // }
+        let has_return = self.translate_block(block, func_return_block);
+        if !has_return {
+            println!("{:#?}", block);
+            self.builder.ins().jump(func_return_block, &[]);
+        }
 
         // Add some arguments to the return block
         self.builder.switch_to_block(func_return_block);
