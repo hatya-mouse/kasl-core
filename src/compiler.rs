@@ -39,7 +39,7 @@ pub struct KaslCompiler {
     comp_state: CompilerState,
     builtin_registry: BuiltinRegistry,
 
-    parser_decl_stmts: Vec<ParserDeclStmt>,
+    pub parser_decl_stmts: Vec<ParserDeclStmt>,
     compiled: *const u8,
 }
 
