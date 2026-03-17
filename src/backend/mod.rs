@@ -23,7 +23,7 @@ use crate::{
 use cranelift::prelude::{
     AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder,
 };
-use cranelift_codegen::settings;
+use cranelift_codegen::{settings, verify_function};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
 
@@ -65,6 +65,11 @@ impl Backend {
         self.translate(prog_ctx, builtin_registry, blueprint, entry_point);
 
         println!("{}", self.ctx.func);
+
+        let verifier_flags = settings::Flags::new(settings::builder());
+        if let Err(errors) = verify_function(&self.ctx.func, &verifier_flags) {
+            panic!("Verifier errors:\n{}", errors);
+        }
 
         let id = self
             .module
