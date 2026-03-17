@@ -58,6 +58,7 @@ impl<'a> BlueprintBuilder<'a> {
                 actual_size,
                 align,
                 value_type: scope_var.value_type,
+                def_val: scope_var.def_val.clone().unwrap(),
                 id: *var_id,
             };
 

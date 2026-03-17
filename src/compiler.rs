@@ -129,6 +129,7 @@ impl KaslCompiler {
         inputs: &[*mut ()],
         outputs: &[*mut ()],
         states: &[*mut ()],
+        should_init: i8,
     ) -> Result<(), String> {
         unsafe {
             KaslCompiler::run_code(
@@ -136,6 +137,7 @@ impl KaslCompiler {
                 inputs.as_ptr(),
                 outputs.as_ptr(),
                 states.as_ptr(),
+                should_init,
             );
         }
 
@@ -147,11 +149,12 @@ impl KaslCompiler {
         input: *const *mut (),
         output: *const *mut (),
         state: *const *mut (),
+        should_init: i8,
     ) {
         unsafe {
-            let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) =
+            let code_fn: fn(*const *mut (), *const *mut (), *const *mut (), i8) =
                 mem::transmute(code_ptr);
-            code_fn(input, output, state)
+            code_fn(input, output, state, should_init)
         }
     }
 }

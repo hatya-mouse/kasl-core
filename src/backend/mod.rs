@@ -21,7 +21,7 @@ use crate::{
     compilation_data::ProgramContext, scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{
-    AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder,
+    AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,
 };
 use cranelift_codegen::{settings, verify_function};
 use cranelift_jit::{JITBuilder, JITModule};
@@ -66,8 +66,6 @@ impl Backend {
     ) -> Result<*const u8, String> {
         self.translate(prog_ctx, builtin_registry, blueprint, entry_point);
 
-        println!("{}", self.ctx.func);
-
         // Verify the function
         let verifier_flags = settings::Flags::new(settings::builder());
         verify_function(&self.ctx.func, &verifier_flags).map_err(|e| e.to_string())?;
@@ -97,9 +95,10 @@ impl Backend {
         // Add parameter for the input and output pointers
         let pointer_type = self.module.target_config().pointer_type();
         self.ctx.func.signature.params.extend(&[
-            AbiParam::new(pointer_type),
-            AbiParam::new(pointer_type),
-            AbiParam::new(pointer_type),
+            AbiParam::new(pointer_type), // Input pointers
+            AbiParam::new(pointer_type), // Output pointers
+            AbiParam::new(pointer_type), // State pointers
+            AbiParam::new(types::I8),    // Should init
         ]);
 
         // Create a function builder

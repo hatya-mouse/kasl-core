@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{VariableID, type_registry::ResolvedType};
+use crate::{Expr, VariableID, type_registry::ResolvedType};
 
 #[derive(Default)]
 pub struct IOBlueprint {
@@ -28,6 +28,7 @@ pub struct BlueprintItem {
     pub actual_size: usize,
     pub align: u8,
     pub value_type: ResolvedType,
+    pub def_val: Expr,
     pub id: VariableID,
 }
 

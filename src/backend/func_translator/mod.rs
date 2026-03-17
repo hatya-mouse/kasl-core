@@ -24,10 +24,8 @@ use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;
 
 use crate::{
-    FunctionID, VariableID,
-    builtin::BuiltinRegistry,
-    compilation_data::ProgramContext,
-    scope_manager::{IOBlueprint, VariableKind},
+    FunctionID, VariableID, builtin::BuiltinRegistry, compilation_data::ProgramContext,
+    scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
@@ -72,29 +70,10 @@ impl<'a> FuncTranslator<'a> {
         let input_ptr_ptr = block_params[0];
         let output_ptr_ptr = block_params[1];
         let state_ptr_ptr = block_params[2];
+        let should_init = block_params[3];
 
         // Get the input and state variables from the blueprint
-        self.load_blueprint_access(input_ptr_ptr, state_ptr_ptr, blueprint);
-
-        // Declare the output variables
-        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
-        let global_scope = self
-            .prog_ctx
-            .scope_registry
-            .get_global_scope(&root_namespace_id);
-        for var_id in &global_scope.variables {
-            // Get the variable
-            let Some(scope_var) = self.prog_ctx.scope_registry.get_var(var_id) else {
-                continue;
-            };
-
-            if matches!(&scope_var.var_kind, VariableKind::Output) {
-                let output_var = self.declare_var(*var_id, &scope_var.value_type);
-                // Output variables must have a default value
-                let def_val = self.translate_expr(scope_var.def_val.as_ref().unwrap());
-                self.builder.def_var(output_var, def_val);
-            }
-        }
+        self.load_blueprint_access(input_ptr_ptr, state_ptr_ptr, should_init, blueprint);
 
         // Get the entry point function node
         let Some(func_block) = self
