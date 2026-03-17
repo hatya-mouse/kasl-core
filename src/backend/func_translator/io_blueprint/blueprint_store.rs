@@ -18,7 +18,7 @@ use crate::{
     backend::func_translator::FuncTranslator,
     scope_manager::{BlueprintItem, IOBlueprint},
 };
-use cranelift::prelude::{InstBuilder, MemFlags};
+use cranelift::prelude::{InstBuilder, MemFlags, types};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
