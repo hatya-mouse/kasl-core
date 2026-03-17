@@ -49,6 +49,18 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     );
 
     registry.register_func(
+        "fmod",
+        &[PrimitiveType::Float, PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| {
+            let div = builder.ins().fdiv(args[0], args[1]);
+            let div_floor = builder.ins().floor(div);
+            let floor_mul = builder.ins().fmul(args[1], div_floor);
+            builder.ins().fsub(args[0], floor_mul)
+        }),
+    );
+
+    registry.register_func(
         "fmax",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
