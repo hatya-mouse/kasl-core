@@ -15,10 +15,14 @@
 //
 
 use crate::{
-    Range, compilation_data::CompilerState, error::Ph, global_decl_collection::GlobalDeclCollector,
-    namespace_constructor::NameSpaceConstructor, namespace_registry::ImportPath,
+    Range,
+    compilation_data::CompilerState,
+    error::{ErrorCollector, ErrorRecord, Ph},
+    global_decl_collection::GlobalDeclCollector,
+    namespace_constructor::NameSpaceConstructor,
+    namespace_registry::ImportPath,
 };
-use std::{fs::File, io::Read, path::PathBuf};
+use std::{collections::HashSet, fs::File, io::Read, path::PathBuf};
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_import(&mut self, import_path: &ImportPath, decl_range: Range) {
@@ -49,6 +53,21 @@ impl GlobalDeclCollector<'_> {
             return;
         }
 
+        // Change the ranges of the errors to the import path range and insert them into the error collector
+        let module_errors = self.compile_imported_program(program, full_path, import_path);
+
+        for mut error in module_errors {
+            error.ranges = HashSet::from([decl_range]);
+            self.ec.push_error(error);
+        }
+    }
+
+    fn compile_imported_program(
+        &mut self,
+        program: String,
+        full_path: PathBuf,
+        import_path: &ImportPath,
+    ) -> Vec<ErrorRecord> {
         // Add the imported path to the set of paths to search for imports
         let mut imported_paths = self.comp_state.imported_paths.clone();
         imported_paths.insert(full_path.clone());
@@ -59,12 +78,6 @@ impl GlobalDeclCollector<'_> {
             child_search_paths.push(parent_path.to_path_buf());
         }
 
-        // Create a new compiler state
-        let comp_state = CompilerState {
-            child_search_paths,
-            imported_paths,
-        };
-
         // Generate a new namespace for the imported program
         let namespace_id = self.prog_ctx.namespace_registry.register_namespace(
             import_path.path.last().cloned().unwrap(),
@@ -74,9 +87,18 @@ impl GlobalDeclCollector<'_> {
             .scope_registry
             .create_global_scope(namespace_id);
 
+        // Create a new error collector for the imported program
+        let mut ec = ErrorCollector::default();
+
+        // Create a new compiler state
+        let comp_state = CompilerState {
+            child_search_paths,
+            imported_paths,
+        };
+
         // Create a constructor and pass the program to it
         let mut constructor = NameSpaceConstructor::new(
-            self.ec,
+            &mut ec,
             self.prog_ctx,
             self.comp_data,
             comp_state,
@@ -92,9 +114,11 @@ impl GlobalDeclCollector<'_> {
                 Ph::Parse,
                 parser_error.expected,
             );
-            return;
+            return vec![];
         }
         constructor.collect_global_decls();
+
+        ec.records.values().cloned().collect()
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {

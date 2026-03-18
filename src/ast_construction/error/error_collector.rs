@@ -39,6 +39,19 @@ impl ErrorCollector {
         }
     }
 
+    pub fn push_error(&mut self, error: ErrorRecord) {
+        let key = error.key.clone();
+        if let Some(record) = self.records.get_mut(&key) {
+            // Prefer the record from the earlier phase
+            if error.earliest_phase < record.earliest_phase {
+                record.earliest_phase = error.earliest_phase;
+            }
+            record.extend_range(error.ranges);
+        } else {
+            self.records.insert(key, error);
+        }
+    }
+
     pub fn emit(
         &mut self,
         kind: ErrorKind,

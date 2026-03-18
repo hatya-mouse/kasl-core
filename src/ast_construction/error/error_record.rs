@@ -43,6 +43,12 @@ impl ErrorRecord {
             self.ranges.insert(range);
         }
     }
+
+    pub fn extend_range(&mut self, ranges: HashSet<Range>) {
+        for r in ranges {
+            self.add_range(r);
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
