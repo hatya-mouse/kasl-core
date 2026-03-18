@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FuncCallArg, FuncParam, Range, error::Ph, expr_engine::ExpressionResolver,
+    Expr, FuncCallArg, FuncParam, Range, error::Ph, expr_engine::ExpressionResolver,
     symbol_table::NoTypeFuncCallArg,
 };
 
@@ -23,11 +23,22 @@ impl ExpressionResolver<'_> {
     pub fn resolve_func_call_args(
         &mut self,
         func_params: &[FuncParam],
+        self_param: Option<Expr>,
         no_type_args: &[NoTypeFuncCallArg],
         func_call_range: Range,
     ) -> Option<Vec<FuncCallArg>> {
         let mut slots: Vec<Option<FuncCallArg>> = vec![None; func_params.len()];
         let mut next_unlabeled_index = 0;
+
+        // If the function has a self parameter, add it to the first slot
+        if let Some(self_param) = self_param {
+            slots[0] = Some(FuncCallArg {
+                var_id: func_params[0].var_id,
+                value: self_param,
+                range: func_call_range,
+            });
+            next_unlabeled_index = 1;
+        }
 
         for no_type_arg in no_type_args {
             // Resolve the type of the argument expression

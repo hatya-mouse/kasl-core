@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, NameSpaceID, Range, VariableID,
+    Expr, NameSpaceID, Range, StructID, VariableID,
     symbol_table::{Block, UnresolvedExpr},
     type_registry::ResolvedType,
 };
@@ -82,6 +82,6 @@ pub struct FuncParam {
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum FunctionType {
     Global,
-    Instance,
+    Instance(StructID),
     Static,
 }

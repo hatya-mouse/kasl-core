@@ -48,13 +48,18 @@ impl ExpressionResolver<'_> {
                     return None;
                 };
                 let member_func = self.prog_ctx.func_ctx.get_func(&member_func_id)?;
+
                 // Resolve the arguments
-                let args = self.resolve_func_call_args(&member_func.params, no_type_args, range)?;
+                let args = self.resolve_func_call_args(
+                    &member_func.params,
+                    Some(lhs),
+                    no_type_args,
+                    range,
+                )?;
 
                 // Return the struct field expression
                 Some(Expr::new(
                     ExprKind::InstanceFuncCall {
-                        lhs: Box::new(lhs),
                         id: member_func_id,
                         args,
                     },

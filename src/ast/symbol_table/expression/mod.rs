@@ -75,7 +75,6 @@ pub enum ExprKind {
         args: Vec<FuncCallArg>,
     },
     InstanceFuncCall {
-        lhs: Box<Expr>,
         id: FunctionID,
         args: Vec<FuncCallArg>,
     },

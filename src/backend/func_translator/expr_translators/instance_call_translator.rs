@@ -14,20 +14,15 @@
 // limitations under the License.
 //
 
-use crate::{Expr, FuncCallArg, FunctionID, backend::func_translator::FuncTranslator};
+use crate::{FuncCallArg, FunctionID, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub fn translate_instance_call_expr(
         &mut self,
-        _lhs: &Expr,
         id: &FunctionID,
         args: &[FuncCallArg],
     ) -> ir::Value {
-        // Translate the expression
-        // TODO: Pass the lhs as the first argument
-        // let translated_lhs = self.translate_expr(lhs).unwrap();
-
         // Call the function and get the result
         let func = self.prog_ctx.func_ctx.get_func(id).unwrap();
         self.call_func(&func.block, args.as_ref(), &func.return_type)

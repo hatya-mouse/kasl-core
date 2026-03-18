@@ -89,7 +89,7 @@ impl<'a> GlobalDeclCollector<'a> {
                     let func_type = if *is_static {
                         FunctionType::Static
                     } else {
-                        FunctionType::Instance
+                        FunctionType::Instance(struct_id)
                     };
 
                     let info = FuncDeclInfo {

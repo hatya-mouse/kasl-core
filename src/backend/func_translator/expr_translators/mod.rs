@@ -47,8 +47,8 @@ impl FuncTranslator<'_> {
             }
             ExprKind::StructInit { id, .. } => self.translate_struct_init(id),
             ExprKind::StaticFuncCall { id, args, .. } => self.translate_func_call_expr(id, args),
-            ExprKind::InstanceFuncCall { lhs, id, args, .. } => {
-                self.translate_instance_call_expr(lhs, id, args)
+            ExprKind::InstanceFuncCall { id, args, .. } => {
+                self.translate_instance_call_expr(id, args)
             }
             ExprKind::FuncCall { id, args, .. } => self.translate_func_call_expr(id, args),
             ExprKind::BuiltinFuncCall { id, args, .. } => {

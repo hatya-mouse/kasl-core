@@ -45,7 +45,35 @@ impl GlobalDeclCollector<'_> {
         let block = Block::new(func_scope_id);
 
         // Resolve the function parameters
-        let params = self.resolve_func_params(params, func_scope_id)?;
+        let mut params = self.resolve_func_params(params, func_scope_id)?;
+
+        // If the function is an instance function, add the type at the first parameter
+        if let FunctionType::Instance(struct_id) = func_type {
+            // Register the variable in the function scope
+            let var = ScopeVar {
+                name: "self".to_string(),
+                value_type: ResolvedType::Struct(struct_id),
+                def_val: None,
+                range: decl_range,
+                var_kind: VariableKind::FuncParam,
+            };
+            let var_id =
+                self.prog_ctx
+                    .scope_registry
+                    .register_var(var, "self".to_string(), &func_scope_id);
+
+            params.insert(
+                0,
+                FuncParam {
+                    label: None,
+                    name: "self".to_string(),
+                    var_id,
+                    value_type: ResolvedType::Struct(struct_id),
+                    def_val: None,
+                    range: decl_range,
+                },
+            );
+        }
 
         // Resolve the return type
         let return_type = match return_type {

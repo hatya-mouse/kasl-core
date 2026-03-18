@@ -34,7 +34,7 @@ impl ExpressionResolver<'_> {
         {
             // Get a reference to the function
             let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
-            let args = self.resolve_func_call_args(&func.params, no_type_args, range)?;
+            let args = self.resolve_func_call_args(&func.params, None, no_type_args, range)?;
 
             // Add a function call edge to the scope graph
             // This is used to detect recursion

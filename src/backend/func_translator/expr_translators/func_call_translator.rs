@@ -46,7 +46,7 @@ impl FuncTranslator<'_> {
             self.builder.def_var(arg_var, translated_val);
         }
 
-        // If the body of the function is a single return statement, we can optimize by jumping directly to the return block
+        // If the body of the function is a single return statement, we can optimize by returning the value directly
         if block.body.len() == 1
             && let Statement::Return { value } = &block.body[0]
         {
