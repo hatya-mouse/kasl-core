@@ -82,8 +82,8 @@ impl FuncTranslator<'_> {
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
 
         // Get the value to be stored
-        let var = self.variables.get(&item.id).unwrap();
-        let val = self.builder.use_var(*var);
+        let var = self.scope_registry.get_var(&item.id);
+        let val = self.builder.use_var(var);
 
         // Store the value
         self.store_value(&item.value_type, val, ptr, 0);

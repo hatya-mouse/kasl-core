@@ -27,7 +27,7 @@ impl FuncTranslator<'_> {
         let rhs_value = self.translate_expr(value);
 
         // Get the Variable and the ScopeVar
-        let var = self.variables[&target.var_id];
+        let var = self.scope_registry.get_var(&target.var_id);
 
         // Set the value to the variable depending on the value type
         if target.is_field {

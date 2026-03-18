@@ -39,21 +39,20 @@ impl FuncTranslator<'_> {
         args: &[FuncCallArg],
         expected_return_type: &ResolvedType,
     ) -> Option<ir::Value> {
-        // println!("Block: {:#?}", block);
-        // println!("Arguments: {:#?}", args);
-        // println!("Expected return type: {:#?}", expected_return_type);
+        // Push a new scope
+        self.scope_registry.push_deepest();
 
         // Define the argument as variables
         for arg in args {
-            eprintln!(
-                "def_var: {:?} = translate({:?})",
-                arg.var_id, arg.value.kind
-            );
             let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
             let translated_val = self.translate_expr(&arg.value);
             self.builder.def_var(arg_var, translated_val);
         }
 
+        // Create a return block and set it as the return block
+        let func_return_block = self.builder.create_block();
+
+        // Build the function body
         // If the body of the function is a single return statement, we can optimize by returning the value directly
         if block.body.len() == 1
             && let Statement::Return { value } = &block.body[0]
@@ -64,9 +63,6 @@ impl FuncTranslator<'_> {
                 return None;
             }
         }
-
-        // Create a return block and set it as the return block
-        let func_return_block = self.builder.create_block();
 
         // Get the return type
         if !expected_return_type.is_void() {
@@ -80,6 +76,9 @@ impl FuncTranslator<'_> {
         if !has_return {
             self.builder.ins().jump(func_return_block, &[]);
         }
+
+        // Pop the scope
+        self.scope_registry.pop_deepest();
 
         // Add some arguments to the return block
         self.builder.switch_to_block(func_return_block);

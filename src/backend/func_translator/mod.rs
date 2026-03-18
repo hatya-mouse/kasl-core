@@ -18,18 +18,18 @@ mod block_translator;
 mod expr_translators;
 mod io_blueprint;
 mod stmt_translators;
+mod translator_scope_registry;
 mod type_converter;
 
 use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;
 
 use crate::{
-    FunctionID, VariableID, builtin::BuiltinRegistry, compilation_data::ProgramContext,
-    scope_manager::IOBlueprint,
+    FunctionID, backend::func_translator::translator_scope_registry::TranslatorScopeRegistry,
+    builtin::BuiltinRegistry, compilation_data::ProgramContext, scope_manager::IOBlueprint,
 };
-use cranelift::prelude::{FunctionBuilder, Variable};
+use cranelift::prelude::FunctionBuilder;
 use cranelift_jit::JITModule;
-use std::collections::HashMap;
 
 pub struct FuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
@@ -37,7 +37,7 @@ pub struct FuncTranslator<'a> {
 
     prog_ctx: &'a ProgramContext,
     builtin_registry: &'a BuiltinRegistry,
-    variables: HashMap<VariableID, Variable>,
+    scope_registry: TranslatorScopeRegistry,
 }
 
 impl<'a> FuncTranslator<'a> {
@@ -48,13 +48,16 @@ impl<'a> FuncTranslator<'a> {
         builtin_registry: &'a BuiltinRegistry,
     ) -> Self {
         let type_converter = TypeConverter::new(module);
+        let mut scope_registry = TranslatorScopeRegistry::default();
+        // Add the global scope registry
+        scope_registry.push_deepest();
 
         Self {
             builder,
             type_converter,
             prog_ctx,
             builtin_registry,
-            variables: HashMap::new(),
+            scope_registry,
         }
     }
 

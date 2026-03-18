@@ -122,7 +122,7 @@ impl FuncTranslator<'_> {
         // Declare the variable
         let var = self.declare_var(var_id, &var_type);
         // Register the variable to the variables
-        self.variables.insert(var_id, var);
+        self.scope_registry.add_var(var_id, var);
         // Define the variable
         self.builder.def_var(var, value);
     }
