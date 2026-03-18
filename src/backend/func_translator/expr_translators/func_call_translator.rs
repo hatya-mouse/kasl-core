@@ -39,9 +39,9 @@ impl FuncTranslator<'_> {
         args: &[FuncCallArg],
         expected_return_type: &ResolvedType,
     ) -> Option<ir::Value> {
-        println!("Block: {:#?}", block);
-        println!("Arguments: {:#?}", args);
-        println!("Expected return type: {:#?}", expected_return_type);
+        // println!("Block: {:#?}", block);
+        // println!("Arguments: {:#?}", args);
+        // println!("Expected return type: {:#?}", expected_return_type);
 
         // Define the argument as variables
         for arg in args {

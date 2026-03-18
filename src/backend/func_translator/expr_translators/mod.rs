@@ -41,7 +41,10 @@ impl FuncTranslator<'_> {
             ExprKind::PostfixOp {
                 operator, operand, ..
             } => self.translate_postfix_op_expr(operator, operand),
-            ExprKind::Identifier { id, .. } => self.translate_identifier(id),
+            ExprKind::Identifier { id, .. } => {
+                eprintln!("use_var: {:?}", id);
+                self.translate_identifier(id)
+            }
             ExprKind::StructField { lhs, offset } => {
                 self.translate_struct_field_expr(lhs, &expr.value_type, *offset)
             }
