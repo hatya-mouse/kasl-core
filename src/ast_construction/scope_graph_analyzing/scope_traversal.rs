@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Range, ScopeID,
+    ScopeID,
     error::Ph,
     scope_graph_analyzing::{ScopeGraphAnalyzer, ScopeState},
 };
@@ -39,16 +39,22 @@ impl ScopeGraphAnalyzer<'_> {
         let child_scopes = self.scope_graph.get_callees(current_scope).cloned();
 
         if let Some(child_scopes) = &child_scopes {
-            for child_scope in child_scopes {
-                if states.get(child_scope) == Some(&ScopeState::Visiting) {
+            for child_scope_id in child_scopes {
+                if states.get(child_scope_id) == Some(&ScopeState::Visiting) {
+                    let child_scope_range = self
+                        .prog_ctx
+                        .scope_registry
+                        .get_scope(child_scope_id)
+                        .map(|scope| scope.range)
+                        .unwrap_or_default();
                     self.ec
-                        .recursive_call(Range::zero(), Ph::ScopeGraphAnalyzing);
+                        .recursive_call(child_scope_range, Ph::ScopeGraphAnalyzing);
                 } else {
-                    self.analyze_scope(child_scope, states, total_sizes);
+                    self.analyze_scope(child_scope_id, states, total_sizes);
 
                     // Take the maximum of the current total child size and the size of the child scope
                     // Scopes with the same level should not exist at the same type
-                    max_child_size = max(max_child_size, total_sizes[child_scope]);
+                    max_child_size = max(max_child_size, total_sizes[child_scope_id]);
                 }
             }
         }
