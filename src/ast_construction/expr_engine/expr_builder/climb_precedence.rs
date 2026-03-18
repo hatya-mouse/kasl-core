@@ -87,7 +87,7 @@ impl ExpressionBuilder<'_> {
                 let next_prec = match op_props.associativity {
                     OperatorAssociativity::Left => op_props.precedence + 1,
                     OperatorAssociativity::Right => op_props.precedence,
-                    OperatorAssociativity::None => op_props.precedence + 1,
+                    OperatorAssociativity::None => op_props.precedence,
                 };
 
                 // Then consume the operator token
