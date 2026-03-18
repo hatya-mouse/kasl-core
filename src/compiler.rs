@@ -28,7 +28,6 @@ use crate::{
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
 };
-use peg::{error::ParseError, str::LineCol};
 use std::{mem, path::PathBuf};
 
 #[derive(Default)]
@@ -48,8 +47,15 @@ impl KaslCompiler {
         self.comp_state.child_search_paths.push(path);
     }
 
-    pub fn parse(&mut self, code: &str) -> Result<(), ParseError<LineCol>> {
-        self.parser_decl_stmts = kasl_parser::parse(code)?;
+    pub fn parse(&mut self, code: &str) -> Result<(), Box<ErrorRecord>> {
+        self.parser_decl_stmts = kasl_parser::parse(code).map_err(|e| {
+            Box::new(ErrorRecord::new(
+                ErrorKey::new(EK::ParserError, Pl::Str(e.expected.to_string())),
+                Range::n(e.location.offset, e.location.offset),
+                Ph::Parse,
+                Sv::Error,
+            ))
+        })?;
         Ok(())
     }
 
