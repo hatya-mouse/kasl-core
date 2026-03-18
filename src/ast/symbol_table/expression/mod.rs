@@ -21,7 +21,7 @@ pub use l_value::LValue;
 pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 
 use crate::{
-    FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
+    FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
     type_registry::ResolvedType,
 };
 
@@ -49,16 +49,16 @@ pub enum ExprKind {
     BoolLiteral(bool),
     InfixOp {
         operator: OperatorID,
-        lhs: VariableID,
-        rhs: VariableID,
+        lhs: Box<FuncCallArg>,
+        rhs: Box<FuncCallArg>,
     },
     PrefixOp {
         operator: OperatorID,
-        operand: VariableID,
+        operand: Box<FuncCallArg>,
     },
     PostfixOp {
         operator: OperatorID,
-        operand: VariableID,
+        operand: Box<FuncCallArg>,
     },
     Identifier {
         id: VariableID,
@@ -72,15 +72,15 @@ pub enum ExprKind {
     },
     StaticFuncCall {
         id: FunctionID,
-        args: Vec<VariableID>,
+        args: Vec<FuncCallArg>,
     },
     InstanceFuncCall {
         id: FunctionID,
-        args: Vec<VariableID>,
+        args: Vec<FuncCallArg>,
     },
     FuncCall {
         id: FunctionID,
-        args: Vec<VariableID>,
+        args: Vec<FuncCallArg>,
     },
     BuiltinFuncCall {
         id: BuiltinFuncID,

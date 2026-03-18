@@ -37,7 +37,7 @@ pub enum VariableKind {
     Output,
     State,
     GlobalConst,
-    FuncCallArg,
+    FuncParam,
     LocalVar,
     LocalConst,
 }

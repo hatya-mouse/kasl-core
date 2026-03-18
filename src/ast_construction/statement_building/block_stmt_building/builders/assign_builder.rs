@@ -43,7 +43,7 @@ impl BlockStmtBuilder<'_> {
                 VariableKind::Input { .. }
                     | VariableKind::GlobalConst
                     | VariableKind::LocalConst
-                    | VariableKind::FuncCallArg
+                    | VariableKind::FuncParam
             )
         {
             self.ec

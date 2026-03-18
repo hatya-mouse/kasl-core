@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{OperatorID, VariableID, backend::func_translator::FuncTranslator};
+use crate::{FuncCallArg, OperatorID, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 use std::slice;
 
@@ -22,19 +22,19 @@ impl FuncTranslator<'_> {
     pub fn translate_infix_op_expr(
         &mut self,
         op_id: &OperatorID,
-        lhs: &VariableID,
-        rhs: &VariableID,
+        lhs: &FuncCallArg,
+        rhs: &FuncCallArg,
     ) -> ir::Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_infix_func(op_id).unwrap();
-        self.call_func(&op.block, &[*lhs, *rhs], &op.return_type)
+        self.call_func(&op.block, &[lhs.clone(), rhs.clone()], &op.return_type)
             .unwrap()
     }
 
     pub fn translate_prefix_op_expr(
         &mut self,
         op_id: &OperatorID,
-        operand: &VariableID,
+        operand: &FuncCallArg,
     ) -> ir::Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_prefix_func(op_id).unwrap();
@@ -45,7 +45,7 @@ impl FuncTranslator<'_> {
     pub fn translate_postfix_op_expr(
         &mut self,
         op_id: &OperatorID,
-        operand: &VariableID,
+        operand: &FuncCallArg,
     ) -> ir::Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_postfix_func(op_id).unwrap();

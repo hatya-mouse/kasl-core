@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FunctionID, Statement, VariableID, backend::func_translator::FuncTranslator, symbol_table,
+    FuncCallArg, FunctionID, Statement, backend::func_translator::FuncTranslator, symbol_table,
     type_registry::ResolvedType,
 };
 use cranelift::prelude::InstBuilder;
@@ -25,7 +25,7 @@ impl FuncTranslator<'_> {
     pub fn translate_func_call_expr(
         &mut self,
         func_id: &FunctionID,
-        args: &[VariableID],
+        args: &[FuncCallArg],
     ) -> ir::Value {
         // Get the function block
         let func = &self.prog_ctx.func_ctx.get_func(func_id).unwrap();
@@ -36,20 +36,22 @@ impl FuncTranslator<'_> {
     pub fn call_func(
         &mut self,
         block: &symbol_table::Block,
-        arg_ids: &[VariableID],
+        args: &[FuncCallArg],
         expected_return_type: &ResolvedType,
     ) -> Option<ir::Value> {
-        // Define the argument as variables
-        for arg_id in arg_ids {
-            // Get the argument variable which is unique for the function call
-            let scope_var = self.prog_ctx.scope_registry.get_var(arg_id).unwrap();
+        // println!("Block: {:#?}", block);
+        // println!("Arguments: {:#?}", args);
+        // println!("Expected return type: {:#?}", expected_return_type);
 
-            // Declare the argument variable in the IR
-            let ir_var = self.declare_var(*arg_id, &scope_var.value_type);
-            // Translate the argument value and define it
-            let translated_val = self.translate_expr(scope_var.def_val.as_ref().unwrap());
-            // Assign the translated value to the argument variable
-            self.builder.def_var(ir_var, translated_val);
+        // Define the argument as variables
+        for arg in args {
+            eprintln!(
+                "def_var: {:?} = translate({:?})",
+                arg.var_id, arg.value.kind
+            );
+            let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
+            let translated_val = self.translate_expr(&arg.value);
+            self.builder.def_var(arg_var, translated_val);
         }
 
         // If the body of the function is a single return statement, we can optimize by returning the value directly

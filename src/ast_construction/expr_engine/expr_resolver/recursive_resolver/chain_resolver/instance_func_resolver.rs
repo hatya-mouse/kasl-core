@@ -49,17 +49,11 @@ impl ExpressionResolver<'_> {
                 };
                 let member_func = self.prog_ctx.func_ctx.get_func(&member_func_id)?;
 
-                // Capture the function informations
-                let func_params = member_func.params.clone();
-                let func_scope = member_func.block.scope_id;
-                let func_return_type = member_func.return_type;
-
                 // Resolve the arguments
                 let args = self.resolve_func_call_args(
-                    &func_params,
+                    &member_func.params,
                     Some(lhs),
                     no_type_args,
-                    &func_scope,
                     range,
                 )?;
 
@@ -69,7 +63,7 @@ impl ExpressionResolver<'_> {
                         id: member_func_id,
                         args,
                     },
-                    func_return_type,
+                    member_func.return_type,
                     range,
                 ))
             }

@@ -15,9 +15,10 @@
 //
 
 use crate::{
-    FuncParam, Function, ParserFuncParam, Range, ScopeID, SymbolPath,
+    FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar, SymbolPath,
     error::Ph,
     global_decl_collection::GlobalDeclCollector,
+    scope_manager::VariableKind,
     symbol_table::{Block, FunctionType},
     type_registry::{PrimitiveType, ResolvedType},
 };
@@ -48,11 +49,25 @@ impl GlobalDeclCollector<'_> {
 
         // If the function is an instance function, add the type at the first parameter
         if let FunctionType::Instance(struct_id) = func_type {
+            // Register the variable in the function scope
+            let var = ScopeVar {
+                name: "self".to_string(),
+                value_type: ResolvedType::Struct(struct_id),
+                def_val: None,
+                range: decl_range,
+                var_kind: VariableKind::FuncParam,
+            };
+            let var_id =
+                self.prog_ctx
+                    .scope_registry
+                    .register_var(var, "self".to_string(), &func_scope_id);
+
             params.insert(
                 0,
                 FuncParam {
                     label: None,
                     name: "self".to_string(),
+                    var_id,
                     value_type: ResolvedType::Struct(struct_id),
                     def_val: None,
                     range: decl_range,
@@ -141,9 +156,23 @@ impl GlobalDeclCollector<'_> {
             let resolved_def_val =
                 self.resolve_def_val_global(&param.value_type, def_val, param.range)?;
 
+            // Register the variable in the function scope
+            let var = ScopeVar {
+                name: param.name.clone(),
+                value_type: resolved_def_val.value_type,
+                def_val: None,
+                range: param.range,
+                var_kind: VariableKind::FuncParam,
+            };
+            let var_id =
+                self.prog_ctx
+                    .scope_registry
+                    .register_var(var, param.name.clone(), &func_scope_id);
+
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
+                var_id,
                 value_type: resolved_def_val.value_type,
                 def_val: Some(resolved_def_val),
                 range: param.range,
@@ -159,9 +188,23 @@ impl GlobalDeclCollector<'_> {
                 .type_registry
                 .resolve_type(namespace_id, &type_name.to_string())?;
 
+            // Register the variable in the function scope
+            let var = ScopeVar {
+                name: param.name.clone(),
+                value_type: resolved_annotation_type,
+                def_val: None,
+                range: param.range,
+                var_kind: VariableKind::FuncParam,
+            };
+            let var_id =
+                self.prog_ctx
+                    .scope_registry
+                    .register_var(var, param.name.clone(), &func_scope_id);
+
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
+                var_id,
                 value_type: resolved_annotation_type,
                 def_val: None,
                 range: param.range,
