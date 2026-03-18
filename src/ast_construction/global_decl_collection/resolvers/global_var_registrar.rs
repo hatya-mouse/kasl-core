@@ -117,7 +117,7 @@ impl GlobalDeclCollector<'_> {
         };
         self.prog_ctx
             .scope_registry
-            .register_var(var, name.to_string(), &global_scope_id);
+            .register_var(var, &global_scope_id);
 
         // Mark the variable name as used in the namespace
         self.mark_name_used(name);

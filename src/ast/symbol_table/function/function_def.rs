@@ -73,7 +73,6 @@ pub struct FuncCallArg {
 pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub var_id: VariableID,
     pub value_type: ResolvedType,
     pub def_val: Option<Expr>,
     pub range: Range,

@@ -15,28 +15,52 @@
 //
 
 use crate::{
-    Expr, FuncCallArg, FuncParam, Range, error::Ph, expr_engine::ExpressionResolver,
-    symbol_table::NoTypeFuncCallArg,
+    Expr, FuncParam, Range, ScopeID, ScopeVar, VariableID, error::Ph,
+    expr_engine::ExpressionResolver, scope_manager::VariableKind, symbol_table::NoTypeFuncCallArg,
 };
 
 impl ExpressionResolver<'_> {
+    pub fn create_func_call_arg(
+        &mut self,
+        name: String,
+        value: Expr,
+        func_scope: &ScopeID,
+        range: Range,
+    ) -> VariableID {
+        // Create a ScopeVar for the function call argument
+        let scope_var = ScopeVar {
+            name,
+            value_type: value.value_type,
+            def_val: None,
+            range,
+            var_kind: VariableKind::FuncCallArg,
+        };
+        // Register the ScopeVar and create the FuncCallArg
+        self.prog_ctx
+            .scope_registry
+            .register_var(scope_var, func_scope)
+    }
+
     pub fn resolve_func_call_args(
         &mut self,
         func_params: &[FuncParam],
         self_param: Option<Expr>,
         no_type_args: &[NoTypeFuncCallArg],
+        func_scope: &ScopeID,
         func_call_range: Range,
-    ) -> Option<Vec<FuncCallArg>> {
-        let mut slots: Vec<Option<FuncCallArg>> = vec![None; func_params.len()];
+    ) -> Option<Vec<VariableID>> {
+        let mut slots: Vec<Option<VariableID>> = vec![None; func_params.len()];
         let mut next_unlabeled_index = 0;
 
         // If the function has a self parameter, add it to the first slot
         if let Some(self_param) = self_param {
-            slots[0] = Some(FuncCallArg {
-                var_id: func_params[0].var_id,
-                value: self_param,
-                range: func_call_range,
-            });
+            let self_arg_id = self.create_func_call_arg(
+                "self".to_string(),
+                self_param,
+                func_scope,
+                func_call_range,
+            );
+            slots[0] = Some(self_arg_id);
             next_unlabeled_index = 1;
         }
 
@@ -65,11 +89,13 @@ impl ExpressionResolver<'_> {
                     return None;
                 }
 
-                slots[param_index] = Some(FuncCallArg {
-                    var_id: func_params[param_index].var_id,
+                let arg_id = self.create_func_call_arg(
+                    func_params[param_index].name.clone(),
                     value,
-                    range: no_type_arg.range,
-                });
+                    func_scope,
+                    no_type_arg.range,
+                );
+                slots[param_index] = Some(arg_id);
                 next_unlabeled_index = param_index + 1;
             } else {
                 // Check if the index is within bounds
@@ -88,25 +114,31 @@ impl ExpressionResolver<'_> {
                     );
                 }
 
-                slots[next_unlabeled_index] = Some(FuncCallArg {
-                    var_id: func_params[next_unlabeled_index].var_id,
+                let arg_id = self.create_func_call_arg(
+                    func_params[next_unlabeled_index].name.clone(),
                     value,
-                    range: no_type_arg.range,
-                });
+                    func_scope,
+                    no_type_arg.range,
+                );
+                slots[next_unlabeled_index] = Some(arg_id);
                 next_unlabeled_index += 1;
             }
         }
 
         let mut resolved_args = Vec::new();
-        for (slot, param) in slots.iter().zip(func_params.iter()) {
+        for (param, slot) in func_params.iter().zip(slots) {
             match slot {
-                Some(arg) => resolved_args.push(arg.clone()),
+                Some(arg_id) => resolved_args.push(arg_id),
                 None => match &param.def_val {
-                    Some(def_val) => resolved_args.push(FuncCallArg {
-                        var_id: param.var_id,
-                        value: def_val.clone(),
-                        range: Range::zero(),
-                    }),
+                    Some(def_val) => {
+                        let arg_id = self.create_func_call_arg(
+                            param.name.clone(),
+                            def_val.clone(),
+                            func_scope,
+                            Range::zero(),
+                        );
+                        resolved_args.push(arg_id);
+                    }
                     None => {
                         self.ec
                             .missing_arg(func_call_range, Ph::ExprEngine, &param.name);
@@ -117,15 +149,15 @@ impl ExpressionResolver<'_> {
 
         // Check if the type of the arguments matches the type of the parameter
         for (resolved_arg, param) in resolved_args.iter().zip(func_params.iter()) {
-            if resolved_arg.value.value_type != param.value_type {
+            // The argument must exist in the scope registry
+            let arg_var = self.prog_ctx.scope_registry.get_var(resolved_arg).unwrap();
+            if arg_var.value_type != param.value_type {
                 self.ec.arg_type_mismatch(
-                    resolved_arg.range,
+                    arg_var.range,
                     Ph::ExprEngine,
                     &param.name,
                     self.prog_ctx.type_registry.format_type(&param.value_type),
-                    self.prog_ctx
-                        .type_registry
-                        .format_type(&resolved_arg.value.value_type),
+                    self.prog_ctx.type_registry.format_type(&arg_var.value_type),
                 );
                 return None;
             }

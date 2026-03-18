@@ -34,17 +34,18 @@ impl ExpressionResolver<'_> {
         {
             // Get a reference to the function
             let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
-            let args = self.resolve_func_call_args(&func.params, None, no_type_args, range)?;
 
-            // Add a function call edge to the scope graph
-            // This is used to detect recursion
-            self.comp_data
-                .scope_graph
-                .add_edge(self.current_scope, func.block.scope_id);
+            // Capture the function informations
+            let func_params = func.params.clone();
+            let func_scope = func.block.scope_id;
+            let func_return_type = func.return_type;
+
+            let args =
+                self.resolve_func_call_args(&func_params, None, no_type_args, &func_scope, range)?;
 
             Some(Expr::new(
                 ExprKind::FuncCall { id: func_id, args },
-                func.return_type,
+                func_return_type,
                 range,
             ))
         } else if let Some(struct_id) = self

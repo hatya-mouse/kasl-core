@@ -56,13 +56,24 @@ impl ExpressionResolver<'_> {
                     return None;
                 }
 
+                // Capture the function informations
+                let func_params = func.params.clone();
+                let func_scope = func.block.scope_id;
+                let func_return_type = func.return_type;
+
                 // Resolve the arguments
-                let args = self.resolve_func_call_args(&func.params, None, no_type_args, range)?;
+                let args = self.resolve_func_call_args(
+                    &func_params,
+                    None,
+                    no_type_args,
+                    &func_scope,
+                    range,
+                )?;
 
                 // Construct the expression
                 Some(Expr::new(
                     ExprKind::StaticFuncCall { id: func_id, args },
-                    func.return_type,
+                    func_return_type,
                     range,
                 ))
             }

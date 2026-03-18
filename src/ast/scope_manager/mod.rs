@@ -115,13 +115,13 @@ impl ScopeRegistry {
     // --- REGISTRATION ---
 
     /// Registers a new variable in the given scope with the given name and returns its `VariableID`.
-    pub fn register_var(&mut self, var: ScopeVar, name: String, scope_id: &ScopeID) -> VariableID {
+    pub fn register_var(&mut self, var: ScopeVar, scope_id: &ScopeID) -> VariableID {
         let var_id = self.generate_var_id();
-        self.variables.insert(var_id, var);
         self.scopes
             .get_mut(scope_id)
             .unwrap()
-            .register_var(name, var_id);
+            .register_var(var.name.clone(), var_id);
+        self.variables.insert(var_id, var);
         var_id
     }
 

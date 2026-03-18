@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, ExprKind, FuncCallArg, Range,
+    Expr, ExprKind, Range,
     error::Ph,
     expr_engine::ExpressionResolver,
     symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef, UnresolvedExpr},
@@ -56,26 +56,21 @@ impl ExpressionResolver<'_> {
             .scope_graph
             .add_edge(self.current_scope, op.block.scope_id);
 
-        // Construct arguments
-        let lhs_arg = FuncCallArg {
-            var_id: op.lhs.var_id,
-            value: lhs.clone(),
-            range: lhs.range,
-        };
-        let rhs_arg = FuncCallArg {
-            var_id: op.rhs.var_id,
-            value: rhs.clone(),
-            range: rhs.range,
-        };
-
-        // Get the return type of the operator
+        // Capture the operator informations
+        let lhs_name = op.lhs.name.clone();
+        let rhs_name = op.rhs.name.clone();
+        let op_scope = op.block.scope_id;
         let return_type = op.return_type;
+
+        // Construct arguments
+        let lhs_id = self.create_func_call_arg(lhs_name, lhs.clone(), &op_scope, lhs.range);
+        let rhs_id = self.create_func_call_arg(rhs_name, rhs.clone(), &op_scope, rhs.range);
 
         Some(Expr::new(
             ExprKind::InfixOp {
                 operator: op_id,
-                lhs: Box::new(lhs_arg),
-                rhs: Box::new(rhs_arg),
+                lhs: lhs_id,
+                rhs: rhs_id,
             },
             return_type,
             range,
@@ -112,20 +107,19 @@ impl ExpressionResolver<'_> {
             .scope_graph
             .add_edge(self.current_scope, op.block.scope_id);
 
-        // Construct arguments
-        let operand_arg = FuncCallArg {
-            var_id: op.operand.var_id,
-            value: operand.clone(),
-            range: operand.range,
-        };
-
-        // Get the return type of the operator
+        // Capture the operator informations
+        let operand_name = op.operand.name.clone();
+        let op_scope = op.block.scope_id;
         let return_type = op.return_type;
+
+        // Construct arguments
+        let operand_id =
+            self.create_func_call_arg(operand_name, operand.clone(), &op_scope, operand.range);
 
         Some(Expr::new(
             ExprKind::PrefixOp {
                 operator: op_id,
-                operand: Box::new(operand_arg),
+                operand: operand_id,
             },
             return_type,
             range,
@@ -162,20 +156,19 @@ impl ExpressionResolver<'_> {
             .scope_graph
             .add_edge(self.current_scope, op.block.scope_id);
 
-        // Construct arguments
-        let operand_arg = FuncCallArg {
-            var_id: op.operand.var_id,
-            value: operand.clone(),
-            range: operand.range,
-        };
-
-        // Get the return type of the operator
+        // Capture the operator informations
+        let operand_name = op.operand.name.clone();
+        let op_scope = op.block.scope_id;
         let return_type = op.return_type;
+
+        // Construct arguments
+        let operand_id =
+            self.create_func_call_arg(operand_name, operand.clone(), &op_scope, operand.range);
 
         Some(Expr::new(
             ExprKind::PostfixOp {
                 operator: op_id,
-                operand: Box::new(operand_arg),
+                operand: operand_id,
             },
             return_type,
             range,

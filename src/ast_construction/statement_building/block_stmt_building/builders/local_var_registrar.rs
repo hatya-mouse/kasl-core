@@ -104,10 +104,10 @@ impl BlockStmtBuilder<'_> {
         }
 
         // Register the variable in the scope
-        let var_id =
-            self.prog_ctx
-                .scope_registry
-                .register_var(scope_var, name.to_string(), &self.scope_id);
+        let var_id = self
+            .prog_ctx
+            .scope_registry
+            .register_var(scope_var, &self.scope_id);
 
         // Mark the variable name as used in the namespace
         self.mark_name_used(name);

@@ -29,7 +29,7 @@ use crate::{
 
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
-    prog_ctx: &ProgramContext,
+    prog_ctx: &mut ProgramContext,
     comp_data: &mut CompilationData,
     builtin_registry: &BuiltinRegistry,
     current_scope_id: ScopeID,
