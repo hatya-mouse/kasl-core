@@ -360,7 +360,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule operator() -> String
-        = quiet!{ op:$(['+' | '-' | '*' | '/' | '%' | '^' | '<' | '>' | '=' | '!' | '?' | '%' | '|' | '&']+) { op.to_owned() } }
+        = quiet!{ op:$(['+' | '-' | '*' | '/' | '%' | '^' | '<' | '>' | '=' | '!' | '?' | '%' | '|' | '&' | '@' | '~']+) { op.to_owned() } }
         / expected!("operator")
 
     rule import_path() -> ImportPath
