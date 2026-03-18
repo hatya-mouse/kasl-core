@@ -45,6 +45,10 @@ impl FuncTranslator<'_> {
 
         // Define the argument as variables
         for arg in args {
+            eprintln!(
+                "def_var: {:?} = translate({:?})",
+                arg.var_id, arg.value.kind
+            );
             let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
             let translated_val = self.translate_expr(&arg.value);
             self.builder.def_var(arg_var, translated_val);
