@@ -26,7 +26,7 @@ impl ExpressionResolver<'_> {
                 self.ec.member_access_on_primitive(
                     range,
                     Ph::ExprEngine,
-                    lhs.value_type.to_string(),
+                    self.prog_ctx.type_registry.format_type(&lhs.value_type),
                 );
                 None
             }

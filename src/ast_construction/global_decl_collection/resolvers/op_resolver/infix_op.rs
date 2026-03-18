@@ -71,8 +71,12 @@ impl GlobalDeclCollector<'_> {
                 decl_range,
                 Ph::GlobalDeclCollection,
                 symbol,
-                params[0].value_type.to_string(),
-                params[1].value_type.to_string(),
+                self.prog_ctx
+                    .type_registry
+                    .format_type(&params[0].value_type),
+                self.prog_ctx
+                    .type_registry
+                    .format_type(&params[1].value_type),
             );
             return;
         };

@@ -73,8 +73,10 @@ impl ExpressionResolver<'_> {
                 self.ec.builtin_arg_type_mismatch(
                     range,
                     Ph::ExprEngine,
-                    expected_type.to_string(),
-                    resolved_arg.value_type.to_string(),
+                    self.prog_ctx.type_registry.format_type(expected_type),
+                    self.prog_ctx
+                        .type_registry
+                        .format_type(&resolved_arg.value_type),
                 );
             }
 

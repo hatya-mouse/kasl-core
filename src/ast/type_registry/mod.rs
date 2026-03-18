@@ -105,7 +105,7 @@ impl TypeRegistry {
 
     pub fn format_type(&self, ty: &ResolvedType) -> String {
         match ty {
-            ResolvedType::Primitive(ty) => ty.to_string(),
+            ResolvedType::Primitive(prim_type) => prim_type.to_string(),
             ResolvedType::Struct(id) => self
                 .get_struct(id)
                 .map(|s| s.name.clone())

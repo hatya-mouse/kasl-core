@@ -111,8 +111,10 @@ impl ExpressionResolver<'_> {
                     resolved_arg.range,
                     Ph::ExprEngine,
                     &param.name,
-                    param.value_type.to_string(),
-                    resolved_arg.value.value_type.to_string(),
+                    self.prog_ctx.type_registry.format_type(&param.value_type),
+                    self.prog_ctx
+                        .type_registry
+                        .format_type(&resolved_arg.value.value_type),
                 );
                 return None;
             }

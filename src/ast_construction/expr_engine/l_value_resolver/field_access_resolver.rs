@@ -32,7 +32,9 @@ impl LValueResolver<'_> {
                 self.ec.member_access_on_primitive(
                     range,
                     Ph::ExprEngine,
-                    last_l_value.value_type.to_string(),
+                    self.prog_ctx
+                        .type_registry
+                        .format_type(&last_l_value.value_type),
                 );
                 None
             }
