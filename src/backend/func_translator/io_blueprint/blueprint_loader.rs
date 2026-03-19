@@ -34,9 +34,9 @@ impl FuncTranslator<'_> {
         let pointer_type = self.type_converter.pointer_type();
 
         // Loop over the inputs, outputs and states and load them
-        self.load_inputs(pointer_type, params.input_ptr_ptr, blueprint, sample_index);
-        self.init_outputs(blueprint);
-        self.load_or_init_states(
+        self.load_input(pointer_type, params.input_ptr_ptr, blueprint, sample_index);
+        self.init_output(blueprint);
+        self.load_or_init_state(
             pointer_type,
             params.state_ptr_ptr,
             params.should_init,
@@ -44,7 +44,7 @@ impl FuncTranslator<'_> {
         );
     }
 
-    fn load_inputs(
+    fn load_input(
         &mut self,
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,
@@ -67,7 +67,7 @@ impl FuncTranslator<'_> {
         }
     }
 
-    fn init_outputs(&mut self, blueprint: &IOBlueprint) {
+    fn init_output(&mut self, blueprint: &IOBlueprint) {
         for output_item in blueprint.get_outputs() {
             let output_var = self.declare_var(output_item.id, &output_item.value_type);
             // Output variables must have a default value
@@ -78,7 +78,7 @@ impl FuncTranslator<'_> {
 
     /// Initialize the variables with the default value if should_init is true,
     /// and otherwise load the value from memory
-    fn load_or_init_states(
+    fn load_or_init_state(
         &mut self,
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,

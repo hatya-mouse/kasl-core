@@ -21,6 +21,7 @@ pub struct IOBlueprint {
     inputs: Vec<BlueprintItem>,
     outputs: Vec<BlueprintItem>,
     states: Vec<BlueprintItem>,
+    decl_order: Vec<VariableID>,
 }
 
 pub struct BlueprintItem {
@@ -55,5 +56,13 @@ impl IOBlueprint {
 
     pub fn get_states(&self) -> &[BlueprintItem] {
         &self.states
+    }
+
+    pub fn set_order(&mut self, order: Vec<VariableID>) {
+        self.decl_order = order;
+    }
+
+    pub fn get_order(&self) -> &[VariableID] {
+        &self.decl_order
     }
 }

@@ -21,6 +21,7 @@ use std::collections::{HashMap, HashSet};
 pub struct Scope {
     pub parent: Option<ScopeID>,
     name_to_id: HashMap<String, VariableID>,
+    /// Variables in this scope, in declaration order.
     pub variables: Vec<VariableID>,
     defined_names: HashSet<String>,
     pub range: Range,
