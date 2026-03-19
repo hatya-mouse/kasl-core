@@ -14,14 +14,17 @@
 // limitations under the License.
 //
 
+use std::collections::HashMap;
+
 use crate::{Expr, VariableID, type_registry::ResolvedType};
 
 #[derive(Default)]
 pub struct IOBlueprint {
-    inputs: Vec<BlueprintItem>,
-    outputs: Vec<BlueprintItem>,
-    states: Vec<BlueprintItem>,
-    decl_order: Vec<VariableID>,
+    inputs: Vec<VariableID>,
+    outputs: Vec<VariableID>,
+    states: Vec<VariableID>,
+    items: HashMap<VariableID, BlueprintItem>,
+    decl_order: Vec<(VariableID, BlueprintItemKind)>,
 }
 
 pub struct BlueprintItem {
@@ -33,36 +36,57 @@ pub struct BlueprintItem {
     pub id: VariableID,
 }
 
+pub(crate) enum BlueprintItemKind {
+    Input,
+    Output,
+    State,
+}
+
 impl IOBlueprint {
     pub fn add_input(&mut self, item: BlueprintItem) {
-        self.inputs.push(item);
+        self.decl_order.push((item.id, BlueprintItemKind::Input));
+        self.inputs.push(item.id);
+        self.items.insert(item.id, item);
     }
 
     pub fn add_output(&mut self, item: BlueprintItem) {
-        self.outputs.push(item);
+        self.decl_order.push((item.id, BlueprintItemKind::Output));
+        self.outputs.push(item.id);
+        self.items.insert(item.id, item);
     }
 
     pub fn add_state(&mut self, item: BlueprintItem) {
-        self.states.push(item);
+        self.decl_order.push((item.id, BlueprintItemKind::State));
+        self.states.push(item.id);
+        self.items.insert(item.id, item);
     }
 
-    pub fn get_inputs(&self) -> &[BlueprintItem] {
-        &self.inputs
+    pub fn get_inputs(&self) -> Vec<&BlueprintItem> {
+        self.inputs
+            .iter()
+            .filter_map(|id| self.items.get(id))
+            .collect::<Vec<_>>()
     }
 
-    pub fn get_outputs(&self) -> &[BlueprintItem] {
-        &self.outputs
+    pub fn get_outputs(&self) -> Vec<&BlueprintItem> {
+        self.outputs
+            .iter()
+            .filter_map(|id| self.items.get(id))
+            .collect::<Vec<_>>()
     }
 
-    pub fn get_states(&self) -> &[BlueprintItem] {
-        &self.states
+    pub fn get_states(&self) -> Vec<&BlueprintItem> {
+        self.states
+            .iter()
+            .filter_map(|id| self.items.get(id))
+            .collect::<Vec<_>>()
     }
 
-    pub fn set_order(&mut self, order: Vec<VariableID>) {
-        self.decl_order = order;
-    }
-
-    pub fn get_order(&self) -> &[VariableID] {
+    pub(crate) fn get_order(&self) -> &[(VariableID, BlueprintItemKind)] {
         &self.decl_order
+    }
+
+    pub(crate) fn get_item(&self, id: &VariableID) -> Option<&BlueprintItem> {
+        self.items.get(id)
     }
 }

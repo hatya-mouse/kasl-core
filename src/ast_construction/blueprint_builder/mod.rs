@@ -76,9 +76,6 @@ impl<'a> BlueprintBuilder<'a> {
             }
         }
 
-        // Set the variable order
-        blueprint.set_order(global_scope.variables.clone());
-
         blueprint
     }
 }

@@ -17,7 +17,7 @@
 use crate::{
     StructID, VariableID,
     backend::func_translator::{FuncTranslator, TranslatorParams},
-    scope_manager::{BlueprintItem, IOBlueprint},
+    scope_manager::{BlueprintItem, BlueprintItemKind, IOBlueprint},
     type_registry::ResolvedType,
 };
 use cranelift::prelude::{InstBuilder, MemFlags, StackSlotData, StackSlotKind, types};
@@ -33,47 +33,66 @@ impl FuncTranslator<'_> {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
 
-        // Loop over the inputs, outputs and states and load them
-        self.load_input(pointer_type, params.input_ptr_ptr, blueprint, sample_index);
-        self.init_output(blueprint);
-        self.load_or_init_state(
-            pointer_type,
-            params.state_ptr_ptr,
-            params.should_init,
-            blueprint,
-        );
+        // Assume that the inputs, outputs and states are packed in the order they are declared
+        let mut input_offset: i32 = 0;
+        let mut state_offset: i32 = 0;
+
+        // Loop over the inputs, outputs and states in declaration order and load them
+        for (var_id, item_kind) in blueprint.get_order() {
+            if let Some(item) = blueprint.get_item(var_id) {
+                match item_kind {
+                    BlueprintItemKind::Input => {
+                        self.load_input(
+                            pointer_type,
+                            params.input_ptr_ptr,
+                            item,
+                            input_offset,
+                            sample_index,
+                        );
+                        input_offset += pointer_type.bytes() as i32;
+                    }
+                    BlueprintItemKind::Output => {
+                        self.init_output(item);
+                    }
+                    BlueprintItemKind::State => {
+                        self.load_or_init_state(
+                            pointer_type,
+                            params.state_ptr_ptr,
+                            params.should_init,
+                            item,
+                            state_offset,
+                        );
+                        state_offset += pointer_type.bytes() as i32;
+                    }
+                }
+            }
+        }
     }
 
     fn load_input(
         &mut self,
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,
-        blueprint: &IOBlueprint,
+        input_item: &BlueprintItem,
+        input_offset: i32,
         sample_index: Option<ir::Value>,
     ) {
-        let mut input_offset: usize = 0;
-        for input_item in blueprint.get_inputs() {
-            // Pass the optional sample index the buffer index in buffer mode
-            let val = self.load_blueprint_item(
-                pointer_type,
-                ptr_ptr,
-                input_item,
-                input_offset as i32,
-                sample_index,
-            );
-            self.register_translated_var(input_item.id, input_item.value_type, val);
-            // Increment the input offset by the size of a pointer
-            input_offset += pointer_type.bytes() as usize;
-        }
+        // Pass the optional sample index the buffer index in buffer mode
+        let val = self.load_blueprint_item(
+            pointer_type,
+            ptr_ptr,
+            input_item,
+            input_offset,
+            sample_index,
+        );
+        self.register_translated_var(input_item.id, input_item.value_type, val);
     }
 
-    fn init_output(&mut self, blueprint: &IOBlueprint) {
-        for output_item in blueprint.get_outputs() {
-            let output_var = self.declare_var(output_item.id, &output_item.value_type);
-            // Output variables must have a default value
-            let def_val = self.translate_expr(&output_item.def_val);
-            self.builder.def_var(output_var, def_val);
-        }
+    fn init_output(&mut self, output_item: &BlueprintItem) {
+        let output_var = self.declare_var(output_item.id, &output_item.value_type);
+        // Output variables must have a default value
+        let def_val = self.translate_expr(&output_item.def_val);
+        self.builder.def_var(output_var, def_val);
     }
 
     /// Initialize the variables with the default value if should_init is true,
@@ -83,31 +102,22 @@ impl FuncTranslator<'_> {
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,
         should_init: ir::Value,
-        blueprint: &IOBlueprint,
+        state_item: &BlueprintItem,
+        state_offset: i32,
     ) {
-        let mut state_offset: usize = 0;
-        for state_item in blueprint.get_states() {
-            // Load the value from memory
-            let loaded_val = self.load_blueprint_item(
-                pointer_type,
-                ptr_ptr,
-                state_item,
-                state_offset as i32,
-                None,
-            );
-            // Get the default value for the state
-            let translated_def_val = self.translate_expr(&state_item.def_val);
+        // Load the value from memory
+        let loaded_val =
+            self.load_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset, None);
+        // Get the default value for the state
+        let translated_def_val = self.translate_expr(&state_item.def_val);
 
-            // Conditionally select the default value or the loaded value
-            let value = self
-                .builder
-                .ins()
-                .select(should_init, translated_def_val, loaded_val);
-            // Register the variable with the value
-            self.register_translated_var(state_item.id, state_item.value_type, value);
-            // Increment the state offset by the size of a pointer
-            state_offset += pointer_type.bytes() as usize;
-        }
+        // Conditionally select the default value or the loaded value
+        let value = self
+            .builder
+            .ins()
+            .select(should_init, translated_def_val, loaded_val);
+        // Register the variable with the value
+        self.register_translated_var(state_item.id, state_item.value_type, value);
     }
 
     // --- LOAD HELPERS ---
