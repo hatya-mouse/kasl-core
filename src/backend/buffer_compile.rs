@@ -136,6 +136,11 @@ impl Backend {
             loop_header_block,
         );
 
+        // Increment the index
+        let one_val = translator.builder.ins().iconst(types::I32, 1);
+        let next_i = translator.builder.ins().iadd(i_val, one_val);
+        translator.builder.def_var(i, next_i);
+
         // Add jump instruction at the end of the body
         translator.builder.ins().jump(loop_header_block, &[]);
         translator.builder.seal_block(loop_header_block);
