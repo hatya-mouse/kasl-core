@@ -27,7 +27,7 @@ funcs:
               range:
                 start: 0
                 end: 0
-      scope_id: 1
+      scope_id: 2
     range:
       start: 0
       end: 0

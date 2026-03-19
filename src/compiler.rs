@@ -104,8 +104,8 @@ impl KaslCompiler {
         self.ec.as_result().map(|_| blueprint)
     }
 
-    pub fn compile(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
-        // 6. Compile the program
+    pub fn compile_once(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
+        // Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
         // Look up the main function, or return an error if it doesn't exist
@@ -123,7 +123,7 @@ impl KaslCompiler {
             })?;
 
         self.compiled = backend
-            .compile(
+            .compile_once(
                 &self.prog_ctx,
                 &self.builtin_registry,
                 blueprint,
@@ -141,7 +141,7 @@ impl KaslCompiler {
         Ok(())
     }
 
-    pub fn run(
+    pub fn run_once(
         &mut self,
         inputs: &[*mut ()],
         outputs: &[*mut ()],
@@ -149,29 +149,76 @@ impl KaslCompiler {
         should_init: i8,
     ) -> Result<(), String> {
         unsafe {
-            KaslCompiler::run_code(
-                self.compiled,
+            let code_fn: fn(*const *mut (), *const *mut (), *const *mut (), i8) =
+                mem::transmute(self.compiled);
+            code_fn(
                 inputs.as_ptr(),
                 outputs.as_ptr(),
                 states.as_ptr(),
                 should_init,
-            );
+            )
         }
 
         Ok(())
     }
 
-    unsafe fn run_code(
-        code_ptr: *const u8,
-        input: *const *mut (),
-        output: *const *mut (),
-        state: *const *mut (),
+    pub fn compile_buffer(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
+        // Compile the program
+        let mut backend = Backend::default();
+        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        // Look up the main function, or return an error if it doesn't exist
+        let main_func_id = self
+            .prog_ctx
+            .func_ctx
+            .get_global_func_id(root_namespace_id, MAIN_FUNCTION_NAME)
+            .ok_or_else(|| {
+                vec![ErrorRecord::new(
+                    ErrorKey::new(EK::NoMainFunc, Pl::None),
+                    Range::zero(),
+                    Ph::Backend,
+                    Sv::Error,
+                )]
+            })?;
+
+        self.compiled = backend
+            .compile_buffer(
+                &self.prog_ctx,
+                &self.builtin_registry,
+                blueprint,
+                &main_func_id,
+            )
+            .map_err(|e| {
+                vec![ErrorRecord::new(
+                    ErrorKey::new(EK::CompilerBug, Pl::Str(e)),
+                    Range::zero(),
+                    Ph::Backend,
+                    Sv::Error,
+                )]
+            })?;
+
+        Ok(())
+    }
+
+    pub fn run_buffer(
+        &mut self,
+        inputs: &[*mut ()],
+        outputs: &[*mut ()],
+        states: &[*mut ()],
         should_init: i8,
-    ) {
+        buffer_size: i32,
+    ) -> Result<(), String> {
         unsafe {
-            let code_fn: fn(*const *mut (), *const *mut (), *const *mut (), i8) =
-                mem::transmute(code_ptr);
-            code_fn(input, output, state, should_init)
+            let code_fn: fn(*const *mut (), *const *mut (), *const *mut (), i8, i32) =
+                mem::transmute(self.compiled);
+            code_fn(
+                inputs.as_ptr(),
+                outputs.as_ptr(),
+                states.as_ptr(),
+                should_init,
+                buffer_size,
+            )
         }
+
+        Ok(())
     }
 }

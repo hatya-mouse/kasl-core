@@ -15,10 +15,19 @@ expression: parsed
                 ExprToken {
                     range: Range {
                         start: 12,
+                        end: 13,
+                    },
+                    kind: Operator(
+                        "-",
+                    ),
+                },
+                ExprToken {
+                    range: Range {
+                        start: 13,
                         end: 16,
                     },
                     kind: FloatLiteral(
-                        -2.6,
+                        2.6,
                     ),
                 },
             ],

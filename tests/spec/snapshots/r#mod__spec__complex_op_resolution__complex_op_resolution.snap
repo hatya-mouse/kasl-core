@@ -71,7 +71,7 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 30
+                  id: 38
                   args:
                     - kind:
                         Identifier:
@@ -93,8 +93,8 @@ infix_operators:
                 Primitive: Bool
               range:
                 start: 123
-                end: 130
-      scope_id: 1
+                end: 143
+      scope_id: 2
     range:
       start: 66
       end: 145
@@ -129,7 +129,7 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 29
+                  id: 37
                   args:
                     - kind:
                         Identifier:
@@ -151,8 +151,8 @@ infix_operators:
                 Primitive: Bool
               range:
                 start: 270
-                end: 277
-      scope_id: 2
+                end: 291
+      scope_id: 3
     range:
       start: 213
       end: 293
@@ -187,7 +187,7 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 9
+                  id: 31
                   args:
                     - kind:
                         Identifier:
@@ -209,8 +209,8 @@ infix_operators:
                 Primitive: Bool
               range:
                 start: 416
-                end: 423
-      scope_id: 3
+                end: 437
+      scope_id: 4
     range:
       start: 361
       end: 439
@@ -245,7 +245,7 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 11
+                  id: 33
                   args:
                     - kind:
                         Identifier:
@@ -267,8 +267,8 @@ infix_operators:
                 Primitive: Bool
               range:
                 start: 560
-                end: 567
-      scope_id: 4
+                end: 581
+      scope_id: 5
     range:
       start: 506
       end: 583
@@ -303,7 +303,7 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 0
+                  id: 21
                   args:
                     - kind:
                         Identifier:
@@ -325,8 +325,8 @@ infix_operators:
                 Primitive: Int
               range:
                 start: 703
-                end: 710
-      scope_id: 5
+                end: 725
+      scope_id: 6
     range:
       start: 650
       end: 727
@@ -361,7 +361,7 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 2
+                  id: 23
                   args:
                     - kind:
                         Identifier:
@@ -383,8 +383,8 @@ infix_operators:
                 Primitive: Int
               range:
                 start: 847
-                end: 854
-      scope_id: 6
+                end: 869
+      scope_id: 7
     range:
       start: 794
       end: 871
@@ -453,7 +453,7 @@ prefix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 35
+                  id: 43
                   args:
                     - kind:
                         Identifier:
@@ -467,8 +467,8 @@ prefix_operators:
                 Primitive: Bool
               range:
                 start: 964
-                end: 971
-      scope_id: 7
+                end: 984
+      scope_id: 8
     range:
       start: 914
       end: 986

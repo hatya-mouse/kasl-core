@@ -34,7 +34,7 @@ funcs:
                   end: 0
               block:
                 body: []
-                scope_id: 2
+                scope_id: 3
             else_ifs: []
             else_block: ~
         - Return:
@@ -46,7 +46,7 @@ funcs:
               range:
                 start: 0
                 end: 0
-      scope_id: 1
+      scope_id: 2
     range:
       start: 0
       end: 0

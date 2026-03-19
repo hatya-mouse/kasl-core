@@ -1,5 +1,6 @@
 ---
-source: tests/semantic/global_decl_collection/global_var_collection.rs
+source: tests/semantic/statement_building/local_var_building.rs
+assertion_line: 92
 expression: "&test_ctx.prog_ctx.scope_registry"
 ---
 scopes:
@@ -13,23 +14,43 @@ scopes:
       end: 0
   1:
     parent: ~
+    name_to_id: {}
+    variables: []
+    defined_names:
+      - do_something
+      - main
+    range:
+      start: 0
+      end: 0
+  2:
+    parent: 1
+    name_to_id: {}
+    variables: []
+    defined_names: []
+    range:
+      start: 0
+      end: 0
+  3:
+    parent: 1
     name_to_id:
-      output: 0
+      local: 0
     variables:
       - 0
     defined_names:
-      - output
+      - local
     range:
       start: 0
       end: 0
 variables:
   0:
-    name: output
+    name: local
     value_type:
       Primitive: Int
     def_val:
       kind:
-        IntLiteral: 0
+        FuncCall:
+          id: 0
+          args: []
       value_type:
         Primitive: Int
       range:
@@ -38,8 +59,8 @@ variables:
     range:
       start: 0
       end: 0
-    var_kind: Output
+    var_kind: LocalVar
 global_scope_ids:
   0: 1
-next_scope_id: 2
+next_scope_id: 4
 next_variable_id: 1

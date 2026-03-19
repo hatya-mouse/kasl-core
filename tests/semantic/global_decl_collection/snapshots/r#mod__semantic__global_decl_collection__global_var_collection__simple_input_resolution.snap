@@ -5,10 +5,20 @@ expression: "&test_ctx.prog_ctx.scope_registry"
 scopes:
   0:
     parent: ~
+    name_to_id: {}
+    variables: []
+    defined_names: []
+    range:
+      start: 0
+      end: 0
+  1:
+    parent: ~
     name_to_id:
       in: 0
     variables:
       - 0
+    defined_names:
+      - in
     range:
       start: 0
       end: 0
@@ -32,6 +42,6 @@ variables:
       Input:
         attrs: []
 global_scope_ids:
-  0: 0
-next_scope_id: 1
+  0: 1
+next_scope_id: 2
 next_variable_id: 1

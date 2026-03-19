@@ -36,12 +36,12 @@ funcs:
                 body:
                   - Return:
                       value: ~
-                scope_id: 2
+                scope_id: 3
             else_ifs: []
             else_block:
               body: []
-              scope_id: 3
-      scope_id: 1
+              scope_id: 4
+      scope_id: 2
     range:
       start: 0
       end: 0

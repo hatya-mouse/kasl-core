@@ -52,7 +52,7 @@ funcs:
                         range:
                           start: 0
                           end: 0
-                scope_id: 2
+                scope_id: 3
             else_ifs:
               - condition:
                   kind:
@@ -74,7 +74,7 @@ funcs:
                           range:
                             start: 0
                             end: 0
-                  scope_id: 3
+                  scope_id: 4
             else_block:
               body:
                 - Return:
@@ -86,8 +86,8 @@ funcs:
                       range:
                         start: 0
                         end: 0
-              scope_id: 4
-      scope_id: 1
+              scope_id: 5
+      scope_id: 2
     range:
       start: 0
       end: 0

@@ -1,5 +1,6 @@
 ---
 source: tests/semantic/global_decl_collection/global_var_collection.rs
+assertion_line: 77
 expression: "&test_ctx.prog_ctx.scope_registry"
 ---
 scopes:
@@ -24,10 +25,10 @@ scopes:
       - 2
       - 3
     defined_names:
-      - delay
       - in
-      - const
       - out
+      - delay
+      - const
     range:
       start: 0
       end: 0

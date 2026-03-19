@@ -12,7 +12,7 @@ funcs:
       Primitive: Void
     block:
       body: []
-      scope_id: 1
+      scope_id: 2
     range:
       start: 0
       end: 0

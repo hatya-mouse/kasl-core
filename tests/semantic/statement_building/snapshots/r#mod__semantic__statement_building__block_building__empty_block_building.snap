@@ -15,8 +15,8 @@ funcs:
         - Block:
             block:
               body: []
-              scope_id: 2
-      scope_id: 1
+              scope_id: 3
+      scope_id: 2
     range:
       start: 0
       end: 0

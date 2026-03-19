@@ -66,7 +66,7 @@ impl Backend {
     /// ```
     /// fn(input, output, state, should_init)
     /// ```
-    pub fn compile(
+    pub fn compile_once(
         &mut self,
         prog_ctx: &ProgramContext,
         builtin_registry: &BuiltinRegistry,

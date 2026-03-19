@@ -131,7 +131,7 @@ pub fn execute_program(
         .get_global_func_id(root_namespace_id, "main")
         .unwrap();
     let code = backend
-        .compile(
+        .compile_once(
             &test_ctx.prog_ctx,
             &test_ctx.builtin_registry,
             blueprint,

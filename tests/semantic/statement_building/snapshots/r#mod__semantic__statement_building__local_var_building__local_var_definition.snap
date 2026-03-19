@@ -14,7 +14,7 @@ funcs:
       body:
         - LocalVar:
             var_id: 0
-      scope_id: 1
+      scope_id: 2
     range:
       start: 0
       end: 0
