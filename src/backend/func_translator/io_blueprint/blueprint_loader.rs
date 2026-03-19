@@ -113,6 +113,7 @@ impl FuncTranslator<'_> {
         state_offset: i32,
     ) {
         // Load the value from memory
+        // Don't need to pass the iteration index because state variables are not buffer even in buffer mode
         let loaded_val =
             self.load_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset, None);
         // Get the default value for the state

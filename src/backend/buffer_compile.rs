@@ -85,6 +85,7 @@ impl Backend {
         // Create needed blocks
         let entry_block = builder.create_block();
         let body_block = builder.create_block();
+        let increment_block = builder.create_block();
         let return_block = builder.create_block();
         let loop_header_block = builder.create_block();
 
@@ -133,15 +134,20 @@ impl Backend {
             Some(i_val),
             entry_point,
             blueprint,
-            loop_header_block,
+            increment_block,
         );
+
+        // Add jump instruction to the increment block at the end of the body
+        translator.builder.ins().jump(increment_block, &[]);
+        translator.builder.switch_to_block(increment_block);
+        translator.builder.seal_block(increment_block);
 
         // Increment the index
         let one_val = translator.builder.ins().iconst(types::I32, 1);
         let next_i = translator.builder.ins().iadd(i_val, one_val);
         translator.builder.def_var(i, next_i);
 
-        // Add jump instruction at the end of the body
+        // Add jump instruction to the loop header block
         translator.builder.ins().jump(loop_header_block, &[]);
         translator.builder.seal_block(loop_header_block);
 
