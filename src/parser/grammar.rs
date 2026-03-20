@@ -19,7 +19,7 @@ use crate::{
     ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
     ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, PostfixOperatorProperties,
     PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
-    namespace_registry::ImportPath,
+    namespace_registry::ImportPath, parser_ast::ParserTypeName,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -325,7 +325,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule literal() -> ExprTokenKind
         = decimal:decimal() { ExprTokenKind::FloatLiteral(decimal) }
-        / integer:integer() { ExprTokenKind::IntLiteral(integer as i32) }
+        / integer:integer() { ExprTokenKind::IntLiteral(integer) }
         / boolean:boolean() { ExprTokenKind::BoolLiteral(boolean) }
 
     rule func_call() -> ExprTokenKind
@@ -352,11 +352,14 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
         / expected!("identifier")
 
-    rule type_name() -> SymbolPath
+    rule type_name() -> ParserTypeName
         = first:identifier() extensions:(_? "." _? id:identifier() _? { id })* {
             let first = SymbolPathComponent::new(first);
             let extensions = extensions.into_iter().map(SymbolPathComponent::new).collect();
-            SymbolPath::with(vec![first]).extended(extensions)
+            ParserTypeName::SymbolPath(SymbolPath::with(vec![first]).extended(extensions))
+        }
+        / "[" __? t:type_name() comma() i:integer() __? "]" {
+            ParserTypeName::Array(Box::new(t), i)
         }
 
     rule operator() -> String

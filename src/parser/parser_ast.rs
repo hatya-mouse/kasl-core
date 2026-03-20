@@ -46,33 +46,33 @@ pub enum ParserDeclStmtKind {
         is_static: bool,
         name: String,
         params: Vec<ParserFuncParam>,
-        return_type: Option<SymbolPath>,
+        return_type: Option<ParserTypeName>,
         body: Vec<ParserScopeStmt>,
     },
     Input {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
         attrs: Vec<ParserInputAttribute>,
     },
     Output {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
     },
     StateVar {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
     },
     GlobalConst {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
     },
     StructField {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
     },
     StructDecl {
@@ -95,7 +95,7 @@ pub enum ParserDeclStmtKind {
         op_type: ParserOperatorType,
         symbol: String,
         params: Vec<ParserFuncParam>,
-        return_type: SymbolPath,
+        return_type: ParserTypeName,
         body: Vec<ParserScopeStmt>,
     },
 }
@@ -126,12 +126,12 @@ pub enum ParserScopeStmtKind {
     },
     LocalVar {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
     },
     LocalConst {
         name: String,
-        value_type: Option<SymbolPath>,
+        value_type: Option<ParserTypeName>,
         def_val: Vec<ExprToken>,
     },
     Assign {
@@ -166,18 +166,11 @@ pub struct ParserInputAttribute {
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone, serde::Serialize)]
-pub struct ParserFuncCallArg {
-    pub label: Option<String>,
-    pub value: Vec<ExprToken>,
-    pub range: Range,
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserFuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub value_type: Option<SymbolPath>,
+    pub value_type: Option<ParserTypeName>,
     pub def_val: Option<Vec<ExprToken>>,
     pub range: Range,
 }
@@ -190,6 +183,19 @@ pub struct ParserIfArm {
 }
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
+pub enum ParserTypeName {
+    SymbolPath(SymbolPath),
+    Array(Box<ParserTypeName>, u32),
+}
+
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
+pub struct ParserFuncCallArg {
+    pub label: Option<String>,
+    pub value: Vec<ExprToken>,
+    pub range: Range,
+}
+
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ExprToken {
     pub range: Range,
     pub kind: ExprTokenKind,
@@ -197,7 +203,7 @@ pub struct ExprToken {
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum ExprTokenKind {
-    IntLiteral(i32),
+    IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     Operator(String),
