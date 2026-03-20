@@ -15,14 +15,15 @@
 //
 
 use crate::{
-    Expr, ExprToken, Range, ScopeVar, SymbolPath, error::Ph, expr_engine::resolve_expr,
-    global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind,
+    Expr, ExprToken, Range, ScopeVar, error::Ph, expr_engine::resolve_expr,
+    global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName,
+    scope_manager::VariableKind, type_resolver::resolve_type,
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_def_val_global(
         &mut self,
-        type_annotation: &Option<SymbolPath>,
+        type_annotation: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) -> Option<Expr> {
@@ -41,24 +42,20 @@ impl GlobalDeclCollector<'_> {
             def_val,
         )?;
 
-        // Resolve the type annotation if provided
-        if let Some(path) = type_annotation {
-            let (namespace_id, type_name) = self
-                .prog_ctx
-                .namespace_registry
-                .resolve_namespace_from_path(path.clone());
-            let resolved_type_annotation = match self
-                .prog_ctx
-                .type_registry
-                .resolve_type_name(namespace_id, &type_name.to_string())
-            {
-                Some(ty) => ty,
-                None => {
-                    self.ec
-                        .type_not_found(decl_range, Ph::GlobalDeclCollection, path.to_string());
-                    return None;
-                }
-            };
+        if let Some(type_annotation) = type_annotation {
+            // Resolve the type annotation if provided
+            let resolved_type_annotation =
+                match resolve_type(self.ec, self.prog_ctx, type_annotation) {
+                    Some(ty) => ty,
+                    None => {
+                        self.ec.type_not_found(
+                            decl_range,
+                            Ph::GlobalDeclCollection,
+                            type_annotation.to_string(),
+                        );
+                        return None;
+                    }
+                };
 
             // If the type annotation provided by the user does not match the default value type throw an error
             if resolved_def_val.value_type != resolved_type_annotation {
@@ -82,7 +79,7 @@ impl GlobalDeclCollector<'_> {
     pub fn register_var_globally(
         &mut self,
         name: &str,
-        type_annotation: &Option<SymbolPath>,
+        type_annotation: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         var_kind: VariableKind,
         decl_range: Range,

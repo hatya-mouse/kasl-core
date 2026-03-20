@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    ExprToken, Range, StructID, SymbolPath,
+    ExprToken, Range, StructID,
     global_decl_collection::GlobalDeclCollector,
+    parser_ast::ParserTypeName,
     type_registry::{ResolvedType, StructDecl, StructField},
 };
 
@@ -26,7 +27,7 @@ impl GlobalDeclCollector<'_> {
         struct_id: StructID,
         struct_decl: &mut StructDecl,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {

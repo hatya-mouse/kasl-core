@@ -22,3 +22,4 @@ pub mod namespace_constructor;
 pub mod scope_graph_analyzing;
 pub mod statement_building;
 pub mod struct_graph_analyzing;
+pub mod type_resolver;

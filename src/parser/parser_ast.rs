@@ -188,6 +188,17 @@ pub enum ParserTypeName {
     Array(Box<ParserTypeName>, u32),
 }
 
+impl Display for ParserTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ParserTypeName::SymbolPath(path) => write!(f, "{}", &path.to_string()),
+            ParserTypeName::Array(item_type, count) => {
+                write!(f, "[{}; {}]", item_type.to_string(), count)
+            }
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ParserFuncCallArg {
     pub label: Option<String>,
@@ -214,6 +225,10 @@ pub enum ExprTokenKind {
     },
     Dot,
     Parenthesized(Vec<ExprToken>),
+    Subscription {
+        array: Vec<ExprToken>,
+        index: Vec<ExprToken>,
+    },
     /// An unresolved expression which is used only in the ExprEngine.
     UnresolvedExpr(UnresolvedExpr),
 }

@@ -15,12 +15,14 @@
 //
 
 use crate::{
-    FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar, SymbolPath,
+    FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar,
     error::Ph,
     global_decl_collection::GlobalDeclCollector,
+    parser_ast::ParserTypeName,
     scope_manager::VariableKind,
     symbol_table::{Block, FunctionType},
     type_registry::{PrimitiveType, ResolvedType},
+    type_resolver::resolve_type,
 };
 use std::collections::HashSet;
 
@@ -30,7 +32,7 @@ impl GlobalDeclCollector<'_> {
         func_type: FunctionType,
         name: &str,
         params: &[ParserFuncParam],
-        return_type: &Option<SymbolPath>,
+        return_type: &Option<ParserTypeName>,
         decl_range: Range,
     ) -> Option<Function> {
         // Create a function block
@@ -77,27 +79,17 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the return type
         let return_type = match return_type {
-            Some(path) => {
-                let (namespace_id, type_name) = self
-                    .prog_ctx
-                    .namespace_registry
-                    .resolve_namespace_from_path(path.clone());
-                match self
-                    .prog_ctx
-                    .type_registry
-                    .resolve_type_name(namespace_id, &type_name.to_string())
-                {
-                    Some(resolved) => resolved,
-                    None => {
-                        self.ec.type_not_found(
-                            decl_range,
-                            Ph::GlobalDeclCollection,
-                            path.to_string(),
-                        );
-                        return None;
-                    }
+            Some(type_name) => match resolve_type(self.ec, self.prog_ctx, type_name) {
+                Some(ty) => ty,
+                None => {
+                    self.ec.type_not_found(
+                        decl_range,
+                        Ph::GlobalDeclCollection,
+                        type_name.to_string(),
+                    );
+                    return None;
                 }
-            }
+            },
             None => ResolvedType::Primitive(PrimitiveType::Void),
         };
 
@@ -177,21 +169,25 @@ impl GlobalDeclCollector<'_> {
                 def_val: Some(resolved_def_val),
                 range: param.range,
             })
-        } else if let Some(annotation_type) = &param.value_type {
+        } else if let Some(type_annotation) = &param.value_type {
             // If no default value is provided, use the annotation type
-            let (namespace_id, type_name) = self
-                .prog_ctx
-                .namespace_registry
-                .resolve_namespace_from_path(annotation_type.clone());
-            let resolved_annotation_type = self
-                .prog_ctx
-                .type_registry
-                .resolve_type_name(namespace_id, &type_name.to_string())?;
+            let resolved_type_annotation =
+                match resolve_type(self.ec, self.prog_ctx, type_annotation) {
+                    Some(ty) => ty,
+                    None => {
+                        self.ec.type_not_found(
+                            param.range,
+                            Ph::GlobalDeclCollection,
+                            type_annotation.to_string(),
+                        );
+                        return None;
+                    }
+                };
 
             // Register the variable in the function scope
             let var = ScopeVar {
                 name: param.name.clone(),
-                value_type: resolved_annotation_type,
+                value_type: resolved_type_annotation,
                 def_val: None,
                 range: param.range,
                 var_kind: VariableKind::FuncParam,
@@ -205,7 +201,7 @@ impl GlobalDeclCollector<'_> {
                 label: param.label.clone(),
                 name: param.name.clone(),
                 var_id,
-                value_type: resolved_annotation_type,
+                value_type: resolved_type_annotation,
                 def_val: None,
                 range: param.range,
             })

@@ -15,15 +15,16 @@
 //
 
 use crate::{
-    ExprToken, InputAttribute, ParserInputAttribute, Range, SymbolPath, expr_engine::resolve_expr,
-    global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind,
+    ExprToken, InputAttribute, ParserInputAttribute, Range, expr_engine::resolve_expr,
+    global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName,
+    scope_manager::VariableKind,
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_input(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         attrs: &[ParserInputAttribute],
         decl_range: Range,
@@ -48,7 +49,7 @@ impl GlobalDeclCollector<'_> {
     pub fn resolve_output(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {
@@ -58,7 +59,7 @@ impl GlobalDeclCollector<'_> {
     pub fn resolve_state_var(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {
@@ -68,7 +69,7 @@ impl GlobalDeclCollector<'_> {
     pub fn resolve_global_const(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {

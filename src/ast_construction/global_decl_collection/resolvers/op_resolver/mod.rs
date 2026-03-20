@@ -19,8 +19,9 @@ mod postfix_op;
 mod prefix_op;
 
 use crate::{
-    ParserFuncParam, ParserOperatorType, ParserScopeStmt, Range, SymbolPath, error::Ph,
-    global_decl_collection::GlobalDeclCollector, symbol_table::Block,
+    ParserFuncParam, ParserOperatorType, ParserScopeStmt, Range, error::Ph,
+    global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName, symbol_table::Block,
+    type_resolver::resolve_type,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -29,7 +30,7 @@ impl GlobalDeclCollector<'_> {
         op_type: &ParserOperatorType,
         symbol: &str,
         params: &[ParserFuncParam],
-        return_type: &SymbolPath,
+        return_type: &ParserTypeName,
         body: &[ParserScopeStmt],
         decl_range: Range,
     ) {
@@ -50,21 +51,16 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Resolve the return type
-        let (namespace_id, type_name) = self
-            .prog_ctx
-            .namespace_registry
-            .resolve_namespace_from_path(return_type.clone());
-        let Some(return_type) = self
-            .prog_ctx
-            .type_registry
-            .resolve_type_name(namespace_id, &type_name.to_string())
-        else {
-            self.ec.type_not_found(
-                decl_range,
-                Ph::GlobalDeclCollection,
-                return_type.to_string(),
-            );
-            return;
+        let return_type = match resolve_type(self.ec, self.prog_ctx, return_type) {
+            Some(ty) => ty,
+            None => {
+                self.ec.type_not_found(
+                    decl_range,
+                    Ph::GlobalDeclCollection,
+                    return_type.to_string(),
+                );
+                return;
+            }
         };
 
         match op_type {

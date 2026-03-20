@@ -72,7 +72,7 @@ impl TypeRegistry {
         }
     }
 
-    pub fn register_or_get_array(&mut self, elem_type: ResolvedType, count: usize) -> ArrayID {
+    pub fn register_or_get_array(&mut self, elem_type: ResolvedType, count: u32) -> ArrayID {
         let array_decl = ArrayDecl::new(elem_type, count);
 
         // Add or get the array id
@@ -102,7 +102,7 @@ impl TypeRegistry {
         self.structs.keys().copied().collect()
     }
 
-    pub fn get_array_info(&self, id: &ArrayID) -> Option<&ArrayDecl> {
+    pub fn get_array_decl(&self, id: &ArrayID) -> Option<&ArrayDecl> {
         self.array_id_to_decl.get(id)
     }
 
@@ -111,16 +111,21 @@ impl TypeRegistry {
     pub fn get_type_actual_size(&self, type_id: &ResolvedType) -> Option<usize> {
         match type_id {
             ResolvedType::Primitive(ty) => Some(ty.size()),
+            ResolvedType::Array(array_id) => self.get_array_decl(array_id).and_then(|a| {
+                self.get_type_actual_size(a.item_type())
+                    .map(|s| s * *a.count() as usize)
+            }),
             ResolvedType::Struct(struct_id) => {
                 self.get_struct(struct_id).map(|s| s.total_size as usize)
             }
         }
     }
 
-    pub fn get_type_alignment(&self, type_id: &ResolvedType) -> u8 {
+    pub fn get_type_alignment(&self, type_id: &ResolvedType) -> Option<u8> {
         match type_id {
-            ResolvedType::Primitive(ty) => ty.alignment(),
-            ResolvedType::Struct(_) => 4,
+            ResolvedType::Primitive(ty) => Some(ty.alignment()),
+            ResolvedType::Array(_) => Some(4),
+            ResolvedType::Struct(struct_id) => self.get_struct(struct_id).map(|s| s.alignment),
         }
     }
 
@@ -142,6 +147,10 @@ impl TypeRegistry {
     pub fn format_type(&self, ty: &ResolvedType) -> String {
         match ty {
             ResolvedType::Primitive(prim_type) => prim_type.to_string(),
+            ResolvedType::Array(id) => self
+                .get_array_decl(id)
+                .map(|a| format!("[{}; {}]", self.format_type(a.item_type()), a.count()))
+                .unwrap_or(format!("array(ID: {})", id.0)),
             ResolvedType::Struct(id) => self
                 .get_struct(id)
                 .map(|s| s.name.clone())

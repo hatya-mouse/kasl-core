@@ -24,17 +24,6 @@ pub enum PrimitiveType {
     Void,
 }
 
-impl Display for PrimitiveType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            PrimitiveType::Int => write!(f, "Int"),
-            PrimitiveType::Float => write!(f, "Float"),
-            PrimitiveType::Bool => write!(f, "Bool"),
-            PrimitiveType::Void => write!(f, "Void"),
-        }
-    }
-}
-
 impl PrimitiveType {
     pub fn size(&self) -> usize {
         match self {
@@ -64,6 +53,17 @@ impl FromStr for PrimitiveType {
             "Float" => Ok(PrimitiveType::Float),
             "Bool" => Ok(PrimitiveType::Bool),
             _ => Err(()),
+        }
+    }
+}
+
+impl Display for PrimitiveType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PrimitiveType::Bool => write!(f, "Bool"),
+            PrimitiveType::Float => write!(f, "Bool"),
+            PrimitiveType::Int => write!(f, "Int"),
+            PrimitiveType::Void => write!(f, "Void"),
         }
     }
 }

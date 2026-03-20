@@ -358,7 +358,7 @@ peg::parser!(pub grammar kasl_parser() for str {
             let extensions = extensions.into_iter().map(SymbolPathComponent::new).collect();
             ParserTypeName::SymbolPath(SymbolPath::with(vec![first]).extended(extensions))
         }
-        / "[" __? t:type_name() comma() i:integer() __? "]" {
+        / "[" __? t:type_name() __? ";" __? i:integer() __? "]" {
             ParserTypeName::Array(Box::new(t), i)
         }
 
