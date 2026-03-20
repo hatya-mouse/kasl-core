@@ -14,32 +14,46 @@
 // limitations under the License.
 //
 
+mod array_decl;
 mod primitive_type;
 mod resolved_type;
 mod struct_decl;
-mod struct_field;
 mod struct_graph;
 
+pub use array_decl::ArrayDecl;
 pub use primitive_type::PrimitiveType;
 pub use resolved_type::ResolvedType;
-pub use struct_decl::StructDecl;
-pub use struct_field::StructField;
+pub use struct_decl::{StructDecl, StructField};
 pub use struct_graph::StructGraph;
 
-use crate::{NameSpaceID, StructID};
+use crate::{NameSpaceID, StructID, namespace_registry::ArrayID};
 use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
-    pub structs: HashMap<StructID, StructDecl>,
-    pub name_to_id: HashMap<(NameSpaceID, String), StructID>,
+    // Struct Registration
+    structs: HashMap<StructID, StructDecl>,
+    name_to_id: HashMap<(NameSpaceID, String), StructID>,
+
+    // Array Registration
+    array_id_to_decl: HashMap<ArrayID, ArrayDecl>,
+    decl_to_array_id: HashMap<ArrayDecl, ArrayID>,
+
+    // ID Generation
     next_struct_id: usize,
+    next_array_id: usize,
 }
 
 impl TypeRegistry {
     pub fn generate_struct_id(&mut self) -> StructID {
         let id = StructID(self.next_struct_id);
         self.next_struct_id += 1;
+        id
+    }
+
+    pub fn generate_array_id(&mut self) -> ArrayID {
+        let id = ArrayID(self.next_array_id);
+        self.next_array_id += 1;
         id
     }
 
@@ -58,6 +72,20 @@ impl TypeRegistry {
         }
     }
 
+    pub fn register_or_get_array(&mut self, elem_type: ResolvedType, count: usize) -> ArrayID {
+        let array_decl = ArrayDecl::new(elem_type, count);
+
+        // Add or get the array id
+        if self.decl_to_array_id.contains_key(&array_decl) {
+            *self.decl_to_array_id.get(&array_decl).unwrap()
+        } else {
+            let id = self.generate_array_id();
+            self.decl_to_array_id.insert(array_decl.clone(), id);
+            self.array_id_to_decl.insert(id, array_decl);
+            id
+        }
+    }
+
     // --- GETTER FUNCTIONS ---
 
     pub fn get_struct_id(&self, namespace_id: NameSpaceID, type_name: &str) -> Option<StructID> {
@@ -72,6 +100,10 @@ impl TypeRegistry {
 
     pub fn get_all_structs(&self) -> Vec<StructID> {
         self.structs.keys().copied().collect()
+    }
+
+    pub fn get_array_info(&self, id: &ArrayID) -> Option<&ArrayDecl> {
+        self.array_id_to_decl.get(id)
     }
 
     // --- TYPE SIZE AND ALIGNMENT ---

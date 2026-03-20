@@ -14,7 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{Range, VariableID, type_registry::StructField, type_registry::TypeRegistry};
+mod struct_field;
+
+pub use struct_field::StructField;
+
+use crate::{Range, VariableID, type_registry::TypeRegistry};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]

@@ -21,7 +21,9 @@ mod symbol_path;
 
 pub use import_path::ImportPath;
 pub use namespace::NameSpace;
-pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
+pub use symbol_id::{
+    ArrayID, FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID,
+};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
 use std::collections::HashMap;
