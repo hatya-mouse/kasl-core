@@ -39,11 +39,6 @@ impl FuncTranslator<'_> {
         args: &[FuncCallArg],
         expected_return_type: &ResolvedType,
     ) -> Option<ir::Value> {
-        println!(
-            "Call function with return type: {:#?}",
-            expected_return_type
-        );
-
         // Push a new scope
         self.scope_registry.push_deepest();
 
@@ -66,8 +61,6 @@ impl FuncTranslator<'_> {
             self.scope_registry.pop_deepest();
             return return_value;
         }
-
-        println!("No optimization function type: {:#?}", expected_return_type);
 
         // Get the return type
         if !expected_return_type.is_void() {

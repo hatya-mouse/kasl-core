@@ -40,6 +40,7 @@ impl BlockStmtBuilder<'_> {
 
         // Error will be thrown by the LValueResolver so no need to check for None
         let target_l_value = l_value_resolver.resolve_l_value(target)?;
+        println!("target: {:#?}", target_l_value);
 
         // Resolve the expression
         let resolved_value = resolve_expr(
@@ -51,6 +52,7 @@ impl BlockStmtBuilder<'_> {
             self.namespace_id,
             value,
         )?;
+        println!("value kind: {:#?}", resolved_value.kind);
 
         // Check if the target and value types match
         if target_l_value.value_type != resolved_value.value_type {

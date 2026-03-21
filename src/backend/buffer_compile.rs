@@ -43,8 +43,6 @@ impl Backend {
     ) -> Result<*const u8, String> {
         self.translate_buffer(prog_ctx, builtin_registry, blueprint, entry_point);
 
-        println!("{}", self.ctx.func);
-
         // Verify the function
         let verifier_flags = settings::Flags::new(settings::builder());
         verify_function(&self.ctx.func, &verifier_flags).map_err(|e| e.to_string())?;
