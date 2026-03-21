@@ -86,7 +86,8 @@ impl Backend {
         };
 
         // Create a FuncTranslator and translate the loop
-        let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
+        let mut translator =
+            FuncTranslator::new(builder, &mut self.module, prog_ctx, builtin_registry);
 
         translator.create_loop(buffer_size, |translator, i, increment_block| {
             translator.translate(

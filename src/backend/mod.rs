@@ -33,7 +33,11 @@ impl Default for Backend {
         let isa = isa_builder
             .finish(settings::Flags::new(flag_builder))
             .unwrap();
-        let builder = JITBuilder::with_isa(isa, cranelift_module::default_libcall_names());
+        let mut builder = JITBuilder::with_isa(isa, cranelift_module::default_libcall_names());
+
+        // Add linked functions for the builtin functions
+        BuiltinRegistry::register_symbols(&mut builder);
+
         let module = JITModule::new(builder);
 
         Self {
@@ -117,7 +121,8 @@ impl Backend {
         let return_block = builder.create_block();
 
         // Create a FuncTranslator and translate the function
-        let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
+        let mut translator =
+            FuncTranslator::new(builder, &mut self.module, prog_ctx, builtin_registry);
         translator.translate(
             translator_params,
             None,

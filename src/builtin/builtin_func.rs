@@ -1,9 +1,11 @@
 use crate::type_registry::ResolvedType;
 use cranelift::prelude::FunctionBuilder;
 use cranelift_codegen::ir;
+use cranelift_jit::JITModule;
 use std::fmt::Display;
 
-pub type BuiltinFuncTranslator = Box<dyn Fn(&mut FunctionBuilder, &[ir::Value]) -> ir::Value>;
+pub type BuiltinFuncTranslator =
+    Box<dyn Fn(&mut JITModule, &mut FunctionBuilder, &[ir::Value]) -> ir::Value>;
 
 pub struct BuiltinFunc {
     pub name: &'static str,

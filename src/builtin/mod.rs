@@ -1,9 +1,9 @@
 mod builtin_func;
 mod functions;
 
-pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
-
 use crate::type_registry::{PrimitiveType, ResolvedType};
+pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
+use cranelift_jit::JITBuilder;
 use std::collections::HashMap;
 
 pub struct BuiltinRegistry {
@@ -20,6 +20,7 @@ impl Default for BuiltinRegistry {
         functions::float_op::register_builtins(&mut registry);
         functions::int_op::register_builtins(&mut registry);
         functions::logical::register_builtins(&mut registry);
+        functions::math::register_builtins(&mut registry);
         functions::type_conversion::register_builtins(&mut registry);
 
         registry
@@ -39,6 +40,19 @@ impl BuiltinRegistry {
         let id = BuiltinFuncID::new(self.next_builtin_func_id);
         self.next_builtin_func_id += 1;
         id
+    }
+
+    pub(crate) fn register_symbols(builder: &mut JITBuilder) {
+        // --- TRIGONOMETRIC FUNCTIONS ---
+        builder.symbol("sin", f32::sin as *const u8);
+        builder.symbol("cos", f32::cos as *const u8);
+        builder.symbol("tan", f32::tan as *const u8);
+        builder.symbol("asin", f32::asin as *const u8);
+        builder.symbol("acos", f32::acos as *const u8);
+        builder.symbol("atan", f32::atan as *const u8);
+        builder.symbol("atan2", f32::atan2 as *const u8);
+
+        builder.symbol("fpow", f32::powf as *const u8);
     }
 
     pub(in crate::builtin) fn register_func(

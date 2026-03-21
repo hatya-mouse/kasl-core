@@ -18,6 +18,7 @@ use cranelift_jit::JITModule;
 
 pub struct FuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
+    module: &'a mut JITModule,
     type_converter: TypeConverter,
 
     prog_ctx: &'a ProgramContext,
@@ -28,7 +29,7 @@ pub struct FuncTranslator<'a> {
 impl<'a> FuncTranslator<'a> {
     pub fn new(
         builder: FunctionBuilder<'a>,
-        module: &'a JITModule,
+        module: &'a mut JITModule,
         prog_ctx: &'a ProgramContext,
         builtin_registry: &'a BuiltinRegistry,
     ) -> Self {
@@ -39,6 +40,7 @@ impl<'a> FuncTranslator<'a> {
 
         Self {
             builder,
+            module,
             type_converter,
             prog_ctx,
             builtin_registry,

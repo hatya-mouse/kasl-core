@@ -8,13 +8,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "beq",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
-        Box::new(|builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
+        Box::new(|_, builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
     );
 
     registry.register_func(
         "bne",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
-        Box::new(|builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
+        Box::new(|_, builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
     );
 }

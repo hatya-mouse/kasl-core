@@ -18,6 +18,6 @@ impl FuncTranslator<'_> {
         let func = &self.builtin_registry.get_func_by_id(func_id).unwrap();
 
         // Translate the function
-        (func.translator)(&mut self.builder, &translated_args)
+        (func.translator)(self.module, &mut self.builder, &translated_args)
     }
 }
