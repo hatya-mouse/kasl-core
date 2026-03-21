@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+mod brif_loop;
 mod copy_value;
 mod stack_slot;
 
