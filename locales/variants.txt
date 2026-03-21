@@ -1,5 +1,3 @@
-#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, strum::Display)]
-ParserError
 TopLevelVar
 NonMemberTokenAfterDot
 ArgForStructInit
@@ -60,8 +58,11 @@ ExprEndsWithBuiltin
 NoMainFunc
 SubscriptOnNonArray
 NonIntegerInSubscript
-NonIntegerForCount
-NonConstantForCount
+NonIntegerForArrayCount
+NonIntegerForLoopCount
+NonConstantForArrayCount
+NonConstantForLoopCount
 EmptyArrayLiteral
 ArrayItemTypeMismatch
+ArgLabelNotFound
 CompilerBug

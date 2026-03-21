@@ -1,9 +1,6 @@
-[parser_error]
-MultipleExpected = "文法に誤りがあります。{$0} または {$1} のいずれかが必要です"
-SingleExpected = "文法に誤りがあります。{$0} が必要です"
-
 [errors]
 ArgForStructInit = '"struct" の初期化時に引数を設定することはできません'
+ArgLabelNotFound = 'ラベルが "{$0}" である引数が見つかりません'
 ArgOrderIncorrect = '引数 "{$0}" の位置に誤りがあります'
 ArgTypeMismatch = '引数 "{$0}" の型が一致しません。"{$1}" 型の値が必要ですが、"{$2}" 型の値が指定されています'
 ArrayItemTypeMismatch = '配列の値の方が一致しません。最初の要素は "{$0}" 型ですが、"{$1}" 型の値が指定されています'
@@ -46,7 +43,9 @@ NoMainFunc = '"main" 関数が見つかりません'
 NoTypeAnnotationOrDefVal = "型または初期値が指定されていません"
 NonBoolTypeForCondition = '条件式には "Bool" 型の値が必要ですが、"{$0}" 型の値が指定されています'
 NonConstantForArrayCount = "配列の長さには定数を指定する必要があります"
+NonConstantForLoopCount = '"loop" の回数には定数を指定する必要があります'
 NonIntegerForArrayCount = '配列の長さには "Int" 型の値が必要ですが、"{$0}" 型の値が指定されています'
+NonIntegerForLoopCount = '"loop" の回数には "Int" 型の値が必要ですが、"{$0}" 型の値が指定されています'
 NonIntegerInSubscript = '"[]" の中には "Int" 型の値が必要ですが、"{$0}" 型の値が指定されています'
 NonMemberTokenAfterDot = '"."の後には変数名または関数呼び出しが必要です'
 OpNotAssociative = '演算子 "{$0}" は連続して使用できません'
@@ -68,3 +67,7 @@ VarNotFound = '変数 "{$0}" が見つかりません'
 WrongParamCountForInfix = '中置演算子 "{$0}" には2個の引数が必要ですが、{$1}個の引数が指定されています'
 WrongParamCountForPostfix = '後置演算子 "{$0}" には1個の引数が必要ですが、{$1}個の引数が指定されています'
 WrongParamCountForPrefix = '前置演算子 "{$0}" には1個の引数が必要ですが、{$1}個の引数が指定されています'
+
+[parser_error]
+MultipleExpected = "文法に誤りがあります。{$0} または {$1} のいずれかが必要です"
+SingleExpected = "文法に誤りがあります。{$0} が必要です"

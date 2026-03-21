@@ -1,9 +1,6 @@
-[parser_error]
-MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
-SingleExpected = "Syntax error. Expected {$0}"
-
 [errors]
 ArgForStructInit = "Arguments cannot be passed to a struct initializer"
+ArgLabelNotFound = 'Parameter with the label "{$0}" could no be found'
 ArgOrderIncorrect = 'The position of the argument "{$0}" is incorrect'
 ArgTypeMismatch = 'The argument "{$0}" is of type "{$1}", but a value of type "{$2}" is passed'
 ArrayItemTypeMismatch = 'The type of value in the array does not match. The first item is of type "{$0}", but the item is of type "{$1}"'
@@ -46,7 +43,9 @@ NoMainFunc = 'The program does not contain "main" function'
 NoTypeAnnotationOrDefVal = "The type of the value and the default value is not specified"
 NonBoolTypeForCondition = 'The condition expression must be of type "Bool", but a value of type "{$0}" is given'
 NonConstantForArrayCount = "The array count must be a constant"
+NonConstantForLoopCount = "The loop count must be a constant"
 NonIntegerForArrayCount = 'The array count must be of type "Int", but a value of type "{$0}" is passed'
+NonIntegerForLoopCount = 'The loop count must be of type "Int", but a value of type "{$0}" is passed'
 NonIntegerInSubscript = 'The index must be of type "Int", but a value of type "{$0}" is passed'
 NonMemberTokenAfterDot = '"." must be followed by a function call or a variable name'
 OpNotAssociative = 'The operator "{$0}" cannot be used consecutively'
@@ -68,3 +67,7 @@ VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'
 WrongParamCountForPrefix = 'Prefix operator "{$0}" requires 1 parameter, but got {$1}'
+
+[parser_error]
+MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
+SingleExpected = "Syntax error. Expected {$0}"
