@@ -26,7 +26,7 @@ use cranelift_codegen::ir;
 impl FuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {
         // Translate the RHS value
-        let rhs_value = self.translate_expr(value);
+        let rhs_value = self.translate_expr(value).unwrap();
 
         // Set the value to the variable depending on the l-value kind
         if let LValueKind::Identifier(var_id) = &target.kind {

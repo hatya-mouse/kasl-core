@@ -100,7 +100,7 @@ impl FuncTranslator<'_> {
     fn init_output(&mut self, output_item: &BlueprintItem) {
         let output_var = self.declare_var(output_item.id, &output_item.value_type);
         // Output variables must have a default value
-        let def_val = self.translate_expr(&output_item.def_val);
+        let def_val = self.translate_expr(&output_item.def_val).unwrap();
         self.builder.def_var(output_var, def_val);
     }
 
@@ -119,7 +119,7 @@ impl FuncTranslator<'_> {
         let loaded_val =
             self.load_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset, None);
         // Get the default value for the state
-        let translated_def_val = self.translate_expr(&state_item.def_val);
+        let translated_def_val = self.translate_expr(&state_item.def_val).unwrap();
 
         // Conditionally select the default value or the loaded value
         let value = self

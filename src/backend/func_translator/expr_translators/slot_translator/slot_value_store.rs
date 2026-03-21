@@ -22,7 +22,7 @@ impl FuncTranslator<'_> {
     pub fn store_value_to_slot(&mut self, expr: &Expr, slot: StackSlot, offset: i32) {
         match expr.value_type {
             ResolvedType::Primitive(_) => {
-                let val = self.translate_expr(expr);
+                let val = self.translate_expr(expr).unwrap();
                 self.builder.ins().stack_store(val, slot, offset);
             }
             ResolvedType::Array(array_id) => {

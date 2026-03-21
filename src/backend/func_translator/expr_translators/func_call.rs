@@ -26,11 +26,10 @@ impl FuncTranslator<'_> {
         &mut self,
         func_id: &FunctionID,
         args: &[FuncCallArg],
-    ) -> ir::Value {
+    ) -> Option<ir::Value> {
         // Get the function block
         let func = &self.prog_ctx.func_ctx.get_func(func_id).unwrap();
         self.call_func(&func.block, args, &func.return_type)
-            .unwrap()
     }
 
     pub(super) fn call_func(
@@ -45,7 +44,7 @@ impl FuncTranslator<'_> {
         // Define the argument as variables
         for arg in args {
             let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
-            let translated_val = self.translate_expr(&arg.value);
+            let translated_val = self.translate_expr(&arg.value).unwrap();
             self.builder.def_var(arg_var, translated_val);
         }
 
@@ -57,7 +56,7 @@ impl FuncTranslator<'_> {
         if block.body.len() == 1
             && let Statement::Return { value } = &block.body[0]
         {
-            let return_value = value.as_ref().map(|v| self.translate_expr(v));
+            let return_value = value.as_ref().and_then(|v| self.translate_expr(v));
             self.scope_registry.pop_deepest();
             return return_value;
         }

@@ -39,7 +39,7 @@ impl FuncTranslator<'_> {
         index_expr: &Expr,
     ) -> ir::Value {
         // Translate the index
-        let translated_index = self.translate_expr(index_expr);
+        let translated_index = self.translate_expr(index_expr).unwrap();
         // Get the size of the item
         let item_size = self
             .prog_ctx

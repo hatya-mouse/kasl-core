@@ -33,7 +33,7 @@ impl FuncTranslator<'_> {
         {
             match field.value_type {
                 ResolvedType::Primitive(_) => {
-                    let val = self.translate_expr(&field.def_val);
+                    let val = self.translate_expr(&field.def_val).unwrap();
                     self.builder
                         .ins()
                         .stack_store(val, slot, base_offset + offset);

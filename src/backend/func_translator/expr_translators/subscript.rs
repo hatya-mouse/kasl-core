@@ -29,7 +29,7 @@ impl FuncTranslator<'_> {
         let translated_type = self.type_converter.convert(item_type);
 
         // Translate the lhs into ir value
-        let base_ptr = self.translate_expr(lhs);
+        let base_ptr = self.translate_expr(lhs).unwrap();
         // Calculate the pointer to the corresponding value
         let val_ptr = self.calculate_array_offset(item_type, base_ptr, index);
 

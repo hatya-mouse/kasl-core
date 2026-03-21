@@ -22,10 +22,9 @@ impl FuncTranslator<'_> {
         &mut self,
         id: &FunctionID,
         args: &[FuncCallArg],
-    ) -> ir::Value {
+    ) -> Option<ir::Value> {
         // Call the function and get the result
         let func = self.prog_ctx.func_ctx.get_func(id).unwrap();
         self.call_func(&func.block, args.as_ref(), &func.return_type)
-            .unwrap()
     }
 }

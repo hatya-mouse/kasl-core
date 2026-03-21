@@ -26,7 +26,7 @@ impl FuncTranslator<'_> {
         // Translate the expressions
         let mut translated_args = Vec::new();
         for arg in args {
-            let translated_val = self.translate_expr(arg);
+            let translated_val = self.translate_expr(arg).unwrap();
             translated_args.push(translated_val);
         }
 
