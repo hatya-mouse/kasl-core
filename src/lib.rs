@@ -1,4 +1,5 @@
 pub(crate) const MAIN_FUNCTION_NAME: &str = "main";
+pub(crate) const LOOP_UNROLL_THRESHOLD: u32 = 32;
 
 pub mod ast;
 pub mod ast_construction;

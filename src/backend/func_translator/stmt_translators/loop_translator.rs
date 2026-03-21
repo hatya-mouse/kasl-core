@@ -1,4 +1,4 @@
-use crate::{backend::func_translator::FuncTranslator, symbol_table};
+use crate::{LOOP_UNROLL_THRESHOLD, backend::func_translator::FuncTranslator, symbol_table};
 use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;
 
@@ -12,8 +12,14 @@ impl FuncTranslator<'_> {
         // Translate the count into an IR value
         let ir_count = self.builder.ins().iconst(types::I32, count as i64);
         // Create a loop
-        self.create_loop(ir_count, |_self, _, _| {
-            _self.translate_block(block, exit_block);
-        });
+        if count <= LOOP_UNROLL_THRESHOLD {
+            for _ in 0..count {
+                self.translate_block(block, exit_block);
+            }
+        } else {
+            self.create_loop(ir_count, |_self, _, _| {
+                _self.translate_block(block, exit_block);
+            });
+        }
     }
 }
