@@ -135,13 +135,13 @@ impl KaslCompiler {
 
     pub fn run_once(
         &mut self,
-        inputs: &[*mut ()],
+        inputs: &[*const ()],
         outputs: &[*mut ()],
         states: &[*mut ()],
         should_init: i8,
     ) -> Result<(), String> {
         unsafe {
-            let code_fn: fn(*const *mut (), *const *mut (), *const *mut (), i8) =
+            let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8) =
                 mem::transmute(self.compiled);
             code_fn(
                 inputs.as_ptr(),
@@ -193,14 +193,14 @@ impl KaslCompiler {
 
     pub fn run_buffer(
         &mut self,
-        inputs: &[*mut ()],
+        inputs: &[*const ()],
         outputs: &[*mut ()],
         states: &[*mut ()],
         should_init: i8,
         buffer_size: i32,
     ) -> Result<(), String> {
         unsafe {
-            let code_fn: fn(*const *mut (), *const *mut (), *const *mut (), i8, i32) =
+            let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8, i32) =
                 mem::transmute(self.compiled);
             code_fn(
                 inputs.as_ptr(),
