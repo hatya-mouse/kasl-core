@@ -20,6 +20,7 @@ mod io_blueprint;
 mod stmt_translators;
 mod translator_scope_registry;
 mod type_converter;
+mod utils;
 
 use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;

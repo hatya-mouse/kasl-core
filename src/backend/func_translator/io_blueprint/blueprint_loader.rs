@@ -167,7 +167,7 @@ impl FuncTranslator<'_> {
                 .iconst(types::I32, item.actual_size as i64);
             let byte_offset = self.builder.ins().imul(i, item_size);
             // Extend the type to the pointer type
-            let ptr_type_offset = self.builder.ins().uextend(pointer_type, byte_offset);
+            let ptr_type_offset = self.extend_to_ptr(types::I32, byte_offset);
             self.builder.ins().iadd(val_ptr, ptr_type_offset)
         } else {
             val_ptr

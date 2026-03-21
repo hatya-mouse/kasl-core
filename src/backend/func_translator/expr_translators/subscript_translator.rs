@@ -1,0 +1,62 @@
+//
+// © 2025-2026 Shuntaro Kasatani
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use cranelift::prelude::{InstBuilder, MemFlags, types};
+use cranelift_codegen::ir;
+
+impl FuncTranslator<'_> {
+    pub fn translate_subscript(
+        &mut self,
+        lhs: &Expr,
+        value_type: &ResolvedType,
+        index: &Expr,
+    ) -> ir::Value {
+        // Translate the expression
+        let translated_lhs = self.translate_expr(lhs);
+        // Translate the index
+        let translated_index = self.translate_expr(index);
+
+        // Translate the value type
+        let translated_type = self.type_converter.convert(value_type);
+
+        // Get the size of the item
+        let item_size = self
+            .prog_ctx
+            .type_registry
+            .get_type_actual_size(value_type)
+            .unwrap();
+        // Calculate the offset
+        let item_size_ir = self.builder.ins().iconst(types::I32, item_size as i64);
+        let offset = self.builder.ins().imul(item_size_ir, translated_index);
+        // Extend the offset value to the pointer type
+        let ptr_type_offset = self.extend_to_ptr(types::I32, offset);
+        // Calculate the pointer to the value
+        let val_ptr = self.builder.ins().iadd(translated_lhs, ptr_type_offset);
+
+        // Get the value depending on the type
+        match value_type {
+            ResolvedType::Primitive(_) => {
+                self.builder
+                    .ins()
+                    .load(translated_type, MemFlags::new(), val_ptr, 0)
+            }
+            // Add offset to the array pointer
+            ResolvedType::Array(_) => val_ptr,
+            ResolvedType::Struct(_) => val_ptr,
+        }
+    }
+}

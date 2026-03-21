@@ -24,6 +24,7 @@ mod op_call_translator;
 mod slot_translator;
 mod struct_field_translator;
 mod struct_init_translator;
+mod subscript_translator;
 
 use crate::{Expr, ExprKind, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
@@ -58,7 +59,9 @@ impl FuncTranslator<'_> {
             }
             ExprKind::ArrayList(_) => self.translate_array_literal(expr),
             ExprKind::ArraySpread { .. } => self.translate_array_literal(expr),
-            ExprKind::Subscript { .. } => todo!(),
+            ExprKind::Subscript { lhs, index } => {
+                self.translate_subscript(lhs, &expr.value_type, index)
+            }
         }
     }
 }
