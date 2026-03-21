@@ -15,40 +15,26 @@
 //
 
 use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
-use cranelift::prelude::{InstBuilder, MemFlags, types};
+use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_subscript(
         &mut self,
+        item_type: &ResolvedType,
         lhs: &Expr,
-        value_type: &ResolvedType,
         index: &Expr,
     ) -> ir::Value {
-        // Translate the expression
-        let translated_lhs = self.translate_expr(lhs);
-        // Translate the index
-        let translated_index = self.translate_expr(index);
-
         // Translate the value type
-        let translated_type = self.type_converter.convert(value_type);
+        let translated_type = self.type_converter.convert(item_type);
 
-        // Get the size of the item
-        let item_size = self
-            .prog_ctx
-            .type_registry
-            .get_type_actual_size(value_type)
-            .unwrap();
-        // Calculate the offset
-        let item_size_ir = self.builder.ins().iconst(types::I32, item_size as i64);
-        let offset = self.builder.ins().imul(item_size_ir, translated_index);
-        // Extend the offset value to the pointer type
-        let ptr_type_offset = self.extend_to_ptr(types::I32, offset);
-        // Calculate the pointer to the value
-        let val_ptr = self.builder.ins().iadd(translated_lhs, ptr_type_offset);
+        // Translate the lhs into ir value
+        let base_ptr = self.translate_expr(lhs);
+        // Calculate the pointer to the corresponding value
+        let val_ptr = self.calculate_array_offset(item_type, base_ptr, index);
 
         // Get the value depending on the type
-        match value_type {
+        match item_type {
             ResolvedType::Primitive(_) => {
                 self.builder
                     .ins()

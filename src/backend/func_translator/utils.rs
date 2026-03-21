@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use crate::backend::func_translator::FuncTranslator;
-use cranelift::prelude::InstBuilder;
+use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
@@ -26,5 +26,29 @@ impl FuncTranslator<'_> {
         } else {
             self.builder.ins().uextend(ptr_type, val)
         }
+    }
+
+    pub fn calculate_array_offset(
+        &mut self,
+        item_type: &ResolvedType,
+        base_ptr: ir::Value,
+        index_expr: &Expr,
+    ) -> ir::Value {
+        // Translate the index
+        let translated_index = self.translate_expr(index_expr);
+        // Get the size of the item
+        let item_size = self
+            .prog_ctx
+            .type_registry
+            .get_type_actual_size(item_type)
+            .unwrap();
+
+        // Calculate the offset
+        let item_size_ir = self.builder.ins().iconst(types::I32, item_size as i64);
+        let offset = self.builder.ins().imul(item_size_ir, translated_index);
+        // Extend the offset value to the pointer type
+        let ptr_type_offset = self.extend_to_ptr(types::I32, offset);
+        // Calculate the pointer to the value
+        self.builder.ins().iadd(base_ptr, ptr_type_offset)
     }
 }

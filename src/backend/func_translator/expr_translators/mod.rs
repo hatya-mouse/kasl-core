@@ -60,7 +60,7 @@ impl FuncTranslator<'_> {
             ExprKind::ArrayList(_) => self.translate_array_literal(expr),
             ExprKind::ArraySpread { .. } => self.translate_array_literal(expr),
             ExprKind::Subscript { lhs, index } => {
-                self.translate_subscript(lhs, &expr.value_type, index)
+                self.translate_subscript(&expr.value_type, lhs, index)
             }
         }
     }
