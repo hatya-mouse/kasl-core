@@ -36,7 +36,7 @@ impl ExpressionResolver<'_> {
         let resolved_count = self.resolve_recursively(count)?;
 
         // Check if the count has integer type
-        if matches!(
+        if !matches!(
             resolved_count.value_type,
             ResolvedType::Primitive(PrimitiveType::Int)
         ) {
