@@ -57,7 +57,7 @@ impl GlobalDeclCollector<'_> {
                 value_type: ResolvedType::Struct(struct_id),
                 def_val: None,
                 range: decl_range,
-                var_kind: VariableKind::FuncParam,
+                var_kind: VariableKind::SelfParam,
             };
             let var_id =
                 self.prog_ctx

@@ -38,6 +38,7 @@ pub enum VariableKind {
     State,
     GlobalConst,
     FuncParam,
+    SelfParam,
     LocalVar,
     LocalConst,
 }
