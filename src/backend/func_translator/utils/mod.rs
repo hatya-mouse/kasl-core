@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+mod copy_value;
+mod stack_slot;
+
 use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
 use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;

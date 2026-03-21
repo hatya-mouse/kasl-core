@@ -73,14 +73,15 @@ impl FuncTranslator<'_> {
                     struct_decl.alignment,
                 );
                 let slot = self.builder.func.create_sized_stack_slot(slot_data);
+                let stack_addr =
+                    self.builder
+                        .ins()
+                        .stack_addr(self.type_converter.pointer_type(), slot, 0);
 
                 // Load and struct the value in the stack slot
-                self.load_struct(struct_id, ptr, slot, 0);
+                self.copy_struct(struct_id, ptr, stack_addr, 0);
 
-                // Return the address to the struct
-                self.builder
-                    .ins()
-                    .stack_addr(self.type_converter.pointer_type(), slot, 0)
+                stack_addr
             }
         }
     }

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+mod array_loader;
 mod item_loader;
 mod struct_loader;
 

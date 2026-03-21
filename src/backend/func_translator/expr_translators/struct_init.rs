@@ -15,20 +15,13 @@
 //
 
 use crate::{StructID, backend::func_translator::FuncTranslator};
-use cranelift::prelude::{InstBuilder, StackSlotData, StackSlotKind};
+use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::{self};
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
-        let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
-
-        // Create a stack slot
-        let slot_data = StackSlotData::new(
-            StackSlotKind::ExplicitSlot,
-            struct_decl.total_size,
-            struct_decl.alignment,
-        );
-        let slot = self.builder.func.create_sized_stack_slot(slot_data);
+        // Create a new stack slot
+        let slot = self.alloc_struct(struct_id);
 
         // Store the fields to the slot
         self.store_init_fields_to_slot(struct_id, slot, 0);

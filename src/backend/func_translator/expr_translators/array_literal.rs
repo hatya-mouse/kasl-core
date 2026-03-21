@@ -15,7 +15,7 @@
 //
 
 use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
-use cranelift::prelude::{InstBuilder, StackSlotData, StackSlotKind};
+use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
@@ -26,22 +26,8 @@ impl FuncTranslator<'_> {
             _ => unreachable!(),
         };
 
-        // Get the total size and the alignment of the array
-        let total_size = self
-            .prog_ctx
-            .type_registry
-            .get_type_actual_size(&array_expr.value_type)
-            .unwrap();
-        let alignment = self
-            .prog_ctx
-            .type_registry
-            .get_type_alignment(&array_expr.value_type)
-            .unwrap();
-
-        // Create a stack slot
-        let slot_data =
-            StackSlotData::new(StackSlotKind::ExplicitSlot, total_size as u32, alignment);
-        let slot = self.builder.func.create_sized_stack_slot(slot_data);
+        // Create a new stack slot
+        let slot = self.alloc_array(&array_id);
 
         // Store the array items to the slot
         self.store_array_to_slot(&array_expr, &array_id, slot, 0);
