@@ -14,12 +14,14 @@
 // limitations under the License.
 //
 
+mod array_literal_translator;
 mod builtin_call_translator;
 mod func_call_translator;
 mod ident_translator;
 mod instance_call_translator;
 mod literal_translator;
 mod op_call_translator;
+mod slot_translator;
 mod struct_field_translator;
 mod struct_init_translator;
 
@@ -54,6 +56,9 @@ impl FuncTranslator<'_> {
             ExprKind::BuiltinFuncCall { id, args, .. } => {
                 self.translate_builtin_func_call(id, args)
             }
+            ExprKind::ArrayList(_) => self.translate_array_literal(expr),
+            ExprKind::ArraySpread { .. } => self.translate_array_literal(expr),
+            ExprKind::Subscript { .. } => todo!(),
         }
     }
 }

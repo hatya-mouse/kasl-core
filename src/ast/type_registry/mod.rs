@@ -124,7 +124,9 @@ impl TypeRegistry {
     pub fn get_type_alignment(&self, type_id: &ResolvedType) -> Option<u8> {
         match type_id {
             ResolvedType::Primitive(ty) => Some(ty.alignment()),
-            ResolvedType::Array(_) => Some(4),
+            ResolvedType::Array(array_id) => self
+                .get_array_decl(array_id)
+                .and_then(|a| self.get_type_alignment(a.item_type())),
             ResolvedType::Struct(struct_id) => self.get_struct(struct_id).map(|s| s.alignment),
         }
     }

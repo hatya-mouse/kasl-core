@@ -38,6 +38,8 @@ impl FuncTranslator<'_> {
                     .ins()
                     .load(translated_type, MemFlags::new(), translated_lhs, offset)
             }
+            // Add offset to the struct pointer
+            ResolvedType::Array(_) => self.builder.ins().iadd_imm(translated_lhs, offset as i64),
             ResolvedType::Struct(_) => self.builder.ins().iadd_imm(translated_lhs, offset as i64),
         }
     }
