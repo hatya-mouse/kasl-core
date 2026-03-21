@@ -22,13 +22,12 @@ impl FuncTranslator<'_> {
     /// Translates the given block. This method does not create any new blocks.
     pub fn translate_block(&mut self, block: &Block, exit_block: ir::Block) -> bool {
         // Loop over the statements in the function and translate them
-        let mut has_return = false;
         for stmt in &block.body {
             if self.translate_stmt(stmt, exit_block) {
-                has_return = true;
+                return true;
             }
         }
-        has_return
+        false
     }
 
     fn translate_stmt(&mut self, stmt: &Statement, exit_block: ir::Block) -> bool {
