@@ -96,7 +96,7 @@ pub enum ErrorKind {
     MemberAccessOnPrimitive,
 
     /// Title: MemberAccessOnArray
-    /// Payload: None
+    /// Payload: The type of an array
     /// Member access expression on an array type.
     MemberAccessOnArray,
 
@@ -331,7 +331,7 @@ pub enum ErrorKind {
     NonIntegerForCount,
 
     /// Title: NonConstantForCount
-    /// Payload: Type of the non-constant count value
+    /// Payload: None
     /// A non-constant value is used for array count in array spread literal.
     NonConstantForCount,
 

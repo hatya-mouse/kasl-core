@@ -4,7 +4,7 @@ TopLevelVar
 NonMemberTokenAfterDot
 ArgForStructInit
 ExprEndsWithDot
-ExprBeginsWithDot
+ExprBeginsWithInvalid
 InvalidLValue
 VarNotFound
 FuncNotFound
@@ -15,6 +15,7 @@ PrefixOpNotFound
 PostfixOpNotFound
 OpNotAssociative
 MemberAccessOnPrimitive
+MemberAccessOnArray
 MemberFieldNotFound
 MemberFuncNotFound
 ArgOrderIncorrect
@@ -56,4 +57,12 @@ ImportNotFound
 CyclicDependency
 ExprEndsWithType
 ExprEndsWithBuiltin
+NoMainFunc
+UnmatchedBracket
+SubscriptOnNonArray
+NonIntegerInSubscript
+NonIntegerForCount
+NonConstantForCount
+EmptyArrayLiteral
+ArrayItemTypeMismatch
 CompilerBug

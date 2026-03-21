@@ -1,7 +1,12 @@
+[parser_error]
+MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
+SingleExpected = "Syntax error. Expected {$0}"
+
 [errors]
 ArgForStructInit = "Arguments cannot be passed to a struct initializer"
 ArgOrderIncorrect = 'The position of the argument "{$0}" is incorrect'
 ArgTypeMismatch = 'The argument "{$0}" is of type "{$1}", but a value of type "{$2}" is passed'
+ArrayItemTypeMismatch = 'The type of value in the array does not match. The first item is of type "{$0}", but the item is of type "{$1}"'
 AssignTypeMismatch = 'A value of type "{$1}" cannoe be passed to a variable of type "{$0}"'
 BuiltinArgTypeMismatch = 'The argument is of the type "{$0}", but a value of type "{$1}" is passed'
 BuiltinFuncNotFound = 'Builtin function "{$0}" could not be found'
@@ -16,7 +21,8 @@ DuplicatePostfixDefine = 'A postfix operator "{$0}" has already been defined'
 DuplicatePostfixFunc = 'A function for the postfix operator "{$0}" that takes an operand of type "{$1}" has already been defined'
 DuplicatePrefixDefine = 'A prefix operator "{$0}" has already been defined'
 DuplicatePrefixFunc = 'A function for the prefix operator "{$0}" that takes an operand of type "{$1}" has already been defined'
-ExprBeginsWithDot = 'Expression begins with "."'
+EmptyArrayLiteral = "Empty arrays are not allowed. An array must contain at least one element"
+ExprBeginsWithInvalid = 'Expression begins with "{$0}"'
 ExprEndsWithBuiltin = 'Expression ends with "Builtin" keyword'
 ExprEndsWithDot = 'Expression ends with "."'
 ExprEndsWithType = "Expression ends with a name of a type"
@@ -29,14 +35,19 @@ InfixOpNotFound = 'Infix operator "{$0}" which takes operands of type "{$1}" and
 InfixOrPostfixOpNotDefined = 'Infix or postfix operator "{$0}" is not defined'
 InvalidLValue = "Only variables can be used as a left-hand side of an assignment statement"
 InvalidStructStmt = '"{$0}" statement cannot be used in "struct"'
+MemberAccessOnArray = 'The value of array "{$0}" does not have members'
 MemberAccessOnPrimitive = 'The value of type "{$0}" does not have members'
 MemberFieldNotFound = 'A member variable "{$1}" could not be found in the type "{$0}"'
 MemberFuncNotFound = 'A member function "{$1}" could not be found in the type "{$0}"'
 MissingArg = 'Missing argument "{$0}"'
 MissingArgLabel = 'The argument "{$0}" requires a label. Specify the label "{$1}:", or the label of other arguments'
 MissingReturn = "This function returns a value, but not all paths return a value"
+NoMainFunc = 'The program does not contain "main" function'
 NoTypeAnnotationOrDefVal = "The type of the value and the default value is not specified"
 NonBoolTypeForCondition = 'The condition expression must be of type "Bool", but a value of type "{$0}" is given'
+NonConstantForCount = "The array count must be a constant"
+NonIntegerForCount = 'The array count must be of type "Int", but a value of type "{$0}" is passed'
+NonIntegerInSubscript = 'The index must be of type "Int", but a value of type "{$0}" is passed'
 NonMemberTokenAfterDot = '"." must be followed by a function call or a variable name'
 OpNotAssociative = 'The operator "{$0}" cannot be used consecutively'
 PostfixOpNotFound = 'Postfix operator "{$0}" which takes an operand of type "{$1}" could not be found'
@@ -49,14 +60,12 @@ ReturnWithoutValueForReturnFunc = 'The function returns "{$0}", so "return" stat
 StaticCallOfInstanceFunc = 'The function "{$0}" must be called on an instance'
 StaticVarAccess = "Variables cannot be accessed on a type"
 StructCycle = 'Struct "{$0}" cannot have a variable that contains itself'
+SubscriptOnNonArray = 'Cannot subscript a value of type "{$0}". "[]" can only be used on arrays.'
 TopLevelVar = '"var" can only be used inside "struct" and "func"'
 TypeAnnotationMismatch = 'Type does not match. The type "{$0}" is specified, but a value of type "{$1}" is passed'
 TypeNotFound = 'The type "{$0}" cannot be found in scope'
+UnmatchedBracket = 'Unmatched bracket ("[" or "]")'
 VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'
 WrongParamCountForPrefix = 'Prefix operator "{$0}" requires 1 parameter, but got {$1}'
-
-[parser_error]
-MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
-SingleExpected = "Syntax error. Expected {$0}"
