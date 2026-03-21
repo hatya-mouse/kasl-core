@@ -150,6 +150,10 @@ pub enum ParserScopeStmtKind {
     Return {
         value: Option<Vec<ExprToken>>,
     },
+    Loop {
+        count: Vec<ExprToken>,
+        body: Vec<ParserScopeStmt>,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone, Eq)]

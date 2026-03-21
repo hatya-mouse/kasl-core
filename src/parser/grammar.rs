@@ -55,6 +55,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expr_statement()
         / if_statement()
         / block_statement()
+        / loop_statement()
         / expected!("STATEMENT")
 
     rule import_statement() -> ParserDeclStmt
@@ -137,6 +138,8 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
+    // --- PARSER SCOPE STMTS ---
+
     rule local_var_statement() -> ParserScopeStmt
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserScopeStmt {
@@ -198,7 +201,18 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    // Operator Properties
+    rule loop_statement() -> ParserScopeStmt
+        = start:position!() _ count:multiline_expression() __? "{"
+        __? body:scope_stmts() __?
+        "}" end:position!() {
+            ParserScopeStmt {
+                range: Range::n(start, end),
+                kind: ParserScopeStmtKind::Loop { count, body }
+            }
+        }
+
+    // --- OPERATOR PROPERTIES ---
+
     rule precedence_prop() -> u32
         = "precedence" _? ":" _? value:integer() { value }
 
