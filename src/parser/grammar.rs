@@ -36,6 +36,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule decl_stmt() -> ParserDeclStmt
         = import_statement()
+        / typealias_statement()
         / func_decl_statement()
         / input_statement()
         / output_statement()
