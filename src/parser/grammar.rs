@@ -202,12 +202,20 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule loop_statement() -> ParserScopeStmt
-        = start:position!() _ count:multiline_expression() __? "{"
+        = start:position!() "loop" _ count:multiline_expression() __? "{"
         __? body:scope_stmts() __?
         "}" end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::Loop { count, body }
+            }
+        }
+
+    rule block_statement() -> ParserScopeStmt
+        = start:position!() "{" __? statements:scope_stmts() __? "}" end:position!() {
+            ParserScopeStmt {
+                range: Range::n(start, end),
+                kind: ParserScopeStmtKind::Block { statements }
             }
         }
 
@@ -268,14 +276,6 @@ peg::parser!(pub grammar kasl_parser() for str {
             ParserDeclStmt {
                 range: Range::n(start, end),
                 kind: ParserDeclStmtKind::OperatorFunc { op_type, symbol, params, return_type, body },
-            }
-        }
-
-    rule block_statement() -> ParserScopeStmt
-        = start:position!() "{" _? statements:scope_stmts() _? "}" end:position!() {
-            ParserScopeStmt {
-                range: Range::n(start, end),
-                kind: ParserScopeStmtKind::Block { statements }
             }
         }
 
