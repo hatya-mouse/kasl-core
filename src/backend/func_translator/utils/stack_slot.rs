@@ -52,8 +52,7 @@ impl FuncTranslator<'_> {
             .unwrap();
 
         // Create a stack slot
-        let slot_data =
-            StackSlotData::new(StackSlotKind::ExplicitSlot, total_size as u32, alignment);
+        let slot_data = StackSlotData::new(StackSlotKind::ExplicitSlot, total_size, alignment);
         self.builder.func.create_sized_stack_slot(slot_data)
     }
 }

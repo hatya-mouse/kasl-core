@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-use kasl::{ExprToken, ParserIfArm, ParserScopeStmt, ParserScopeStmtKind, Range, SymbolPath};
+use kasl::{
+    ExprToken, ParserIfArm, ParserScopeStmt, ParserScopeStmtKind, Range, parser_ast::ParserTypeName,
+};
 
 pub fn block(statements: &[ParserScopeStmt]) -> ParserScopeStmt {
     ParserScopeStmt {
@@ -27,7 +29,7 @@ pub fn block(statements: &[ParserScopeStmt]) -> ParserScopeStmt {
 
 pub fn local_var(
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: &[ExprToken],
 ) -> ParserScopeStmt {
     ParserScopeStmt {
@@ -42,7 +44,7 @@ pub fn local_var(
 
 pub fn local_const(
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: &[ExprToken],
 ) -> ParserScopeStmt {
     ParserScopeStmt {

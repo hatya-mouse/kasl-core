@@ -26,7 +26,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -40,7 +40,7 @@ fn test_early_return_in_void_func() {
         &[func_param(
             None,
             "param",
-            Some(symbol_path!["Bool".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
             None,
         )],
         None,
@@ -66,7 +66,9 @@ fn test_missing_return() {
         false,
         "do_something",
         &[],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
@@ -85,10 +87,12 @@ fn test_return_only_in_if() {
         &[func_param(
             None,
             "param",
-            Some(symbol_path!["Bool".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
             None,
         )],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[if_stmt(
             if_arm(
                 &[identifier("param")],
@@ -115,17 +119,19 @@ fn test_return_only_in_else_if() {
             func_param(
                 None,
                 "if_param",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 None,
             ),
             func_param(
                 None,
                 "else_if_param",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 None,
             ),
         ],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[if_stmt(
             if_arm(&[identifier("if_param")], &[]),
             &[if_arm(
@@ -152,17 +158,19 @@ fn test_return_only_in_if_and_else_if() {
             func_param(
                 None,
                 "if_param",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 None,
             ),
             func_param(
                 None,
                 "else_if_param",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 None,
             ),
         ],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[if_stmt(
             if_arm(
                 &[identifier("if_param")],

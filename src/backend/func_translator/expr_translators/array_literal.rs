@@ -30,7 +30,7 @@ impl FuncTranslator<'_> {
         let slot = self.alloc_array(&array_id);
 
         // Store the array items to the slot
-        self.store_array_to_slot(&array_expr, &array_id, slot, 0);
+        self.store_array_to_slot(array_expr, &array_id, slot, 0);
 
         // Return the address to the array
         self.builder

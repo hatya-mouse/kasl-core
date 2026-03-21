@@ -27,7 +27,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -58,7 +58,7 @@ fn test_local_var_definition_with_annotation() {
         None,
         &[local_var(
             "local",
-            Some(symbol_path!["Int".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
             &[int_literal(0)],
         )],
     )];
@@ -76,7 +76,7 @@ fn test_local_var_definition_with_func_call() {
             false,
             "do_something",
             &[],
-            Some(symbol_path!["Int".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
             &[return_stmt(Some(&[int_literal(0)]))],
         ),
         func_decl(
@@ -105,7 +105,7 @@ fn test_access_to_var_before_definition() {
             &[func_param(
                 None,
                 "number",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 None,
             )],
             None,

@@ -16,7 +16,7 @@
 
 use kasl::{ExprToken, ExprTokenKind, ParserFuncCallArg, Range};
 
-pub fn int_literal(value: i32) -> ExprToken {
+pub fn int_literal(value: u32) -> ExprToken {
     ExprToken {
         kind: ExprTokenKind::IntLiteral(value),
         range: Range::zero(),

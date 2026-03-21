@@ -69,9 +69,11 @@ impl FuncTranslator<'_> {
             ResolvedType::Primitive(_) => {
                 self.builder.ins().store(MemFlags::new(), val, ptr, offset);
             }
-            ResolvedType::Array(_) => {}
+            ResolvedType::Array(array_id) => {
+                self.copy_array(array_id, val, ptr, offset);
+            }
             ResolvedType::Struct(struct_id) => {
-                self.store_struct(struct_id, val, ptr, offset);
+                self.copy_struct(struct_id, val, ptr, offset);
             }
         }
     }

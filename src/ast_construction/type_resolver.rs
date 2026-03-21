@@ -29,13 +29,9 @@ pub fn resolve_type(
                 .resolve_namespace_from_path(path.clone());
 
             // Resolved the type name
-            match prog_ctx
+            prog_ctx
                 .type_registry
                 .resolve_type_name(namespace_id, &type_name.to_string())
-            {
-                Some(ty) => Some(ty),
-                None => None,
-            }
         }
         ParserTypeName::Array(item_type, count) => {
             let resolved_item_type = resolve_type(prog_ctx, item_type)?;

@@ -23,7 +23,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -73,7 +73,7 @@ fn test_type_not_found_func() {
         false,
         "greet",
         &[],
-        Some(symbol_path!["Type".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path!["Type".to_string()])),
         &[],
     )];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
@@ -114,13 +114,13 @@ fn test_duplicate_param_func() {
                 func_param(
                     None,
                     "message",
-                    Some(symbol_path!["Type".to_string()]),
+                    Some(ParserTypeName::SymbolPath(symbol_path!["Type".to_string()])),
                     None,
                 ),
                 func_param(
                     None,
                     "message",
-                    Some(symbol_path!["Type".to_string()]),
+                    Some(ParserTypeName::SymbolPath(symbol_path!["Type".to_string()])),
                     None,
                 ),
             ],

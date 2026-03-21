@@ -31,7 +31,7 @@ impl FuncTranslator<'_> {
         let array_decl = self
             .prog_ctx
             .type_registry
-            .get_array_decl(&array_id)
+            .get_array_decl(array_id)
             .unwrap();
         let item_size = self
             .prog_ctx

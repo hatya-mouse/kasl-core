@@ -27,7 +27,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -43,7 +43,7 @@ fn test_assign_to_output() {
             &[func_param(
                 None,
                 "number",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 None,
             )],
             None,
@@ -107,7 +107,9 @@ fn test_assign_to_different_type() {
             &[func_param(
                 None,
                 "this_is_float",
-                Some(symbol_path!["Float".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path![
+                    "Float".to_string()
+                ])),
                 None,
             )],
             None,
@@ -136,7 +138,7 @@ fn test_assign_to_input() {
             &[func_param(
                 None,
                 "number",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 None,
             )],
             None,
@@ -161,7 +163,7 @@ fn test_assign_to_func_param() {
         &[func_param(
             None,
             "param",
-            Some(symbol_path!["Int".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
             None,
         )],
         None,
@@ -184,7 +186,7 @@ fn test_assign_to_global_const() {
             &[func_param(
                 None,
                 "number",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 None,
             )],
             None,
@@ -206,7 +208,7 @@ fn test_assign_to_local_const() {
         &[func_param(
             None,
             "number",
-            Some(symbol_path!["Int".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
             None,
         )],
         None,

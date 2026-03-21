@@ -27,7 +27,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // -- SUCCESS CASES ---
 
@@ -71,7 +71,7 @@ fn test_block_with_access_to_outside_var() {
             &[func_param(
                 None,
                 "number",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 None,
             )],
             None,
@@ -109,7 +109,7 @@ fn test_block_with_access_to_child_scope_var() {
             &[func_param(
                 None,
                 "number",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 None,
             )],
             None,

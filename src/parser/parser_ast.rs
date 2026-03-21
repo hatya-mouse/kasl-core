@@ -193,7 +193,7 @@ impl Display for ParserTypeName {
         match self {
             ParserTypeName::SymbolPath(path) => write!(f, "{}", &path.to_string()),
             ParserTypeName::Array(item_type, count) => {
-                write!(f, "[{}; {}]", item_type.to_string(), count)
+                write!(f, "[{}; {}]", item_type, count)
             }
         }
     }

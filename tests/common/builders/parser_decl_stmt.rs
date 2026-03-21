@@ -17,14 +17,14 @@
 use kasl::{
     ExprToken, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt, ParserDeclStmtKind,
     ParserFuncParam, ParserInputAttribute, ParserOperatorType, ParserScopeStmt,
-    PostfixOperatorProperties, PrefixOperatorProperties, Range, SymbolPath,
+    PostfixOperatorProperties, PrefixOperatorProperties, Range, parser_ast::ParserTypeName,
 };
 
 pub fn func_decl(
     is_static: bool,
     name: &str,
     params: &[ParserFuncParam],
-    return_type: Option<SymbolPath>,
+    return_type: Option<ParserTypeName>,
     body: &[ParserScopeStmt],
 ) -> ParserDeclStmt {
     ParserDeclStmt {
@@ -41,7 +41,7 @@ pub fn func_decl(
 
 pub fn input(
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: &[ExprToken],
     attrs: &[ParserInputAttribute],
 ) -> ParserDeclStmt {
@@ -56,7 +56,11 @@ pub fn input(
     }
 }
 
-pub fn output(name: &str, value_type: Option<SymbolPath>, def_val: &[ExprToken]) -> ParserDeclStmt {
+pub fn output(
+    name: &str,
+    value_type: Option<ParserTypeName>,
+    def_val: &[ExprToken],
+) -> ParserDeclStmt {
     ParserDeclStmt {
         kind: ParserDeclStmtKind::Output {
             name: name.to_string(),
@@ -69,7 +73,7 @@ pub fn output(name: &str, value_type: Option<SymbolPath>, def_val: &[ExprToken])
 
 pub fn state_var(
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: &[ExprToken],
 ) -> ParserDeclStmt {
     ParserDeclStmt {
@@ -84,7 +88,7 @@ pub fn state_var(
 
 pub fn global_const(
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: &[ExprToken],
 ) -> ParserDeclStmt {
     ParserDeclStmt {
@@ -99,7 +103,7 @@ pub fn global_const(
 
 pub fn struct_field(
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: &[ExprToken],
 ) -> ParserDeclStmt {
     ParserDeclStmt {
@@ -170,7 +174,7 @@ pub fn op_func(
     op_type: ParserOperatorType,
     symbol: &str,
     params: &[ParserFuncParam],
-    return_type: SymbolPath,
+    return_type: ParserTypeName,
     body: &[ParserScopeStmt],
 ) -> ParserDeclStmt {
     ParserDeclStmt {
@@ -188,7 +192,7 @@ pub fn op_func(
 pub fn func_param(
     label: Option<&str>,
     name: &str,
-    value_type: Option<SymbolPath>,
+    value_type: Option<ParserTypeName>,
     def_val: Option<&[ExprToken]>,
 ) -> ParserFuncParam {
     ParserFuncParam {

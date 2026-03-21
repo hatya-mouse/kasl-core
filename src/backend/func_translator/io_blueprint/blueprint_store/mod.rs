@@ -15,7 +15,6 @@
 //
 
 mod item_store;
-mod struct_store;
 
 use crate::{
     backend::func_translator::{FuncTranslator, TranslatorParams},

@@ -18,7 +18,7 @@ use crate::{
     backend::func_translator::FuncTranslator, scope_manager::BlueprintItem,
     type_registry::ResolvedType,
 };
-use cranelift::prelude::{InstBuilder, MemFlags, StackSlotData, StackSlotKind, types};
+use cranelift::prelude::{InstBuilder, MemFlags, types};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
@@ -62,23 +62,24 @@ impl FuncTranslator<'_> {
                 ptr,
                 0,
             ),
-            ResolvedType::Array(array_id) => {}
-            ResolvedType::Struct(struct_id) => {
-                let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
-
-                // Create a stack slot
-                let slot_data = StackSlotData::new(
-                    StackSlotKind::ExplicitSlot,
-                    struct_decl.total_size,
-                    struct_decl.alignment,
-                );
-                let slot = self.builder.func.create_sized_stack_slot(slot_data);
+            ResolvedType::Array(array_id) => {
+                let slot = self.alloc_array(array_id);
                 let stack_addr =
                     self.builder
                         .ins()
                         .stack_addr(self.type_converter.pointer_type(), slot, 0);
+                // Copy the value to the stack slot
+                self.copy_array(array_id, ptr, stack_addr, 0);
 
-                // Load and struct the value in the stack slot
+                stack_addr
+            }
+            ResolvedType::Struct(struct_id) => {
+                let slot = self.alloc_struct(struct_id);
+                let stack_addr =
+                    self.builder
+                        .ins()
+                        .stack_addr(self.type_converter.pointer_type(), slot, 0);
+                // Copy the value in the stack slot
                 self.copy_struct(struct_id, ptr, stack_addr, 0);
 
                 stack_addr

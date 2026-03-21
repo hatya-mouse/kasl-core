@@ -26,7 +26,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -63,17 +63,19 @@ fn test_complex_struct_collection() {
         &[
             struct_field(
                 "float",
-                Some(symbol_path!["Float".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path![
+                    "Float".to_string()
+                ])),
                 &[float_literal(5.3)],
             ),
             struct_field(
                 "bool",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 &[bool_literal(false)],
             ),
             struct_field(
                 "int",
-                Some(symbol_path!["Int".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
                 &[int_literal(5)],
             ),
             func_decl(false, "new", &[], None, &[]),

@@ -24,7 +24,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -38,7 +38,7 @@ fn test_basic_if() {
         &[func_param(
             None,
             "condition",
-            Some(symbol_path!["Bool".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
             None,
         )],
         None,
@@ -61,7 +61,9 @@ fn test_invalid_condition_type() {
         &[func_param(
             None,
             "condition",
-            Some(symbol_path!["Float".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path![
+                "Float".to_string()
+            ])),
             None,
         )],
         None,

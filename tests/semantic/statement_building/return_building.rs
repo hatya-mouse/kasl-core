@@ -27,7 +27,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, symbol_path};
+use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -49,7 +49,7 @@ fn test_return_int() {
         false,
         "do_something",
         &[],
-        Some(symbol_path!["Int".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
         &[return_stmt(Some(&[int_literal(0)]))],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
@@ -67,10 +67,12 @@ fn test_return_in_both_if_and_else() {
         &[func_param(
             None,
             "param",
-            Some(symbol_path!["Bool".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
             None,
         )],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[if_stmt(
             if_arm(
                 &[identifier("param")],
@@ -95,10 +97,12 @@ fn test_return_after_if() {
         &[func_param(
             None,
             "param",
-            Some(symbol_path!["Bool".to_string()]),
+            Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
             None,
         )],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[
             if_stmt(if_arm(&[identifier("param")], &[]), &[], None),
             return_stmt(Some(&[float_literal(5.0)])),
@@ -120,17 +124,19 @@ fn test_return_in_if_else_if_else() {
             func_param(
                 None,
                 "if_param",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 None,
             ),
             func_param(
                 None,
                 "if_else_param",
-                Some(symbol_path!["Bool".to_string()]),
+                Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
                 None,
             ),
         ],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[if_stmt(
             if_arm(
                 &[identifier("if_param")],
@@ -174,7 +180,7 @@ fn test_return_nothing_on_int_return_func() {
         false,
         "do_something",
         &[],
-        Some(symbol_path!["Int".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
         &[return_stmt(None)],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
@@ -190,7 +196,9 @@ fn test_return_int_on_float_return_func() {
         false,
         "do_something",
         &[],
-        Some(symbol_path!["Float".to_string()]),
+        Some(ParserTypeName::SymbolPath(symbol_path![
+            "Float".to_string()
+        ])),
         &[return_stmt(Some(&[int_literal(0)]))],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
