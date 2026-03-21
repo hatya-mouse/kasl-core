@@ -14,17 +14,17 @@
 // limitations under the License.
 //
 
-mod array_literal_translator;
-mod builtin_call_translator;
-mod func_call_translator;
-mod ident_translator;
-mod instance_call_translator;
-mod literal_translator;
-mod op_call_translator;
+mod array_literal;
+mod builtin_call;
+mod func_call;
+mod ident;
+mod instance_call;
+mod literal;
+mod op_call;
 mod slot_translator;
-mod struct_field_translator;
-mod struct_init_translator;
-mod subscript_translator;
+mod struct_field;
+mod struct_init;
+mod subscript;
 
 use crate::{Expr, ExprKind, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;

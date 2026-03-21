@@ -185,8 +185,8 @@ impl FuncTranslator<'_> {
                 ptr,
                 0,
             ),
+            ResolvedType::Array(array_id) => {}
             ResolvedType::Struct(struct_id) => {
-                // Store the value in the stack slot
                 let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
 
                 // Create a stack slot
