@@ -31,7 +31,7 @@ impl FuncTranslator<'_> {
         // Translate the lhs into ir value
         let base_ptr = self.translate_expr(lhs).unwrap();
         // Calculate the pointer to the corresponding value
-        let val_ptr = self.calculate_array_offset(item_type, base_ptr, index);
+        let val_ptr = self.calculate_array_offset(&lhs.value_type, base_ptr, index);
 
         match item_type {
             ResolvedType::Primitive(_) => {
