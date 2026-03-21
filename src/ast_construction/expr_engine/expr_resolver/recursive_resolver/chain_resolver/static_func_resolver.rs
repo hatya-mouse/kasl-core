@@ -49,6 +49,8 @@ impl ExpressionResolver<'_> {
 
                 // Get the function by ID
                 let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
+                let func_params = func.params.clone();
+                let return_type = func.return_type;
 
                 // Throw an error if the function is not static
                 if func.func_type != FunctionType::Static {
@@ -58,12 +60,12 @@ impl ExpressionResolver<'_> {
                 }
 
                 // Resolve the arguments
-                let args = self.resolve_func_call_args(&func.params, None, no_type_args, *range)?;
+                let args = self.resolve_func_call_args(&func_params, None, no_type_args, *range)?;
 
                 // Construct the expression
                 Some(Expr::new(
                     ExprKind::StaticFuncCall { id: func_id, args },
-                    func.return_type,
+                    return_type,
                     Range::n(type_name_range.start, range.end),
                 ))
             }

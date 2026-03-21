@@ -34,7 +34,7 @@ impl BlockStmtBuilder<'_> {
             if value.is_some() {
                 // If the function doesn't require a return value but it's provided, throw and error
                 self.ec
-                    .return_value_for_no_return_func(decl_range, Ph::StatementCollection);
+                    .return_value_for_no_return_func(decl_range, Ph::StatementBuilding);
                 None
             } else {
                 Some(Statement::Return { value: None })
@@ -56,7 +56,7 @@ impl BlockStmtBuilder<'_> {
             if resolved_value.value_type != self.expected_return_type {
                 self.ec.return_type_mismatch(
                     decl_range,
-                    Ph::StatementCollection,
+                    Ph::StatementBuilding,
                     self.prog_ctx
                         .type_registry
                         .format_type(&self.expected_return_type),
@@ -73,7 +73,7 @@ impl BlockStmtBuilder<'_> {
         } else {
             self.ec.return_without_value_for_return_func(
                 decl_range,
-                Ph::StatementCollection,
+                Ph::StatementBuilding,
                 self.prog_ctx
                     .type_registry
                     .format_type(&self.expected_return_type),

@@ -15,12 +15,10 @@
 //
 
 use crate::{
-    compilation_data::ProgramContext, error::ErrorCollector, parser_ast::ParserTypeName,
-    type_registry::ResolvedType,
+    compilation_data::ProgramContext, parser_ast::ParserTypeName, type_registry::ResolvedType,
 };
 
 pub fn resolve_type(
-    ec: &mut ErrorCollector,
     prog_ctx: &mut ProgramContext,
     parser_type: &ParserTypeName,
 ) -> Option<ResolvedType> {
@@ -40,7 +38,7 @@ pub fn resolve_type(
             }
         }
         ParserTypeName::Array(item_type, count) => {
-            let resolved_item_type = resolve_type(ec, prog_ctx, item_type)?;
+            let resolved_item_type = resolve_type(prog_ctx, item_type)?;
 
             // Register or get the array ID
             let array_id = prog_ctx

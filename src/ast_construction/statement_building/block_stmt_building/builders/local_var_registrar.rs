@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    Expr, ExprToken, Range, ScopeVar, SymbolPath, VariableID, error::Ph, expr_engine::resolve_expr,
+    Expr, ExprToken, Range, ScopeVar, VariableID, error::Ph, expr_engine::resolve_expr,
     parser_ast::ParserTypeName, scope_manager::VariableKind, statement_building::BlockStmtBuilder,
+    type_resolver::resolve_type,
 };
 
 impl BlockStmtBuilder<'_> {
@@ -38,30 +39,23 @@ impl BlockStmtBuilder<'_> {
 
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {
-            // Get the namespace that the type belongs to
-            let (namespace_id, type_name) = self
-                .prog_ctx
-                .namespace_registry
-                .resolve_namespace_from_path(type_annotation.clone());
-            // Then get the type from the type registry
-            let Some(resolved_type_annotation) = self
-                .prog_ctx
-                .type_registry
-                .resolve_type_name(namespace_id, &type_name.to_string())
-            else {
-                self.ec.type_not_found(
-                    stmt_range,
-                    Ph::StatementCollection,
-                    type_annotation.to_string(),
-                );
-                return None;
+            let resolved_type_annotation = match resolve_type(self.prog_ctx, type_annotation) {
+                Some(ty) => ty,
+                None => {
+                    self.ec.type_not_found(
+                        stmt_range,
+                        Ph::StatementBuilding,
+                        type_annotation.to_string(),
+                    );
+                    return None;
+                }
             };
 
             // Check if the resolved value type matches the type annotation
             if resolved_type_annotation != resolved_def_val.value_type {
                 self.ec.type_annotation_mismatch(
                     stmt_range,
-                    Ph::StatementCollection,
+                    Ph::StatementBuilding,
                     self.prog_ctx
                         .type_registry
                         .format_type(&resolved_type_annotation),
@@ -99,7 +93,7 @@ impl BlockStmtBuilder<'_> {
         // Check if the name is already in use in this scope
         if self.is_name_used(name) {
             self.ec
-                .duplicate_name(stmt_range, Ph::StatementCollection, name);
+                .duplicate_name(stmt_range, Ph::StatementBuilding, name);
             return None;
         }
 

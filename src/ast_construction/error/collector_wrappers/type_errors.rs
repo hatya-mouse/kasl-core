@@ -85,4 +85,55 @@ impl ErrorCollector {
             Pl::Str(return_type),
         );
     }
+
+    pub(crate) fn subscript_on_non_array(&mut self, range: Range, phase: Phase, type_name: String) {
+        self.emit(
+            EK::SubscriptOnNonArray,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+
+    pub(crate) fn non_integer_in_subscript(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        type_name: String,
+    ) {
+        self.emit(
+            EK::NonIntegerInSubscript,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+
+    pub(crate) fn non_integer_for_count(&mut self, range: Range, phase: Phase, type_name: String) {
+        self.emit(
+            EK::NonIntegerForCount,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+
+    pub(crate) fn array_item_type_mismatch(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        first_type: String,
+        item_type: String,
+    ) {
+        self.emit(
+            EK::ArrayItemTypeMismatch,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(first_type, item_type),
+        );
+    }
 }

@@ -21,7 +21,7 @@ use crate::{
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_int_literal(&self, value: i32, range: Range) -> Option<Expr> {
+    pub fn resolve_int_literal(&self, value: u32, range: Range) -> Option<Expr> {
         Some(Expr::new(
             ExprKind::IntLiteral(value),
             ResolvedType::Primitive(PrimitiveType::Int),

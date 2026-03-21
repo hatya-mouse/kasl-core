@@ -44,7 +44,7 @@ impl Expr {
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum ExprKind {
-    IntLiteral(i32),
+    IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     InfixOp {
@@ -60,9 +60,7 @@ pub enum ExprKind {
         operator: OperatorID,
         operand: Box<FuncCallArg>,
     },
-    Identifier {
-        id: VariableID,
-    },
+    Identifier(VariableID),
     StructField {
         lhs: Box<Expr>,
         offset: i32,
@@ -86,4 +84,13 @@ pub enum ExprKind {
         id: BuiltinFuncID,
         args: Vec<Expr>,
     },
+    Subscript {
+        lhs: Box<Expr>,
+        index: Box<Expr>,
+    },
+    ArraySpread {
+        value: Box<Expr>,
+        count: u32,
+    },
+    ArrayList(Vec<Expr>),
 }

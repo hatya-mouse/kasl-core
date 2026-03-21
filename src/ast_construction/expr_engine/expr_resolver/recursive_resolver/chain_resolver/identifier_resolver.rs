@@ -33,7 +33,7 @@ impl ExpressionResolver<'_> {
         let scope_var = self.prog_ctx.scope_registry.get_var(&var_id)?;
 
         Some(Expr::new(
-            ExprKind::Identifier { id: var_id },
+            ExprKind::Identifier(var_id),
             scope_var.value_type,
             range,
         ))

@@ -35,6 +35,16 @@ impl ErrorCollector {
         );
     }
 
+    pub(crate) fn member_access_on_array(&mut self, range: Range, phase: Phase, type_name: String) {
+        self.emit(
+            EK::MemberAccessOnArray,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+
     pub(crate) fn member_field_not_found(
         &mut self,
         range: Range,

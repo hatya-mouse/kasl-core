@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use crate::Range;
 use crate::expr_engine::ExpressionBuilder;
 use crate::symbol_table::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 use crate::{ExprToken, ExprTokenKind, error::Ph};
@@ -26,7 +27,36 @@ impl ExpressionBuilder<'_> {
     ) -> Option<UnresolvedExpr> {
         let first = tokens.next()?;
         let mut expr = self.parse_lhs_single(first, tokens)?;
+        expr = self.resolve_chain(expr, tokens)?;
 
+        Some(expr)
+    }
+
+    fn resolve_chain(
+        &mut self,
+        expr: UnresolvedExpr,
+        tokens: &mut Peekable<Iter<ExprToken>>,
+    ) -> Option<UnresolvedExpr> {
+        let mut result = expr;
+        loop {
+            match tokens.peek().map(|t| &t.kind) {
+                Some(ExprTokenKind::Dot) => {
+                    result = self.resolve_member_access(result, tokens)?;
+                }
+                Some(ExprTokenKind::BracketOpen) => {
+                    result = self.resolve_subscript(result, tokens)?;
+                }
+                _ => break,
+            }
+        }
+        Some(result)
+    }
+
+    fn resolve_member_access(
+        &mut self,
+        expr: UnresolvedExpr,
+        tokens: &mut Peekable<Iter<ExprToken>>,
+    ) -> Option<UnresolvedExpr> {
         let mut chain_elements = Vec::new();
 
         // If the next token is dot, resolve it as a member access
@@ -63,25 +93,56 @@ impl ExpressionBuilder<'_> {
         if !chain_elements.is_empty() {
             if let UnresolvedExprKind::Chain { lhs, elements } = expr.kind {
                 let joined_elements = [elements.clone(), chain_elements].concat();
-                expr = UnresolvedExpr::new(
+                Some(UnresolvedExpr::new(
                     UnresolvedExprKind::Chain {
                         lhs: lhs.clone(),
                         elements: joined_elements,
                     },
                     expr.range,
-                );
+                ))
             } else {
                 let expr_range = expr.range;
-                expr = UnresolvedExpr::new(
+                Some(UnresolvedExpr::new(
                     UnresolvedExprKind::Chain {
                         lhs: Some(Box::new(expr)),
                         elements: chain_elements,
                     },
                     expr_range,
-                );
+                ))
             }
+        } else {
+            Some(expr)
+        }
+    }
+
+    fn resolve_subscript(
+        &mut self,
+        expr: UnresolvedExpr,
+        tokens: &mut Peekable<Iter<ExprToken>>,
+    ) -> Option<UnresolvedExpr> {
+        let mut result_expr = expr;
+
+        while let Some(ExprTokenKind::BracketOpen) = tokens.peek().map(|token| &token.kind) {
+            // Consume the bracket open token
+            let bracket_open_range = tokens.next().unwrap().range;
+
+            // Collect until the matching bracket
+            let (index_tokens, close_bracket_end) =
+                self.collect_bracket_contents(bracket_open_range, tokens)?;
+
+            // Build the unresolved token for the index expression
+            let index_expr = self.build(&index_tokens)?;
+
+            // Create a new subscript token ans return it
+            result_expr = UnresolvedExpr::new(
+                UnresolvedExprKind::Subscript {
+                    lhs: Box::new(result_expr),
+                    index: Box::new(index_expr),
+                },
+                Range::n(bracket_open_range.start, close_bracket_end),
+            );
         }
 
-        Some(expr)
+        Some(result_expr)
     }
 }

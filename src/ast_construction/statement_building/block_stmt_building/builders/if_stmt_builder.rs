@@ -63,7 +63,7 @@ impl BlockStmtBuilder<'_> {
         if condition.value_type != ResolvedType::Primitive(PrimitiveType::Bool) {
             self.ec.non_bool_type_for_condition(
                 arm.range,
-                Ph::StatementCollection,
+                Ph::StatementBuilding,
                 self.prog_ctx
                     .type_registry
                     .format_type(&condition.value_type),

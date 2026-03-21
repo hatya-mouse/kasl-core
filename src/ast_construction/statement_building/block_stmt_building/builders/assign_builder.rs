@@ -47,7 +47,7 @@ impl BlockStmtBuilder<'_> {
             )
         {
             self.ec
-                .immutable_assignment(stmt_range, Ph::StatementCollection, &target_var.name);
+                .immutable_assignment(stmt_range, Ph::StatementBuilding, &target_var.name);
             return None;
         }
 
@@ -66,7 +66,7 @@ impl BlockStmtBuilder<'_> {
         if target_l_value.value_type != resolved_value.value_type {
             self.ec.assign_type_mismatch(
                 stmt_range,
-                Ph::StatementCollection,
+                Ph::StatementBuilding,
                 self.prog_ctx
                     .type_registry
                     .format_type(&target_l_value.value_type),

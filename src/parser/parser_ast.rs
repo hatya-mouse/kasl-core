@@ -225,10 +225,10 @@ pub enum ExprTokenKind {
     },
     Dot,
     Parenthesized(Vec<ExprToken>),
-    Subscription {
-        array: Vec<ExprToken>,
-        index: Vec<ExprToken>,
-    },
+    BracketOpen,
+    BracketClose,
+    Semicolon,
+    Comma,
     /// An unresolved expression which is used only in the ExprEngine.
     UnresolvedExpr(UnresolvedExpr),
 }

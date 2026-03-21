@@ -40,10 +40,10 @@ pub enum ErrorKind {
     /// The expression ends with a dot.
     ExprEndsWithDot,
 
-    /// Title: ExprBeginsWithDot
+    /// Title: ExprBeginsWithInvalid
     /// Payload: None
-    /// The expression begins with a dot.
-    ExprBeginsWithDot,
+    /// The expression begins with an invalid token.
+    ExprBeginsWithInvalid,
 
     /// Title: InvalidLValue
     /// Payload: None
@@ -94,6 +94,11 @@ pub enum ErrorKind {
     /// Payload: None
     /// Member access expression on a primitive type.
     MemberAccessOnPrimitive,
+
+    /// Title: MemberAccessOnArray
+    /// Payload: None
+    /// Member access expression on an array type.
+    MemberAccessOnArray,
 
     /// Title: MemberFieldNotFound
     /// Payload: The name of the struct and the name of the member that is not found
@@ -304,6 +309,41 @@ pub enum ErrorKind {
     /// Payload: None
     /// The compile target does not have a main function.
     NoMainFunc,
+
+    /// Title: UnmatchedBracket
+    /// Payload: None
+    /// Bracket [] does not match.
+    UnmatchedBracket,
+
+    /// Title: SubscriptOnNonArray
+    /// Payload: Type of the non-array value
+    /// Subscript access is performed on a non-array value.
+    SubscriptOnNonArray,
+
+    /// Title: NonIntegerInSubscript
+    /// Payload: Type of the non-integer value
+    /// A non-integer value is used to index an array.
+    NonIntegerInSubscript,
+
+    /// Title: NonIntegerForCount
+    /// Payload: Type of the non-integer count value
+    /// A non-integer value is used for array count in array spread literal.
+    NonIntegerForCount,
+
+    /// Title: NonConstantForCount
+    /// Payload: Type of the non-constant count value
+    /// A non-constant value is used for array count in array spread literal.
+    NonConstantForCount,
+
+    /// Title: EmptyArrayLiteral
+    /// Payload: None
+    /// An array with no item is initialized. This is error because KASL only supports fixed-length arrays and empty array is meaningless.
+    EmptyArrayLiteral,
+
+    /// Title: ArrayItemTypeMismatch
+    /// Payload: The type of the first item and the type of the value which has wrong type
+    /// The type of the array item is does not match.
+    ArrayItemTypeMismatch,
 
     /// Title: CompilerBug
     /// Payload: Error message

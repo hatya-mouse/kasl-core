@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ExprToken, Range, Statement, SymbolPath, parser_ast::ParserTypeName,
-    scope_manager::VariableKind, statement_building::BlockStmtBuilder,
+    ExprToken, Range, Statement, parser_ast::ParserTypeName, scope_manager::VariableKind,
+    statement_building::BlockStmtBuilder,
 };
 
 impl BlockStmtBuilder<'_> {

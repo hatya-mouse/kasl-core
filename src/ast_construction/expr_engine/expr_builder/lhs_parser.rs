@@ -48,8 +48,10 @@ impl ExpressionBuilder<'_> {
                 ))
             }
 
+            ExprTokenKind::BracketOpen => self.parse_array_literal(token, rest),
+
             ExprTokenKind::IntLiteral(value) => Some(UnresolvedExpr::new(
-                UnresolvedExprKind::IntLiteral(*value as i32),
+                UnresolvedExprKind::IntLiteral(*value),
                 token.range,
             )),
             ExprTokenKind::FloatLiteral(value) => Some(UnresolvedExpr::new(
@@ -96,7 +98,26 @@ impl ExpressionBuilder<'_> {
             }
 
             ExprTokenKind::Dot => {
-                self.ec.expr_begins_with_dot(token.range, Ph::ExprEngine);
+                self.ec
+                    .expr_begins_with_invalid(token.range, Ph::ExprEngine, ".");
+                None
+            }
+
+            ExprTokenKind::BracketClose => {
+                self.ec
+                    .expr_begins_with_invalid(token.range, Ph::ExprEngine, "]");
+                None
+            }
+
+            ExprTokenKind::Semicolon => {
+                self.ec
+                    .expr_begins_with_invalid(token.range, Ph::ExprEngine, ";");
+                None
+            }
+
+            ExprTokenKind::Comma => {
+                self.ec
+                    .expr_begins_with_invalid(token.range, Ph::ExprEngine, ",");
                 None
             }
         }

@@ -51,7 +51,7 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Resolve the return type
-        let return_type = match resolve_type(self.ec, self.prog_ctx, return_type) {
+        let return_type = match resolve_type(self.prog_ctx, return_type) {
             Some(ty) => ty,
             None => {
                 self.ec.type_not_found(

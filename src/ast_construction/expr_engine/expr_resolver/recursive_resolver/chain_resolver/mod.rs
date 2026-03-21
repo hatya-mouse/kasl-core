@@ -38,9 +38,6 @@ impl ExpressionResolver<'_> {
         elements: Vec<UnresolvedChainElement>,
         expr_range: Range,
     ) -> Option<Expr> {
-        // Resolve the LHS expression
-        // let resolved_lhs = self.resolve_chain_lhs(lhs)?;
-
         let mut elements_iter = elements.iter().peekable();
 
         let mut expr = None;
@@ -124,7 +121,7 @@ impl ExpressionResolver<'_> {
         expr
     }
 
-    pub fn resolve_namespace_scope(
+    fn resolve_namespace_scope(
         &mut self,
         elements: &mut Peekable<Iter<UnresolvedChainElement>>,
     ) -> (ScopeID, NameSpaceID) {

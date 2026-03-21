@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+mod array_literal_parser;
 mod climb_precedence;
 mod lhs_chain_parser;
 mod lhs_parser;

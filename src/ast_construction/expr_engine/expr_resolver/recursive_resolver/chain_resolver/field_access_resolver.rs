@@ -30,6 +30,14 @@ impl ExpressionResolver<'_> {
                 );
                 None
             }
+            ResolvedType::Array(_) => {
+                self.ec.member_access_on_array(
+                    range,
+                    Ph::ExprEngine,
+                    self.prog_ctx.type_registry.format_type(&lhs.value_type),
+                );
+                None
+            }
             ResolvedType::Struct(struct_id) => {
                 let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
                 // Get the field from the struct declaration

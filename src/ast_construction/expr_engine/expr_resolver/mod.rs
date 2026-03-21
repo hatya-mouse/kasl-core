@@ -23,7 +23,7 @@ use crate::{
 
 pub struct ExpressionResolver<'a> {
     ec: &'a mut ErrorCollector,
-    prog_ctx: &'a ProgramContext,
+    prog_ctx: &'a mut ProgramContext,
     comp_data: &'a mut CompilationData,
     builtin_registry: &'a BuiltinRegistry,
     current_scope: ScopeID,
@@ -33,7 +33,7 @@ pub struct ExpressionResolver<'a> {
 impl<'a> ExpressionResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        prog_ctx: &'a ProgramContext,
+        prog_ctx: &'a mut ProgramContext,
         comp_data: &'a mut CompilationData,
         builtin_registry: &'a BuiltinRegistry,
         current_scope: ScopeID,

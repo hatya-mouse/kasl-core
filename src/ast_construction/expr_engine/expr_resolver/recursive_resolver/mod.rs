@@ -14,9 +14,12 @@
 // limitations under the License.
 //
 
+mod array_list_resolver;
+mod array_spread_resolver;
 mod chain_resolver;
 mod literal_resolver;
 mod operator_resolver;
+mod subscript_resolver;
 
 use crate::{
     Expr,
@@ -50,6 +53,16 @@ impl ExpressionResolver<'_> {
             UnresolvedExprKind::Chain { lhs, elements } => {
                 self.resolve_chain(lhs.map(|lhs| *lhs), elements, expr.range)
             }
+
+            UnresolvedExprKind::Subscript { lhs, index } => {
+                self.resolve_subscript(*lhs, *index, expr.range)
+            }
+
+            UnresolvedExprKind::ArraySpread { value, count } => {
+                self.resolve_array_spread(*value, *count, expr.range)
+            }
+
+            UnresolvedExprKind::ArrayList(items) => self.resolve_array_list(items, expr.range),
         }
     }
 }

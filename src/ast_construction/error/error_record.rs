@@ -70,7 +70,7 @@ pub enum Phase {
     StructCollection = 1,
     GlobalDeclCollection = 2,
     StructGraphAnalyzing = 3,
-    StatementCollection = 4,
+    StatementBuilding = 4,
     ExprEngine = 5,
     ScopeGraphAnalyzing = 6,
     Backend = 7,

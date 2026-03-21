@@ -79,7 +79,7 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the return type
         let return_type = match return_type {
-            Some(type_name) => match resolve_type(self.ec, self.prog_ctx, type_name) {
+            Some(type_name) => match resolve_type(self.prog_ctx, type_name) {
                 Some(ty) => ty,
                 None => {
                     self.ec.type_not_found(
@@ -119,7 +119,7 @@ impl GlobalDeclCollector<'_> {
             // Add the parameter name to the used names set
             if used_param_names.contains(&param.name) {
                 self.ec
-                    .duplicate_name(param.range, Ph::StatementCollection, &param.name);
+                    .duplicate_name(param.range, Ph::StatementBuilding, &param.name);
             } else {
                 used_param_names.insert(param.name.clone());
             }
@@ -139,7 +139,7 @@ impl GlobalDeclCollector<'_> {
             .is_name_used(&func_scope_id, &param.name)
         {
             self.ec
-                .duplicate_name(param.range, Ph::StatementCollection, &param.name);
+                .duplicate_name(param.range, Ph::StatementBuilding, &param.name);
             return None;
         }
 
@@ -171,18 +171,17 @@ impl GlobalDeclCollector<'_> {
             })
         } else if let Some(type_annotation) = &param.value_type {
             // If no default value is provided, use the annotation type
-            let resolved_type_annotation =
-                match resolve_type(self.ec, self.prog_ctx, type_annotation) {
-                    Some(ty) => ty,
-                    None => {
-                        self.ec.type_not_found(
-                            param.range,
-                            Ph::GlobalDeclCollection,
-                            type_annotation.to_string(),
-                        );
-                        return None;
-                    }
-                };
+            let resolved_type_annotation = match resolve_type(self.prog_ctx, type_annotation) {
+                Some(ty) => ty,
+                None => {
+                    self.ec.type_not_found(
+                        param.range,
+                        Ph::GlobalDeclCollection,
+                        type_annotation.to_string(),
+                    );
+                    return None;
+                }
+            };
 
             // Register the variable in the function scope
             let var = ScopeVar {

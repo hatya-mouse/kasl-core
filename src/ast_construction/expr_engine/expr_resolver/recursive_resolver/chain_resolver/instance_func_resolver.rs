@@ -37,6 +37,14 @@ impl ExpressionResolver<'_> {
                 );
                 None
             }
+            ResolvedType::Array(_) => {
+                self.ec.member_access_on_array(
+                    range,
+                    Ph::ExprEngine,
+                    self.prog_ctx.type_registry.format_type(&lhs.value_type),
+                );
+                None
+            }
             ResolvedType::Struct(struct_id) => {
                 // Get the function
                 let Some(member_func_id) =
@@ -48,10 +56,12 @@ impl ExpressionResolver<'_> {
                     return None;
                 };
                 let member_func = self.prog_ctx.func_ctx.get_func(&member_func_id)?;
+                let member_func_params = member_func.params.clone();
+                let return_type = member_func.return_type;
 
                 // Resolve the arguments
                 let args = self.resolve_func_call_args(
-                    &member_func.params,
+                    &member_func_params,
                     Some(lhs),
                     no_type_args,
                     range,
@@ -63,7 +73,7 @@ impl ExpressionResolver<'_> {
                         id: member_func_id,
                         args,
                     },
-                    member_func.return_type,
+                    return_type,
                     range,
                 ))
             }

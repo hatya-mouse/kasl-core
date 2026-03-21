@@ -83,4 +83,8 @@ impl ErrorCollector {
     pub(crate) fn builtin_var_access(&mut self, range: Range, phase: Phase) {
         self.emit(EK::BuiltinVarAccess, range, phase, Sv::Error, Pl::None);
     }
+
+    pub(crate) fn non_constant_for_count(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::NonConstantForCount, range, phase, Sv::Error, Pl::None);
+    }
 }

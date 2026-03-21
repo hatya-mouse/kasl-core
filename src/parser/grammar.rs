@@ -309,6 +309,10 @@ peg::parser!(pub grammar kasl_parser() for str {
             / identifier_token()
             / parenthesized_token()
             / dot_token()
+            / bracket_open()
+            / bracket_close()
+            / semicolon()
+            / colon()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }
@@ -317,6 +321,8 @@ peg::parser!(pub grammar kasl_parser() for str {
         = start:position!() kind:(
             dot_token()
             / identifier_token()
+            / bracket_open()
+            / bracket_close()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }
@@ -344,6 +350,13 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule dot_token() -> ExprTokenKind
         = "." { ExprTokenKind::Dot }
+
+    rule bracket_open() -> ExprTokenKind = "[" { ExprTokenKind::BracketOpen }
+    rule bracket_close() -> ExprTokenKind = "]" { ExprTokenKind::BracketClose }
+    rule semicolon() -> ExprTokenKind = ";" { ExprTokenKind::Semicolon }
+    rule colon() -> ExprTokenKind = "," { ExprTokenKind::Comma }
+
+    // --- MISCELLANEOUS ---
 
     rule identifier() -> String
         = quiet!{

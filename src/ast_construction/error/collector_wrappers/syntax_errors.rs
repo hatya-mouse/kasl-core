@@ -75,8 +75,14 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn expr_begins_with_dot(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::ExprBeginsWithDot, range, phase, Sv::Error, Pl::None);
+    pub(crate) fn expr_begins_with_invalid(&mut self, range: Range, phase: Phase, token: &str) {
+        self.emit(
+            EK::ExprBeginsWithInvalid,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(token.to_string()),
+        );
     }
 
     pub(crate) fn invalid_l_value(&mut self, range: Range, phase: Phase) {
@@ -89,5 +95,13 @@ impl ErrorCollector {
 
     pub(crate) fn expr_ends_with_builtin(&mut self, range: Range, phase: Phase) {
         self.emit(EK::ExprEndsWithBuiltin, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub(crate) fn unmatched_bracket(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::UnmatchedBracket, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub(crate) fn empty_array_literal(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::EmptyArrayLiteral, range, phase, Sv::Error, Pl::None);
     }
 }

@@ -30,7 +30,7 @@ impl UnresolvedExpr {
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum UnresolvedExprKind {
-    IntLiteral(i32),
+    IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     InfixOp {
@@ -50,6 +50,15 @@ pub enum UnresolvedExprKind {
         lhs: Option<Box<UnresolvedExpr>>,
         elements: Vec<UnresolvedChainElement>,
     },
+    Subscript {
+        lhs: Box<UnresolvedExpr>,
+        index: Box<UnresolvedExpr>,
+    },
+    ArraySpread {
+        value: Box<UnresolvedExpr>,
+        count: Box<UnresolvedExpr>,
+    },
+    ArrayList(Vec<UnresolvedExpr>),
 }
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
