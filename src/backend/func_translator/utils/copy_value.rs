@@ -27,6 +27,7 @@ impl FuncTranslator<'_> {
         struct_id: &StructID,
         src: ir::Value,
         dst: ir::Value,
+        src_offset: i32,
         base_offset: i32,
     ) {
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
@@ -35,7 +36,14 @@ impl FuncTranslator<'_> {
             .iter()
             .zip(struct_decl.field_offsets.iter())
         {
-            self.copy_value(&field.value_type, src, dst, base_offset, *offset);
+            self.copy_value(
+                &field.value_type,
+                src,
+                dst,
+                src_offset,
+                base_offset,
+                *offset,
+            );
         }
     }
 
@@ -44,6 +52,7 @@ impl FuncTranslator<'_> {
         array_id: &ArrayID,
         src: ir::Value,
         dst: ir::Value,
+        src_offset: i32,
         base_offset: i32,
     ) {
         let array_decl = self
@@ -61,7 +70,7 @@ impl FuncTranslator<'_> {
 
         let mut offset: i32 = 0;
         for _ in 0..*array_decl.count() {
-            self.copy_value(item_type, src, dst, base_offset, offset);
+            self.copy_value(item_type, src, dst, src_offset, base_offset, offset);
             // Increment the offset every iteration
             offset += item_size;
         }
@@ -72,26 +81,38 @@ impl FuncTranslator<'_> {
         value_type: &ResolvedType,
         src: ir::Value,
         dst: ir::Value,
+        src_offset: i32,
         base_offset: i32,
         offset: i32,
     ) {
         match value_type {
             ResolvedType::Primitive(_) => {
                 let ir_type = self.type_converter.convert(value_type);
-                let val = self
-                    .builder
-                    .ins()
-                    .load(ir_type, MemFlags::new(), src, offset);
+                let val =
+                    self.builder
+                        .ins()
+                        .load(ir_type, MemFlags::new(), src, src_offset + offset);
                 self.builder
                     .ins()
                     .store(MemFlags::new(), val, dst, base_offset + offset);
             }
             ResolvedType::Array(inner_id) => {
-                self.copy_array(inner_id, src, dst, base_offset + offset);
+                self.copy_array(
+                    inner_id,
+                    src,
+                    dst,
+                    src_offset + offset,
+                    base_offset + offset,
+                );
             }
             ResolvedType::Struct(inner_id) => {
-                let src_offsetted = self.builder.ins().iadd_imm(src, offset as i64);
-                self.copy_struct(inner_id, src_offsetted, dst, base_offset + offset);
+                self.copy_struct(
+                    inner_id,
+                    src,
+                    dst,
+                    src_offset + offset,
+                    base_offset + offset,
+                );
             }
         }
     }
