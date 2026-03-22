@@ -13,7 +13,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     );
 
     registry.register_func(
-        "sin",
+        "fast_sin",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
         Box::new(|_, builder, args| {
@@ -31,31 +31,23 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
             let x3 = builder.ins().fmul(x2, clamped_x);
             let x5 = builder.ins().fmul(x3, x2);
             let x7 = builder.ins().fmul(x5, x2);
-            let x9 = builder.ins().fmul(x7, x2);
-            let x11 = builder.ins().fmul(x9, x2);
 
             let c3 = builder.ins().f32const(-1.0 / 6.0);
             let c5 = builder.ins().f32const(1.0 / 120.0);
             let c7 = builder.ins().f32const(-1.0 / 5040.0);
-            let c9 = builder.ins().f32const(1.0 / 362880.0);
-            let c11 = builder.ins().f32const(-1.0 / 39916800.0);
 
             let t3 = builder.ins().fmul(x3, c3);
             let t5 = builder.ins().fmul(x5, c5);
             let t7 = builder.ins().fmul(x7, c7);
-            let t9 = builder.ins().fmul(x9, c9);
-            let t11 = builder.ins().fmul(x11, c11);
 
             let r = builder.ins().fadd(clamped_x, t3);
             let r = builder.ins().fadd(r, t5);
-            let r = builder.ins().fadd(r, t7);
-            let r = builder.ins().fadd(r, t9);
-            builder.ins().fadd(r, t11)
+            builder.ins().fadd(r, t7)
         }),
     );
 
     registry.register_func(
-        "cos",
+        "fast_cos",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
         Box::new(|_, builder, args| {
@@ -73,26 +65,52 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
             let x3 = builder.ins().fmul(x2, clamped_x);
             let x5 = builder.ins().fmul(x3, x2);
             let x7 = builder.ins().fmul(x5, x2);
-            let x9 = builder.ins().fmul(x7, x2);
-            let x11 = builder.ins().fmul(x9, x2);
 
             let c3 = builder.ins().f32const(-1.0 / 6.0);
             let c5 = builder.ins().f32const(1.0 / 120.0);
             let c7 = builder.ins().f32const(-1.0 / 5040.0);
-            let c9 = builder.ins().f32const(1.0 / 362880.0);
-            let c11 = builder.ins().f32const(-1.0 / 39916800.0);
 
             let t3 = builder.ins().fmul(x3, c3);
             let t5 = builder.ins().fmul(x5, c5);
             let t7 = builder.ins().fmul(x7, c7);
-            let t9 = builder.ins().fmul(x9, c9);
-            let t11 = builder.ins().fmul(x11, c11);
 
             let r = builder.ins().fadd(clamped_x, t3);
             let r = builder.ins().fadd(r, t5);
-            let r = builder.ins().fadd(r, t7);
-            let r = builder.ins().fadd(r, t9);
-            builder.ins().fadd(r, t11)
+            builder.ins().fadd(r, t7)
+        }),
+    );
+
+    registry.register_func(
+        "sin",
+        &[PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|module, builder, args| {
+            let mut sig = module.make_signature();
+            sig.params.push(AbiParam::new(types::F32));
+            sig.returns.push(AbiParam::new(types::F32));
+            let func_id = module
+                .declare_function("sin", Linkage::Import, &sig)
+                .unwrap();
+            let func_ref = module.declare_func_in_func(func_id, builder.func);
+            let call = builder.ins().call(func_ref, &[args[0]]);
+            builder.inst_results(call)[0]
+        }),
+    );
+
+    registry.register_func(
+        "cos",
+        &[PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|module, builder, args| {
+            let mut sig = module.make_signature();
+            sig.params.push(AbiParam::new(types::F32));
+            sig.returns.push(AbiParam::new(types::F32));
+            let func_id = module
+                .declare_function("cos", Linkage::Import, &sig)
+                .unwrap();
+            let func_ref = module.declare_func_in_func(func_id, builder.func);
+            let call = builder.ins().call(func_ref, &[args[0]]);
+            builder.inst_results(call)[0]
         }),
     );
 

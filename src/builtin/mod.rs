@@ -44,6 +44,8 @@ impl BuiltinRegistry {
 
     pub(crate) fn register_symbols(builder: &mut JITBuilder) {
         // --- TRIGONOMETRIC FUNCTIONS ---
+        builder.symbol("sin", f32::sin as *const u8);
+        builder.symbol("cos", f32::cos as *const u8);
         builder.symbol("tan", f32::tan as *const u8);
         builder.symbol("asin", f32::asin as *const u8);
         builder.symbol("acos", f32::acos as *const u8);
