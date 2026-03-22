@@ -66,10 +66,6 @@ impl IOBlueprint {
             .collect::<Vec<_>>()
     }
 
-    pub(crate) fn get_order(&self) -> &[(VariableID, BlueprintItemKind)] {
-        &self.decl_order
-    }
-
     pub(crate) fn get_item(&self, id: &VariableID) -> Option<&BlueprintItem> {
         self.items.get(id)
     }

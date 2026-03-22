@@ -9,8 +9,6 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-pub(crate) use io_blueprint::BlueprintItemKind;
-
 use crate::{NameSpaceID, Range, VariableID, scope_manager::reserved_type_names::is_reserved_name};
 use std::{collections::HashMap, fmt::Display};
 
