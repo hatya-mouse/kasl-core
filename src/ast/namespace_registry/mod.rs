@@ -73,9 +73,13 @@ impl NameSpaceRegistry {
     // --- NAMESPACE RESOLUTION ---
 
     /// Resolves a namespace from a first few path components and returns the corresponding namespace and the remaining path components.
-    pub fn resolve_namespace_from_path(&self, path: SymbolPath) -> (NameSpaceID, SymbolPath) {
+    pub fn resolve_namespace_from_path(
+        &self,
+        current_namespace: NameSpaceID,
+        path: SymbolPath,
+    ) -> (NameSpaceID, SymbolPath) {
         let mut path_iter = path.into_iter().peekable();
-        let mut current_namespace_id = self.root_namespace_id;
+        let mut current_namespace_id = current_namespace;
         while let Some(name) = path_iter.peek() {
             if let Some(namespace) = self.get_namespace_by_id(&current_namespace_id) {
                 // Get the child namespace ID by name

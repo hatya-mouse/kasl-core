@@ -63,7 +63,8 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the return type
         let return_type = match return_type {
-            Some(type_name) => match resolve_type(self.prog_ctx, type_name) {
+            Some(type_name) => match resolve_type(self.current_namespace, self.prog_ctx, type_name)
+            {
                 Some(ty) => ty,
                 None => {
                     self.ec.type_not_found(
@@ -155,17 +156,18 @@ impl GlobalDeclCollector<'_> {
             })
         } else if let Some(type_annotation) = &param.value_type {
             // If no default value is provided, use the annotation type
-            let resolved_type_annotation = match resolve_type(self.prog_ctx, type_annotation) {
-                Some(ty) => ty,
-                None => {
-                    self.ec.type_not_found(
-                        param.range,
-                        Ph::GlobalDeclCollection,
-                        type_annotation.to_string(),
-                    );
-                    return None;
-                }
-            };
+            let resolved_type_annotation =
+                match resolve_type(self.current_namespace, self.prog_ctx, type_annotation) {
+                    Some(ty) => ty,
+                    None => {
+                        self.ec.type_not_found(
+                            param.range,
+                            Ph::GlobalDeclCollection,
+                            type_annotation.to_string(),
+                        );
+                        return None;
+                    }
+                };
 
             // Register the variable in the function scope
             let var = ScopeVar {

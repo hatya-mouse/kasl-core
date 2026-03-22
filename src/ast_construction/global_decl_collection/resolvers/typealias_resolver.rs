@@ -6,7 +6,7 @@ use crate::{
 impl GlobalDeclCollector<'_> {
     pub fn resolve_typealias(&mut self, alias: &str, target: &ParserTypeName, decl_range: Range) {
         // Resolve the target type
-        let resolved_target = match resolve_type(self.prog_ctx, target) {
+        let resolved_target = match resolve_type(self.current_namespace, self.prog_ctx, target) {
             Some(ty) => ty,
             None => {
                 self.ec

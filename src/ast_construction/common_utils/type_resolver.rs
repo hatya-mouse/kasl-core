@@ -1,8 +1,10 @@
 use crate::{
-    compilation_data::ProgramContext, parser_ast::ParserTypeName, type_registry::ResolvedType,
+    NameSpaceID, compilation_data::ProgramContext, parser_ast::ParserTypeName,
+    type_registry::ResolvedType,
 };
 
 pub(crate) fn resolve_type(
+    current_namespace: NameSpaceID,
     prog_ctx: &mut ProgramContext,
     parser_type: &ParserTypeName,
 ) -> Option<ResolvedType> {
@@ -10,12 +12,7 @@ pub(crate) fn resolve_type(
         ParserTypeName::SymbolPath(path) => {
             let (namespace_id, type_name) = prog_ctx
                 .namespace_registry
-                .resolve_namespace_from_path(path.clone());
-
-            println!(
-                "Path: {}, NameSpaceID: {:?}, Typename: {}",
-                path, namespace_id, type_name
-            );
+                .resolve_namespace_from_path(current_namespace, path.clone());
 
             // Resolved the type name
             prog_ctx
@@ -23,7 +20,7 @@ pub(crate) fn resolve_type(
                 .resolve_type_name(namespace_id, &type_name.to_string())
         }
         ParserTypeName::Array(item_type, count) => {
-            let resolved_item_type = resolve_type(prog_ctx, item_type)?;
+            let resolved_item_type = resolve_type(current_namespace, prog_ctx, item_type)?;
 
             // Register or get the array ID
             let array_id = prog_ctx

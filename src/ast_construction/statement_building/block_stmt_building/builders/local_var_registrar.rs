@@ -23,17 +23,18 @@ impl BlockStmtBuilder<'_> {
 
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {
-            let resolved_type_annotation = match resolve_type(self.prog_ctx, type_annotation) {
-                Some(ty) => ty,
-                None => {
-                    self.ec.type_not_found(
-                        stmt_range,
-                        Ph::StatementBuilding,
-                        type_annotation.to_string(),
-                    );
-                    return None;
-                }
-            };
+            let resolved_type_annotation =
+                match resolve_type(self.namespace_id, self.prog_ctx, type_annotation) {
+                    Some(ty) => ty,
+                    None => {
+                        self.ec.type_not_found(
+                            stmt_range,
+                            Ph::StatementBuilding,
+                            type_annotation.to_string(),
+                        );
+                        return None;
+                    }
+                };
 
             // Check if the resolved value type matches the type annotation
             if resolved_type_annotation != resolved_def_val.value_type {

@@ -28,17 +28,18 @@ impl GlobalDeclCollector<'_> {
 
         if let Some(type_annotation) = type_annotation {
             // Resolve the type annotation if provided
-            let resolved_type_annotation = match resolve_type(self.prog_ctx, type_annotation) {
-                Some(ty) => ty,
-                None => {
-                    self.ec.type_not_found(
-                        decl_range,
-                        Ph::GlobalDeclCollection,
-                        type_annotation.to_string(),
-                    );
-                    return None;
-                }
-            };
+            let resolved_type_annotation =
+                match resolve_type(self.current_namespace, self.prog_ctx, type_annotation) {
+                    Some(ty) => ty,
+                    None => {
+                        self.ec.type_not_found(
+                            decl_range,
+                            Ph::GlobalDeclCollection,
+                            type_annotation.to_string(),
+                        );
+                        return None;
+                    }
+                };
 
             // If the type annotation provided by the user does not match the default value type throw an error
             if resolved_def_val.value_type != resolved_type_annotation {
