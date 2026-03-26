@@ -21,7 +21,6 @@ pub struct KaslCompiler {
     comp_state: CompilerState,
 
     pub parser_decl_stmts: Vec<ParserDeclStmt>,
-    compiled: *const u8,
 }
 
 impl KaslCompiler {
@@ -94,7 +93,7 @@ impl KaslCompiler {
         self.ec.as_result().map(|_| blueprint)
     }
 
-    pub fn compile_once(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
+    pub fn compile_once(&mut self, blueprint: &IOBlueprint) -> Result<*const u8, Vec<ErrorRecord>> {
         let builtin_registry = BuiltinRegistry::default();
 
         // Compile the program
@@ -114,7 +113,7 @@ impl KaslCompiler {
                 )]
             })?;
 
-        self.compiled = backend
+        let compiled = backend
             .compile_once(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
             .map_err(|e| {
                 vec![ErrorRecord::new(
@@ -125,35 +124,13 @@ impl KaslCompiler {
                 )]
             })?;
 
-        Ok(())
+        Ok(compiled)
     }
 
-    pub fn run_once(
-        &self,
-        inputs: &[*const ()],
-        outputs: &[*mut ()],
-        states: &[*mut ()],
-        should_init: i8,
-    ) -> Result<(), String> {
-        if self.compiled.is_null() {
-            return Ok(());
-        };
-
-        unsafe {
-            let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8) =
-                mem::transmute(self.compiled);
-            code_fn(
-                inputs.as_ptr(),
-                outputs.as_ptr(),
-                states.as_ptr(),
-                should_init,
-            )
-        }
-
-        Ok(())
-    }
-
-    pub fn compile_buffer(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
+    pub fn compile_buffer(
+        &mut self,
+        blueprint: &IOBlueprint,
+    ) -> Result<*const u8, Vec<ErrorRecord>> {
         let builtin_registry = BuiltinRegistry::default();
 
         // Compile the program
@@ -173,7 +150,7 @@ impl KaslCompiler {
                 )]
             })?;
 
-        self.compiled = backend
+        let compiled = backend
             .compile_buffer(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
             .map_err(|e| {
                 vec![ErrorRecord::new(
@@ -184,33 +161,6 @@ impl KaslCompiler {
                 )]
             })?;
 
-        Ok(())
-    }
-
-    pub fn run_buffer(
-        &self,
-        inputs: &[*const ()],
-        outputs: &[*mut ()],
-        states: &[*mut ()],
-        should_init: i8,
-        buffer_size: i32,
-    ) -> Result<(), String> {
-        if self.compiled.is_null() {
-            return Ok(());
-        };
-
-        unsafe {
-            let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8, i32) =
-                mem::transmute(self.compiled);
-            code_fn(
-                inputs.as_ptr(),
-                outputs.as_ptr(),
-                states.as_ptr(),
-                should_init,
-                buffer_size,
-            )
-        }
-
-        Ok(())
+        Ok(compiled)
     }
 }

@@ -8,6 +8,7 @@ pub mod builtin;
 pub mod compiler;
 pub mod localization;
 pub mod parser;
+pub mod run_program;
 
 pub use ast::*;
 pub use ast_construction::*;
