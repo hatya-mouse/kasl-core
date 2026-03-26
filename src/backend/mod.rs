@@ -18,7 +18,7 @@ use cranelift_module::{Linkage, Module};
 pub struct Backend {
     builder_ctx: FunctionBuilderContext,
     ctx: cranelift_codegen::Context,
-    module: JITModule,
+    module: Option<JITModule>,
 }
 
 impl Default for Backend {
@@ -43,7 +43,15 @@ impl Default for Backend {
         Self {
             builder_ctx: FunctionBuilderContext::new(),
             ctx: module.make_context(),
-            module,
+            module: Some(module),
+        }
+    }
+}
+
+impl Drop for Backend {
+    fn drop(&mut self) {
+        if let Some(module) = self.module.take() {
+            unsafe { module.free_memory() };
         }
     }
 }
@@ -67,18 +75,19 @@ impl Backend {
         let verifier_flags = settings::Flags::new(settings::builder());
         verify_function(&self.ctx.func, &verifier_flags).map_err(|e| e.to_string())?;
 
-        let id = self
-            .module
+        let module = self.module.as_mut().unwrap();
+
+        let id = module
             .declare_function("main", Linkage::Export, &self.ctx.func.signature)
             .map_err(|e| e.to_string())?;
-        self.module
+        module
             .define_function(id, &mut self.ctx)
             .map_err(|e| e.to_string())?;
 
-        self.module.clear_context(&mut self.ctx);
-        self.module.finalize_definitions().unwrap();
+        module.clear_context(&mut self.ctx);
+        module.finalize_definitions().unwrap();
 
-        let code = self.module.get_finalized_function(id);
+        let code = module.get_finalized_function(id);
         Ok(code)
     }
 
@@ -89,8 +98,10 @@ impl Backend {
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) {
+        let module = self.module.as_mut().unwrap();
+
         // Add parameter for the input and output pointers
-        let pointer_type = self.module.target_config().pointer_type();
+        let pointer_type = module.target_config().pointer_type();
         self.ctx.func.signature.params.extend(&[
             AbiParam::new(pointer_type), // Input pointers
             AbiParam::new(pointer_type), // Output pointers
@@ -121,8 +132,7 @@ impl Backend {
         let return_block = builder.create_block();
 
         // Create a FuncTranslator and translate the function
-        let mut translator =
-            FuncTranslator::new(builder, &mut self.module, prog_ctx, builtin_registry);
+        let mut translator = FuncTranslator::new(builder, module, prog_ctx, builtin_registry);
         translator.translate(
             translator_params,
             None,

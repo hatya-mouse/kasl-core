@@ -20,6 +20,8 @@ pub struct KaslCompiler {
     pub prog_ctx: ProgramContext,
     comp_state: CompilerState,
 
+    backend: Option<Backend>,
+
     pub parser_decl_stmts: Vec<ParserDeclStmt>,
 }
 
@@ -97,7 +99,7 @@ impl KaslCompiler {
         let builtin_registry = BuiltinRegistry::default();
 
         // Compile the program
-        let mut backend = Backend::default();
+        self.backend = Some(Backend::default());
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
         // Look up the main function, or return an error if it doesn't exist
         let main_func_id = self
@@ -113,7 +115,10 @@ impl KaslCompiler {
                 )]
             })?;
 
-        let compiled = backend
+        let compiled = self
+            .backend
+            .as_mut()
+            .unwrap()
             .compile_once(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
             .map_err(|e| {
                 vec![ErrorRecord::new(
@@ -134,8 +139,9 @@ impl KaslCompiler {
         let builtin_registry = BuiltinRegistry::default();
 
         // Compile the program
-        let mut backend = Backend::default();
+        self.backend = Some(Backend::default());
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
+
         // Look up the main function, or return an error if it doesn't exist
         let main_func_id = self
             .prog_ctx
@@ -150,7 +156,10 @@ impl KaslCompiler {
                 )]
             })?;
 
-        let compiled = backend
+        let compiled = self
+            .backend
+            .as_mut()
+            .unwrap()
             .compile_buffer(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
             .map_err(|e| {
                 vec![ErrorRecord::new(
