@@ -11,7 +11,7 @@ use crate::{
 use cranelift::prelude::{
     AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,
 };
-use cranelift_codegen::{settings, verify_function};
+use cranelift_codegen::{ir, settings, verify_function};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
 
@@ -57,6 +57,11 @@ impl Drop for Backend {
 }
 
 impl Backend {
+    /// Returns the main function.
+    pub fn func(&self) -> &ir::Function {
+        &self.ctx.func
+    }
+
     /// Compiles the program which runs once.
     /// Signature:
     /// ```

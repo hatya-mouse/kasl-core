@@ -6,7 +6,6 @@ mod translator_scope_registry;
 mod type_converter;
 mod utils;
 
-use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;
 
 use crate::{
@@ -14,6 +13,7 @@ use crate::{
     builtin::BuiltinRegistry, compilation_data::ProgramContext, scope_manager::IOBlueprint,
 };
 use cranelift::prelude::FunctionBuilder;
+use cranelift_codegen::ir;
 use cranelift_jit::JITModule;
 
 pub struct FuncTranslator<'a> {
