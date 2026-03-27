@@ -4,6 +4,7 @@ use crate::{
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
+use cranelift_module::Module;
 
 impl FuncTranslator<'_> {
     pub fn copy_struct(
@@ -15,20 +16,40 @@ impl FuncTranslator<'_> {
         base_offset: i32,
     ) {
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
-        for (field, offset) in struct_decl
-            .fields
-            .iter()
-            .zip(struct_decl.field_offsets.iter())
-        {
-            self.copy_value(
-                &field.value_type,
-                src,
-                dst,
-                src_offset,
-                base_offset,
-                *offset,
-            );
-        }
+        let struct_size = struct_decl.total_size;
+
+        // Calculate the src and dst ptr by adding the offset
+        let src_ptr = if src_offset != 0 {
+            let offset = self
+                .builder
+                .ins()
+                .iconst(self.type_converter.pointer_type(), src_offset as i64);
+            self.builder.ins().iadd(src, offset)
+        } else {
+            src
+        };
+
+        let dst_ptr = if base_offset != 0 {
+            let offset = self
+                .builder
+                .ins()
+                .iconst(self.type_converter.pointer_type(), base_offset as i64);
+            self.builder.ins().iadd(dst, offset)
+        } else {
+            dst
+        };
+
+        // Copy the struct to the destination pointer
+        self.builder.emit_small_memory_copy(
+            self.module.target_config(),
+            dst_ptr,
+            src_ptr,
+            struct_size as u64,
+            1,
+            1,
+            true,
+            MemFlags::new(),
+        );
     }
 
     pub fn copy_array(
