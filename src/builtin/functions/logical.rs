@@ -5,42 +5,42 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---
 
     registry.register_func(
-        "and",
+        "band",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().band(args[0], args[1])),
     );
 
     registry.register_func(
-        "or",
+        "bor",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().bor(args[0], args[1])),
     );
 
     registry.register_func(
-        "xor",
+        "bxor",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().bxor(args[0], args[1])),
     );
 
     registry.register_func(
-        "nand",
+        "bnand",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().band_not(args[0], args[1])),
     );
 
     registry.register_func(
-        "nor",
+        "bnor",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().bor_not(args[0], args[1])),
     );
 
     registry.register_func(
-        "xnor",
+        "bxnor",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().bxor_not(args[0], args[1])),
@@ -49,7 +49,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- UNARY OPERATORS ---
 
     registry.register_func(
-        "not",
+        "bnot",
         &[PrimitiveType::Bool],
         PrimitiveType::Bool,
         Box::new(|_, builder, args| builder.ins().bnot(args[0])),

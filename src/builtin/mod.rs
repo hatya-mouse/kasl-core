@@ -18,6 +18,7 @@ impl Default for BuiltinRegistry {
 
         functions::bool_op::register_builtins(&mut registry);
         functions::float_op::register_builtins(&mut registry);
+        functions::int_logical::register_builtins(&mut registry);
         functions::int_op::register_builtins(&mut registry);
         functions::logical::register_builtins(&mut registry);
         functions::math::register_builtins(&mut registry);

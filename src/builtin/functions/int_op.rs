@@ -61,6 +61,8 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         }),
     );
 
+    // --- CLAMP FUNCTIONS ---
+
     registry.register_func(
         "imax",
         &[PrimitiveType::Int, PrimitiveType::Int],
