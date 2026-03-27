@@ -36,10 +36,11 @@ impl FuncTranslator<'_> {
                 if self.is_zero(value) {
                     // Use memset to fill the target memory with zeros
                     // Get the address of the slot
-                    let ptr =
-                        self.builder
-                            .ins()
-                            .stack_addr(self.type_converter.pointer_type(), slot, 0);
+                    let ptr = self.builder.ins().stack_addr(
+                        self.type_converter.pointer_type(),
+                        slot,
+                        base_offset,
+                    );
                     self.builder.emit_small_memset(
                         self.module.target_config(),
                         ptr,
