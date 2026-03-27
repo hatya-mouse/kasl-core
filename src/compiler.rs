@@ -20,7 +20,7 @@ pub struct KaslCompiler {
     pub prog_ctx: ProgramContext,
     comp_state: CompilerState,
 
-    backend: Option<Backend>,
+    pub backend: Option<Backend>,
 
     pub parser_decl_stmts: Vec<ParserDeclStmt>,
 }
