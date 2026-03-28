@@ -30,10 +30,9 @@ use cranelift_module::{Linkage, Module};
 
 impl Backend {
     /// Compiles the program that processes a buffer.
+    ///
     /// Signature:
-    /// ```
-    /// fn(input, output, state, should_init, buffer_size)
-    /// ```
+    /// `fn(input, output, state, should_init, buffer_size)`
     pub fn compile_buffer(
         &mut self,
         prog_ctx: &ProgramContext,

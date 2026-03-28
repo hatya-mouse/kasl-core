@@ -74,10 +74,9 @@ impl Drop for Backend {
 
 impl Backend {
     /// Compiles the program which runs once.
+    ///
     /// Signature:
-    /// ```
-    /// fn(input, output, state, should_init)
-    /// ```
+    /// `fn(input, output, state, should_init)`
     pub fn compile_once(
         &mut self,
         prog_ctx: &ProgramContext,

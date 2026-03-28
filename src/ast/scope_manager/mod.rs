@@ -135,7 +135,7 @@ impl ScopeRegistry {
     }
 
     /// Returns if the name is already used.
-    /// Returns `true` if the scope is not found.
+    /// Returns `false` if the scope is not found.
     pub fn is_name_used(&self, scope_id: &ScopeID, name: &str) -> bool {
         if is_reserved_name(name) {
             return true;
