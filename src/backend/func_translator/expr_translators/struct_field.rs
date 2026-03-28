@@ -17,7 +17,9 @@
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
-use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use crate::{
+    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+};
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_struct_field_expr(

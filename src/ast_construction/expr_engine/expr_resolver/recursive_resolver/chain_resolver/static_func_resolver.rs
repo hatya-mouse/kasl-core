@@ -15,10 +15,12 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, StructID,
+    ast::{
+        Expr, ExprKind, Range, StructID,
+        symbol_table::{FunctionType, UnresolvedChainElement},
+    },
+    ast_construction::expr_engine::ExpressionResolver,
     error::Ph,
-    expr_engine::ExpressionResolver,
-    symbol_table::{FunctionType, UnresolvedChainElement},
 };
 
 impl ExpressionResolver<'_> {

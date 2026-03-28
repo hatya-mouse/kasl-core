@@ -14,12 +14,12 @@
 //  limitations under the License.
 //
 
-use crate::ParserFuncCallArg;
-use crate::expr_engine::ExpressionBuilder;
-use crate::symbol_table::{
+use crate::ast::symbol_table::{
     NoTypeFuncCallArg, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
 };
-use crate::{ExprToken, ExprTokenKind, error::Ph};
+use crate::ast_construction::expr_engine::ExpressionBuilder;
+use crate::error::Ph;
+use crate::parser::{ExprToken, ExprTokenKind, ParserFuncCallArg};
 use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionBuilder<'_> {

@@ -14,6 +14,10 @@
 //  limitations under the License.
 //
 
+/// Runs the given program once with the provided inputs, outputs, and states.
+/// This function is unsafe because this function can cause an undefined behavior
+/// if any of the pointers passed to the function are null, or if the lengths are incorrect.
+///
 /// # Safety
 ///
 /// This function can cause an undefined behavior in these cases:
@@ -38,6 +42,10 @@ pub unsafe fn run_once(
     }
 }
 
+/// Runs the given program given times, with the provided inputs, outputs, and states.
+/// This function is unsafe because this function can cause an undefined behavior
+/// if any of the pointers passed to the function are null, or if the lengths are incorrect.
+///
 /// # Safety
 ///
 /// This function can cause an undefined behavior in these cases:

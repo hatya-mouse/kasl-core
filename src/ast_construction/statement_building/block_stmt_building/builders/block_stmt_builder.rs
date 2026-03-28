@@ -14,7 +14,11 @@
 //  limitations under the License.
 //
 
-use crate::{ParserScopeStmt, Range, Statement, statement_building::BlockStmtBuilder};
+use crate::{
+    ast::{Range, Statement},
+    ast_construction::statement_building::BlockStmtBuilder,
+    parser::ParserScopeStmt,
+};
 
 impl BlockStmtBuilder<'_> {
     /// Builds a block statement from a list of statements.

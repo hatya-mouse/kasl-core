@@ -18,11 +18,9 @@ mod buffer_compile;
 mod func_translator;
 
 use crate::{
-    FunctionID,
+    ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
     backend::func_translator::{FuncTranslator, TranslatorParams},
     builtin::BuiltinRegistry,
-    compilation_data::ProgramContext,
-    scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{
     AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,

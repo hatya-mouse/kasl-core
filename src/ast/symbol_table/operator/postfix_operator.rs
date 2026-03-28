@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{FuncParam, NameSpaceID, Range, symbol_table::Block, type_registry::ResolvedType};
+use crate::ast::{FuncParam, NameSpaceID, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]

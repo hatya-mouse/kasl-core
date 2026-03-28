@@ -20,7 +20,8 @@ mod body_collector;
 pub use block_stmt_building::BlockStmtBuilder;
 
 use crate::{
-    CompilationData, builtin::BuiltinRegistry, compilation_data::ProgramContext,
+    ast::{CompilationData, compilation_data::ProgramContext},
+    builtin::BuiltinRegistry,
     error::ErrorCollector,
 };
 

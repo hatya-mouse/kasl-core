@@ -17,10 +17,12 @@
 mod item_loader;
 
 use crate::{
-    VariableID,
+    ast::{
+        VariableID,
+        scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
+        type_registry::ResolvedType,
+    },
     backend::func_translator::{FuncTranslator, TranslatorParams},
-    scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
-    type_registry::ResolvedType,
 };
 use cranelift::prelude::{InstBuilder, IntCC, types};
 use cranelift_codegen::ir;

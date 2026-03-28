@@ -17,8 +17,9 @@
 mod recursive_resolver;
 
 use crate::{
-    CompilationData, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
-    compilation_data::ProgramContext, error::ErrorCollector,
+    ast::{CompilationData, NameSpaceID, ScopeID, compilation_data::ProgramContext},
+    builtin::BuiltinRegistry,
+    error::ErrorCollector,
 };
 
 pub struct ExpressionResolver<'a> {

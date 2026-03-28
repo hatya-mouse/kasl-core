@@ -15,11 +15,16 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
-    ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
-    ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, PostfixOperatorProperties,
-    PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
-    namespace_registry::ImportPath, parser_ast::ParserTypeName,
+    ast::{
+        InfixOperatorProperties, OperatorAssociativity, PostfixOperatorProperties,
+        PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
+        namespace_registry::ImportPath,
+    },
+    parser::{
+        ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, ParserFuncCallArg,
+        ParserFuncParam, ParserIfArm, ParserInputAttribute, ParserOperatorType, ParserScopeStmt,
+        ParserScopeStmtKind, parser_ast::ParserTypeName,
+    },
 };
 
 peg::parser!(pub grammar kasl_parser() for str {

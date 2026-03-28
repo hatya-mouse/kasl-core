@@ -15,7 +15,10 @@
 //
 
 use kasl::{
-    ExprToken, ParserIfArm, ParserScopeStmt, ParserScopeStmtKind, Range, parser_ast::ParserTypeName,
+    ast::Range,
+    parser::{
+        ExprToken, ParserIfArm, ParserScopeStmt, ParserScopeStmtKind, parser_ast::ParserTypeName,
+    },
 };
 
 pub fn block(statements: &[ParserScopeStmt]) -> ParserScopeStmt {

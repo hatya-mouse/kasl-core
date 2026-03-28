@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{LOOP_UNROLL_THRESHOLD, backend::func_translator::FuncTranslator, symbol_table};
+use crate::{LOOP_UNROLL_THRESHOLD, ast::symbol_table, backend::func_translator::FuncTranslator};
 use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;
 

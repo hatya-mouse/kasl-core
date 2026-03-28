@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, error::Ph, expr_engine::ExpressionResolver,
-    symbol_table::UnresolvedExpr, type_registry::ResolvedType,
+    ast::{Expr, ExprKind, Range, symbol_table::UnresolvedExpr, type_registry::ResolvedType},
+    ast_construction::expr_engine::ExpressionResolver,
+    error::Ph,
 };
 
 impl ExpressionResolver<'_> {

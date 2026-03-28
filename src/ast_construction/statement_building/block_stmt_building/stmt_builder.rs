@@ -15,7 +15,9 @@
 //
 
 use crate::{
-    ParserScopeStmt, ParserScopeStmtKind, Statement, statement_building::BlockStmtBuilder,
+    ast::Statement,
+    ast_construction::statement_building::BlockStmtBuilder,
+    parser::{ParserScopeStmt, ParserScopeStmtKind},
 };
 
 impl BlockStmtBuilder<'_> {

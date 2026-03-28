@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
-use kasl::{ExprToken, ExprTokenKind, ParserFuncCallArg, Range};
+use kasl::{
+    ast::Range,
+    parser::{ExprToken, ExprTokenKind, ParserFuncCallArg},
+};
 
 pub fn int_literal(value: u32) -> ExprToken {
     ExprToken {

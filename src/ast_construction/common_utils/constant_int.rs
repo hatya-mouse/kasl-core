@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, ExprKind, ScopeRegistry, scope_manager::VariableKind};
+use crate::ast::{Expr, ExprKind, ScopeRegistry, scope_manager::VariableKind};
 
 pub(crate) fn get_constant_int(scope_registry: &ScopeRegistry, expr: &Expr) -> Option<u32> {
     match &expr.kind {

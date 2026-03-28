@@ -29,7 +29,7 @@ pub use postfix_operator::{
 pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties, PrefixQuery, PrefixQueryRef};
 
 use crate::{
-    OperatorID,
+    ast::OperatorID,
     error::{EK, ErrorKind},
 };
 use hashbrown::{HashMap, hash_map::Entry};

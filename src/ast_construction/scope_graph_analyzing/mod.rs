@@ -17,7 +17,8 @@
 mod scope_traversal;
 
 use crate::{
-    ScopeID, compilation_data::ProgramContext, error::ErrorCollector, scope_manager::ScopeGraph,
+    ast::{ScopeID, compilation_data::ProgramContext, scope_manager::ScopeGraph},
+    error::ErrorCollector,
 };
 use std::collections::HashMap;
 

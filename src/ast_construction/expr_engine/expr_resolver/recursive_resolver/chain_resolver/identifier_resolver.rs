@@ -14,7 +14,11 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, ExprKind, Range, ScopeID, error::Ph, expr_engine::ExpressionResolver};
+use crate::{
+    ast::{Expr, ExprKind, Range, ScopeID},
+    ast_construction::expr_engine::ExpressionResolver,
+    error::Ph,
+};
 
 impl ExpressionResolver<'_> {
     pub fn resolve_identifier(

@@ -15,11 +15,13 @@
 //
 
 use crate::{
-    IfArm, ParserIfArm, ParserScopeStmt, Range, Statement,
+    ast::{
+        IfArm, Range, Statement,
+        type_registry::{PrimitiveType, ResolvedType},
+    },
+    ast_construction::{expr_engine::resolve_expr, statement_building::BlockStmtBuilder},
     error::Ph,
-    expr_engine::resolve_expr,
-    statement_building::BlockStmtBuilder,
-    type_registry::{PrimitiveType, ResolvedType},
+    parser::{ParserIfArm, ParserScopeStmt},
 };
 
 impl BlockStmtBuilder<'_> {

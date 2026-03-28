@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    Range, StructID,
-    global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
+    ast::{Range, StructID},
+    ast_construction::global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
 };
 
 impl GlobalDeclCollector<'_> {

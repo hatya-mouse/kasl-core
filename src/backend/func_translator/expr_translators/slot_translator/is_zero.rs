@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, ExprKind, backend::func_translator::FuncTranslator};
+use crate::{
+    ast::{Expr, ExprKind},
+    backend::func_translator::FuncTranslator,
+};
 
 impl FuncTranslator<'_> {
     /// Checks if the passed expression is a zero literal.

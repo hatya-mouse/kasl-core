@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    ExprToken, Range, Statement, error::Ph, expr_engine::resolve_expr,
-    statement_building::BlockStmtBuilder,
+    ast::{Range, Statement},
+    ast_construction::{expr_engine::resolve_expr, statement_building::BlockStmtBuilder},
+    error::Ph,
+    parser::ExprToken,
 };
 
 impl BlockStmtBuilder<'_> {

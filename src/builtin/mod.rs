@@ -17,7 +17,7 @@
 mod builtin_func;
 mod functions;
 
-use crate::type_registry::{PrimitiveType, ResolvedType};
+use crate::ast::type_registry::{PrimitiveType, ResolvedType};
 pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
 use cranelift_jit::JITBuilder;
 use std::collections::HashMap;

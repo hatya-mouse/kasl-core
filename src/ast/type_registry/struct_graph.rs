@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::StructID;
+use crate::ast::StructID;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Default, Debug)]

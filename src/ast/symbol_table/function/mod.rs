@@ -20,7 +20,7 @@ mod function_def;
 pub use func_body_map::FuncBodyMap;
 pub use function_def::{FuncCallArg, FuncParam, Function, FunctionType, NoTypeFuncCallArg};
 
-use crate::{FunctionID, NameSpaceID, StructID};
+use crate::ast::{FunctionID, NameSpaceID, StructID};
 use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, serde::Serialize)]

@@ -23,8 +23,10 @@ pub use expr_resolver::ExpressionResolver;
 pub use l_value_resolver::LValueResolver;
 
 use crate::{
-    CompilationData, Expr, ExprToken, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
-    compilation_data::ProgramContext, error::ErrorCollector,
+    ast::{CompilationData, Expr, NameSpaceID, ScopeID, compilation_data::ProgramContext},
+    builtin::BuiltinRegistry,
+    error::ErrorCollector,
+    parser::ExprToken,
 };
 
 pub fn resolve_expr(

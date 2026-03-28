@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::type_registry::ResolvedType;
+use crate::ast::type_registry::ResolvedType;
 use cranelift::prelude::FunctionBuilder;
 use cranelift_codegen::ir;
 use cranelift_jit::JITModule;

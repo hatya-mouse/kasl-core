@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::NameSpaceID;
+use crate::ast::NameSpaceID;
 use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone)]

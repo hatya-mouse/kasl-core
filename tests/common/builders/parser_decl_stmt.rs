@@ -15,9 +15,14 @@
 //
 
 use kasl::{
-    ExprToken, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt, ParserDeclStmtKind,
-    ParserFuncParam, ParserInputAttribute, ParserOperatorType, ParserScopeStmt,
-    PostfixOperatorProperties, PrefixOperatorProperties, Range, parser_ast::ParserTypeName,
+    ast::{
+        InfixOperatorProperties, OperatorAssociativity, PostfixOperatorProperties,
+        PrefixOperatorProperties, Range,
+    },
+    parser::{
+        ExprToken, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, ParserInputAttribute,
+        ParserOperatorType, ParserScopeStmt, parser_ast::ParserTypeName,
+    },
 };
 
 pub fn func_decl(

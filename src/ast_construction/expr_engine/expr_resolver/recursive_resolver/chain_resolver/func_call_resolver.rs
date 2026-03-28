@@ -15,8 +15,12 @@
 //
 
 use crate::{
-    Expr, ExprKind, NameSpaceID, Range, error::Ph, expr_engine::ExpressionResolver,
-    symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
+    ast::{
+        Expr, ExprKind, NameSpaceID, Range, symbol_table::NoTypeFuncCallArg,
+        type_registry::ResolvedType,
+    },
+    ast_construction::expr_engine::ExpressionResolver,
+    error::Ph,
 };
 
 impl ExpressionResolver<'_> {

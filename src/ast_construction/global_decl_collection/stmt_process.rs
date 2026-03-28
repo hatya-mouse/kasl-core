@@ -15,10 +15,10 @@
 //
 
 use crate::{
-    ParserDeclStmt, ParserDeclStmtKind,
+    ast::symbol_table::FunctionType,
+    ast_construction::global_decl_collection::{FuncDeclInfo, GlobalDeclCollector},
     error::Ph,
-    global_decl_collection::{FuncDeclInfo, GlobalDeclCollector},
-    symbol_table::FunctionType,
+    parser::{ParserDeclStmt, ParserDeclStmtKind},
 };
 
 impl<'a> GlobalDeclCollector<'a> {

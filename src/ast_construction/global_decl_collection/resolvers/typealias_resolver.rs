@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    Range, common_utils::resolve_type, error::Ph, global_decl_collection::GlobalDeclCollector,
-    parser_ast::ParserTypeName,
+    ast::Range,
+    ast_construction::{common_utils::resolve_type, global_decl_collection::GlobalDeclCollector},
+    error::Ph,
+    parser::parser_ast::ParserTypeName,
 };
 
 impl GlobalDeclCollector<'_> {

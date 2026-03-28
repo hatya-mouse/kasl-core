@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{builtin::BuiltinRegistry, type_registry::PrimitiveType};
+use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
 use cranelift::prelude::{AbiParam, InstBuilder, types};
 use cranelift_module::{Linkage, Module};
 

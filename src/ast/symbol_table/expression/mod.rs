@@ -21,8 +21,11 @@ pub use l_value::{LValue, LValueKind};
 pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 
 use crate::{
-    FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID, builtin::BuiltinFuncID,
-    type_registry::ResolvedType,
+    ast::{
+        FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID,
+        type_registry::ResolvedType,
+    },
+    builtin::BuiltinFuncID,
 };
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]

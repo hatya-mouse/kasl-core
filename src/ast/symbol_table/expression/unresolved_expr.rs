@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Range, symbol_table::NoTypeFuncCallArg};
+use crate::ast::{Range, symbol_table::NoTypeFuncCallArg};
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct UnresolvedExpr {

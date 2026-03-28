@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, backend::func_translator::FuncTranslator, builtin::BuiltinFuncID};
+use crate::{ast::Expr, backend::func_translator::FuncTranslator, builtin::BuiltinFuncID};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {

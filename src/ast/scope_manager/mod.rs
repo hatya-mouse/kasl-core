@@ -25,7 +25,9 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::{NameSpaceID, Range, VariableID, scope_manager::reserved_type_names::is_reserved_name};
+use crate::ast::{
+    NameSpaceID, Range, VariableID, scope_manager::reserved_type_names::is_reserved_name,
+};
 use std::{collections::HashMap, fmt::Display};
 
 /// ScopeRegistry manages scopes and variables belonging to them.

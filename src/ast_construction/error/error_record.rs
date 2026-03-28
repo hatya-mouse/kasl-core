@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Range,
+    ast::Range,
     error::{ErrorKind, Payload},
 };
 use std::collections::HashSet;

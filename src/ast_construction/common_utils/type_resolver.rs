@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    NameSpaceID, compilation_data::ProgramContext, parser_ast::ParserTypeName,
-    type_registry::ResolvedType,
+    ast::{NameSpaceID, compilation_data::ProgramContext, type_registry::ResolvedType},
+    parser::parser_ast::ParserTypeName,
 };
 
 pub(crate) fn resolve_type(

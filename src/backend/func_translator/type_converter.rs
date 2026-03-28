@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::type_registry::{PrimitiveType, ResolvedType};
+use crate::ast::type_registry::{PrimitiveType, ResolvedType};
 use cranelift::prelude::types;
 use cranelift_codegen::ir;
 use cranelift_jit::JITModule;

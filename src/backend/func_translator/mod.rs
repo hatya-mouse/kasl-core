@@ -25,8 +25,9 @@ mod utils;
 pub use type_converter::TypeConverter;
 
 use crate::{
-    FunctionID, backend::func_translator::translator_scope_registry::TranslatorScopeRegistry,
-    builtin::BuiltinRegistry, compilation_data::ProgramContext, scope_manager::IOBlueprint,
+    ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
+    backend::func_translator::translator_scope_registry::TranslatorScopeRegistry,
+    builtin::BuiltinRegistry,
 };
 use cranelift::prelude::FunctionBuilder;
 use cranelift_codegen::ir;

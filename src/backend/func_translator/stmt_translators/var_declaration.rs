@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
-use crate::{VariableID, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use crate::{
+    ast::{VariableID, type_registry::ResolvedType},
+    backend::func_translator::FuncTranslator,
+};
 use cranelift::prelude::Variable;
 
 impl FuncTranslator<'_> {

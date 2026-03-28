@@ -15,12 +15,14 @@
 //
 
 use crate::{
-    CompilationData, NameSpaceID, ParserDeclStmt,
+    ast::{
+        CompilationData, NameSpaceID,
+        compilation_data::{CompilerState, ProgramContext},
+    },
+    ast_construction::global_decl_collection::GlobalDeclCollector,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerState, ProgramContext},
     error::ErrorCollector,
-    global_decl_collection::GlobalDeclCollector,
-    kasl_parser,
+    parser::{ParserDeclStmt, kasl_parser},
 };
 use peg::{error::ParseError, str::LineCol};
 

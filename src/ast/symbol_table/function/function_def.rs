@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{
+use crate::ast::{
     Expr, NameSpaceID, Range, StructID, VariableID,
     symbol_table::{Block, UnresolvedExpr},
     type_registry::ResolvedType,

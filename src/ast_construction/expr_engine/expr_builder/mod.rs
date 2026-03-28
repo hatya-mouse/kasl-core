@@ -20,9 +20,9 @@ mod lhs_chain_parser;
 mod lhs_parser;
 
 use crate::{
-    ExprToken, ExprTokenKind,
+    ast::symbol_table::{OperatorContext, UnresolvedExpr},
     error::ErrorCollector,
-    symbol_table::{OperatorContext, UnresolvedExpr},
+    parser::{ExprToken, ExprTokenKind},
 };
 
 pub struct ExpressionBuilder<'a> {

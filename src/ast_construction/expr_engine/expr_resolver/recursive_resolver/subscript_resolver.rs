@@ -15,11 +15,13 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range,
+    ast::{
+        Expr, ExprKind, Range,
+        symbol_table::UnresolvedExpr,
+        type_registry::{PrimitiveType, ResolvedType},
+    },
+    ast_construction::expr_engine::ExpressionResolver,
     error::Ph,
-    expr_engine::ExpressionResolver,
-    symbol_table::UnresolvedExpr,
-    type_registry::{PrimitiveType, ResolvedType},
 };
 
 impl ExpressionResolver<'_> {

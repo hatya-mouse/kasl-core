@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{VariableID, backend::func_translator::FuncTranslator};
+use crate::{ast::VariableID, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {

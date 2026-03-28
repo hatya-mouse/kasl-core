@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::type_registry::ResolvedType;
+use crate::ast::type_registry::ResolvedType;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize)]
 pub struct ArrayDecl {

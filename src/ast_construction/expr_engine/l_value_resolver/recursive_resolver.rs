@@ -15,11 +15,14 @@
 //
 
 use crate::{
-    Expr, ExprKind, ExprToken,
+    ast::{
+        Expr, ExprKind,
+        scope_manager::VariableKind,
+        symbol_table::{LValue, LValueKind},
+    },
+    ast_construction::expr_engine::{LValueResolver, resolve_expr},
     error::Ph,
-    expr_engine::{LValueResolver, resolve_expr},
-    scope_manager::VariableKind,
-    symbol_table::{LValue, LValueKind},
+    parser::ExprToken,
 };
 
 impl LValueResolver<'_> {

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Range,
+    ast::Range,
     error::{ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity},
 };
 use std::collections::HashMap;

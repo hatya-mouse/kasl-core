@@ -17,8 +17,8 @@
 mod item_store;
 
 use crate::{
+    ast::scope_manager::IOBlueprint,
     backend::func_translator::{FuncTranslator, TranslatorParams},
-    scope_manager::IOBlueprint,
 };
 use cranelift_codegen::ir;
 

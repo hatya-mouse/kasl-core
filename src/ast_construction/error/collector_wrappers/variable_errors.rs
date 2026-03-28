@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Range,
+    ast::Range,
     error::{EK, ErrorCollector, Phase, Pl, Sv},
 };
 

@@ -15,9 +15,11 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range,
-    expr_engine::ExpressionResolver,
-    type_registry::{PrimitiveType, ResolvedType},
+    ast::{
+        Expr, ExprKind, Range,
+        type_registry::{PrimitiveType, ResolvedType},
+    },
+    ast_construction::expr_engine::ExpressionResolver,
 };
 
 impl ExpressionResolver<'_> {

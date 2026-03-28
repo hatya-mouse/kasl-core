@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    FuncCallArg, FunctionID, Statement, backend::func_translator::FuncTranslator, symbol_table,
-    type_registry::ResolvedType,
+    ast::symbol_table,
+    ast::type_registry::ResolvedType,
+    ast::{FuncCallArg, FunctionID, Statement},
+    backend::func_translator::FuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;

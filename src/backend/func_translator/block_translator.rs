@@ -16,7 +16,10 @@
 
 use cranelift_codegen::ir;
 
-use crate::{Statement, backend::func_translator::FuncTranslator, symbol_table::Block};
+use crate::{
+    ast::{Statement, symbol_table::Block},
+    backend::func_translator::FuncTranslator,
+};
 
 impl FuncTranslator<'_> {
     /// Translates the given block. This method does not create any new blocks.

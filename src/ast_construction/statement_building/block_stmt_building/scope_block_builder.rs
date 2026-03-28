@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    ParserScopeStmt, Range, ScopeID, Statement, statement_building::BlockStmtBuilder,
-    symbol_table::Block,
+    ast::{Range, ScopeID, Statement, symbol_table::Block},
+    ast_construction::statement_building::BlockStmtBuilder,
+    parser::ParserScopeStmt,
 };
 
 impl BlockStmtBuilder<'_> {

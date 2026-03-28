@@ -18,18 +18,20 @@ pub mod assert;
 pub mod builders;
 
 use kasl::{
-    CompilationData, ParserDeclStmt,
+    ast::{
+        CompilationData,
+        compilation_data::{CompilerState, ProgramContext},
+        scope_manager::IOBlueprint,
+    },
+    ast_construction::{
+        blueprint_builder::BlueprintBuilder, global_decl_collection::GlobalDeclCollector,
+        scope_graph_analyzing::ScopeGraphAnalyzer, statement_building::StatementBuilder,
+        struct_graph_analyzing::StructGraphAnalyzer,
+    },
     backend::Backend,
-    blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerState, ProgramContext},
     error::{ErrorCollector, ErrorRecord},
-    global_decl_collection::GlobalDeclCollector,
-    kasl_parser,
-    scope_graph_analyzing::ScopeGraphAnalyzer,
-    scope_manager::IOBlueprint,
-    statement_building::StatementBuilder,
-    struct_graph_analyzing::StructGraphAnalyzer,
+    parser::{ParserDeclStmt, kasl_parser},
 };
 use std::mem;
 

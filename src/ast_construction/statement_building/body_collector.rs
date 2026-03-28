@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    FunctionID, NameSpaceID, OperatorID, ScopeID,
-    statement_building::{BlockStmtBuilder, StatementBuilder},
+    ast::{FunctionID, NameSpaceID, OperatorID, ScopeID},
+    ast_construction::statement_building::{BlockStmtBuilder, StatementBuilder},
 };
 
 impl StatementBuilder<'_> {

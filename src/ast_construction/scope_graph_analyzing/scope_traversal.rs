@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ScopeID,
+    ast::ScopeID,
+    ast_construction::scope_graph_analyzing::{ScopeGraphAnalyzer, ScopeState},
     error::Ph,
-    scope_graph_analyzing::{ScopeGraphAnalyzer, ScopeState},
 };
 use std::{cmp::max, collections::HashMap};
 

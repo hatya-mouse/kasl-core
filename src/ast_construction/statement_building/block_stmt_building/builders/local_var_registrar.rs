@@ -15,9 +15,12 @@
 //
 
 use crate::{
-    Expr, ExprToken, Range, ScopeVar, VariableID, common_utils::resolve_type, error::Ph,
-    expr_engine::resolve_expr, parser_ast::ParserTypeName, scope_manager::VariableKind,
-    statement_building::BlockStmtBuilder,
+    ast::{Expr, Range, ScopeVar, VariableID, scope_manager::VariableKind},
+    ast_construction::{
+        common_utils::resolve_type, expr_engine::resolve_expr, statement_building::BlockStmtBuilder,
+    },
+    error::Ph,
+    parser::{ExprToken, parser_ast::ParserTypeName},
 };
 
 impl BlockStmtBuilder<'_> {

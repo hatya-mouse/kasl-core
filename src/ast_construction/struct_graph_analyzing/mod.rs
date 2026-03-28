@@ -17,7 +17,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    StructID, compilation_data::ProgramContext, error::ErrorCollector, type_registry::StructGraph,
+    ast::{StructID, compilation_data::ProgramContext, type_registry::StructGraph},
+    error::ErrorCollector,
 };
 mod struct_traversal;
 

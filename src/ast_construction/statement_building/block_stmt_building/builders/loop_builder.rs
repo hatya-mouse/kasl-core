@@ -15,12 +15,16 @@
 //
 
 use crate::{
-    ExprToken, ParserScopeStmt, Range, Statement,
-    common_utils::get_constant_int,
+    ast::{
+        Range, Statement,
+        type_registry::{PrimitiveType, ResolvedType},
+    },
+    ast_construction::{
+        common_utils::get_constant_int, expr_engine::resolve_expr,
+        statement_building::BlockStmtBuilder,
+    },
     error::Ph,
-    expr_engine::resolve_expr,
-    statement_building::BlockStmtBuilder,
-    type_registry::{PrimitiveType, ResolvedType},
+    parser::{ExprToken, ParserScopeStmt},
 };
 
 impl BlockStmtBuilder<'_> {

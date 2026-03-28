@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
-use crate::{StructID, backend::func_translator::FuncTranslator, namespace_registry::ArrayID};
+use crate::{
+    ast::{StructID, namespace_registry::ArrayID},
+    backend::func_translator::FuncTranslator,
+};
 use cranelift::prelude::{StackSlotData, StackSlotKind};
 use cranelift_codegen::ir::StackSlot;
 

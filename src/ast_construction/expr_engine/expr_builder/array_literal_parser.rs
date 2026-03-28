@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind,
-    expr_engine::ExpressionBuilder,
-    symbol_table::{UnresolvedExpr, UnresolvedExprKind},
+    ast::symbol_table::{UnresolvedExpr, UnresolvedExprKind},
+    ast_construction::expr_engine::ExpressionBuilder,
+    parser::{ExprToken, ExprTokenKind},
 };
 
 impl ExpressionBuilder<'_> {

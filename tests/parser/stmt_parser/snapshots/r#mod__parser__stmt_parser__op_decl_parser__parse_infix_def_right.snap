@@ -15,7 +15,7 @@ expression: parsed
                 associativity: Right,
                 range: Range {
                     start: 19,
-                    end: 55,
+                    end: 56,
                 },
             },
         },

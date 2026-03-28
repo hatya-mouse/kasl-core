@@ -15,10 +15,12 @@
 //
 
 use crate::{
-    Expr,
+    ast::{
+        Expr,
+        symbol_table::{LValue, LValueKind},
+        type_registry::ResolvedType,
+    },
     backend::func_translator::FuncTranslator,
-    symbol_table::{LValue, LValueKind},
-    type_registry::ResolvedType,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;

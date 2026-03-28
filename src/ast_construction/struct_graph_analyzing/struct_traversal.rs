@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    StructID,
+    ast::StructID,
+    ast_construction::struct_graph_analyzing::{StructGraphAnalyzer, StructState},
     error::Ph,
-    struct_graph_analyzing::{StructGraphAnalyzer, StructState},
 };
 use std::collections::HashMap;
 

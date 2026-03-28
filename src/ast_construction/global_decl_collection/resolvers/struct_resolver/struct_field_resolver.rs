@@ -15,10 +15,12 @@
 //
 
 use crate::{
-    ExprToken, Range, StructID,
-    global_decl_collection::GlobalDeclCollector,
-    parser_ast::ParserTypeName,
-    type_registry::{ResolvedType, StructDecl, StructField},
+    ast::{
+        Range, StructID,
+        type_registry::{ResolvedType, StructDecl, StructField},
+    },
+    ast_construction::global_decl_collection::GlobalDeclCollector,
+    parser::{ExprToken, parser_ast::ParserTypeName},
 };
 
 impl GlobalDeclCollector<'_> {

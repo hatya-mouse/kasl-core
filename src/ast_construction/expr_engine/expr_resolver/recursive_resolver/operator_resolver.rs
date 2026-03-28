@@ -15,10 +15,12 @@
 //
 
 use crate::{
-    Expr, ExprKind, FuncCallArg, Range,
+    ast::{
+        Expr, ExprKind, FuncCallArg, Range,
+        symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef, UnresolvedExpr},
+    },
+    ast_construction::expr_engine::ExpressionResolver,
     error::Ph,
-    expr_engine::ExpressionResolver,
-    symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef, UnresolvedExpr},
 };
 
 impl ExpressionResolver<'_> {

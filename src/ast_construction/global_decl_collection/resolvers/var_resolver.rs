@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    ExprToken, InputAttribute, ParserInputAttribute, Range, expr_engine::resolve_expr,
-    global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName,
-    scope_manager::VariableKind,
+    ast::{InputAttribute, Range, scope_manager::VariableKind},
+    ast_construction::{expr_engine::resolve_expr, global_decl_collection::GlobalDeclCollector},
+    parser::{ExprToken, ParserInputAttribute, parser_ast::ParserTypeName},
 };
 
 impl GlobalDeclCollector<'_> {

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, backend::func_translator::FuncTranslator};
+use crate::{ast::Expr, backend::func_translator::FuncTranslator};
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::{self, BlockArg};
 

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{OperatorID, ParserScopeStmt};
+use crate::{ast::OperatorID, parser::ParserScopeStmt};
 use std::collections::HashMap;
 
 #[derive(Default, Debug)]

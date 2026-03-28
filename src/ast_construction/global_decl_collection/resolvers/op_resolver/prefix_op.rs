@@ -15,11 +15,13 @@
 //
 
 use crate::{
-    FuncParam, ParserScopeStmt, PrefixOperator, PrefixOperatorProperties, Range,
+    ast::{
+        FuncParam, PrefixOperator, PrefixOperatorProperties, Range, symbol_table::Block,
+        type_registry::ResolvedType,
+    },
+    ast_construction::global_decl_collection::GlobalDeclCollector,
     error::{EK, Ph},
-    global_decl_collection::GlobalDeclCollector,
-    symbol_table::Block,
-    type_registry::ResolvedType,
+    parser::ParserScopeStmt,
 };
 
 impl GlobalDeclCollector<'_> {

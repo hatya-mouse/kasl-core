@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{
+use crate::ast::{
     NameSpaceID,
     compilation_data::ProgramContext,
     scope_manager::{BlueprintItem, IOBlueprint, VariableKind},

@@ -26,7 +26,6 @@ pub mod localization;
 pub mod parser;
 pub mod run_program;
 
-pub use ast::*;
-pub use ast_construction::*;
+pub use ast_construction::error;
 pub use compiler::KaslCompiler;
-pub use parser::*;
+pub use run_program::{run_buffer, run_once};

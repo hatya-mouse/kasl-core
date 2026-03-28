@@ -15,10 +15,13 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, OperatorAssociativity,
+    ast::{
+        OperatorAssociativity,
+        symbol_table::{UnresolvedExpr, UnresolvedExprKind},
+    },
+    ast_construction::expr_engine::ExpressionBuilder,
     error::Ph,
-    expr_engine::ExpressionBuilder,
-    symbol_table::{UnresolvedExpr, UnresolvedExprKind},
+    parser::{ExprToken, ExprTokenKind},
 };
 use std::{iter::Peekable, slice::Iter};
 

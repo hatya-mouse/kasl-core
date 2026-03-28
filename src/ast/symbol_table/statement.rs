@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, ScopeID, VariableID, symbol_table::LValue};
+use crate::ast::{Expr, ScopeID, VariableID, symbol_table::LValue};
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Block {

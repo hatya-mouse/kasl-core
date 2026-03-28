@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Range, VariableID, scope_manager::ScopeID};
+use crate::ast::{Range, VariableID, scope_manager::ScopeID};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, serde::Serialize)]

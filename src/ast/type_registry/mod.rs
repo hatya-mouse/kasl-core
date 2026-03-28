@@ -26,7 +26,7 @@ pub use resolved_type::ResolvedType;
 pub use struct_decl::{StructDecl, StructField};
 pub use struct_graph::StructGraph;
 
-use crate::{NameSpaceID, StructID, namespace_registry::ArrayID};
+use crate::ast::{NameSpaceID, StructID, namespace_registry::ArrayID};
 use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, Default, Clone, serde::Serialize)]

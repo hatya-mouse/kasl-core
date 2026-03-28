@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{builtin::BuiltinRegistry, type_registry::PrimitiveType};
+use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
 use cranelift::prelude::{InstBuilder, IntCC};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {

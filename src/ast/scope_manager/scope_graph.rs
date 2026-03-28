@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::ScopeID;
+use crate::ast::ScopeID;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Default, Debug)]

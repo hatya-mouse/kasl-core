@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
-use crate::{IfArm, backend::func_translator::FuncTranslator, symbol_table};
+use crate::{
+    ast::{IfArm, symbol_table},
+    backend::func_translator::FuncTranslator,
+};
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 

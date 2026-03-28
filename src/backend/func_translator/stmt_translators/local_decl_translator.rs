@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{VariableID, backend::func_translator::FuncTranslator};
+use crate::{ast::VariableID, backend::func_translator::FuncTranslator};
 
 impl FuncTranslator<'_> {
     pub fn translate_local_var(&mut self, var_id: &VariableID) {

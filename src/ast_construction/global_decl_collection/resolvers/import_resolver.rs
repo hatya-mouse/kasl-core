@@ -15,12 +15,11 @@
 //
 
 use crate::{
-    Range,
-    compilation_data::CompilerState,
+    ast::{Range, compilation_data::CompilerState, namespace_registry::ImportPath},
+    ast_construction::{
+        global_decl_collection::GlobalDeclCollector, namespace_constructor::NameSpaceConstructor,
+    },
     error::{ErrorCollector, Ph},
-    global_decl_collection::GlobalDeclCollector,
-    namespace_constructor::NameSpaceConstructor,
-    namespace_registry::ImportPath,
 };
 use std::{collections::HashSet, fs::File, io::Read, path::PathBuf};
 

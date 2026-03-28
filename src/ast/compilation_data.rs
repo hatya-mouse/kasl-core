@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{
+use crate::ast::{
     OperatorContext, ScopeRegistry,
     namespace_registry::NameSpaceRegistry,
     scope_manager::ScopeGraph,

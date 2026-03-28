@@ -32,7 +32,8 @@ mod typealias_resolver;
 mod var_resolver;
 
 use crate::{
-    ParserFuncParam, ParserScopeStmt, parser_ast::ParserTypeName, symbol_table::FunctionType,
+    ast::symbol_table::FunctionType,
+    parser::{ParserFuncParam, ParserScopeStmt, parser_ast::ParserTypeName},
 };
 
 pub struct FuncDeclInfo<'a> {

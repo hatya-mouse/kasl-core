@@ -27,7 +27,7 @@ use crate::{
         collect_global_decls,
     },
 };
-use kasl::{error::EK, parser_ast::ParserTypeName, symbol_path};
+use kasl::{error::EK, parser::parser_ast::ParserTypeName, symbol_path};
 
 // -- SUCCESS CASES ---
 

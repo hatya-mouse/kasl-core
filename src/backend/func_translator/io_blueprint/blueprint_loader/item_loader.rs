@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    backend::func_translator::FuncTranslator, scope_manager::BlueprintItem,
-    type_registry::ResolvedType,
+    ast::{scope_manager::BlueprintItem, type_registry::ResolvedType},
+    backend::func_translator::FuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags, types};
 use cranelift_codegen::ir;

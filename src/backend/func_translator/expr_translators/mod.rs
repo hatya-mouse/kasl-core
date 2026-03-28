@@ -26,7 +26,10 @@ mod struct_field;
 mod struct_init;
 mod subscript;
 
-use crate::{Expr, ExprKind, backend::func_translator::FuncTranslator};
+use crate::{
+    ast::{Expr, ExprKind},
+    backend::func_translator::FuncTranslator,
+};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {

@@ -22,14 +22,15 @@ mod identifier_resolver;
 mod instance_func_resolver;
 mod static_func_resolver;
 
-use std::{iter::Peekable, slice::Iter};
-
 use crate::{
-    Expr, NameSpaceID, Range, ScopeID,
+    ast::{
+        Expr, NameSpaceID, Range, ScopeID,
+        symbol_table::{UnresolvedChainElement, UnresolvedExpr},
+    },
+    ast_construction::expr_engine::ExpressionResolver,
     error::Ph,
-    expr_engine::ExpressionResolver,
-    symbol_table::{UnresolvedChainElement, UnresolvedExpr},
 };
+use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionResolver<'_> {
     pub fn resolve_chain(

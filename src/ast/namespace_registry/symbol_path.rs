@@ -131,7 +131,7 @@ macro_rules! symbol_path {
                 // Type check to ensure it's a String
                 let _: &String = &temp_val;
                 // Push the component to the vector
-                temp_path.push($crate::SymbolPathComponent { symbol: temp_val.to_string() });
+                temp_path.push($crate::ast::SymbolPathComponent { symbol: temp_val.to_string() });
             )*
             temp_path
         }

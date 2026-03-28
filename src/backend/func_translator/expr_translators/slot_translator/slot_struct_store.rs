@@ -14,7 +14,9 @@
 //  limitations under the License.
 //
 
-use crate::{StructID, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use crate::{
+    ast::StructID, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+};
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::StackSlot;
 

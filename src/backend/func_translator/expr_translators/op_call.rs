@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
-use crate::{FuncCallArg, OperatorID, backend::func_translator::FuncTranslator};
+use crate::{
+    ast::{FuncCallArg, OperatorID},
+    backend::func_translator::FuncTranslator,
+};
 use cranelift_codegen::ir;
 use std::slice;
 

@@ -18,7 +18,10 @@ mod brif_loop;
 mod copy_value;
 mod stack_slot;
 
-use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
+use crate::{
+    ast::{Expr, type_registry::ResolvedType},
+    backend::func_translator::FuncTranslator,
+};
 use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;
 

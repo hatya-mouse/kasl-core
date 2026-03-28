@@ -15,14 +15,12 @@
 //
 
 use crate::{
-    FunctionID,
+    ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
     backend::{
         Backend,
         func_translator::{FuncTranslator, TranslatorParams},
     },
     builtin::BuiltinRegistry,
-    compilation_data::ProgramContext,
-    scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{AbiParam, FunctionBuilder, InstBuilder, types};
 use cranelift_codegen::{settings, verify_function};

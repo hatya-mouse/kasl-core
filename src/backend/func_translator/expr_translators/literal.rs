@@ -15,8 +15,8 @@
 //
 
 use crate::{
+    ast::type_registry::{PrimitiveType, ResolvedType},
     backend::func_translator::FuncTranslator,
-    type_registry::{PrimitiveType, ResolvedType},
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;

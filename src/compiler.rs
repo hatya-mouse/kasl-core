@@ -15,21 +15,78 @@
 //
 
 use crate::{
-    CompilationData, MAIN_FUNCTION_NAME, ParserDeclStmt, Range,
+    MAIN_FUNCTION_NAME,
+    ast::{
+        CompilationData, Range,
+        compilation_data::{CompilerState, ProgramContext},
+        scope_manager::IOBlueprint,
+    },
+    ast_construction::{
+        BlueprintBuilder, GlobalDeclCollector, ScopeGraphAnalyzer, StatementBuilder,
+        StructGraphAnalyzer,
+    },
     backend::Backend,
-    blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerState, ProgramContext},
     error::{EK, ErrorCollector, ErrorKey, ErrorRecord, Ph, Pl, Sv},
-    global_decl_collection::GlobalDeclCollector,
-    kasl_parser,
-    scope_graph_analyzing::ScopeGraphAnalyzer,
-    scope_manager::IOBlueprint,
-    statement_building::StatementBuilder,
-    struct_graph_analyzing::StructGraphAnalyzer,
+    parser::{ParserDeclStmt, kasl_parser},
 };
 use std::path::PathBuf;
 
+/// The main compiler struct that manages the entire compilation process, from parsing to code generation.
+///
+/// If you want to run the process individually, you might want to use the individual components directly,
+/// because this struct provides a convenient interface for the entire process.
+///
+/// # How does it work?
+///
+/// The compiler processes the KASL code in several stages:
+/// 1. **Parsing**: The `parse` method takes the KASL code.
+/// 2. **Building**: The `build` method analyzes the parsed code and constructs an `IOBlueprint`. Building phase has several sub-stages:
+///     1. Collect global declarations (e.g. `input`) using `GlobalDeclCollector`.
+///     2. Analyze struct graph and find recursive structs using `StructGraphAnalyzer`.
+///     3. Build statements inside functions using `StatementBuilder`.
+///     4. Analyze scope graph and find recursive calls using `ScopeGraphAnalyzer`.
+///     5. Finally, build an `IOBlueprint` using `BlueprintBuilder`.
+/// 3. **Compilation**: Compile the AST into a ready-to-run program. The `compile_once` method compiles the program that runs only once, while the `compile_buffer` method compiles the program that runs given times.
+///
+/// # Usage
+/// ```rust
+/// use kasl::{KaslCompiler, run_once};
+///
+/// let code = r#"
+/// output out_value = 0
+///
+/// func main() {
+///     out_value = Builtin.iadd(1, 1)
+/// }
+/// "#;
+///
+/// // Create a new instance of the compiler
+/// let mut compiler = KaslCompiler::default();
+///
+/// // Parse the KASL code
+/// compiler.parse(code).expect("Failed to parse code");
+///
+/// // Analyze and build the program, which returns an IOBlueprint
+/// let blueprint = compiler.build().expect("Failed to build program");
+///
+/// // Allocate a memory for the output value based on the blueprint
+/// let out_value_size = blueprint.get_outputs()[0].actual_size;
+/// let out_value_ptr = unsafe {
+///     let layout = std::alloc::Layout::from_size_align(out_value_size, 1).unwrap();
+///     std::alloc::alloc(layout) as *mut ()
+/// };
+///
+/// // Compile the program
+/// let program_ptr = compiler.compile_once(&blueprint).expect("Failed to compile program");
+///
+/// // Run the program
+/// unsafe {
+///     run_once(program_ptr, &[], &[out_value_ptr], &[], 1);
+/// }
+///
+/// assert_eq!(unsafe { *(out_value_ptr as *const i32) }, 2);
+/// ```
 #[derive(Default)]
 pub struct KaslCompiler {
     ec: ErrorCollector,

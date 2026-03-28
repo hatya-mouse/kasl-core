@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, VariableID, type_registry::ResolvedType};
+use crate::ast::{Expr, VariableID, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct LValue {

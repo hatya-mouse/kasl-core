@@ -15,7 +15,9 @@
 //
 
 use crate::{
-    Expr, ExprKind, backend::func_translator::FuncTranslator, namespace_registry::ArrayID,
+    ast::namespace_registry::ArrayID,
+    ast::{Expr, ExprKind},
+    backend::func_translator::FuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir::StackSlot;

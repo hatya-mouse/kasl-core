@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{FunctionID, ParserScopeStmt};
+use crate::{ast::FunctionID, parser::ParserScopeStmt};
 use std::collections::HashMap;
 
 #[derive(Debug, Default, serde::Serialize)]

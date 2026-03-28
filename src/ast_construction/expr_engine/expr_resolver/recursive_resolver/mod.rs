@@ -22,9 +22,11 @@ mod operator_resolver;
 mod subscript_resolver;
 
 use crate::{
-    Expr,
-    expr_engine::ExpressionResolver,
-    symbol_table::{UnresolvedExpr, UnresolvedExprKind},
+    ast::{
+        Expr,
+        symbol_table::{UnresolvedExpr, UnresolvedExprKind},
+    },
+    ast_construction::expr_engine::ExpressionResolver,
 };
 
 impl ExpressionResolver<'_> {

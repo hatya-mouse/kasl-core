@@ -8,37 +8,37 @@ infix_operator_properties:
     associativity: Left
     range:
       start: 172
-      end: 210
+      end: 211
   "*":
     precedence: 6
     associativity: Left
     range:
       start: 754
-      end: 792
+      end: 793
   +:
     precedence: 5
     associativity: Left
     range:
       start: 610
-      end: 648
+      end: 649
   "==":
     precedence: 3
     associativity: Left
     range:
       start: 321
-      end: 359
+      end: 360
   ">":
     precedence: 4
     associativity: Left
     range:
       start: 466
-      end: 504
+      end: 505
   "||":
     precedence: 1
     associativity: Left
     range:
       start: 24
-      end: 62
+      end: 63
 infix_operators:
   0:
     symbol: "||"
@@ -418,7 +418,7 @@ prefix_operator_properties:
     precedence: 7
     range:
       start: 899
-      end: 912
+      end: 913
 prefix_operators:
   6:
     symbol: "!"

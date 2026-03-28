@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{
+use crate::ast::{
     InfixOperatorProperties, PostfixOperatorProperties, PrefixOperatorProperties, Range,
     SymbolPath, namespace_registry::ImportPath, symbol_table::UnresolvedExpr,
 };

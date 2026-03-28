@@ -20,8 +20,12 @@ mod scope_block_builder;
 mod stmt_builder;
 
 use crate::{
-    CompilationData, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
-    compilation_data::ProgramContext, error::ErrorCollector, type_registry::ResolvedType,
+    ast::{
+        CompilationData, NameSpaceID, ScopeID, compilation_data::ProgramContext,
+        type_registry::ResolvedType,
+    },
+    builtin::BuiltinRegistry,
+    error::ErrorCollector,
 };
 
 /// Builds a statements from raw parser statements.

@@ -14,9 +14,8 @@
 //  limitations under the License.
 //
 
+use crate::ast::{Expr, VariableID, type_registry::ResolvedType};
 use std::collections::HashMap;
-
-use crate::{Expr, VariableID, type_registry::ResolvedType};
 
 #[derive(Default)]
 pub struct IOBlueprint {

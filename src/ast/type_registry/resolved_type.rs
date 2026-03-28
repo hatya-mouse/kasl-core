@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{StructID, namespace_registry::ArrayID, type_registry::PrimitiveType};
+use crate::ast::{StructID, namespace_registry::ArrayID, type_registry::PrimitiveType};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum ResolvedType {

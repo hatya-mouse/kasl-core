@@ -18,11 +18,10 @@ mod member_func_resolver;
 mod struct_field_resolver;
 
 use crate::{
-    ParserDeclStmt, ParserDeclStmtKind, Range, StructID,
+    ast::{Range, StructID, symbol_table::FunctionType, type_registry::StructDecl},
+    ast_construction::global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
     error::Ph,
-    global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    symbol_table::FunctionType,
-    type_registry::StructDecl,
+    parser::{ParserDeclStmt, ParserDeclStmtKind},
 };
 
 impl<'a> GlobalDeclCollector<'a> {

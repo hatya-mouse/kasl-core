@@ -17,14 +17,16 @@
 mod resolvers;
 mod stmt_process;
 
-pub use resolvers::FuncDeclInfo;
-
 use crate::{
-    CompilationData, NameSpaceID, ParserDeclStmt, ScopeID,
+    ast::{
+        CompilationData, NameSpaceID, ScopeID,
+        compilation_data::{CompilerState, ProgramContext},
+    },
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerState, ProgramContext},
     error::ErrorCollector,
+    parser::ParserDeclStmt,
 };
+pub use resolvers::FuncDeclInfo;
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,

@@ -18,7 +18,7 @@ mod struct_field;
 
 pub use struct_field::StructField;
 
-use crate::{Range, VariableID, type_registry::TypeRegistry};
+use crate::ast::{Range, VariableID, type_registry::TypeRegistry};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]

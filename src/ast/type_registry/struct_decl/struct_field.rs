@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{Expr, Range, type_registry::ResolvedType};
+use crate::ast::{Expr, Range, type_registry::ResolvedType};
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct StructField {

@@ -14,7 +14,7 @@ expression: parsed
                 precedence: 20,
                 range: Range {
                     start: 21,
-                    end: 35,
+                    end: 36,
                 },
             },
         },
