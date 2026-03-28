@@ -241,20 +241,20 @@ peg::parser!(pub grammar kasl_parser() for str {
         ) { value }
 
     rule infix_properties() -> InfixOperatorProperties
-        = start:position!() precedence:precedence_prop() __? comma() __? associativity:associativity_prop() end:position!() {
+        = start:position!() precedence:precedence_prop() __? comma() __? associativity:associativity_prop() __? comma()? end:position!() {
             InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
         }
-        / start:position!() associativity:associativity_prop() __? comma() __? precedence:precedence_prop() end:position!() {
+        / start:position!() associativity:associativity_prop() __? comma() __? precedence:precedence_prop() __? comma()? end:position!() {
             InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
         }
 
     rule prefix_properties() -> PrefixOperatorProperties
-        = start:position!() precedence:precedence_prop() end:position!() {
+        = start:position!() precedence:precedence_prop() __? comma()? end:position!() {
             PrefixOperatorProperties { precedence, range: Range::n(start, end) }
         }
 
     rule postfix_properties() -> PostfixOperatorProperties
-        = start:position!() precedence:precedence_prop() end:position!() {
+        = start:position!() precedence:precedence_prop() __? comma()? end:position!() {
             PostfixOperatorProperties { precedence, range: Range::n(start, end) }
         }
 
