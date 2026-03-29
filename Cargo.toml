@@ -5,6 +5,7 @@ edition = "2024"
 license = "Apache-2.0"
 description = "Compile and run KASL programs from your Rust code."
 repository = "https://github.com/hatya-mouse/kasl"
+homepage = "https://hatya.dev"
 readme = "README.md"
 exclude = [
     "tests/*",
