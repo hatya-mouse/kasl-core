@@ -1,6 +1,6 @@
 [package]
 name = "kasl"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 license = "Apache-2.0"
 description = "Compile and run KASL programs from your Rust code."
