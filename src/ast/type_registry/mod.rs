@@ -119,20 +119,18 @@ impl TypeRegistry {
 
     // --- TYPE SIZE AND ALIGNMENT ---
 
-    pub fn get_type_actual_size(&self, type_id: &ResolvedType) -> Option<usize> {
+    pub fn get_type_actual_size(&self, type_id: &ResolvedType) -> Option<u32> {
         match type_id {
             ResolvedType::Primitive(ty) => Some(ty.size()),
             ResolvedType::Array(array_id) => self.get_array_decl(array_id).and_then(|a| {
                 self.get_type_actual_size(a.item_type())
-                    .map(|s| s * *a.count() as usize)
+                    .map(|s| s * *a.count())
             }),
-            ResolvedType::Struct(struct_id) => {
-                self.get_struct(struct_id).map(|s| s.total_size as usize)
-            }
+            ResolvedType::Struct(struct_id) => self.get_struct(struct_id).map(|s| s.total_size),
         }
     }
 
-    pub fn get_type_alignment(&self, type_id: &ResolvedType) -> Option<u8> {
+    pub fn get_type_alignment(&self, type_id: &ResolvedType) -> Option<u32> {
         match type_id {
             ResolvedType::Primitive(ty) => Some(ty.alignment()),
             ResolvedType::Array(array_id) => self

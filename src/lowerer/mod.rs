@@ -14,11 +14,20 @@
 //  limitations under the License.
 //
 
+mod func_translator;
+
 use crate::{
     ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
-    builtin::BuiltinRegistry,
+    lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{IRBuilder, IRType};
+use kasl_ir::ir::{IRBuilder, IRType, InstBuilder, Value};
+
+pub struct TranslatorParams {
+    pub input_ptr_ptr: Value,
+    pub output_ptr_ptr: Value,
+    pub state_ptr_ptr: Value,
+    pub should_init: Value,
+}
 
 #[derive(Default)]
 pub struct Lowerer;
@@ -28,7 +37,6 @@ impl Lowerer {
     pub fn lower(
         &self,
         prog_ctx: &ProgramContext,
-        builtin_registry: &BuiltinRegistry,
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) {
@@ -49,15 +57,34 @@ impl Lowerer {
         builder.set_entry_block(entry_block);
 
         // Get the entry block parameters
-        let params = builder.get_block_args(entry_block) else {
+        let Some(block_params) = builder.get_block_args(entry_block) else {
             return;
+        };
+        let translator_params = TranslatorParams {
+            input_ptr_ptr: block_params[0],
+            output_ptr_ptr: block_params[1],
+            state_ptr_ptr: block_params[2],
+            should_init: block_params[3],
         };
 
         // Create a return block
         let return_block = builder.create_block(&[]);
 
         // Lower the program context to KASL-IR
+        let mut translator = FuncTranslator::new(builder, prog_ctx);
+        translator.translate(
+            translator_params,
+            None,
+            entry_point,
+            blueprint,
+            return_block,
+        );
+
+        // Add jump instruction
+        translator.builder.jump(return_block, &[]);
 
         // Add return instruction to the return block
+        translator.builder.switch_to_block(return_block);
+        translator.builder._return(&[]);
     }
 }

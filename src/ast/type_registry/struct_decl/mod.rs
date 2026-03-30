@@ -36,7 +36,7 @@ pub struct StructDecl {
     /// The total size of the struct in bytes.
     pub total_size: u32,
     /// The alignment of the struct in bytes.
-    pub alignment: u8,
+    pub alignment: u32,
 
     /// The range of the struct declaration in the source code.
     pub range: Range,
@@ -75,7 +75,7 @@ impl StructDecl {
 
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
         let mut offset = 0i32;
-        let mut max_alignment = 1u8;
+        let mut max_alignment = 1u32;
 
         for field in &mut self.fields {
             // Get the size and alignment of the field's type

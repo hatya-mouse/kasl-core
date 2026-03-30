@@ -25,7 +25,7 @@ pub enum PrimitiveType {
 }
 
 impl PrimitiveType {
-    pub fn size(&self) -> usize {
+    pub fn size(&self) -> u32 {
         match self {
             PrimitiveType::Bool => 1,
             PrimitiveType::Int => 4,
@@ -34,7 +34,7 @@ impl PrimitiveType {
         }
     }
 
-    pub fn alignment(&self) -> u8 {
+    pub fn alignment(&self) -> u32 {
         match self {
             PrimitiveType::Bool => 1,
             PrimitiveType::Int => 4,

@@ -33,9 +33,9 @@ pub struct BlueprintItem {
     /// The name of the variable.
     pub name: String,
     /// The actual memory size of the variable, in bytes.
-    pub actual_size: usize,
+    pub actual_size: u32,
     /// The alignment of the variable, in bytes.
-    pub align: u8,
+    pub align: u32,
     /// The type of the variable.
     pub value_type: ResolvedType,
     /// The default value of the variable, which will be used for initialization.
