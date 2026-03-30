@@ -402,9 +402,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.47.1"
+version = "1.47.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99322078b2c076829a1db959d49da554fabc4342257fc0ba5a070a1eb3a01cd8"
+checksum = "7b4a6248eb93a4401ed2f37dfe8ea592d3cf05b7cf4f8efa867b6895af7e094e"
 dependencies = [
  "console",
  "once_cell",
@@ -444,7 +444,7 @@ dependencies = [
 [[package]]
 name = "kasl-ir"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl-ir#469cb06dee467a4ae4e52fcba53e4220037e34d0"
+source = "git+https://github.com/hatya-mouse/kasl-ir#bf11f3a8eb25933051c52d91506f3e68acdd82b7"
 
 [[package]]
 name = "leb128fmt"

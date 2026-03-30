@@ -57,9 +57,7 @@ impl Lowerer {
         builder.set_entry_block(entry_block);
 
         // Get the entry block parameters
-        let Some(block_params) = builder.get_block_args(entry_block) else {
-            return;
-        };
+        let block_params = builder.get_block_args(entry_block);
         let translator_params = TranslatorParams {
             input_ptr_ptr: block_params[0],
             output_ptr_ptr: block_params[1],

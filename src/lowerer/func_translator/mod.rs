@@ -15,7 +15,9 @@
 //
 
 mod blueprint;
+mod expr_translator;
 mod ir_scope_registry;
+mod stmt_translator;
 mod type_converter;
 mod utils;
 
