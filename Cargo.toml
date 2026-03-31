@@ -1,5 +1,5 @@
 [package]
-name = "kasl-core"
+name = "kasl_core"
 version = "0.1.4"
 edition = "2024"
 license = "Apache-2.0"
