@@ -15,19 +15,16 @@
 //
 
 use crate::ast::type_registry::ResolvedType;
-use cranelift::prelude::FunctionBuilder;
-use cranelift_codegen::ir;
-use cranelift_jit::JITModule;
+use kasl_ir::ir::{IRBuilder, Value};
 use std::fmt::Display;
 
-pub type BuiltinCLIFFuncTranslator =
-    Box<dyn Fn(&mut JITModule, &mut FunctionBuilder, &[ir::Value]) -> ir::Value>;
+pub type BuiltinFuncTranslator = Box<dyn Fn(&mut IRBuilder, &[Value]) -> Value>;
 
 pub struct BuiltinFunc {
     pub name: &'static str,
     pub params: Vec<ResolvedType>,
     pub return_type: ResolvedType,
-    pub translator: BuiltinCLIFFuncTranslator,
+    pub translator: BuiltinFuncTranslator,
 }
 
 /// An ID used to identify an builtin function.

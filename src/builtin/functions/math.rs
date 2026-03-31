@@ -25,14 +25,14 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "sqrt",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().sqrt(args[0])),
+        Box::new(|builder, args| builder.ins().sqrt(args[0])),
     );
 
     registry.register_func(
         "fast_sin",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let x = args[0];
 
             let pi = builder.ins().f32const(std::f32::consts::PI);
@@ -66,7 +66,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "fast_cos",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let x = args[0];
 
             let pi_half = builder.ins().f32const(std::f32::consts::PI / 2.0);

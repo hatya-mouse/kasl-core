@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+mod array_literal;
 mod func_call;
 mod identifier;
 mod initialization;
@@ -21,6 +22,7 @@ mod literal;
 mod op_call;
 mod struct_field;
 mod struct_init;
+mod subscript;
 
 use crate::{
     ast::{Expr, ExprKind},
@@ -49,9 +51,7 @@ impl FuncTranslator<'_> {
             }
             ExprKind::StructInit { id, .. } => Some(self.translate_struct_init(id)),
             ExprKind::StaticFuncCall { id, args, .. } => self.translate_func_call_expr(id, args),
-            ExprKind::InstanceFuncCall { id, args, .. } => {
-                self.translate_instance_call_expr(id, args)
-            }
+            ExprKind::InstanceFuncCall { id, args, .. } => self.translate_func_call_expr(id, args),
             ExprKind::FuncCall { id, args, .. } => self.translate_func_call_expr(id, args),
             ExprKind::BuiltinFuncCall { id, args, .. } => {
                 Some(self.translate_builtin_func_call(id, args))

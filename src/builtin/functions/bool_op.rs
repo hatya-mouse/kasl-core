@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use cranelift::prelude::{InstBuilder, IntCC};
+use kasl_ir::ir::{InstBuilder, IntCmp};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- COMPARISON OPERATORS ---
@@ -24,13 +24,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "beq",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
+        Box::new(|builder, args| builder.icmp(IntCmp::Eq, args[0], args[1])),
     );
 
     registry.register_func(
         "bne",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
+        Box::new(|builder, args| builder.icmp(IntCmp::Ne, args[0], args[1])),
     );
 }

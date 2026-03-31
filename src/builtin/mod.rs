@@ -20,8 +20,7 @@ mod builtin_func;
 mod functions;
 
 use crate::ast::type_registry::{PrimitiveType, ResolvedType};
-pub use builtin_func::{BuiltinCLIFFuncTranslator, BuiltinFunc, BuiltinFuncID};
-use cranelift_jit::JITBuilder;
+pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
 use std::collections::HashMap;
 
 pub struct BuiltinRegistry {
@@ -61,25 +60,12 @@ impl BuiltinRegistry {
         id
     }
 
-    pub(crate) fn register_symbols(builder: &mut JITBuilder) {
-        // --- TRIGONOMETRIC FUNCTIONS ---
-        builder.symbol("sin", f32::sin as *const u8);
-        builder.symbol("cos", f32::cos as *const u8);
-        builder.symbol("tan", f32::tan as *const u8);
-        builder.symbol("asin", f32::asin as *const u8);
-        builder.symbol("acos", f32::acos as *const u8);
-        builder.symbol("atan", f32::atan as *const u8);
-        builder.symbol("atan2", f32::atan2 as *const u8);
-
-        builder.symbol("fpow", f32::powf as *const u8);
-    }
-
     pub(in crate::builtin) fn register_func(
         &mut self,
         name: &'static str,
         params: &[PrimitiveType],
         return_type: PrimitiveType,
-        translator: BuiltinCLIFFuncTranslator,
+        translator: BuiltinFuncTranslator,
     ) {
         let func_id = self.generate_id();
         let func = BuiltinFunc {

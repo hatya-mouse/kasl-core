@@ -24,28 +24,28 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "iadd",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| builder.ins().iadd(args[0], args[1])),
+        Box::new(|builder, args| builder.ins().iadd(args[0], args[1])),
     );
 
     registry.register_func(
         "isub",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| builder.ins().isub(args[0], args[1])),
+        Box::new(|builder, args| builder.ins().isub(args[0], args[1])),
     );
 
     registry.register_func(
         "imul",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| builder.ins().imul(args[0], args[1])),
+        Box::new(|builder, args| builder.ins().imul(args[0], args[1])),
     );
 
     registry.register_func(
         "idiv",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let diviend = args[0];
             let divisor = args[1];
 
@@ -63,7 +63,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "imod",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let diviend = args[0];
             let divisor = args[1];
 
@@ -83,7 +83,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "imax",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let is_lhs_greater = builder
                 .ins()
                 .icmp(IntCC::SignedGreaterThan, args[0], args[1]);
@@ -95,7 +95,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "imin",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let is_lhs_lesser = builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1]);
             builder.ins().select(is_lhs_lesser, args[0], args[1])
         }),
@@ -107,14 +107,14 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "iabs",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| builder.ins().iabs(args[0])),
+        Box::new(|builder, args| builder.ins().iabs(args[0])),
     );
 
     registry.register_func(
         "isgn",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             let is_positive = builder.ins().icmp_imm(IntCC::SignedGreaterThan, args[0], 0);
             let is_negative = builder.ins().icmp_imm(IntCC::SignedLessThan, args[0], 0);
 
@@ -130,7 +130,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ineg",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|_, builder, args| builder.ins().ineg(args[0])),
+        Box::new(|builder, args| builder.ins().ineg(args[0])),
     );
 
     // --- COMPARISON OPERATORS ---
@@ -139,21 +139,21 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ieq",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
+        Box::new(|builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
     );
 
     registry.register_func(
         "ine",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
+        Box::new(|builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
     );
 
     registry.register_func(
         "igt",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             builder
                 .ins()
                 .icmp(IntCC::SignedGreaterThan, args[0], args[1])
@@ -164,14 +164,14 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ilt",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1])),
+        Box::new(|builder, args| builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1])),
     );
 
     registry.register_func(
         "ige",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             builder
                 .ins()
                 .icmp(IntCC::SignedGreaterThanOrEqual, args[0], args[1])
@@ -182,7 +182,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ile",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| {
+        Box::new(|builder, args| {
             builder
                 .ins()
                 .icmp(IntCC::SignedLessThanOrEqual, args[0], args[1])

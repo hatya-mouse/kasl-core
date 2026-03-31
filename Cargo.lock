@@ -444,7 +444,7 @@ dependencies = [
 [[package]]
 name = "kasl-ir"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl-ir#0dbf430e7acce6a8a6ee840d3fb896587288198f"
+source = "git+https://github.com/hatya-mouse/kasl-ir#b63de19158a5e4d2a4a360a2037bf6d8e50ca55b"
 
 [[package]]
 name = "leb128fmt"

@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use cranelift::prelude::{FloatCC, InstBuilder};
+use kasl_ir::ir::{FloatBinOp, FloatCmp, FloatUnaryOp, InstBuilder};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---
@@ -24,39 +24,39 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "fadd",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().fadd(args[0], args[1])),
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Add, args[0], args[1])),
     );
 
     registry.register_func(
         "fsub",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().fsub(args[0], args[1])),
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Sub, args[0], args[1])),
     );
 
     registry.register_func(
         "fmul",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().fmul(args[0], args[1])),
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Mul, args[0], args[1])),
     );
 
     registry.register_func(
         "fdiv",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().fdiv(args[0], args[1])),
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Div, args[0], args[1])),
     );
 
     registry.register_func(
         "fmod",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| {
-            let div = builder.ins().fdiv(args[0], args[1]);
-            let div_floor = builder.ins().floor(div);
-            let floor_mul = builder.ins().fmul(args[1], div_floor);
-            builder.ins().fsub(args[0], floor_mul)
+        Box::new(|builder, args| {
+            let div = builder.fbop(FloatBinOp::Div, args[0], args[1]);
+            let div_floor = builder.fuop(FloatUnaryOp::Floor, div);
+            let floor_mul = builder.fbop(FloatBinOp::Mul, args[1], div_floor);
+            builder.fbop(FloatBinOp::Sub, args[0], floor_mul)
         }),
     );
 
@@ -64,20 +64,14 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "fmax",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| {
-            let is_lhs_greater = builder.ins().fcmp(FloatCC::GreaterThan, args[0], args[1]);
-            builder.ins().select(is_lhs_greater, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Max, args[0], args[1])),
     );
 
     registry.register_func(
         "fmin",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| {
-            let is_lhs_lesser = builder.ins().fcmp(FloatCC::LessThan, args[0], args[1]);
-            builder.ins().select(is_lhs_lesser, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Min, args[0], args[1])),
     );
 
     // --- UNARY OPERATIONS ---
@@ -86,52 +80,42 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "fabs",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().fabs(args[0])),
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Abs, args[0])),
     );
 
     registry.register_func(
         "fsgn",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| {
-            let one = builder.ins().f32const(1.0);
-            let zero = builder.ins().f32const(0.0);
-            let minus_one = builder.ins().f32const(-1.0);
-
-            let is_positive = builder.ins().fcmp(FloatCC::GreaterThan, args[0], zero);
-            let is_negative = builder.ins().fcmp(FloatCC::LessThan, args[0], zero);
-
-            let pos_val = builder.ins().select(is_positive, one, zero);
-            builder.ins().select(is_negative, minus_one, pos_val)
-        }),
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Sgn, args[0])),
     );
 
     registry.register_func(
         "fneg",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().fneg(args[0])),
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Neg, args[0])),
     );
 
     registry.register_func(
         "floor",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().floor(args[0])),
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Floor, args[0])),
     );
 
     registry.register_func(
         "ceil",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().ceil(args[0])),
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Ceil, args[0])),
     );
 
     registry.register_func(
         "round",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
-        Box::new(|_, builder, args| builder.ins().nearest(args[0])),
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Round, args[0])),
     );
 
     // --- COMPARISON OPERATORS ---
@@ -140,49 +124,41 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "feq",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().fcmp(FloatCC::Equal, args[0], args[1])),
+        Box::new(|builder, args| builder.fcmp(FloatCmp::Eq, args[0], args[1])),
     );
 
     registry.register_func(
         "fne",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().fcmp(FloatCC::NotEqual, args[0], args[1])),
+        Box::new(|builder, args| builder.fcmp(FloatCmp::Ne, args[0], args[1])),
     );
 
     registry.register_func(
         "fgt",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().fcmp(FloatCC::GreaterThan, args[0], args[1])),
+        Box::new(|builder, args| builder.fcmp(FloatCmp::Gt, args[0], args[1])),
     );
 
     registry.register_func(
         "flt",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| builder.ins().fcmp(FloatCC::LessThan, args[0], args[1])),
+        Box::new(|builder, args| builder.fcmp(FloatCmp::Lt, args[0], args[1])),
     );
 
     registry.register_func(
         "fge",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| {
-            builder
-                .ins()
-                .fcmp(FloatCC::GreaterThanOrEqual, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.fcmp(FloatCmp::Ge, args[0], args[1])),
     );
 
     registry.register_func(
         "fle",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|_, builder, args| {
-            builder
-                .ins()
-                .fcmp(FloatCC::LessThanOrEqual, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.fcmp(FloatCmp::Le, args[0], args[1])),
     );
 }

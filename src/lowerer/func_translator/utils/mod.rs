@@ -15,6 +15,7 @@
 //
 
 mod alloc;
+mod array_offset;
 mod copy_value;
 mod var_decl;
 mod zero_check;
