@@ -14,17 +14,19 @@
 //  limitations under the License.
 //
 
-use crate::{ast::StructID, lowerer::func_translator::FuncTranslator};
-use kasl_ir::ir::Value;
+use crate::{
+    ast::{Expr, ExprKind},
+    lowerer::func_translator::FuncTranslator,
+};
 
 impl FuncTranslator<'_> {
-    pub(super) fn translate_struct_init(&mut self, struct_id: &StructID) -> Value {
-        // Create a new stack slot
-        let ptr = self.alloc_struct(struct_id);
-        // Store the fields to the slot
-        self.store_init_fields(struct_id, ptr, 0);
-
-        // Return the address to the struct
-        ptr
+    /// Checks if the passed expression is a zero literal.
+    pub fn is_zero(&mut self, expr: &Expr) -> bool {
+        match &expr.kind {
+            ExprKind::BoolLiteral(value) => !value,
+            ExprKind::FloatLiteral(value) => value == &0.0,
+            ExprKind::IntLiteral(value) => value == &0,
+            _ => false,
+        }
     }
 }

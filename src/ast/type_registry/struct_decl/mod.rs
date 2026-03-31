@@ -32,7 +32,7 @@ pub struct StructDecl {
     pub indices: HashMap<String, usize>,
 
     /// The map of field names to their offsets in bytes.
-    pub field_offsets: Vec<i32>,
+    pub field_offsets: Vec<u32>,
     /// The total size of the struct in bytes.
     pub total_size: u32,
     /// The alignment of the struct in bytes.
@@ -63,7 +63,7 @@ impl StructDecl {
         self.indices.get(field_name).copied()
     }
 
-    pub fn get_offset_by_index(&self, field_index: usize) -> Option<i32> {
+    pub fn get_offset_by_index(&self, field_index: usize) -> Option<u32> {
         self.field_offsets.get(field_index).copied()
     }
 
@@ -74,7 +74,7 @@ impl StructDecl {
     }
 
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
-        let mut offset = 0i32;
+        let mut offset = 0u32;
         let mut max_alignment = 1u32;
 
         for field in &mut self.fields {
@@ -88,13 +88,13 @@ impl StructDecl {
                 max_alignment = alignment;
             }
             // Align the offset to the field's alignment
-            offset = (offset + (alignment - 1) as i32) & !(alignment - 1) as i32;
+            offset = (offset + (alignment - 1)) & !(alignment - 1);
             // Push the offset to the field_offsets vector
             self.field_offsets.push(offset);
-            offset += size as i32;
+            offset += size;
         }
 
-        self.total_size = (offset as u32).div_ceil(max_alignment as u32) * max_alignment as u32;
+        self.total_size = (offset).div_ceil(max_alignment) * max_alignment;
         self.alignment = max_alignment;
     }
 }

@@ -16,6 +16,7 @@
 
 mod func_call;
 mod identifier;
+mod initialization;
 mod literal;
 mod op_call;
 mod struct_field;

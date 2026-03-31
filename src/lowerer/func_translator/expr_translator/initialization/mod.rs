@@ -14,17 +14,6 @@
 //  limitations under the License.
 //
 
-use crate::{ast::StructID, lowerer::func_translator::FuncTranslator};
-use kasl_ir::ir::Value;
-
-impl FuncTranslator<'_> {
-    pub(super) fn translate_struct_init(&mut self, struct_id: &StructID) -> Value {
-        // Create a new stack slot
-        let ptr = self.alloc_struct(struct_id);
-        // Store the fields to the slot
-        self.store_init_fields(struct_id, ptr, 0);
-
-        // Return the address to the struct
-        ptr
-    }
-}
+mod array_init_store;
+mod struct_init_store;
+mod value_store;

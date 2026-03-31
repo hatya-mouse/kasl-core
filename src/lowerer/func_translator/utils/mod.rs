@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
-mod alloc_array;
+mod alloc;
 mod copy_value;
 mod var_decl;
+mod zero_check;
