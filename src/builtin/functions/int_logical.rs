@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use cranelift::prelude::InstBuilder;
+use kasl_ir::ir::{InstBuilder, IntBinOp, IntUnaryOp};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---
@@ -24,42 +24,42 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "iand",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().band(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::BAnd, args[0], args[1])),
     );
 
     registry.register_func(
         "ior",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().bor(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::BOr, args[0], args[1])),
     );
 
     registry.register_func(
         "ixor",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().bxor(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::BXor, args[0], args[1])),
     );
 
     registry.register_func(
         "inand",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().band_not(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::BNand, args[0], args[1])),
     );
 
     registry.register_func(
         "inor",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().bor_not(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::BNor, args[0], args[1])),
     );
 
     registry.register_func(
         "ixnor",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().bxor_not(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::BXnor, args[0], args[1])),
     );
 
     // --- BIT SHIFT ---
@@ -68,21 +68,21 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ishl",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().ishl(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::IShL, args[0], args[1])),
     );
 
     registry.register_func(
         "sshr",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().sshr(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::SShR, args[0], args[1])),
     );
 
     registry.register_func(
         "ushr",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().ushr(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::UShR, args[0], args[1])),
     );
 
     // --- UNARY OPERATORS ---
@@ -91,6 +91,6 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "inot",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().bnot(args[0])),
+        Box::new(|builder, args| builder.iuop(IntUnaryOp::BNot, args[0])),
     );
 }

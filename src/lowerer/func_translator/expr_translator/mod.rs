@@ -15,6 +15,7 @@
 //
 
 mod array_literal;
+mod builtin_call;
 mod func_call;
 mod identifier;
 mod initialization;

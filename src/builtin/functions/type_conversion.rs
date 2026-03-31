@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use cranelift::prelude::{InstBuilder, types};
+use kasl_ir::ir::InstBuilder;
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- INT TO FLOAT ---
@@ -23,7 +23,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "itof",
         &[PrimitiveType::Int],
         PrimitiveType::Float,
-        Box::new(|builder, args| builder.ins().fcvt_from_sint(types::F32, args[0])),
+        Box::new(|builder, args| builder.itof(args[0])),
     );
 
     // --- FLOAT TO INT ---
@@ -31,6 +31,6 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ftoi",
         &[PrimitiveType::Float],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().fcvt_to_sint_sat(types::I32, args[0])),
+        Box::new(|builder, args| builder.ftoi(args[0])),
     );
 }

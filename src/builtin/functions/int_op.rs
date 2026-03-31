@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use cranelift::prelude::{InstBuilder, IntCC, types};
+use kasl_ir::ir::{Const, InstBuilder, IntBinOp, IntCmp, IntUnaryOp};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---
@@ -24,21 +24,21 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "iadd",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().iadd(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::Add, args[0], args[1])),
     );
 
     registry.register_func(
         "isub",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().isub(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::Sub, args[0], args[1])),
     );
 
     registry.register_func(
         "imul",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().imul(args[0], args[1])),
+        Box::new(|builder, args| builder.ibop(IntBinOp::Mul, args[0], args[1])),
     );
 
     registry.register_func(
@@ -49,13 +49,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
             let diviend = args[0];
             let divisor = args[1];
 
-            let is_divisor_zero = builder.ins().icmp_imm(IntCC::Equal, divisor, 0);
-            let one = builder.ins().iconst(types::I32, 1);
-            let safe_divisor = builder.ins().select(is_divisor_zero, one, divisor);
+            let is_divisor_zero = builder.icmp_imm(IntCmp::Eq, divisor, 0);
+            let one = builder.const_val(Const::I32(1));
+            let safe_divisor = builder.select(is_divisor_zero, one, divisor);
 
-            let quotient = builder.ins().sdiv(diviend, safe_divisor);
-            let zero = builder.ins().iconst(types::I32, 0);
-            builder.ins().select(is_divisor_zero, zero, quotient)
+            let quotient = builder.ibop(IntBinOp::Div, diviend, safe_divisor);
+            let zero = builder.const_val(Const::I32(0));
+            builder.select(is_divisor_zero, zero, quotient)
         }),
     );
 
@@ -67,13 +67,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
             let diviend = args[0];
             let divisor = args[1];
 
-            let is_divisor_zero = builder.ins().icmp_imm(IntCC::Equal, divisor, 0);
-            let one = builder.ins().iconst(types::I32, 1);
-            let safe_divisor = builder.ins().select(is_divisor_zero, one, divisor);
+            let is_divisor_zero = builder.icmp_imm(IntCmp::Eq, divisor, 0);
+            let one = builder.const_val(Const::I32(1));
+            let safe_divisor = builder.select(is_divisor_zero, one, divisor);
 
-            let rem = builder.ins().srem(diviend, safe_divisor);
-            let zero = builder.ins().iconst(types::I32, 0);
-            builder.ins().select(is_divisor_zero, zero, rem)
+            let rem = builder.ibop(IntBinOp::SRem, diviend, safe_divisor);
+            let zero = builder.const_val(Const::I32(0));
+            builder.select(is_divisor_zero, zero, rem)
         }),
     );
 
@@ -83,22 +83,14 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "imax",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| {
-            let is_lhs_greater = builder
-                .ins()
-                .icmp(IntCC::SignedGreaterThan, args[0], args[1]);
-            builder.ins().select(is_lhs_greater, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.ibop(IntBinOp::Max, args[0], args[1])),
     );
 
     registry.register_func(
         "imin",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| {
-            let is_lhs_lesser = builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1]);
-            builder.ins().select(is_lhs_lesser, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.ibop(IntBinOp::Min, args[0], args[1])),
     );
 
     // --- UNARY OPERATIONS ---
@@ -107,30 +99,21 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "iabs",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().iabs(args[0])),
+        Box::new(|builder, args| builder.iuop(IntUnaryOp::Abs, args[0])),
     );
 
     registry.register_func(
         "isgn",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| {
-            let is_positive = builder.ins().icmp_imm(IntCC::SignedGreaterThan, args[0], 0);
-            let is_negative = builder.ins().icmp_imm(IntCC::SignedLessThan, args[0], 0);
-
-            let one = builder.ins().iconst(types::I32, 1);
-            let zero = builder.ins().iconst(types::I32, 0);
-            let minus_one = builder.ins().iconst(types::I32, -1);
-            let pos_val = builder.ins().select(is_positive, one, zero);
-            builder.ins().select(is_negative, minus_one, pos_val)
-        }),
+        Box::new(|builder, args| builder.iuop(IntUnaryOp::Sgn, args[0])),
     );
 
     registry.register_func(
         "ineg",
         &[PrimitiveType::Int],
         PrimitiveType::Int,
-        Box::new(|builder, args| builder.ins().ineg(args[0])),
+        Box::new(|builder, args| builder.iuop(IntUnaryOp::Neg, args[0])),
     );
 
     // --- COMPARISON OPERATORS ---
@@ -139,53 +122,41 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ieq",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
+        Box::new(|builder, args| builder.icmp(IntCmp::Eq, args[0], args[1])),
     );
 
     registry.register_func(
         "ine",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
+        Box::new(|builder, args| builder.icmp(IntCmp::Ne, args[0], args[1])),
     );
 
     registry.register_func(
         "igt",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            builder
-                .ins()
-                .icmp(IntCC::SignedGreaterThan, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.icmp(IntCmp::Sgt, args[0], args[1])),
     );
 
     registry.register_func(
         "ilt",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1])),
+        Box::new(|builder, args| builder.icmp(IntCmp::Slt, args[0], args[1])),
     );
 
     registry.register_func(
         "ige",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            builder
-                .ins()
-                .icmp(IntCC::SignedGreaterThanOrEqual, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.icmp(IntCmp::Sge, args[0], args[1])),
     );
 
     registry.register_func(
         "ile",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            builder
-                .ins()
-                .icmp(IntCC::SignedLessThanOrEqual, args[0], args[1])
-        }),
+        Box::new(|builder, args| builder.icmp(IntCmp::Sle, args[0], args[1])),
     );
 }

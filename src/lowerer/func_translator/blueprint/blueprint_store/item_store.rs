@@ -47,10 +47,10 @@ impl FuncTranslator<'_> {
         let val = self.builder.load_var(var);
 
         // Store the value
-        self.store_value(&item.value_type, val, ptr);
+        self.store_value_to_var(&item.value_type, val, ptr);
     }
 
-    fn store_value(&mut self, value_type: &ResolvedType, val: Value, ptr: Value) {
+    fn store_value_to_var(&mut self, value_type: &ResolvedType, val: Value, ptr: Value) {
         match value_type {
             ResolvedType::Primitive(_) => {
                 self.builder.store(val, ptr, Offset::zero());

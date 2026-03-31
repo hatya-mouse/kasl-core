@@ -22,7 +22,7 @@ use crate::{
 };
 
 impl FuncTranslator<'_> {
-    pub(super) fn store_value(&mut self, expr: &Expr, dst_ptr: Value, dst_offset: u32) {
+    pub(super) fn store_init_value(&mut self, expr: &Expr, dst_ptr: Value, dst_offset: u32) {
         match expr.value_type {
             ResolvedType::Primitive(_) => {
                 let val = self.translate_expr(expr).unwrap();

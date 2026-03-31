@@ -61,6 +61,7 @@ impl FuncTranslator<'_> {
                             if let Some(item) = blueprint.get_item(var_id) {
                                 let offset = Offset::PointerScaled(input_count);
                                 self.load_input(params.input_ptr_ptr, item, offset, iteration);
+                                input_count += 1;
                             }
                         }
                         VariableKind::Output => {
@@ -77,12 +78,15 @@ impl FuncTranslator<'_> {
                                     item,
                                     offset,
                                 );
+                                state_count += 1;
                             }
                         }
                         VariableKind::GlobalConst => {
                             let var = self.declare_var(*var_id, &scope_var.value_type);
                             // Constants must have a default value
-                            let def_val = self.translate_expr(scope_var.def_val.as_ref().unwrap());
+                            let def_val = self
+                                .translate_expr(scope_var.def_val.as_ref().unwrap())
+                                .unwrap();
                             self.builder.assign(var, def_val);
                         }
                         _ => (),
@@ -108,7 +112,7 @@ impl FuncTranslator<'_> {
     fn init_output(&mut self, output_item: &BlueprintItem) {
         let output_var = self.declare_var(output_item.id, &output_item.value_type);
         // Output variables must have a default value
-        let def_val = self.translate_expr(&output_item.def_val);
+        let def_val = self.translate_expr(&output_item.def_val).unwrap();
         self.builder.assign(output_var, def_val);
     }
 
@@ -125,7 +129,7 @@ impl FuncTranslator<'_> {
         // Don't need to pass the iteration idex because state variables are not buffer even in buffer mode
         let loaded_val = self.load_blueprint_item(ptr_ptr, state_item, state_offset, None);
         // Get the default value of the state
-        let def_val = self.translate_expr(&state_item.def_val);
+        let def_val = self.translate_expr(&state_item.def_val).unwrap();
 
         // Conditionally select whether to use the default value or the loaded value
         let val = self.builder.select(should_init, def_val, loaded_val);

@@ -23,6 +23,7 @@ mod utils;
 
 use crate::{
     ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
+    builtin::BuiltinRegistry,
     lowerer::TranslatorParams,
 };
 use ir_scope_registry::IRScopeRegistry;
@@ -35,10 +36,16 @@ pub struct FuncTranslator<'a> {
     prog_ctx: &'a ProgramContext,
     /// Scope registry to manage the variables declared while translating the program context.
     scope_registry: IRScopeRegistry,
+    /// Builtin registry to translate the builtin functions to KASL-IR.
+    builtin_registry: &'a BuiltinRegistry,
 }
 
 impl<'a> FuncTranslator<'a> {
-    pub(super) fn new(builder: IRBuilder, prog_ctx: &'a ProgramContext) -> Self {
+    pub(super) fn new(
+        builder: IRBuilder,
+        prog_ctx: &'a ProgramContext,
+        builtin_registry: &'a BuiltinRegistry,
+    ) -> Self {
         let mut scope_registry = IRScopeRegistry::default();
         // Add the global scope registry
         scope_registry.push_deepest();
@@ -47,6 +54,7 @@ impl<'a> FuncTranslator<'a> {
             builder,
             prog_ctx,
             scope_registry,
+            builtin_registry,
         }
     }
 

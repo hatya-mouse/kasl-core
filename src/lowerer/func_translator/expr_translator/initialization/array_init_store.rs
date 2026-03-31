@@ -44,7 +44,7 @@ impl FuncTranslator<'_> {
             ExprKind::ArrayList(items) => {
                 for (i, item) in (0u32..).zip(items.iter()) {
                     let offset = dst_offset + item_size * i;
-                    self.store_value(item, dst_ptr, offset);
+                    self.store_init_value(item, dst_ptr, offset);
                 }
             }
             ExprKind::ArraySpread { value, count } => {
@@ -55,7 +55,7 @@ impl FuncTranslator<'_> {
                 } else {
                     for i in 0..*count {
                         let offset = dst_offset + item_size * i;
-                        self.store_value(value, dst_ptr, offset);
+                        self.store_init_value(value, dst_ptr, offset);
                     }
                 }
             }
