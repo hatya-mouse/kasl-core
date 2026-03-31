@@ -43,7 +43,7 @@ impl Lowerer {
         entry_point: &FunctionID,
     ) -> Function {
         // Create a ir builder
-        let mut builder = IRBuilder::default();
+        let mut builder = IRBuilder::new();
 
         // Create an entry block and switch to the block
         // Add parameter for the input and output pointers

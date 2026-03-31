@@ -16,8 +16,6 @@
 
 //! The orchestrator of the entire compilation process, from parsing to code generation.
 
-use kasl_ir::ir::Function;
-
 use crate::{
     MAIN_FUNCTION_NAME,
     ast::{
@@ -34,6 +32,7 @@ use crate::{
     lowerer::Lowerer,
     parser::{ParserDeclStmt, kasl_parser},
 };
+use kasl_ir::ir::Function;
 use std::path::PathBuf;
 
 /// The main compiler struct that manages the entire compilation process, from parsing to code generation.
