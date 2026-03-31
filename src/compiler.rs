@@ -16,6 +16,8 @@
 
 //! The orchestrator of the entire compilation process, from parsing to code generation.
 
+use kasl_ir::ir::Function;
+
 use crate::{
     MAIN_FUNCTION_NAME,
     ast::{
@@ -27,9 +29,9 @@ use crate::{
         BlueprintBuilder, GlobalDeclCollector, ScopeGraphAnalyzer, StatementBuilder,
         StructGraphAnalyzer,
     },
-    backend::Backend,
     builtin::BuiltinRegistry,
     error::{EK, ErrorCollector, ErrorKey, ErrorRecord, Ph, Pl, Sv},
+    lowerer::Lowerer,
     parser::{ParserDeclStmt, kasl_parser},
 };
 use std::path::PathBuf;
@@ -49,7 +51,7 @@ use std::path::PathBuf;
 ///     3. Build statements inside functions using `StatementBuilder`.
 ///     4. Analyze scope graph and find recursive calls using `ScopeGraphAnalyzer`.
 ///     5. Finally, build an `IOBlueprint` using `BlueprintBuilder`.
-/// 3. **Compilation**: Compile the AST into a ready-to-run program. The `compile_once` method compiles the program that runs only once, while the `compile_buffer` method compiles the program that runs given times.
+/// 3. **Lowering**: Translate the AST into KASL-IR, an intermediate expression for KASL.
 ///
 /// # Usage
 /// ```rust
@@ -79,15 +81,8 @@ use std::path::PathBuf;
 ///     std::alloc::alloc(layout) as *mut ()
 /// };
 ///
-/// // Compile the program
-/// let program_ptr = compiler.compile_once(&blueprint).expect("Failed to compile program");
-///
-/// // Run the program
-/// unsafe {
-///     run_once(program_ptr, &[], &[out_value_ptr], &[], 1);
-/// }
-///
-/// assert_eq!(unsafe { *(out_value_ptr as *const i32) }, 2);
+/// // Lower the program to KASL-IR
+/// let program_ptr = compiler.lower_once(&blueprint).expect("Failed to compile program");
 /// ```
 #[derive(Default)]
 pub struct KaslCompiler {
@@ -95,8 +90,6 @@ pub struct KaslCompiler {
     /// The current program context, which mainly holds the constructed AST and related information.
     pub prog_ctx: ProgramContext,
     comp_state: CompilerState,
-
-    backend: Option<Backend>,
 
     /// The raw declarations parsed from the KASL code.
     pub parser_decl_stmts: Vec<ParserDeclStmt>,
@@ -177,47 +170,32 @@ impl KaslCompiler {
         self.ec.as_result().map(|_| blueprint)
     }
 
-    /// Compiles the program into a ready-to-run program, and returns a pointer to the compiled code.
-    /// The compiled program will run only once.
-    ///
-    /// # Deallocation
-    /// The compiled program will be dropped when the `KaslCompiler` instance is dropped,
-    /// since the `Backend` instance that holds the compiled code is stored in the `KaslCompiler` struct.
-    pub fn compile_once(&mut self, blueprint: &IOBlueprint) -> Result<*const u8, Vec<ErrorRecord>> {
+    /// Translated the program into KASL-IR, an intermediate representation for KASL language.
+    /// The lowered program will run only once.
+    pub fn lower_once(&mut self, blueprint: &IOBlueprint) -> Result<Function, ErrorRecord> {
         let builtin_registry = BuiltinRegistry::default();
 
-        // Compile the program
-        self.backend = Some(Backend::default());
+        // Create a lowerer and lower the program
+        let lowerer = Lowerer::default();
+
+        // Get the main function
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
         // Look up the main function, or return an error if it doesn't exist
         let main_func_id = self
             .prog_ctx
             .func_ctx
             .get_global_func_id(root_namespace_id, MAIN_FUNCTION_NAME)
-            .ok_or_else(|| {
-                vec![ErrorRecord::new(
-                    ErrorKey::new(EK::NoMainFunc, Pl::None),
-                    Range::zero(),
-                    Ph::Backend,
-                    Sv::Error,
-                )]
-            })?;
+            .ok_or(ErrorRecord::new(
+                ErrorKey::new(EK::NoMainFunc, Pl::None),
+                Range::zero(),
+                Ph::Backend,
+                Sv::Error,
+            ))?;
 
-        let compiled = self
-            .backend
-            .as_mut()
-            .unwrap()
-            .compile_once(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
-            .map_err(|e| {
-                vec![ErrorRecord::new(
-                    ErrorKey::new(EK::CompilerBug, Pl::Str(e)),
-                    Range::zero(),
-                    Ph::Backend,
-                    Sv::Error,
-                )]
-            })?;
+        // Lower the program
+        let func = lowerer.lower_once(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id);
 
-        Ok(compiled)
+        Ok(func)
     }
 
     /// Compiles the program into a ready-to-run program, and returns a pointer to the compiled code.
@@ -226,44 +204,30 @@ impl KaslCompiler {
     /// # Deallocation
     /// The compiled program will be dropped when the `KaslCompiler` instance is dropped,
     /// since the `Backend` instance that holds the compiled code is stored in the `KaslCompiler` struct.
-    pub fn compile_buffer(
-        &mut self,
-        blueprint: &IOBlueprint,
-    ) -> Result<*const u8, Vec<ErrorRecord>> {
+    pub fn compile_buffer(&mut self, blueprint: &IOBlueprint) -> Result<Function, ErrorRecord> {
         let builtin_registry = BuiltinRegistry::default();
 
-        // Compile the program
-        self.backend = Some(Backend::default());
-        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        // Create a lowerer and lower the program
+        let lowerer = Lowerer::default();
 
+        // Get the main function
+        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
         // Look up the main function, or return an error if it doesn't exist
         let main_func_id = self
             .prog_ctx
             .func_ctx
             .get_global_func_id(root_namespace_id, MAIN_FUNCTION_NAME)
-            .ok_or_else(|| {
-                vec![ErrorRecord::new(
-                    ErrorKey::new(EK::NoMainFunc, Pl::None),
-                    Range::zero(),
-                    Ph::Backend,
-                    Sv::Error,
-                )]
-            })?;
+            .ok_or(ErrorRecord::new(
+                ErrorKey::new(EK::NoMainFunc, Pl::None),
+                Range::zero(),
+                Ph::Backend,
+                Sv::Error,
+            ))?;
 
-        let compiled = self
-            .backend
-            .as_mut()
-            .unwrap()
-            .compile_buffer(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
-            .map_err(|e| {
-                vec![ErrorRecord::new(
-                    ErrorKey::new(EK::CompilerBug, Pl::Str(e)),
-                    Range::zero(),
-                    Ph::Backend,
-                    Sv::Error,
-                )]
-            })?;
+        // Lower the program
+        let func =
+            lowerer.lower_buffer(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id);
 
-        Ok(compiled)
+        Ok(func)
     }
 }

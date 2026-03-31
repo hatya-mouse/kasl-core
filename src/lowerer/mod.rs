@@ -21,7 +21,7 @@ use crate::{
     builtin::BuiltinRegistry,
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{IRBuilder, IRType, InstBuilder, Value};
+use kasl_ir::ir::{Function, IRBuilder, IRType, InstBuilder, Value};
 
 pub struct TranslatorParams {
     pub input_ptr_ptr: Value,
@@ -34,14 +34,14 @@ pub struct TranslatorParams {
 pub struct Lowerer;
 
 impl Lowerer {
-    /// Lower the given program context to KASL-IR.
-    pub fn lower(
+    /// Lower the given program context to KASL-IR, which runs only once.
+    pub fn lower_once(
         &self,
         prog_ctx: &ProgramContext,
         builtin_registry: &BuiltinRegistry,
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
-    ) {
+    ) -> Function {
         // Create a ir builder
         let mut builder = IRBuilder::default();
 
@@ -86,5 +86,65 @@ impl Lowerer {
         // Add return instruction to the return block
         translator.builder.switch_to_block(return_block);
         translator.builder._return(&[]);
+
+        translator.builder.finalize_func()
+    }
+
+    /// Lower the given program context to KASL-IR, which runs specified times and loops over the input and output.
+    pub fn lower_buffer(
+        &self,
+        prog_ctx: &ProgramContext,
+        builtin_registry: &BuiltinRegistry,
+        blueprint: &IOBlueprint,
+        entry_point: &FunctionID,
+    ) -> Function {
+        // Create a ir builder
+        let mut builder = IRBuilder::default();
+
+        // Create an entry block and switch to the block
+        // Add parameter for the input and output pointers
+        // 1: input pointer
+        // 2: output pointer
+        // 3: state pointer
+        // 4: whether to initialize the states
+        // 5: size of the buffer
+        let entry_block = builder.create_block(&[
+            IRType::Ptr,
+            IRType::Ptr,
+            IRType::Ptr,
+            IRType::I8,
+            IRType::I32,
+        ]);
+        builder.switch_to_block(entry_block);
+
+        // Set the block as the entry block of the function
+        builder.set_entry_block(entry_block);
+
+        // Get the entry block parameters
+        let block_params = builder.get_block_args(entry_block);
+        let buffer_size = block_params[4];
+        let translator_params = TranslatorParams {
+            input_ptr_ptr: block_params[0],
+            output_ptr_ptr: block_params[1],
+            state_ptr_ptr: block_params[2],
+            should_init: block_params[3],
+        };
+
+        // Lower the program context to KASL-IR
+        let mut translator = FuncTranslator::new(builder, prog_ctx, builtin_registry);
+        translator.create_loop(buffer_size, |translator, i, increment_block| {
+            translator.translate(
+                translator_params,
+                Some(i),
+                entry_point,
+                blueprint,
+                increment_block,
+            );
+        });
+
+        // Add return instruction to the block after the loop
+        translator.builder._return(&[]);
+
+        translator.builder.finalize_func()
     }
 }

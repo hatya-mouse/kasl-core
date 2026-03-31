@@ -74,17 +74,18 @@
 //! assert_eq!(unsafe { *(out_value_ptr as *const i32) }, 6);
 //! ```
 
+pub(crate) const MAIN_FUNCTION_NAME: &'static str = "main";
 pub(crate) const LOOP_UNROLL_THRESHOLD: u32 = 32;
 
 pub mod ast;
 pub mod ast_construction;
 pub mod builtin;
-// pub mod compiler;
+pub mod compiler;
 pub mod localization;
 pub mod lowerer;
 pub mod parser;
 pub mod run_program;
 
 pub use ast_construction::error;
-// pub use compiler::KaslCompiler;
+pub use compiler::KaslCompiler;
 pub use run_program::{run_buffer, run_once};
