@@ -1,5 +1,5 @@
 [package]
-name = "kasl_core"
+name = "kasl-core"
 version = "0.1.4"
 edition = "2024"
 license = "Apache-2.0"
@@ -16,11 +16,6 @@ name = "kasl"
 path = "src/lib.rs"
 
 [dependencies]
-cranelift = "0.129.1"
-cranelift-codegen = "0.129.1"
-cranelift-jit = "0.129.1"
-cranelift-module = "0.129.1"
-cranelift-native = "0.129.1"
 hashbrown = { version = "0.16.1", features = ["serde"] }
 kasl-ir = { git = "https://github.com/hatya-mouse/kasl-ir", version = "0.1.0" }
 peg = "0.8.5"
@@ -31,4 +26,4 @@ toml = "1.0.7"
 
 [dev-dependencies]
 insta = { version = "1.46.3", features = ["yaml", "redactions"] }
-kasl = { path = "./" }
+kasl-core = { path = "./" }
