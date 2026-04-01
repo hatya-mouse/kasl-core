@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::Expr, lowerer::func_translator::FuncTranslator};
-use kasl_ir::ir::{Block, InstBuilder};
+use kasl_ir::{Block, InstBuilder};
 
 impl FuncTranslator<'_> {
     pub fn translate_return(&mut self, value: &Option<Expr>, exit_block: Block) {

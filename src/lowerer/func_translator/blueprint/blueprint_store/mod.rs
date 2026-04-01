@@ -20,7 +20,7 @@ use crate::{
     ast::scope_manager::IOBlueprint,
     lowerer::{TranslatorParams, func_translator::FuncTranslator},
 };
-use kasl_ir::ir::{Offset, Value};
+use kasl_ir::{Offset, Value};
 
 impl FuncTranslator<'_> {
     pub fn store_blueprint(

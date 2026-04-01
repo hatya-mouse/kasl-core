@@ -18,7 +18,7 @@ use crate::{
     ast::{IfArm, symbol_table},
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{self, InstBuilder};
+use kasl_ir::{self, InstBuilder};
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_if(
@@ -26,7 +26,7 @@ impl FuncTranslator<'_> {
         main: &IfArm,
         else_ifs: &[IfArm],
         else_block: Option<&symbol_table::Block>,
-        exit_block: ir::Block,
+        exit_block: kasl_ir::Block,
     ) {
         // Create a merge block
         let merge_block = self.builder.create_block(&[]);
@@ -60,9 +60,9 @@ impl FuncTranslator<'_> {
     fn translate_if_arm(
         &mut self,
         if_arm: &IfArm,
-        merge_block: ir::Block,
-        exit_block: ir::Block,
-    ) -> ir::Block {
+        merge_block: kasl_ir::Block,
+        exit_block: kasl_ir::Block,
+    ) -> kasl_ir::Block {
         // Create a then block and an else block
         let then_block = self.builder.create_block(&[]);
         let else_block = self.builder.create_block(&[]);

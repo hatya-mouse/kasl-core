@@ -15,7 +15,7 @@
 //
 
 use crate::ast::type_registry::{PrimitiveType, ResolvedType};
-use kasl_ir::ir::IRType;
+use kasl_ir::IRType;
 
 pub(super) fn convert_type(resolved_type: &ResolvedType) -> IRType {
     match resolved_type {

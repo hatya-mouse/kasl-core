@@ -18,7 +18,7 @@ use crate::{
     ast::{FuncCallArg, FunctionID, Statement, symbol_table, type_registry::ResolvedType},
     lowerer::func_translator::{FuncTranslator, type_converter::convert_type},
 };
-use kasl_ir::ir::{InstBuilder, Value};
+use kasl_ir::{InstBuilder, Value};
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_func_call_expr(

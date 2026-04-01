@@ -22,7 +22,7 @@ use crate::{
     },
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{Const, InstBuilder, IntBinOp, Offset, Value};
+use kasl_ir::{Const, InstBuilder, IntBinOp, Offset, Value};
 
 impl FuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {

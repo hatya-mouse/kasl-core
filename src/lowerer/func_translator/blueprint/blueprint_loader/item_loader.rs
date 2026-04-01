@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl_ir::ir::{Const, IRType, InstBuilder, IntBinOp, Offset, Value};
+use kasl_ir::{Const, IRType, InstBuilder, IntBinOp, Offset, Value};
 
 use crate::{
     ast::{scope_manager::BlueprintItem, type_registry::ResolvedType},

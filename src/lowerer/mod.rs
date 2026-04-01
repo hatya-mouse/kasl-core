@@ -21,7 +21,7 @@ use crate::{
     builtin::BuiltinRegistry,
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{Function, IRBuilder, IRType, InstBuilder, Value};
+use kasl_ir::{Function, IRBuilder, IRType, InstBuilder, Value};
 
 pub struct TranslatorParams {
     pub input_ptr_ptr: Value,

@@ -14,16 +14,15 @@
 //  limitations under the License.
 //
 
-use kasl_ir::ir::{self, Const, InstBuilder};
-
 use crate::{LOOP_UNROLL_THRESHOLD, ast::symbol_table, lowerer::func_translator::FuncTranslator};
+use kasl_ir::{self, Const, InstBuilder};
 
 impl FuncTranslator<'_> {
     pub fn translate_loop(
         &mut self,
         count: u32,
         block: &symbol_table::Block,
-        exit_block: ir::Block,
+        exit_block: kasl_ir::Block,
     ) {
         // Translate the count in to an IR value
         let ir_count = self.builder.const_val(Const::I32(count as i32));

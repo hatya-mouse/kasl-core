@@ -18,7 +18,7 @@ use crate::{
     ast::{Expr, ExprKind, namespace_registry::ArrayID},
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{InstBuilder, Value};
+use kasl_ir::{InstBuilder, Value};
 
 impl FuncTranslator<'_> {
     pub(in crate::lowerer::func_translator::expr_translator) fn store_array(

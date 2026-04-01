@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::VariableID, lowerer::func_translator::FuncTranslator};
-use kasl_ir::ir::InstBuilder;
+use kasl_ir::InstBuilder;
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_local_var(&mut self, var_id: &VariableID) {

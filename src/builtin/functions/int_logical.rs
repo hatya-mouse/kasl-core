@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use kasl_ir::ir::{InstBuilder, IntBinOp, IntUnaryOp};
+use kasl_ir::{InstBuilder, IntBinOp, IntUnaryOp};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---

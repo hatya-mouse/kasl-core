@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl_ir::ir::{Const, IRType, InstBuilder, IntBinOp, Value};
+use kasl_ir::{Const, IRType, InstBuilder, IntBinOp, Value};
 
 use crate::{
     ast::{Expr, type_registry::ResolvedType},

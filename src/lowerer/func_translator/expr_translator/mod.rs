@@ -29,7 +29,7 @@ use crate::{
     ast::{Expr, ExprKind},
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::Value;
+use kasl_ir::Value;
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_expr(&mut self, expr: &Expr) -> Option<Value> {

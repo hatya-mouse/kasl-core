@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::Expr, builtin::BuiltinFuncID, lowerer::func_translator::FuncTranslator};
-use kasl_ir::ir::Value;
+use kasl_ir::Value;
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_builtin_func_call(

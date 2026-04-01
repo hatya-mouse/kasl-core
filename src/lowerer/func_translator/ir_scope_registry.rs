@@ -15,7 +15,7 @@
 //
 
 use crate::ast::VariableID;
-use kasl_ir::ir::Variable;
+use kasl_ir::Variable;
 use std::collections::HashMap;
 
 #[derive(Default)]

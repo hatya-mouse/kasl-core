@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::StructID, lowerer::func_translator::FuncTranslator};
-use kasl_ir::ir::Value;
+use kasl_ir::Value;
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_struct_init(&mut self, struct_id: &StructID) -> Value {

@@ -15,7 +15,7 @@
 //
 
 use crate::lowerer::func_translator::FuncTranslator;
-use kasl_ir::ir::{Block, Const, IRType, InstBuilder, IntBinOp, IntCmp, Value};
+use kasl_ir::{Block, Const, IRType, InstBuilder, IntBinOp, IntCmp, Value};
 
 impl FuncTranslator<'_> {
     pub fn create_loop<F>(&mut self, count: Value, body_translator: F)

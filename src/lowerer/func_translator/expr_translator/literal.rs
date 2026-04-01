@@ -15,7 +15,7 @@
 //
 
 use crate::lowerer::func_translator::FuncTranslator;
-use kasl_ir::ir::{Const, InstBuilder, Value};
+use kasl_ir::{Const, InstBuilder, Value};
 
 impl FuncTranslator<'_> {
     pub(super) fn translate_int_literal(&mut self, value: u32) -> Value {

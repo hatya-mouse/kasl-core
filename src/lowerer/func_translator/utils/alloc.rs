@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl_ir::ir::{InstBuilder, Value};
+use kasl_ir::{InstBuilder, Value};
 
 use crate::{
     ast::{StructID, namespace_registry::ArrayID},

@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use kasl_ir::ir::{Const, FloatBinOp, FloatUnaryOp, InstBuilder};
+use kasl_ir::{Const, FloatBinOp, FloatUnaryOp, InstBuilder};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- MATHEMATICAL FUNCTIONS ---

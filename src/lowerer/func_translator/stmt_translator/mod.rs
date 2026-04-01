@@ -24,11 +24,14 @@ use crate::{
     ast::{Statement, symbol_table},
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir;
 
 impl FuncTranslator<'_> {
     /// Translates the given block AST.
-    pub fn translate_block(&mut self, block: &symbol_table::Block, exit_block: ir::Block) -> bool {
+    pub fn translate_block(
+        &mut self,
+        block: &symbol_table::Block,
+        exit_block: kasl_ir::Block,
+    ) -> bool {
         // Loop over the statements in the block and translate them
         for stmt in &block.body {
             if self.translate_stmt(stmt, exit_block) {
@@ -39,7 +42,7 @@ impl FuncTranslator<'_> {
     }
 
     /// Translates a single statement into IR.
-    fn translate_stmt(&mut self, stmt: &Statement, exit_block: ir::Block) -> bool {
+    fn translate_stmt(&mut self, stmt: &Statement, exit_block: kasl_ir::Block) -> bool {
         match stmt {
             Statement::Block { block } => {
                 return self.translate_block(block, exit_block);

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl_ir::ir::Value;
+use kasl_ir::Value;
 
 use crate::{
     ast::{FuncCallArg, OperatorID},

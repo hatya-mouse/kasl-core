@@ -32,7 +32,7 @@ use crate::{
     lowerer::Lowerer,
     parser::{ParserDeclStmt, kasl_parser},
 };
-use kasl_ir::ir::Function;
+use kasl_ir::Function;
 use std::path::PathBuf;
 
 /// The main compiler struct that manages the entire compilation process, from parsing to code generation.

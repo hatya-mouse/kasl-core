@@ -24,7 +24,7 @@ use crate::{
     },
     lowerer::{TranslatorParams, func_translator::FuncTranslator},
 };
-use kasl_ir::ir::{Const, InstBuilder, IntBinOp, IntCmp, Offset, Value};
+use kasl_ir::{Const, InstBuilder, IntBinOp, IntCmp, Offset, Value};
 
 impl FuncTranslator<'_> {
     pub fn load_blueprint_access(

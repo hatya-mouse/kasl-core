@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl_ir::ir::{InstBuilder, Offset, Value};
+use kasl_ir::{InstBuilder, Offset, Value};
 
 use crate::{
     ast::{Expr, type_registry::ResolvedType},

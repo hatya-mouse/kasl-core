@@ -27,7 +27,7 @@ use crate::{
     lowerer::TranslatorParams,
 };
 use ir_scope_registry::IRScopeRegistry;
-use kasl_ir::ir::{Block, IRBuilder, Value};
+use kasl_ir::{Block, IRBuilder, Value};
 
 pub struct FuncTranslator<'a> {
     /// IR builder used to build the function body.

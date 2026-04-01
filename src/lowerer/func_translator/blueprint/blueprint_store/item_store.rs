@@ -18,7 +18,7 @@ use crate::{
     ast::{scope_manager::BlueprintItem, type_registry::ResolvedType},
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{Const, IRType, InstBuilder, IntBinOp, Offset, Value};
+use kasl_ir::{Const, IRType, InstBuilder, IntBinOp, Offset, Value};
 
 impl FuncTranslator<'_> {
     pub(super) fn store_blueprint_item(

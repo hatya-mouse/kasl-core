@@ -15,7 +15,7 @@
 //
 
 use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
-use kasl_ir::ir::{InstBuilder, IntCmp};
+use kasl_ir::{InstBuilder, IntCmp};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- COMPARISON OPERATORS ---

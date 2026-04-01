@@ -18,7 +18,7 @@ use crate::{
     ast::{StructID, namespace_registry::ArrayID},
     lowerer::func_translator::FuncTranslator,
 };
-use kasl_ir::ir::{InstBuilder, Offset, Value};
+use kasl_ir::{InstBuilder, Offset, Value};
 
 impl FuncTranslator<'_> {
     pub(in crate::lowerer::func_translator) fn copy_struct(

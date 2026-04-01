@@ -15,7 +15,7 @@
 //
 
 use crate::ast::type_registry::ResolvedType;
-use kasl_ir::ir::{IRBuilder, Value};
+use kasl_ir::{IRBuilder, Value};
 use std::fmt::Display;
 
 pub type BuiltinFuncTranslator = Box<dyn Fn(&mut IRBuilder, &[Value]) -> Value>;
