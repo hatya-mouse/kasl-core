@@ -1,6 +1,6 @@
 [package]
 name = "kasl-core"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "Apache-2.0"
 description = "Parses and translates the kasl code into KASL-IR, an intermediate representation for KASL."
