@@ -81,7 +81,7 @@ use std::path::PathBuf;
 /// };
 ///
 /// // Lower the program to KASL-IR
-/// let program_ptr = compiler.lower_once(&blueprint).expect("Failed to compile program");
+/// let func = compiler.lower_once(&blueprint).expect("Failed to compile program");
 /// ```
 #[derive(Default)]
 pub struct KaslCompiler {
