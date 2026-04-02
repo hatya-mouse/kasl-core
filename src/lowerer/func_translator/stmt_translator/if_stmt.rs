@@ -50,6 +50,8 @@ impl FuncTranslator<'_> {
             if !has_else_return {
                 self.builder.jump(merge_block, &[]);
             }
+        } else {
+            self.builder.jump(merge_block, &[]);
         }
 
         // Switch to the merge block and continue translating the rest of the function
