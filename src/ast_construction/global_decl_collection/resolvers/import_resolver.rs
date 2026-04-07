@@ -40,11 +40,14 @@ impl GlobalDeclCollector<'_> {
         };
 
         // If the name is already used, throw an error
-        if let Some(last_component) = import_path.path.last()
-            && self.is_name_used(last_component)
-        {
-            self.ec
-                .duplicate_name(decl_range, Ph::GlobalDeclCollection, last_component);
+        if let Some(last_component) = import_path.path.last() {
+            if self.is_name_used(last_component) {
+                self.ec
+                    .duplicate_name(decl_range, Ph::GlobalDeclCollection, last_component);
+            } else {
+                // Mark the module name as used
+                self.mark_name_used(last_component);
+            }
         }
 
         // If the path is already in the set of imported paths, skip it and throw an error
