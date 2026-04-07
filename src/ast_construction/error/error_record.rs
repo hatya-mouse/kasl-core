@@ -87,8 +87,9 @@ pub enum Phase {
     StructGraphAnalyzing = 3,
     StatementBuilding = 4,
     ExprEngine = 5,
-    ScopeGraphAnalyzing = 6,
-    Backend = 7,
+    FlowGraphAnalyzing = 6,
+    ScopeGraphAnalyzing = 7,
+    Backend = 8,
 }
 
 /// The severity of the error.

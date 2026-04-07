@@ -24,11 +24,10 @@ pub struct FlowGraphBuilder {
 impl FlowGraphBuilder {
     /// Initializes a FlowGraphBuilder with a single entry point node.
     pub fn with_entry_node() -> Self {
-        let mut flow_graph = FlowGraph::default();
-        let entry_node = flow_graph.add_flow_node(false);
+        let flow_graph = FlowGraph::with_entry_node();
         Self {
+            current_node: flow_graph.entry_node(),
             building_graph: flow_graph,
-            current_node: entry_node,
         }
     }
 

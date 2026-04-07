@@ -25,14 +25,23 @@ use std::fmt::Display;
 
 /// This is a Control Flow Graph (CFG),
 /// which is used to check if the all paths have return statement.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct FlowGraph {
     flow_nodes: HashMap<FlowID, FlowNode>,
     edges: HashMap<FlowID, Vec<FlowID>>,
+    entry_node: FlowID,
     next_flow_id: usize,
 }
 
 impl FlowGraph {
+    /// Initializes a FlowGraphBuilder with a single entry point node.
+    pub fn with_entry_node() -> Self {
+        let mut flow_graph = FlowGraph::default();
+        let entry_node = flow_graph.add_flow_node(false);
+        flow_graph.entry_node = entry_node;
+        flow_graph
+    }
+
     /// Generates a new flow ID.
     pub fn generate_flow_id(&mut self) -> FlowID {
         let id = FlowID(self.next_flow_id);
@@ -57,6 +66,34 @@ impl FlowGraph {
     /// Adds an edge to the graph.
     pub fn add_flow_edge(&mut self, from: FlowID, to: FlowID) {
         self.edges.entry(from).or_default().push(to);
+    }
+
+    /// Returns the all nods in the graph.
+    pub fn get_all_nodes(&self) -> Vec<FlowID> {
+        self.flow_nodes.keys().copied().collect()
+    }
+
+    /// Calculates the in-degree of the given node.
+    pub fn get_in_degree(&self, node: &FlowID) -> usize {
+        self.edges
+            .iter()
+            .filter(|(_, to)| to.contains(node))
+            .count()
+    }
+
+    /// Returns the successors of the given node.
+    pub fn get_successors(&self, node: &FlowID) -> Vec<FlowID> {
+        self.edges.get(node).cloned().unwrap_or_default()
+    }
+
+    /// Returns the node with the given ID.
+    pub fn get_node(&self, id: &FlowID) -> Option<&FlowNode> {
+        self.flow_nodes.get(id)
+    }
+
+    /// Returns the flow ID of the entry node.
+    pub fn entry_node(&self) -> FlowID {
+        self.entry_node
     }
 }
 

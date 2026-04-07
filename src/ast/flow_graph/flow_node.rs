@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+#[derive(Debug)]
 pub struct FlowNode {
-    pub(super) has_return: bool,
+    pub has_return: bool,
 }

@@ -50,30 +50,6 @@ impl ScopeGraphAnalyzer<'_> {
             }
         }
 
-        // Check if this scope guarantees return
-        let current_scope_has_return = self.scope_graph.guarantees_return(current_scope);
-        let all_children_have_return = child_scopes
-            .map(|children| {
-                children
-                    .iter()
-                    .all(|child| self.scope_graph.guarantees_return(child))
-            })
-            .unwrap_or(false);
-        let guarantees_return = current_scope_has_return || all_children_have_return;
-        // If the current scope requires return but doesn't guarantee return, throw an error
-        if self.scope_graph.requires_return(current_scope) && !guarantees_return {
-            let scope_range = self
-                .prog_ctx
-                .scope_registry
-                .get_scope(current_scope)
-                .map(|scope| scope.range)
-                .unwrap_or_default();
-            self.ec.missing_return(scope_range, Ph::ScopeGraphAnalyzing);
-        }
-        // Set if the current scope guarantees return
-        self.scope_graph
-            .set_has_return(*current_scope, guarantees_return);
-
         // Mark the current scope as Visited
         states.insert(*current_scope, ScopeState::Visited);
     }
