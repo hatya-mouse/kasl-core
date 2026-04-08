@@ -163,13 +163,14 @@ impl KaslCompiler {
         stmt_builder.build_all();
 
         // 3. Analyze flow graph
-        let mut scope_analyzer = FlowGraphAnalyzer::new(
+        let mut flow_analyzer = FlowGraphAnalyzer::new(
             &mut self.ec,
             &self.prog_ctx,
             &comp_data.func_flow_graphs,
             &comp_data.op_flow_graphs,
         );
-        scope_analyzer.analyze_all();
+        flow_analyzer.analyze_all();
+        println!("{:#?}", comp_data.func_flow_graphs);
 
         // 4. Analyze scope graph
         let mut scope_analyzer =
