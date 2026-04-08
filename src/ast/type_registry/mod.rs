@@ -32,7 +32,8 @@ use std::{collections::HashMap, str::FromStr};
 #[derive(Debug, Default, Clone, serde::Serialize)]
 pub struct TypeRegistry {
     // Struct Registration
-    structs: HashMap<StructID, StructDecl>,
+    /// Map of struct IDs to struct declarations. Can be None while collecting the struct body.
+    structs: HashMap<StructID, Option<StructDecl>>,
     name_to_id: HashMap<(NameSpaceID, String), StructID>,
 
     // Array Registration
@@ -102,7 +103,7 @@ impl TypeRegistry {
     }
 
     pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
-        self.structs.get(id)
+        self.structs.get(id).and_then(|decl| decl.as_ref())
     }
 
     pub fn get_all_structs(&self) -> Vec<StructID> {
@@ -142,15 +143,15 @@ impl TypeRegistry {
 
     // --- REGISTRATION ---
 
-    pub fn register_struct(
-        &mut self,
-        namespace_id: NameSpaceID,
-        struct_decl: StructDecl,
-        name: String,
-        struct_id: StructID,
-    ) {
-        self.structs.insert(struct_id, struct_decl);
-        self.name_to_id.insert((namespace_id, name), struct_id);
+    pub fn register_struct(&mut self, namespace_id: NameSpaceID, name: String) -> StructID {
+        let id = self.generate_struct_id();
+        self.structs.insert(id, None);
+        self.name_to_id.insert((namespace_id, name), id);
+        id
+    }
+
+    pub fn set_struct_decl(&mut self, struct_id: StructID, struct_decl: StructDecl) {
+        self.structs.insert(struct_id, Some(struct_decl));
     }
 
     pub fn register_typealias(

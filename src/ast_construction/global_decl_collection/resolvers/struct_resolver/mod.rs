@@ -37,21 +37,21 @@ impl<'a> GlobalDeclCollector<'a> {
                 .duplicate_name(decl_range, Ph::StructCollection, name);
         }
 
-        // Generate a unique struct ID and create a new struct decl
-        let struct_id = self.prog_ctx.type_registry.generate_struct_id();
+        // Register the new struct
+        let struct_id = self
+            .prog_ctx
+            .type_registry
+            .register_struct(self.current_namespace, name.to_string());
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
         // Calculate the struct layout
         struct_decl.compute_layout(&self.prog_ctx.type_registry);
 
-        // Register the struct in the type registry with a generated ID
-        self.prog_ctx.type_registry.register_struct(
-            self.current_namespace,
-            struct_decl,
-            name.to_string(),
-            struct_id,
-        );
+        // Register the struct decl in the type registry with a generated ID
+        self.prog_ctx
+            .type_registry
+            .set_struct_decl(struct_id, struct_decl);
 
         // Mark the struct name as used in the namespace
         self.mark_name_used(name);
