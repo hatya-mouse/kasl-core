@@ -171,7 +171,13 @@ impl KaslCompiler {
         );
         flow_analyzer.analyze_all();
 
-        println!("{:#?}", self.prog_ctx.func_ctx.get_func_map());
+        println!(
+            "is_prime id: {:#?}",
+            self.prog_ctx.func_ctx.get_global_func_id(
+                self.prog_ctx.namespace_registry.get_root_namespace_id(),
+                "is_prime"
+            )
+        );
         println!("{:#?}", comp_data.func_flow_graphs);
 
         // 4. Analyze scope graph
