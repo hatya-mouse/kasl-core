@@ -20,8 +20,8 @@ use crate::{
         TestContext,
         assert::assert_error,
         builders::{
-            bool_literal, float_literal, func_decl, int_literal, state_var, struct_decl,
-            struct_field,
+            bool_literal, float_literal, func_call, func_decl, int_literal, return_stmt, state_var,
+            struct_decl, struct_field,
         },
         collect_global_decls,
     },
@@ -85,6 +85,24 @@ fn test_complex_struct_collection() {
     assert_type_registry_snapshot!(&test_ctx.prog_ctx.type_registry);
 }
 
+#[test]
+fn test_struct_use_inside_struct() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![struct_decl(
+        "Type",
+        &[func_decl(
+            true,
+            "new",
+            &[],
+            Some(ParserTypeName::SymbolPath(symbol_path!["Type".to_string()])),
+            &[return_stmt(Some(&[func_call("Type", &[])]))],
+        )],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    assert_type_registry_snapshot!(&test_ctx.prog_ctx.type_registry);
+}
+
 // --- ERROR CASES ---
 
 #[test]
@@ -97,4 +115,20 @@ fn invalid_struct_decl_error() {
     )];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
     assert_error(&error, EK::InvalidStructStmt);
+}
+
+#[test]
+fn test_recursive_struct_use() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![struct_decl(
+        "Type",
+        &[struct_field(
+            "me",
+            Some(ParserTypeName::SymbolPath(symbol_path!["Type".to_string()])),
+            &[func_call("Type", &[])],
+        )],
+    )];
+    let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
+    assert_error(&error, EK::StructCycle);
 }

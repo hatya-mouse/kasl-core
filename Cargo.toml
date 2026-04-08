@@ -23,5 +23,4 @@ toml = "1.0.7"
 
 [dev-dependencies]
 insta = { version = "1.46.3", features = ["yaml", "redactions"] }
-kasl-core = { path = "./" }
 kasl-cranelift-backend = "0.1.1"

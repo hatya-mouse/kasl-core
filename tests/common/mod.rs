@@ -26,7 +26,7 @@ use kasl_core::{
     ast_construction::{
         blueprint_builder::BlueprintBuilder, flow_graph_analyzing::FlowGraphAnalyzer,
         global_decl_collection::GlobalDeclCollector, scope_graph_analyzing::ScopeGraphAnalyzer,
-        statement_building::StatementBuilder, struct_graph_analyzing::StructGraphAnalyzer,
+        statement_building::StatementBuilder,
     },
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorRecord},
@@ -79,16 +79,6 @@ pub fn collect_global_decls(
         root_namespace_id,
     );
     global_decl_collector.process(statements);
-    test_ctx.ec.as_result()
-}
-
-pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
-    let mut struct_graph_analyzer = StructGraphAnalyzer::new(
-        &mut test_ctx.ec,
-        &test_ctx.prog_ctx,
-        &test_ctx.comp_data.struct_graph,
-    );
-    struct_graph_analyzer.analyze_all();
     test_ctx.ec.as_result()
 }
 

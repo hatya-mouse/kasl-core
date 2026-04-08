@@ -16,9 +16,7 @@
 
 use crate::{
     assert_op_ctx_snapshot, assert_scope_registry_snapshot,
-    common::{
-        TestContext, analyze_scopes, analyze_structs, build_stmts, collect_global_decls, parse_expr,
-    },
+    common::{TestContext, analyze_scopes, build_stmts, collect_global_decls, parse_expr},
 };
 
 #[test]
@@ -91,7 +89,6 @@ let test_expr = 1 + 2 * 3 == 7 && !true || 5 > 2
 "#;
     let parsed = parse_expr(code);
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    analyze_structs(&mut test_ctx).unwrap();
     build_stmts(&mut test_ctx).unwrap();
     analyze_scopes(&mut test_ctx).unwrap();
 

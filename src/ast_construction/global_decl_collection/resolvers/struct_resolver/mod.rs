@@ -20,7 +20,7 @@ mod struct_field_resolver;
 use crate::{
     ast::{Range, StructID, symbol_table::FunctionType, type_registry::StructDecl},
     ast_construction::global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    error::Ph,
+    error::{EK, Ph},
     parser::{ParserDeclStmt, ParserDeclStmtKind},
 };
 
@@ -46,7 +46,10 @@ impl<'a> GlobalDeclCollector<'a> {
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
         // Calculate the struct layout
-        struct_decl.compute_layout(&self.prog_ctx.type_registry);
+        if let Err(EK::StructCycle) = struct_decl.compute_layout(&self.prog_ctx.type_registry) {
+            self.ec
+                .struct_cycle(decl_range, Ph::GlobalDeclCollection, name);
+        }
 
         // Register the struct decl in the type registry with a generated ID
         self.prog_ctx

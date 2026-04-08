@@ -25,7 +25,7 @@ use crate::{
     },
     ast_construction::{
         BlueprintBuilder, GlobalDeclCollector, ScopeGraphAnalyzer, StatementBuilder,
-        StructGraphAnalyzer, flow_graph_analyzing::FlowGraphAnalyzer,
+        flow_graph_analyzing::FlowGraphAnalyzer,
     },
     builtin::BuiltinRegistry,
     error::{EK, ErrorCollector, ErrorKey, ErrorRecord, Ph, Pl, Sv},
@@ -153,12 +153,7 @@ impl KaslCompiler {
         );
         global_decl_collector.process(&self.parser_decl_stmts);
 
-        // 2. Analyze struct graph
-        let mut struct_analyzer =
-            StructGraphAnalyzer::new(&mut self.ec, &self.prog_ctx, &comp_data.struct_graph);
-        struct_analyzer.analyze_all();
-
-        // 3. Build statements
+        // 2. Build statements
         let mut stmt_builder = StatementBuilder::new(
             &mut self.ec,
             &mut self.prog_ctx,
@@ -167,7 +162,7 @@ impl KaslCompiler {
         );
         stmt_builder.build_all();
 
-        // 4. Analyze flow graph
+        // 3. Analyze flow graph
         let mut scope_analyzer = FlowGraphAnalyzer::new(
             &mut self.ec,
             &self.prog_ctx,
@@ -176,12 +171,12 @@ impl KaslCompiler {
         );
         scope_analyzer.analyze_all();
 
-        // 5. Analyze scope graph
+        // 4. Analyze scope graph
         let mut scope_analyzer =
             ScopeGraphAnalyzer::new(&mut self.ec, &self.prog_ctx, &mut comp_data.scope_graph);
         scope_analyzer.analyze_all();
 
-        // 6. Build an IOBlueprint
+        // 5. Build an IOBlueprint
         let blueprint_builder = BlueprintBuilder::new(&self.prog_ctx);
         let blueprint = blueprint_builder.build();
 

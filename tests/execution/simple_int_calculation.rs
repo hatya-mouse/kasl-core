@@ -15,8 +15,8 @@
 //
 
 use crate::common::{
-    TestContext, analyze_scopes, analyze_structs, build_blueprint, build_stmts,
-    collect_global_decls, execute_program, parse_expr,
+    TestContext, analyze_scopes, build_blueprint, build_stmts, collect_global_decls,
+    execute_program, parse_expr,
 };
 
 #[test]
@@ -41,7 +41,6 @@ func main() {
 "#;
     let parsed = parse_expr(code);
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    analyze_structs(&mut test_ctx).unwrap();
     build_stmts(&mut test_ctx).unwrap();
     analyze_scopes(&mut test_ctx).unwrap();
     let blueprint = build_blueprint(&mut test_ctx);

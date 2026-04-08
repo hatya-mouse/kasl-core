@@ -18,7 +18,10 @@ mod struct_field;
 
 pub use struct_field::StructField;
 
-use crate::ast::{Range, type_registry::TypeRegistry};
+use crate::{
+    ast::{Range, type_registry::TypeRegistry},
+    error::EK,
+};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
@@ -73,7 +76,8 @@ impl StructDecl {
         self.fields.push(field);
     }
 
-    pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
+    /// Calculates the memory layout of the struct and detects the struct cycle.
+    pub fn compute_layout(&mut self, type_registry: &TypeRegistry) -> Result<(), EK> {
         let mut offset = 0u32;
         let mut max_alignment = 1u32;
 
@@ -81,7 +85,7 @@ impl StructDecl {
             // Get the size and alignment of the field's type
             let size = type_registry
                 .get_type_actual_size(&field.value_type)
-                .unwrap();
+                .ok_or(EK::StructCycle)?;
             let alignment = type_registry.get_type_alignment(&field.value_type).unwrap();
             // If the alignment is greater than the max_alignment, update it
             if alignment > max_alignment {
@@ -96,5 +100,7 @@ impl StructDecl {
 
         self.total_size = (offset).div_ceil(max_alignment) * max_alignment;
         self.alignment = max_alignment;
+
+        Ok(())
     }
 }
