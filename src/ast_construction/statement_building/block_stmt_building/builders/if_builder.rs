@@ -35,38 +35,48 @@ impl BlockStmtBuilder<'_> {
         // Create a new flow node for the operations after the if statement
         let before_node = self.flow_graph_builder.current_node();
         let after_node = self.flow_graph_builder.new_node();
-        // Create a vector for if, if-else and else nodes
-        let mut branch_nodes = Vec::new();
+        // Create a vector of flow nodes for if, if-else and else nodes
+        let mut branch_in_nodes = Vec::new();
+        let mut branch_out_nodes = Vec::new();
 
         // Create a new flow node for the main if arm
         let main_flow_node = self.flow_graph_builder.new_node();
         self.flow_graph_builder.switch_node(main_flow_node);
-        branch_nodes.push(main_flow_node);
+        branch_in_nodes.push(main_flow_node);
         // Build the main if arm
         let main_arm = self.build_if_arm(parser_main)?;
+        // Add the current branch to the branch out nodes
+        branch_out_nodes.push(self.flow_graph_builder.current_node());
 
         let mut else_ifs = Vec::new();
         for parser_arm in parser_else_ifs {
             // Create a new flow node for the else-if arms
             let else_if_node = self.flow_graph_builder.new_node();
             self.flow_graph_builder.switch_node(else_if_node);
-            branch_nodes.push(else_if_node);
+            branch_in_nodes.push(else_if_node);
             // Build the else-if arm
             else_ifs.push(self.build_if_arm(parser_arm)?);
+            // Add the current branch to the branch out nodes
+            branch_out_nodes.push(self.flow_graph_builder.current_node());
         }
 
         let else_block = if let Some(parser_else_body) = parser_else_body {
             // Create a new flow node for the else arm
             let else_node = self.flow_graph_builder.new_node();
             self.flow_graph_builder.switch_node(else_node);
-            branch_nodes.push(else_node);
+            branch_in_nodes.push(else_node);
 
             // Build the else block
-            Some(self.build_scope_block(
+            let built_block = self.build_scope_block(
                 parser_else_body,
                 self.scope_id,
                 else_range.unwrap_or_default(),
-            ))
+            );
+
+            // Add the current branch to the branch out nodes
+            branch_out_nodes.push(self.flow_graph_builder.current_node());
+
+            Some(built_block)
         } else {
             // If the if statement does not have else arm, add an edge from the before_node to the after_node
             self.flow_graph_builder.add_edge(before_node, after_node);
@@ -74,10 +84,10 @@ impl BlockStmtBuilder<'_> {
             None
         };
 
-        // Add the edges from the before node to branch nodes, and the edges from the branch nodes to after node
-        for branch_node in branch_nodes {
-            self.flow_graph_builder.add_edge(before_node, branch_node);
-            self.flow_graph_builder.add_edge(branch_node, after_node);
+        // Add the edges from the before node to in-nodes, and the edges from the out-nodes to after node
+        for (in_node, out_node) in branch_in_nodes.iter().zip(branch_out_nodes) {
+            self.flow_graph_builder.add_edge(before_node, *in_node);
+            self.flow_graph_builder.add_edge(out_node, after_node);
         }
         // Switch to the after node
         self.flow_graph_builder.switch_node(after_node);

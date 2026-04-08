@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::ast::flow_graph::{FlowGraph, FlowID};
+use crate::ast::flow_graph::{FlowGraph, FlowID, FlowNode};
 
 pub struct FlowGraphBuilder {
     building_graph: FlowGraph,
@@ -59,5 +59,10 @@ impl FlowGraphBuilder {
     /// Sets the has_return of the current node to true.
     pub fn current_has_return(&mut self) {
         self.building_graph.set_has_return(&self.current_node, true);
+    }
+
+    /// Returns the node with the given FlowID.
+    pub fn get_node(&self, id: &FlowID) -> Option<&FlowNode> {
+        self.building_graph.get_node(id)
     }
 }
