@@ -1,3 +1,7 @@
+[parser_error]
+MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
+SingleExpected = "Syntax error. Expected {$0}"
+
 [errors]
 ArgForStructInit = "Arguments cannot be passed to a struct initializer"
 ArgLabelNotFound = 'Parameter with the label "{$0}" could no be found'
@@ -69,7 +73,3 @@ VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'
 WrongParamCountForPrefix = 'Prefix operator "{$0}" requires 1 parameter, but got {$1}'
-
-[parser_error]
-MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
-SingleExpected = "Syntax error. Expected {$0}"

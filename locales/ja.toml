@@ -73,7 +73,3 @@ VarNotFound = '変数 "{$0}" が見つかりません'
 WrongParamCountForInfix = '中置演算子 "{$0}" には2個の引数が必要ですが、{$1}個の引数が指定されています'
 WrongParamCountForPostfix = '後置演算子 "{$0}" には1個の引数が必要ですが、{$1}個の引数が指定されています'
 WrongParamCountForPrefix = '前置演算子 "{$0}" には1個の引数が必要ですが、{$1}個の引数が指定されています'
-
-[parser_error]
-MultipleExpected = "文法に誤りがあります。{$0} または {$1} のいずれかが必要です"
-SingleExpected = "文法に誤りがあります。{$0} が必要です"
