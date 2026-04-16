@@ -43,7 +43,24 @@ impl<'a> GlobalDeclCollector<'a> {
             .type_registry
             .register_struct(self.current_namespace, name.to_string());
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
+
+        // Create a new scope for the struct body and resolve the struct body
+        let global_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope_id(&self.current_namespace);
+        let struct_scope_id = self
+            .prog_ctx
+            .scope_registry
+            .create_scope(Some(global_scope_id), decl_range);
+
+        // Switch to the newly creates scope and resolve the struct body
+        let old_scope_id = self.current_scope_id;
+        self.switch_to_scope(struct_scope_id);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
+
+        // Restore the old scope ID
+        self.switch_to_scope(old_scope_id);
 
         // Calculate the struct layout
         if let Err(EK::StructCycle) = struct_decl.compute_layout(&self.prog_ctx.type_registry) {

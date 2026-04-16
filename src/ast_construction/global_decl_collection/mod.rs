@@ -39,7 +39,7 @@ pub struct GlobalDeclCollector<'a> {
     builtin_registry: &'a BuiltinRegistry,
 
     current_namespace: NameSpaceID,
-    global_scope_id: ScopeID,
+    current_scope_id: ScopeID,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -55,6 +55,7 @@ impl<'a> GlobalDeclCollector<'a> {
             .scope_registry
             .get_global_scope_id(&current_namespace);
 
+        // Set the current scope to the global scope of the current namespace
         Self {
             ec,
             prog_ctx,
@@ -62,26 +63,34 @@ impl<'a> GlobalDeclCollector<'a> {
             comp_state,
             builtin_registry,
             current_namespace,
-            global_scope_id,
+            current_scope_id: global_scope_id,
         }
     }
 
+    /// Processes the given declaration statements.
     pub fn process(&mut self, decl_stmts: &'a [ParserDeclStmt]) {
         for stmt in decl_stmts.iter() {
             self.process_stmt(stmt);
         }
     }
 
+    /// Marks the given name as used in the current scope.
     pub fn mark_name_used(&mut self, name: &str) {
         // Mark the name as used in the namespace
         self.prog_ctx
             .scope_registry
-            .mark_name_used(&self.global_scope_id, name);
+            .mark_name_used(&self.current_scope_id, name);
     }
 
+    /// Returns `true` if the given name is used in the current scope.
     pub fn is_name_used(&self, name: &str) -> bool {
         self.prog_ctx
             .scope_registry
-            .is_name_used(&self.global_scope_id, name)
+            .is_name_used(&self.current_scope_id, name)
+    }
+
+    /// Switches the current scope to the given scope ID.
+    pub fn switch_to_scope(&mut self, scope_id: ScopeID) {
+        self.current_scope_id = scope_id;
     }
 }
