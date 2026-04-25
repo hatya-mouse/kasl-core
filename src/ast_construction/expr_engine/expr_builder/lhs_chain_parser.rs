@@ -92,28 +92,28 @@ impl ExpressionBuilder<'_> {
         }
 
         // If the chain elements are not empty, construct the chain expression
-        if !chain_elements.is_empty() {
-            if let UnresolvedExprKind::Chain { lhs, elements } = expr.kind {
-                let joined_elements = [elements.clone(), chain_elements].concat();
-                Some(UnresolvedExpr::new(
-                    UnresolvedExprKind::Chain {
-                        lhs: lhs.clone(),
-                        elements: joined_elements,
-                    },
-                    expr.range,
-                ))
-            } else {
-                let expr_range = expr.range;
-                Some(UnresolvedExpr::new(
-                    UnresolvedExprKind::Chain {
-                        lhs: Some(Box::new(expr)),
-                        elements: chain_elements,
-                    },
-                    expr_range,
-                ))
-            }
+        if chain_elements.is_empty() {
+            return Some(expr);
+        }
+
+        if let UnresolvedExprKind::Chain { lhs, elements } = expr.kind {
+            let joined_elements = [elements.clone(), chain_elements].concat();
+            Some(UnresolvedExpr::new(
+                UnresolvedExprKind::Chain {
+                    lhs: lhs.clone(),
+                    elements: joined_elements,
+                },
+                expr.range,
+            ))
         } else {
-            Some(expr)
+            let expr_range = expr.range;
+            Some(UnresolvedExpr::new(
+                UnresolvedExprKind::Chain {
+                    lhs: Some(Box::new(expr)),
+                    elements: chain_elements,
+                },
+                expr_range,
+            ))
         }
     }
 

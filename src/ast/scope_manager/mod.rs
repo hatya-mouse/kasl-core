@@ -143,25 +143,25 @@ impl ScopeRegistry {
             return true;
         }
 
-        if let Some(mut current_scope) = self.get_scope(scope_id) {
-            loop {
-                // Return if the name is already used
-                if current_scope.is_name_used(name) {
-                    return true;
-                }
+        let Some(mut current_scope) = self.get_scope(scope_id) else {
+            return false;
+        };
 
-                // Move to the parent scope or return
-                if let Some(parent_scope) = current_scope
-                    .parent
-                    .and_then(|parent| self.get_scope(&parent))
-                {
-                    current_scope = parent_scope;
-                } else {
-                    return false;
-                }
+        loop {
+            // Return if the name is already used
+            if current_scope.is_name_used(name) {
+                return true;
             }
-        } else {
-            false
+
+            // Move to the parent scope or return
+            let Some(parent_scope) = current_scope
+                .parent
+                .and_then(|parent| self.get_scope(&parent))
+            else {
+                return false;
+            };
+
+            current_scope = parent_scope;
         }
     }
 }

@@ -38,12 +38,11 @@ impl ExpressionBuilder<'_> {
             // Get the range of the operator token
             let op_range = op_token.range;
 
-            let op_symbol = match &op_token.kind {
-                ExprTokenKind::Operator(symbol) => symbol.clone(),
-                _ => break,
+            let ExprTokenKind::Operator(op_symbol) = &op_token.kind else {
+                break;
             };
 
-            if let Some(op_props) = self.op_ctx.get_postfix_props(&op_symbol) {
+            if let Some(op_props) = self.op_ctx.get_postfix_props(op_symbol) {
                 // Break if the operator precedence is less than the minimum precedence
                 if op_props.precedence < min_prec {
                     break;
@@ -51,7 +50,7 @@ impl ExpressionBuilder<'_> {
 
                 lhs = UnresolvedExpr::new(
                     UnresolvedExprKind::PostfixOp {
-                        symbol: op_symbol,
+                        symbol: op_symbol.clone(),
                         operand: Box::new(lhs),
                     },
                     op_range,
@@ -59,17 +58,14 @@ impl ExpressionBuilder<'_> {
                 tokens.next();
             } else {
                 // If the operator is not a postfix operator, assume it's infix
-                let op_props = match self.op_ctx.get_infix_props(&op_symbol) {
-                    Some(op_props) => op_props,
-                    None => {
-                        // If the both infix and postfix operators are not found, emit an error
-                        self.ec.infix_or_postfix_op_not_defined(
-                            op_token.range,
-                            Ph::ExprEngine,
-                            &op_symbol,
-                        );
-                        break;
-                    }
+                let Some(op_props) = self.op_ctx.get_infix_props(op_symbol) else {
+                    // If the both infix and postfix operators are not found, emit an error
+                    self.ec.infix_or_postfix_op_not_defined(
+                        op_token.range,
+                        Ph::ExprEngine,
+                        op_symbol,
+                    );
+                    break;
                 };
 
                 if op_props.precedence < min_prec {
@@ -82,7 +78,7 @@ impl ExpressionBuilder<'_> {
                 {
                     // Throw an error if the operator is not associative but consecutively used
                     self.ec
-                        .op_not_associative(op_token.range, Ph::ExprEngine, &op_symbol);
+                        .op_not_associative(op_token.range, Ph::ExprEngine, op_symbol);
                     return None;
                 }
 
@@ -99,7 +95,7 @@ impl ExpressionBuilder<'_> {
                 let rhs = self.climb_precedence(tokens, next_prec)?;
                 lhs = UnresolvedExpr::new(
                     UnresolvedExprKind::InfixOp {
-                        symbol: op_symbol,
+                        symbol: op_symbol.clone(),
                         lhs_expr: Box::new(lhs),
                         rhs_expr: Box::new(rhs),
                     },

@@ -35,42 +35,13 @@ impl BlockStmtBuilder<'_> {
                 // If the function doesn't require a return value but it's provided, throw and error
                 self.ec
                     .return_value_for_no_return_func(decl_range, Ph::StatementBuilding);
-                None
-            } else {
-                Some(Statement::Return { value: None })
-            }
-        } else if let Some(value) = value {
-            // Resolve the expression
-            let resolved_value = resolve_expr(
-                self.ec,
-                self.prog_ctx,
-                self.comp_data,
-                self.builtin_registry,
-                self.scope_id,
-                self.namespace_id,
-                value,
-            )?;
-
-            // Check if the return type matches the expected return type
-            // If the self.expected_return_type is None, resolved_value should be None as well
-            if resolved_value.value_type != self.expected_return_type {
-                self.ec.return_type_mismatch(
-                    decl_range,
-                    Ph::StatementBuilding,
-                    self.prog_ctx
-                        .type_registry
-                        .format_type(&self.expected_return_type),
-                    self.prog_ctx
-                        .type_registry
-                        .format_type(&resolved_value.value_type),
-                );
                 return None;
             }
 
-            Some(Statement::Return {
-                value: Some(resolved_value),
-            })
-        } else {
+            return Some(Statement::Return { value: None });
+        }
+
+        let Some(value) = value else {
             self.ec.return_without_value_for_return_func(
                 decl_range,
                 Ph::StatementBuilding,
@@ -78,7 +49,38 @@ impl BlockStmtBuilder<'_> {
                     .type_registry
                     .format_type(&self.expected_return_type),
             );
-            None
+            return None;
+        };
+
+        // Resolve the expression
+        let resolved_value = resolve_expr(
+            self.ec,
+            self.prog_ctx,
+            self.comp_data,
+            self.builtin_registry,
+            self.scope_id,
+            self.namespace_id,
+            value,
+        )?;
+
+        // Check if the return type matches the expected return type
+        // If the self.expected_return_type is None, resolved_value should be None as well
+        if resolved_value.value_type != self.expected_return_type {
+            self.ec.return_type_mismatch(
+                decl_range,
+                Ph::StatementBuilding,
+                self.prog_ctx
+                    .type_registry
+                    .format_type(&self.expected_return_type),
+                self.prog_ctx
+                    .type_registry
+                    .format_type(&resolved_value.value_type),
+            );
+            return None;
         }
+
+        Some(Statement::Return {
+            value: Some(resolved_value),
+        })
     }
 }

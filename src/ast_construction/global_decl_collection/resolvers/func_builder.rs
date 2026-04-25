@@ -145,6 +145,7 @@ impl GlobalDeclCollector<'_> {
             return None;
         }
 
+        // If the parameter has a default value, resolve the default value expression and use its type as the parameter type
         if let Some(def_val) = &param.def_val {
             // Resolve the default value expression
             let resolved_def_val =
@@ -163,54 +164,54 @@ impl GlobalDeclCollector<'_> {
                     .scope_registry
                     .register_var(var, param.name.clone(), &func_scope_id);
 
-            Some(FuncParam {
+            return Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
                 var_id,
                 value_type: resolved_def_val.value_type,
                 def_val: Some(resolved_def_val),
                 range: param.range,
-            })
-        } else if let Some(type_annotation) = &param.value_type {
-            // If no default value is provided, use the annotation type
-            let resolved_type_annotation =
-                match resolve_type(self.current_namespace, self.prog_ctx, type_annotation) {
-                    Some(ty) => ty,
-                    None => {
-                        self.ec.type_not_found(
-                            param.range,
-                            Ph::GlobalDeclCollection,
-                            type_annotation.to_string(),
-                        );
-                        return None;
-                    }
-                };
+            });
+        }
 
-            // Register the variable in the function scope
-            let var = ScopeVar {
-                name: param.name.clone(),
-                value_type: resolved_type_annotation,
-                def_val: None,
-                range: param.range,
-                var_kind: VariableKind::FuncParam,
-            };
-            let var_id =
-                self.prog_ctx
-                    .scope_registry
-                    .register_var(var, param.name.clone(), &func_scope_id);
-
-            Some(FuncParam {
-                label: param.label.clone(),
-                name: param.name.clone(),
-                var_id,
-                value_type: resolved_type_annotation,
-                def_val: None,
-                range: param.range,
-            })
-        } else {
+        let Some(type_annotation) = &param.value_type else {
             self.ec
                 .no_type_annotation_or_def_val(param.range, Ph::GlobalDeclCollection);
-            None
-        }
+            return None;
+        };
+
+        // If no default value is provided, use the annotation type
+        let Some(resolved_type_annotation) =
+            resolve_type(self.current_namespace, self.prog_ctx, type_annotation)
+        else {
+            self.ec.type_not_found(
+                param.range,
+                Ph::GlobalDeclCollection,
+                type_annotation.to_string(),
+            );
+            return None;
+        };
+
+        // Register the variable in the function scope
+        let var = ScopeVar {
+            name: param.name.clone(),
+            value_type: resolved_type_annotation,
+            def_val: None,
+            range: param.range,
+            var_kind: VariableKind::FuncParam,
+        };
+        let var_id =
+            self.prog_ctx
+                .scope_registry
+                .register_var(var, param.name.clone(), &func_scope_id);
+
+        Some(FuncParam {
+            label: param.label.clone(),
+            name: param.name.clone(),
+            var_id,
+            value_type: resolved_type_annotation,
+            def_val: None,
+            range: param.range,
+        })
     }
 }

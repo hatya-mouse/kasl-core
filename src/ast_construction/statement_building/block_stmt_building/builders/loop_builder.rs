@@ -61,17 +61,17 @@ impl BlockStmtBuilder<'_> {
         }
 
         // Verify the count expression and get the integer loop count
-        if let Some(loop_count) = get_constant_int(&self.prog_ctx.scope_registry, &count_expr) {
-            // Build the body and return the new loop statement
-            let loop_block = self.build_scope_block(body, self.scope_id, decl_range);
-            Some(Statement::Loop {
-                count: loop_count,
-                body: loop_block,
-            })
-        } else {
+        let Some(loop_count) = get_constant_int(&self.prog_ctx.scope_registry, &count_expr) else {
             self.ec
                 .non_constant_for_loop_count(count_expr.range, Ph::ExprEngine);
-            None
-        }
+            return None;
+        };
+
+        // Build the body and return the new loop statement
+        let loop_block = self.build_scope_block(body, self.scope_id, decl_range);
+        Some(Statement::Loop {
+            count: loop_count,
+            body: loop_block,
+        })
     }
 }

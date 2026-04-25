@@ -101,17 +101,17 @@ impl NameSpaceRegistry {
         let mut path_iter = path.into_iter().peekable();
         let mut current_namespace_id = current_namespace;
         while let Some(name) = path_iter.peek() {
-            if let Some(namespace) = self.get_namespace_by_id(&current_namespace_id) {
-                // Get the child namespace ID by name
-                if let Some(child_id) = namespace.get_id_by_name(&name.symbol) {
-                    path_iter.next();
-                    current_namespace_id = child_id;
-                } else {
-                    break;
-                }
-            } else {
+            // Get the current namespace
+            let Some(namespace) = self.get_namespace_by_id(&current_namespace_id) else {
                 break;
-            }
+            };
+            // Get the child namespace ID by name
+            let Some(child_id) = namespace.get_id_by_name(&name.symbol) else {
+                break;
+            };
+
+            path_iter.next();
+            current_namespace_id = child_id;
         }
         (current_namespace_id, path_iter.collect())
     }

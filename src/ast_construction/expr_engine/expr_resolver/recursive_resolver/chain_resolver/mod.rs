@@ -41,48 +41,17 @@ impl ExpressionResolver<'_> {
     ) -> Option<Expr> {
         let mut elements_iter = elements.iter().peekable();
 
-        let mut expr = None;
+        let mut expr;
         let mut target_scope = self.current_scope;
         let mut target_namespace = self.current_namespace;
 
         if let Some(lhs) = lhs {
-            // Resolve the lhs
+            // Resolve the lhs expression first and use it as the starting point for resolving the chain
             let resolved_lhs = self.resolve_recursively(lhs)?;
             expr = Some(resolved_lhs);
         } else {
             (target_scope, target_namespace) = self.resolve_namespace_scope(&mut elements_iter);
-
-            if let Some(UnresolvedChainElement::Identifier { name, range }) = elements_iter.peek() {
-                // Check if the next element is a type
-                if let Some(struct_id) = self
-                    .prog_ctx
-                    .type_registry
-                    .get_struct_id(target_namespace, name)
-                {
-                    // Consume the type name element
-                    elements_iter.next();
-
-                    // Assume that the next element is a static function
-                    let Some(next_element) = elements_iter.next() else {
-                        self.ec.expr_ends_with_type(*range, Ph::ExprEngine);
-                        return None;
-                    };
-
-                    // Resolve the static function call
-                    expr =
-                        Some(self.resolve_static_func_call(struct_id, next_element, expr_range)?);
-                } else if name == "Builtin" {
-                    // Consume the "Builtin" element
-                    elements_iter.next();
-                    // Get the next element
-                    let Some(next_element) = elements_iter.next() else {
-                        self.ec.expr_ends_with_builtin(*range, Ph::ExprEngine);
-                        return None;
-                    };
-                    // Resolve the builtin function call
-                    expr = Some(self.resolve_builtin_func_call(next_element, expr_range)?);
-                }
-            }
+            expr = self.resolve_first_identifier(&mut elements_iter, target_namespace, expr_range);
         }
 
         // Resolve member access and function calls
@@ -130,30 +99,73 @@ impl ExpressionResolver<'_> {
         let mut current_namespace = self.current_namespace;
         // Loop over the elements in the chain and get the namespace ID from the first tokens
         while let Some(element) = elements.peek() {
-            match element {
-                UnresolvedChainElement::Identifier { name, .. } => {
-                    let namespace_ref = self
-                        .prog_ctx
-                        .namespace_registry
-                        .get_namespace_by_id(&current_namespace)
-                        .unwrap();
-                    if let Some(namespace_id) = namespace_ref.get_id_by_name(name) {
-                        // Consume the identifier
-                        elements.next();
-                        current_namespace = namespace_id;
-                        // Get the global scope of the namespace
-                        let global_scope = self
-                            .prog_ctx
-                            .scope_registry
-                            .get_global_scope_id(&current_namespace);
-                        current_scope = global_scope;
-                    } else {
-                        return (current_scope, current_namespace);
-                    }
-                }
-                _ => return (current_scope, current_namespace),
-            }
+            let UnresolvedChainElement::Identifier { name, .. } = element else {
+                return (current_scope, current_namespace);
+            };
+
+            let namespace_ref = self
+                .prog_ctx
+                .namespace_registry
+                .get_namespace_by_id(&current_namespace)
+                .unwrap();
+
+            let Some(namespace_id) = namespace_ref.get_id_by_name(name) else {
+                return (current_scope, current_namespace);
+            };
+
+            // Consume the identifier
+            elements.next();
+            current_namespace = namespace_id;
+
+            // Get the global scope of the namespace
+            let global_scope = self
+                .prog_ctx
+                .scope_registry
+                .get_global_scope_id(&current_namespace);
+            current_scope = global_scope;
         }
         (current_scope, current_namespace)
+    }
+
+    fn resolve_first_identifier(
+        &mut self,
+        elements_iter: &mut Peekable<Iter<UnresolvedChainElement>>,
+        target_namespace: NameSpaceID,
+        expr_range: Range,
+    ) -> Option<Expr> {
+        let Some(UnresolvedChainElement::Identifier { name, range }) = elements_iter.peek() else {
+            return None;
+        };
+
+        // Check if the next element is a type
+        if let Some(struct_id) = self
+            .prog_ctx
+            .type_registry
+            .get_struct_id(target_namespace, name)
+        {
+            // Consume the type name element
+            elements_iter.next();
+
+            // Assume that the next element is a static function
+            let Some(next_element) = elements_iter.next() else {
+                self.ec.expr_ends_with_type(*range, Ph::ExprEngine);
+                return None;
+            };
+
+            // Resolve the static function call
+            Some(self.resolve_static_func_call(struct_id, next_element, expr_range)?)
+        } else if name == "Builtin" {
+            // Consume the "Builtin" element
+            elements_iter.next();
+            // Get the next element
+            let Some(next_element) = elements_iter.next() else {
+                self.ec.expr_ends_with_builtin(*range, Ph::ExprEngine);
+                return None;
+            };
+            // Resolve the builtin function call
+            Some(self.resolve_builtin_func_call(next_element, expr_range)?)
+        } else {
+            None
+        }
     }
 }
