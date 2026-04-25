@@ -53,9 +53,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
             let one = builder.const_val(Const::I32(1));
             let safe_divisor = builder.select(is_divisor_zero, one, divisor);
 
-            let quotient = builder.ibop(IntBinOp::Div, diviend, safe_divisor);
-            let zero = builder.const_val(Const::I32(0));
-            builder.select(is_divisor_zero, zero, quotient)
+            builder.ibop(IntBinOp::Div, diviend, safe_divisor)
         }),
     );
 
