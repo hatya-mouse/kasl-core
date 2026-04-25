@@ -15,6 +15,7 @@
 //
 
 use crate::{
+    DIR_ROOT_FILE_NAME,
     ast::{Range, compilation_data::CompilerState, namespace_registry::ImportPath},
     ast_construction::{
         global_decl_collection::GlobalDeclCollector, namespace_constructor::NameSpaceConstructor,
@@ -132,10 +133,18 @@ impl GlobalDeclCollector<'_> {
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {
         for base_path in &self.comp_state.child_search_paths {
-            let full_path = base_path.join(import_path.to_path()).with_extension("kasl");
+            let file_path = base_path.join(import_path.to_path()).with_extension("kasl");
 
-            if let Some(content) = self.get_file_content(&full_path) {
-                return Some((content, full_path));
+            if let Some(content) = self.get_file_content(&file_path) {
+                return Some((content, file_path));
+            } else {
+                // If the file with .kasl extension is not found, try to find a directory with the same name and look for a root.kasl file in it
+                let root_path = base_path
+                    .join(import_path.to_path())
+                    .with_file_name(DIR_ROOT_FILE_NAME);
+                if let Some(content) = self.get_file_content(&root_path) {
+                    return Some((content, root_path));
+                }
             }
         }
         None

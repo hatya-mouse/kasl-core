@@ -17,6 +17,7 @@
 //! This crate includes the core implementation of the KASL programming language.
 
 pub(crate) const MAIN_FUNCTION_NAME: &str = "main";
+pub(crate) const DIR_ROOT_FILE_NAME: &str = "root.kasl";
 pub(crate) const LOOP_UNROLL_THRESHOLD: u32 = 32;
 
 pub mod ast;
