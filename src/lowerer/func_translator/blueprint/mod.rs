@@ -14,5 +14,5 @@
 //  limitations under the License.
 //
 
-mod blueprint_loader;
-mod blueprint_store;
+mod loader;
+mod store;
