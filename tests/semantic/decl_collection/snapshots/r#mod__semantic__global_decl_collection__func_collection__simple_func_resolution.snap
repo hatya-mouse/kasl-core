@@ -1,0 +1,24 @@
+---
+source: tests/semantic/decl_collection/func_collection.rs
+expression: "&test_ctx.prog_ctx.func_ctx"
+---
+funcs:
+  0:
+    name: greet
+    namespace_id: 0
+    func_type: Global
+    params: []
+    return_type:
+      Primitive: Void
+    block:
+      body: []
+      scope_id: 2
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+global_functions:
+  ? - 0
+    - greet
+  : 0
+next_function_id: 1

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::ast::type_registry::{PrimitiveType, ResolvedType};
+use crate::ast_nodes::type_registry::{PrimitiveType, ResolvedType};
 use kasl_ir::IRType;
 
 pub(super) fn convert_type(resolved_type: &ResolvedType) -> IRType {

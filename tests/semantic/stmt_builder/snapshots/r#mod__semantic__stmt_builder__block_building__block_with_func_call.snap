@@ -1,0 +1,55 @@
+---
+source: tests/semantic/stmt_builder/block_building.rs
+expression: "&test_ctx.prog_ctx.func_ctx"
+---
+funcs:
+  0:
+    name: do_something
+    namespace_id: 0
+    func_type: Global
+    params: []
+    return_type:
+      Primitive: Void
+    block:
+      body: []
+      scope_id: 2
+    range:
+      start: 0
+      end: 0
+  1:
+    name: main
+    namespace_id: 0
+    func_type: Global
+    params: []
+    return_type:
+      Primitive: Void
+    block:
+      body:
+        - Block:
+            block:
+              body:
+                - Expression:
+                    expr:
+                      kind:
+                        FuncCall:
+                          id: 0
+                          args: []
+                      value_type:
+                        Primitive: Void
+                      range:
+                        start: 0
+                        end: 0
+              scope_id: 4
+      scope_id: 3
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+global_functions:
+  ? - 0
+    - do_something
+  : 0
+  ? - 0
+    - main
+  : 1
+next_function_id: 2

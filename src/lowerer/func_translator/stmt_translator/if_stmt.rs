@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ast::{IfArm, symbol_table},
+    ast_nodes::{IfArm, symbol_table},
     lowerer::func_translator::FuncTranslator,
 };
 use kasl_ir::{self, InstBuilder};

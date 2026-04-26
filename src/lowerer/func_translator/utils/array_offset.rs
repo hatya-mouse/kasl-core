@@ -17,7 +17,7 @@
 use kasl_ir::{Const, IRType, InstBuilder, IntBinOp, Value};
 
 use crate::{
-    ast::{Expr, type_registry::ResolvedType},
+    ast_nodes::{Expr, type_registry::ResolvedType},
     lowerer::func_translator::FuncTranslator,
 };
 

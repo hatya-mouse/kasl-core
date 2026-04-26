@@ -15,7 +15,7 @@
 //
 
 use kasl_core::{
-    ast::Range,
+    ast_nodes::Range,
     parser::{ExprToken, ExprTokenKind, ParserFuncCallArg},
 };
 

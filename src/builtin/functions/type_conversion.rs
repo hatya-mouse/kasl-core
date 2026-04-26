@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{ast::type_registry::PrimitiveType, builtin::BuiltinRegistry};
+use crate::{ast_nodes::type_registry::PrimitiveType, builtin::BuiltinRegistry};
 use kasl_ir::InstBuilder;
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {

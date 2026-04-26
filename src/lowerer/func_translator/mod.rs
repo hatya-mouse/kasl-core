@@ -22,7 +22,7 @@ mod type_converter;
 mod utils;
 
 use crate::{
-    ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
+    ast_nodes::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
     builtin::BuiltinRegistry,
     lowerer::TranslatorParams,
 };

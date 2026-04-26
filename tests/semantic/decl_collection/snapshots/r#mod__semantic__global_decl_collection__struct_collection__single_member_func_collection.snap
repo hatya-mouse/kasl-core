@@ -1,0 +1,24 @@
+---
+source: tests/semantic/decl_collection/struct_collection.rs
+expression: "&test_ctx.prog_ctx.type_registry"
+---
+structs:
+  0:
+    name: Type
+    fields: []
+    indices: {}
+    field_offsets: []
+    total_size: 0
+    alignment: 1
+    range:
+      start: 0
+      end: 0
+name_to_id:
+  ? - 0
+    - Type
+  : 0
+array_id_to_decl: {}
+decl_to_array_id: {}
+alias_to_type: {}
+next_struct_id: 1
+next_array_id: 0

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::ast::type_registry::ResolvedType;
+use crate::ast_nodes::type_registry::ResolvedType;
 use kasl_ir::{IRBuilder, Value};
 use std::fmt::Display;
 

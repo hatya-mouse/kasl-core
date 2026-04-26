@@ -19,7 +19,7 @@ use std::slice::from_ref;
 use kasl_ir::Value;
 
 use crate::{
-    ast::{FuncCallArg, OperatorID},
+    ast_nodes::{FuncCallArg, OperatorID},
     lowerer::func_translator::FuncTranslator,
 };
 

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ast::{Expr, ExprKind},
+    ast_nodes::{Expr, ExprKind},
     lowerer::func_translator::FuncTranslator,
 };
 

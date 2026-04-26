@@ -21,7 +21,7 @@ mod loop_stmt;
 mod return_stmt;
 
 use crate::{
-    ast::{Statement, symbol_table},
+    ast_nodes::{Statement, symbol_table},
     lowerer::func_translator::FuncTranslator,
 };
 

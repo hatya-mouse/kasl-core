@@ -17,7 +17,7 @@
 mod func_translator;
 
 use crate::{
-    ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
+    ast_nodes::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
     builtin::BuiltinRegistry,
     lowerer::func_translator::FuncTranslator,
 };

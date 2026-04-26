@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{ast::VariableID, lowerer::func_translator::FuncTranslator};
+use crate::{ast_nodes::VariableID, lowerer::func_translator::FuncTranslator};
 use kasl_ir::{InstBuilder, Value};
 
 impl FuncTranslator<'_> {

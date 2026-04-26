@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ast::{StructID, type_registry::ResolvedType},
+    ast_nodes::{StructID, type_registry::ResolvedType},
     lowerer::func_translator::FuncTranslator,
 };
 use kasl_ir::{InstBuilder, Offset, Value};

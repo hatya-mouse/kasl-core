@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ast::{
+    ast_nodes::{
         InfixOperatorProperties, OperatorAssociativity, PostfixOperatorProperties,
         PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
         namespace_registry::ImportPath,

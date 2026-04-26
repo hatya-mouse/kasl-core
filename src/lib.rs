@@ -20,15 +20,15 @@ pub(crate) const MAIN_FUNCTION_NAME: &str = "main";
 pub(crate) const DIR_ROOT_FILE_NAME: &str = "root.kasl";
 pub(crate) const LOOP_UNROLL_THRESHOLD: u32 = 32;
 
-pub mod ast;
-pub mod ast_construction;
+pub mod ast_nodes;
 pub mod builtin;
 pub mod compiler;
 pub mod localization;
 pub mod lowerer;
 pub mod parser;
 pub mod run_program;
+pub mod semantic_analysis;
 
-pub use ast_construction::error;
 pub use compiler::KaslCompiler;
 pub use run_program::{run_buffer, run_once};
+pub use semantic_analysis::error;

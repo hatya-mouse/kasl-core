@@ -14,7 +14,9 @@
 //  limitations under the License.
 //
 
-use crate::{LOOP_UNROLL_THRESHOLD, ast::symbol_table, lowerer::func_translator::FuncTranslator};
+use crate::{
+    LOOP_UNROLL_THRESHOLD, ast_nodes::symbol_table, lowerer::func_translator::FuncTranslator,
+};
 use kasl_ir::{self, Const, InstBuilder};
 
 impl FuncTranslator<'_> {

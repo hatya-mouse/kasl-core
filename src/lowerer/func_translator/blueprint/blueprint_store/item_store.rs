@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ast::{scope_manager::BlueprintItem, type_registry::ResolvedType},
+    ast_nodes::{scope_manager::BlueprintItem, type_registry::ResolvedType},
     lowerer::func_translator::FuncTranslator,
 };
 use kasl_ir::{Const, IRType, InstBuilder, IntBinOp, Offset, Value};

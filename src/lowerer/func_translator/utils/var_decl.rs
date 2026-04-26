@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ast::{VariableID, type_registry::ResolvedType},
+    ast_nodes::{VariableID, type_registry::ResolvedType},
     lowerer::func_translator::{FuncTranslator, type_converter::convert_type},
 };
 use kasl_ir::Variable;

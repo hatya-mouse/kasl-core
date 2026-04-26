@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-mod flow_graph_analyzing;
-mod global_decl_collection;
-mod scope_graph_analyzing;
-mod statement_building;
+mod decl_collection;
+mod flow_analysis;
+mod scope_analysis;
+mod stmt_builder;

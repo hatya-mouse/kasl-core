@@ -15,7 +15,7 @@
 //
 
 use kasl_core::{
-    ast::{
+    ast_nodes::{
         InfixOperatorProperties, OperatorAssociativity, PostfixOperatorProperties,
         PrefixOperatorProperties, Range,
     },

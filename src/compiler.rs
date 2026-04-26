@@ -18,19 +18,19 @@
 
 use crate::{
     MAIN_FUNCTION_NAME,
-    ast::{
+    ast_nodes::{
         CompilationData, Range,
         compilation_data::{CompilerState, ProgramContext},
         scope_manager::IOBlueprint,
-    },
-    ast_construction::{
-        BlueprintBuilder, GlobalDeclCollector, ScopeGraphAnalyzer, StatementBuilder,
-        flow_graph_analyzing::FlowGraphAnalyzer,
     },
     builtin::BuiltinRegistry,
     error::{EK, ErrorCollector, ErrorKey, ErrorRecord, Ph, Pl, Sv},
     lowerer::Lowerer,
     parser::{ParserDeclStmt, kasl_parser},
+    semantic_analysis::{
+        BlueprintBuilder, GlobalDeclCollector, ScopeGraphAnalyzer, StatementBuilder,
+        flow_analysis::FlowGraphAnalyzer,
+    },
 };
 use kasl_ir::Function;
 use std::path::PathBuf;

@@ -18,20 +18,20 @@ pub mod assert;
 pub mod builders;
 
 use kasl_core::{
-    ast::{
+    ast_nodes::{
         CompilationData,
         compilation_data::{CompilerState, ProgramContext},
         scope_manager::IOBlueprint,
-    },
-    ast_construction::{
-        blueprint_builder::BlueprintBuilder, flow_graph_analyzing::FlowGraphAnalyzer,
-        global_decl_collection::GlobalDeclCollector, scope_graph_analyzing::ScopeGraphAnalyzer,
-        statement_building::StatementBuilder,
     },
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorRecord},
     lowerer::Lowerer,
     parser::{ParserDeclStmt, kasl_parser},
+    semantic_analysis::{
+        blueprint_builder::BlueprintBuilder, decl_collection::GlobalDeclCollector,
+        flow_analysis::FlowGraphAnalyzer, scope_analysis::ScopeGraphAnalyzer,
+        stmt_builder::StatementBuilder,
+    },
 };
 use kasl_cranelift_backend::CraneliftBackend;
 

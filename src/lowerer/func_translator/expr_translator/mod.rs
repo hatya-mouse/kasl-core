@@ -26,7 +26,7 @@ mod struct_init;
 mod subscript;
 
 use crate::{
-    ast::{Expr, ExprKind},
+    ast_nodes::{Expr, ExprKind},
     lowerer::func_translator::FuncTranslator,
 };
 use kasl_ir::Value;

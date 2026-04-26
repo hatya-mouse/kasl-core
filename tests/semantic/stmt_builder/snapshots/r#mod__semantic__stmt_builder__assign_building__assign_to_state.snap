@@ -1,0 +1,38 @@
+---
+source: tests/semantic/stmt_builder/assign_building.rs
+expression: "&test_ctx.prog_ctx.func_ctx"
+---
+funcs:
+  0:
+    name: greet
+    namespace_id: 0
+    func_type: Global
+    params: []
+    return_type:
+      Primitive: Void
+    block:
+      body:
+        - Assign:
+            target:
+              kind:
+                Identifier: 0
+              value_type:
+                Primitive: Int
+            value:
+              kind:
+                IntLiteral: 0
+              value_type:
+                Primitive: Int
+              range:
+                start: 0
+                end: 0
+      scope_id: 2
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+global_functions:
+  ? - 0
+    - greet
+  : 0
+next_function_id: 1

@@ -1,0 +1,106 @@
+//
+//  Copyright 2025-2026 Shuntaro Kasatani
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+use crate::{
+    ast_nodes::Range,
+    error::{EK, ErrorCollector, Phase, Pl, Sv},
+};
+
+impl ErrorCollector {
+    pub(crate) fn no_type_annotation_or_def_val(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::NoTypeAnnotationOrDefVal,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+
+    pub(crate) fn var_not_found(&mut self, range: Range, phase: Phase, var_name: &str) {
+        self.emit(
+            EK::VarNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrVec(vec![var_name.to_string()]),
+        );
+    }
+
+    pub(crate) fn type_annotation_mismatch(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        annotation_type: String,
+        expr_type: String,
+    ) {
+        self.emit(
+            EK::TypeAnnotationMismatch,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrVec(vec![annotation_type, expr_type]),
+        );
+    }
+
+    pub(crate) fn duplicate_name(&mut self, range: Range, phase: Phase, name: &str) {
+        self.emit(
+            EK::DuplicateName,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrVec(vec![name.to_string()]),
+        );
+    }
+
+    pub(crate) fn immutable_assignment(&mut self, range: Range, phase: Phase, var_name: &str) {
+        self.emit(
+            EK::ImmutableAssignment,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrVec(vec![var_name.to_string()]),
+        );
+    }
+
+    pub(crate) fn static_var_access(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub(crate) fn builtin_var_access(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::BuiltinVarAccess, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub(crate) fn non_constant_for_array_count(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::NonConstantForArrayCount,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+
+    pub(crate) fn non_constant_for_loop_count(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::NonConstantForLoopCount,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+}

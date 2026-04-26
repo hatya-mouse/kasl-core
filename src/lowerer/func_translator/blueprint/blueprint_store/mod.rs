@@ -17,7 +17,7 @@
 mod item_store;
 
 use crate::{
-    ast::scope_manager::IOBlueprint,
+    ast_nodes::scope_manager::IOBlueprint,
     lowerer::{TranslatorParams, func_translator::FuncTranslator},
 };
 use kasl_ir::{Offset, Value};

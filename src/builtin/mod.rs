@@ -19,7 +19,7 @@
 mod builtin_func;
 mod functions;
 
-use crate::ast::type_registry::{PrimitiveType, ResolvedType};
+use crate::ast_nodes::type_registry::{PrimitiveType, ResolvedType};
 pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
 use std::collections::HashMap;
 

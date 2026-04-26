@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::ast::VariableID;
+use crate::ast_nodes::VariableID;
 use kasl_ir::Variable;
 use std::collections::HashMap;
 

@@ -1,0 +1,26 @@
+---
+source: tests/semantic/stmt_builder/local_let_building.rs
+expression: "&test_ctx.prog_ctx.func_ctx"
+---
+funcs:
+  0:
+    name: main
+    namespace_id: 0
+    func_type: Global
+    params: []
+    return_type:
+      Primitive: Void
+    block:
+      body:
+        - LocalConst:
+            var_id: 0
+      scope_id: 2
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+global_functions:
+  ? - 0
+    - main
+  : 0
+next_function_id: 1

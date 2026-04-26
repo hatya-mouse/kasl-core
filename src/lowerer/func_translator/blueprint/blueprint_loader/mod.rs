@@ -17,7 +17,7 @@
 mod item_loader;
 
 use crate::{
-    ast::{
+    ast_nodes::{
         VariableID,
         scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
         type_registry::ResolvedType,

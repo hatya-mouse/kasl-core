@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use crate::{ast::Expr, lowerer::func_translator::FuncTranslator};
+use crate::{ast_nodes::Expr, lowerer::func_translator::FuncTranslator};
 use kasl_ir::{Block, InstBuilder};
 
 impl FuncTranslator<'_> {
