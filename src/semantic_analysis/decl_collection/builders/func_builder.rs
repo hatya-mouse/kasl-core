@@ -115,7 +115,7 @@ impl GlobalDeclCollector<'_> {
         let mut used_param_names = HashSet::new();
         // Resolve each parameter
         for param in params {
-            let resolved_param = self.resolve_func_param(param, func_scope_id)?;
+            let resolved_param = self.resolve_single_func_param(param, func_scope_id)?;
             resolved_params.push(resolved_param);
 
             // Add the parameter name to the used names set
@@ -129,7 +129,7 @@ impl GlobalDeclCollector<'_> {
         Some(resolved_params)
     }
 
-    pub fn resolve_func_param(
+    fn resolve_single_func_param(
         &mut self,
         param: &ParserFuncParam,
         func_scope_id: ScopeID,
