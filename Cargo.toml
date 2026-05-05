@@ -1,6 +1,6 @@
 [package]
 name = "kasl-core"
-version = "0.1.21"
+version = "0.1.22"
 edition = "2024"
 license = "Apache-2.0"
 description = "Parses and translates the kasl code into KASL-IR, an intermediate representation for KASL."
@@ -14,7 +14,7 @@ path = "src/lib.rs"
 
 [dependencies]
 hashbrown = { version = "0.16.1", features = ["serde"] }
-kasl-ir = "0.3.0"
+kasl-ir = "0.3.3"
 peg = "0.8.5"
 rust-embed = "8.11.0"
 serde = { version = "1.0.228", features = ["derive"] }
@@ -23,4 +23,4 @@ toml = "1.0.7"
 
 [dev-dependencies]
 insta = { version = "1.46.3", features = ["yaml", "redactions"] }
-kasl-cranelift-backend = "0.1.1"
+kasl-cranelift-backend = "0.1.6"
