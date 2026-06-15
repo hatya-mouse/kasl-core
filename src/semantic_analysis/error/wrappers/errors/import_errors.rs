@@ -30,6 +30,16 @@ impl ErrorCollector {
         );
     }
 
+    pub(crate) fn invalid_import_name(&mut self, range: Range, phase: Phase, path: String) {
+        self.emit(
+            EK::InvalidImportName,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrVec(vec![path]),
+        );
+    }
+
     pub(crate) fn cyclic_dependency(&mut self, range: Range, phase: Phase, path: String) {
         self.emit(
             EK::CyclicDependency,

@@ -291,6 +291,11 @@ pub enum ErrorKind {
     /// An import path is not found.
     ImportNotFound,
 
+    /// Title: InvalidImportName
+    /// Payload: The name of the module
+    /// An name of the module which was imported was invalid.
+    InvalidImportName,
+
     /// Title: CyclicDependency
     /// Payload: The path of the import
     /// An import makes a cyclic dependency.

@@ -30,7 +30,14 @@ use std::{
 };
 
 impl GlobalDeclCollector<'_> {
-    pub fn resolve_import(&mut self, import_path: &ImportPath, decl_range: Range) {
+    /// Resolves import statement.
+    pub fn resolve_import(
+        &mut self,
+        import_path: &ImportPath,
+        alias: &Option<String>,
+        decl_range: Range,
+    ) {
+        // Resolve the full absolute path to the program
         let Some((program, full_path)) = self.search_progam(import_path) else {
             self.ec.import_not_found(
                 decl_range,
@@ -40,15 +47,27 @@ impl GlobalDeclCollector<'_> {
             return;
         };
 
+        // Determine the name of the namespace. Prioritize the alias if any is given
+        let module_name = if let Some(alias) = alias {
+            alias.clone()
+        } else if let Some(last_component) = import_path.path.last() {
+            last_component.clone()
+        } else {
+            self.ec.invalid_import_name(
+                decl_range,
+                Ph::GlobalDeclCollection,
+                import_path.to_string(),
+            );
+            return;
+        };
+
         // If the name is already used, throw an error
-        if let Some(last_component) = import_path.path.last() {
-            if self.is_name_used(last_component) {
-                self.ec
-                    .duplicate_name(decl_range, Ph::GlobalDeclCollection, last_component);
-            } else {
-                // Mark the module name as used
-                self.mark_name_used(last_component);
-            }
+        if self.is_name_used(&module_name) {
+            self.ec
+                .duplicate_name(decl_range, Ph::GlobalDeclCollection, &module_name);
+        } else {
+            // Mark the module name as used
+            self.mark_name_used(&module_name);
         }
 
         // If the path is already in the set of imported paths, skip it and throw an error
@@ -61,9 +80,10 @@ impl GlobalDeclCollector<'_> {
             return;
         }
 
-        // Change the ranges of the errors to the import path range and insert them into the error collector
-        let child_ec = self.compile_imported_program(program, full_path, import_path);
+        // Compile the imported program and collect errors in it
+        let child_ec = self.compile_imported_program(program, module_name, full_path);
 
+        // Change the ranges of the errors in the imported program to the import statement
         for mut error in child_ec.records.values().cloned() {
             error.ranges = HashSet::from([decl_range]);
             self.ec.push_error(error);
@@ -73,8 +93,8 @@ impl GlobalDeclCollector<'_> {
     fn compile_imported_program(
         &mut self,
         program: String,
+        module_name: String,
         full_path: PathBuf,
-        import_path: &ImportPath,
     ) -> ErrorCollector {
         // Add the imported path to the set of paths to search for imports
         let mut imported_paths = self.comp_state.imported_paths.clone();
@@ -87,11 +107,10 @@ impl GlobalDeclCollector<'_> {
         }
 
         // Generate a new namespace for the imported program
-        let namespace_name = import_path.path.last().cloned().unwrap();
-        let namespace_id = self.prog_ctx.namespace_registry.register_namespace(
-            namespace_name,
-            Some(self.current_namespace),
-        );
+        let namespace_id = self
+            .prog_ctx
+            .namespace_registry
+            .register_namespace(module_name, Some(self.current_namespace));
         self.prog_ctx
             .scope_registry
             .create_global_scope(namespace_id);

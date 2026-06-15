@@ -16,6 +16,7 @@
 
 use std::{fmt::Display, path::PathBuf};
 
+/// A relative path from the current program which is used to import other programs.
 #[derive(Debug, PartialEq, Clone)]
 pub struct ImportPath {
     pub path: Vec<String>,
