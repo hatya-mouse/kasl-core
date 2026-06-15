@@ -167,7 +167,12 @@ impl GlobalDeclCollector<'_> {
                 return Some((content, root_path));
             }
         }
-        None
+
+        let import_path_buf = import_path.to_path();
+        self.comp_state
+            .virtual_files
+            .get(&import_path_buf)
+            .map(|content| (content.to_string(), import_path_buf))
     }
 
     fn get_file_content(&self, path: &Path) -> Option<String> {
@@ -185,7 +190,7 @@ impl GlobalDeclCollector<'_> {
                 Ok(_) => Some(str),
             }
         } else {
-            self.comp_state.virtual_files.get(path).cloned()
+            None
         }
     }
 }
