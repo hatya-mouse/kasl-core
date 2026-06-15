@@ -65,7 +65,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("STATEMENT")
 
     rule import_statement() -> ParserDeclStmt
-        = start:position!() "import" _ path:import_path() _ alias:("as" _ alias:identifier() { alias })? end:position!() {
+        = start:position!() "import" _ path:import_path() alias:(_ "as" _ alias:identifier() { alias })? end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
                 kind: ParserDeclStmtKind::Import { path, alias },
