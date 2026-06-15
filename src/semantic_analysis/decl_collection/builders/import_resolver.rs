@@ -162,7 +162,7 @@ impl GlobalDeclCollector<'_> {
             // If the file with .kasl extension is not found, try to find a directory with the same name and look for a root.kasl file in it
             let root_path = base_path
                 .join(import_path.to_path())
-                .with_file_name(DIR_ROOT_FILE_NAME);
+                .join(DIR_ROOT_FILE_NAME);
             if let Some(content) = self.get_file_content(&root_path) {
                 println!(
                     "import_path: {}, import_path.to_path(): {}, root_path: {}",
