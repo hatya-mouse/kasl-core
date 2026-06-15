@@ -41,6 +41,7 @@ pub struct ParserScopeStmt {
 pub enum ParserDeclStmtKind {
     Import {
         path: ImportPath,
+        alias: Option<String>,
     },
     Typealias {
         alias: String,

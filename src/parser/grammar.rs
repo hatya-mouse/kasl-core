@@ -16,14 +16,14 @@
 
 use crate::{
     ast_nodes::{
-        namespace_registry::ImportPath, InfixOperatorProperties, OperatorAssociativity,
-        PostfixOperatorProperties, PrefixOperatorProperties, Range, SymbolPath,
-        SymbolPathComponent,
+        InfixOperatorProperties, OperatorAssociativity, PostfixOperatorProperties,
+        PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
+        namespace_registry::ImportPath,
     },
     parser::{
-        parser_ast::ParserTypeName, ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind,
-        ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute, ParserOperatorType,
-        ParserScopeStmt, ParserScopeStmtKind,
+        ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, ParserFuncCallArg,
+        ParserFuncParam, ParserIfArm, ParserInputAttribute, ParserOperatorType, ParserScopeStmt,
+        ParserScopeStmtKind, parser_ast::ParserTypeName,
     },
 };
 
@@ -65,10 +65,10 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("STATEMENT")
 
     rule import_statement() -> ParserDeclStmt
-        = start:position!() "import" _ path:import_path() _ alias:("as" _ alias:identifier() { alias }) end:position!() {
+        = start:position!() "import" _ path:import_path() _ alias:("as" _ alias:identifier() { alias })? end:position!() {
             ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserDeclStmtKind::Import { path },
+                kind: ParserDeclStmtKind::Import { path, alias },
             }
         }
 
