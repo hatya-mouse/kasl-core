@@ -164,6 +164,7 @@ impl GlobalDeclCollector<'_> {
                 .join(import_path.to_path())
                 .with_file_name(DIR_ROOT_FILE_NAME);
             if let Some(content) = self.get_file_content(&root_path) {
+                println!("{}", root_path.to_string_lossy());
                 return Some((content, root_path));
             }
         }
