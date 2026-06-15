@@ -87,8 +87,9 @@ impl GlobalDeclCollector<'_> {
         }
 
         // Generate a new namespace for the imported program
+        let namespace_name = import_path.path.last().cloned().unwrap();
         let namespace_id = self.prog_ctx.namespace_registry.register_namespace(
-            import_path.path.last().cloned().unwrap(),
+            namespace_name,
             Some(self.current_namespace),
         );
         self.prog_ctx
